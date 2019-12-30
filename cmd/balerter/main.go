@@ -3,10 +3,13 @@ package main
 import (
 	"flag"
 	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/runner"
 	scriptsManager "github.com/balerter/balerter/internal/script/manager"
 	"go.uber.org/zap"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 var (
@@ -42,7 +45,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	//
+	logger.Info("init runner")
+	rnr := runner.New(scriptsMgr, logger)
 
-	logger.Info("terminate")
+	logger.Info("run runner")
+	go rnr.Run()
+
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGINT)
+	signal.Notify(ch, syscall.SIGTERM)
+
+	sig := <-ch
+
+	logger.Info("terminate", zap.String("signal", sig.String()))
 }
