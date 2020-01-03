@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/runner"
@@ -9,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 )
 
@@ -46,16 +48,30 @@ func main() {
 	}
 
 	logger.Info("init runner")
-	rnr := runner.New(scriptsMgr, logger)
+	rnr := runner.New(scriptsMgr, cfg.Scripts.Sources.UpdateInterval, logger)
+
+	ctx, ctxCancel := context.WithCancel(context.Background())
+	wg := &sync.WaitGroup{}
 
 	logger.Info("run runner")
-	go rnr.Run()
+	go rnr.Watch(ctx, wg)
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGINT)
 	signal.Notify(ch, syscall.SIGTERM)
 
-	sig := <-ch
+	var sig os.Signal
 
-	logger.Info("terminate", zap.String("signal", sig.String()))
+	select {
+	case sig = <-ch:
+		logger.Info("got os signal", zap.String("signal", sig.String()))
+		ctxCancel()
+	case <-ctx.Done():
+	}
+
+	rnr.Stop()
+
+	wg.Wait()
+
+	logger.Info("terminate")
 }

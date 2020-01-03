@@ -1,13 +1,26 @@
 package config
 
-import "flag"
+import (
+	"flag"
+	"time"
+)
+
+const (
+	defaultScriptsUpdateInterval time.Duration = time.Second * 60
+)
 
 var (
-	configSource = flag.String("config", "config.yml", "Configuration source. Currently support only path to yaml file.")
+	configSource = flag.String("config", "config.yml", "Configuration source. Currently supports only path to yaml file.")
 )
 
 func New() *Config {
-	cfg := &Config{}
+	cfg := &Config{
+		Scripts: Scripts{
+			Sources: ScriptsSources{
+				UpdateInterval: defaultScriptsUpdateInterval,
+			},
+		},
+	}
 
 	return cfg
 }
@@ -21,7 +34,8 @@ type Scripts struct {
 }
 
 type ScriptsSources struct {
-	Folder []ScriptSourceFolder `json:"folder" yaml:"folder"`
+	UpdateInterval time.Duration        `json:"update_interval" yaml:"update_interval"`
+	Folder         []ScriptSourceFolder `json:"folder" yaml:"folder"`
 }
 
 type ScriptSourceFolder struct {
