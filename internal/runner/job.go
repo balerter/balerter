@@ -1,6 +1,7 @@
 package runner
 
 import (
+	moduleLog "github.com/balerter/balerter/internal/modules/log"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -58,8 +59,7 @@ func (rnr *Runner) createLuaState(jobName string) *lua.LState {
 	L := lua.NewState()
 
 	// Init core modules
-	//mLog := moduleLog.New(jobName, cr.logger)
-	//L.PreloadModule("log", mLog.Loader)
+	L.PreloadModule("log", moduleLog.New(jobName, rnr.logger))
 
 	// Init datasources
 	//for name, m := range cr.datasourcesMgr.Modules() {
