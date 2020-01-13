@@ -33,6 +33,7 @@ func main() {
 
 	logger.Info("balerter start", zap.String("version", version))
 
+	// Configuration
 	cfg := config.New()
 	if err := cfg.Init(*configSource); err != nil {
 		logger.Error("error init config", zap.Error(err))
@@ -44,6 +45,7 @@ func main() {
 	}
 	logger.Debug("loaded configuration", zap.Any("config", cfg))
 
+	// Scripts sources
 	logger.Info("init scripts manager")
 	scriptsMgr := scriptsManager.New()
 	if err := scriptsMgr.Init(cfg.Scripts.Sources); err != nil {
@@ -51,6 +53,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Runner
 	logger.Info("init runner")
 	rnr := runner.New(scriptsMgr, cfg.Scripts.Sources.UpdateInterval, logger)
 
