@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 )
 
-func (cfg *Config) Init() error {
-	body, err := ioutil.ReadFile(*configSource)
+func (cfg *Config) Init(configSource string) error {
+	body, err := ioutil.ReadFile(configSource)
 	if err != nil {
 		return err
 	}

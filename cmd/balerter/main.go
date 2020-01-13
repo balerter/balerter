@@ -18,6 +18,10 @@ var (
 	version = "undefined"
 )
 
+var (
+	configSource = flag.String("config", "config.yml", "Configuration source. Currently supports only path to yaml file.")
+)
+
 func main() {
 	flag.Parse()
 
@@ -30,7 +34,7 @@ func main() {
 	logger.Info("balerter start", zap.String("version", version))
 
 	cfg := config.New()
-	if err := cfg.Init(); err != nil {
+	if err := cfg.Init(*configSource); err != nil {
 		logger.Error("error init config", zap.Error(err))
 		os.Exit(1)
 	}

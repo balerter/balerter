@@ -1,16 +1,11 @@
 package config
 
 import (
-	"flag"
 	"time"
 )
 
 const (
 	defaultScriptsUpdateInterval time.Duration = time.Second * 60
-)
-
-var (
-	configSource = flag.String("config", "config.yml", "Configuration source. Currently supports only path to yaml file.")
 )
 
 func New() *Config {
