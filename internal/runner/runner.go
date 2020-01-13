@@ -8,25 +8,25 @@ import (
 	"time"
 )
 
-type scriptsProvider interface {
+type scriptsManager interface {
 	Get() ([]*script.Script, error)
 }
 
 type Runner struct {
-	updateInterval  time.Duration
-	scriptsProvider scriptsProvider
-	logger          *zap.Logger
+	updateInterval time.Duration
+	scriptsManager scriptsManager
+	logger         *zap.Logger
 
 	poolMx sync.Mutex
 	pool   map[string]*Job
 }
 
-func New(scriptsProvider scriptsProvider, updateInterval time.Duration, logger *zap.Logger) *Runner {
+func New(scriptsManager scriptsManager, updateInterval time.Duration, logger *zap.Logger) *Runner {
 	r := &Runner{
-		updateInterval:  updateInterval,
-		scriptsProvider: scriptsProvider,
-		logger:          logger,
-		pool:            make(map[string]*Job),
+		updateInterval: updateInterval,
+		scriptsManager: scriptsManager,
+		logger:         logger,
+		pool:           make(map[string]*Job),
 	}
 
 	return r
@@ -34,7 +34,7 @@ func New(scriptsProvider scriptsProvider, updateInterval time.Duration, logger *
 
 func (rnr *Runner) Watch(ctx context.Context, wg *sync.WaitGroup) {
 	for {
-		ss, err := rnr.scriptsProvider.Get()
+		ss, err := rnr.scriptsManager.Get()
 
 		if err != nil {
 			rnr.logger.Error("error get scripts", zap.Error(err))
