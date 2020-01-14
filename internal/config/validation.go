@@ -12,6 +12,26 @@ func (cfg *Config) Validate() error {
 		}
 	}
 
+	for _, c := range cfg.DataSources.Clickhouse {
+		if err := c.Validate(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (cfg *DataSourceClickhouse) Validate() error {
+	if cfg.Host == "" {
+		return fmt.Errorf("host must be defined")
+	}
+	if cfg.Port == 0 {
+		return fmt.Errorf("port must be defined")
+	}
+	if cfg.Username == "" {
+		return fmt.Errorf("username must be defined")
+	}
+
 	return nil
 }
 

@@ -21,7 +21,23 @@ func New() *Config {
 }
 
 type Config struct {
-	Scripts Scripts `json:"scripts" yaml:"scripts"`
+	Scripts     Scripts     `json:"scripts" yaml:"scripts"`
+	DataSources DataSources `json:"data_sources" yaml:"data_sources"`
+}
+
+type DataSources struct {
+	Clickhouse []DataSourceClickhouse `json:"clickhouse" yaml:"clickhouse"`
+}
+
+type DataSourceClickhouse struct {
+	Name        string `json:"name" yaml:"name"`
+	Host        string `json:"host" yaml:"host"`
+	Port        int    `json:"port" yaml:"port"`
+	Username    string `json:"username" yaml:"username"`
+	Password    string `json:"password" yaml:"password"`
+	Database    string `json:"database" yaml:"database"`
+	SSLMode     string `json:"ssl_mode" yaml:"ssl_mode"`
+	SSLCertPath string `json:"ssl_cert_path" yaml:"ssl_cert_path"`
 }
 
 type Scripts struct {
