@@ -43,6 +43,9 @@ func (m *Clickhouse) query(L *lua.LState) int {
 		case "String":
 			dest = append(dest, new(string))
 			ffs = append(ffs, convertToString_String)
+		case "UInt64":
+			dest = append(dest, new(uint64))
+			ffs = append(ffs, convertToString_UInt64)
 		default:
 			m.logger.Error("error scan type", zap.String("typename", c.DatabaseTypeName()))
 			L.Push(lua.LNil)
@@ -86,4 +89,8 @@ func convertToString_Date(v interface{}) string {
 
 func convertToString_String(v interface{}) string {
 	return *(v.(*string))
+}
+
+func convertToString_UInt64(v interface{}) string {
+	return strconv.Itoa(int((*(v.(*uint64)))))
 }
