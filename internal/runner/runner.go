@@ -2,8 +2,8 @@ package runner
 
 import (
 	"context"
+	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
-	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"sync"
 	"time"
@@ -13,13 +13,8 @@ type scriptsManager interface {
 	Get() ([]*script.Script, error)
 }
 
-type module interface {
-	Name() string
-	GetLoader() lua.LGFunction
-}
-
 type dsManager interface {
-	Get() []module
+	Get() []modules.Module
 }
 
 type Runner struct {

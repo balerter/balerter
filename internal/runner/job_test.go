@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"github.com/balerter/balerter/internal/modules"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
@@ -12,9 +13,9 @@ type dsManagerMock struct {
 	mock.Mock
 }
 
-func (m *dsManagerMock) Get() []module {
+func (m *dsManagerMock) Get() []modules.Module {
 	args := m.Called()
-	return args.Get(0).([]module)
+	return args.Get(0).([]modules.Module)
 }
 
 type moduleMock struct {
@@ -42,7 +43,7 @@ func TestRunner_createLuaState(t *testing.T) {
 	}())
 
 	dsManager := &dsManagerMock{}
-	dsManager.On("Get").Return([]module{m1})
+	dsManager.On("Get").Return([]modules.Module{m1})
 
 	rnr := &Runner{
 		logger:    zap.NewNop(),

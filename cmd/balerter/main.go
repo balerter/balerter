@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"github.com/balerter/balerter/internal/config"
+	dsManager "github.com/balerter/balerter/internal/datasource/manager"
 	"github.com/balerter/balerter/internal/runner"
 	scriptsManager "github.com/balerter/balerter/internal/script/manager"
 	"go.uber.org/zap"
@@ -53,9 +54,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	// datasources
+	logger.Info("init datasources manager")
+	dsMgr := dsManager.New()
+	if err := dsMgr.Init(cfg.DataSources); err != nil {
+		logger.Error("error init datasources manager", zap.Error(err))
+		os.Exit(1)
+	}
+
 	// Runner
 	logger.Info("init runner")
-	rnr := runner.New(scriptsMgr, cfg.Scripts.Sources.UpdateInterval, logger)
+	rnr := runner.New(scriptsMgr, dsMgr, cfg.Scripts.Sources.UpdateInterval, logger)
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
 	wg := &sync.WaitGroup{}
