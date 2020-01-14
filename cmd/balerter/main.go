@@ -56,7 +56,7 @@ func main() {
 
 	// datasources
 	logger.Info("init datasources manager")
-	dsMgr := dsManager.New()
+	dsMgr := dsManager.New(logger)
 	if err := dsMgr.Init(cfg.DataSources); err != nil {
 		logger.Error("error init datasources manager", zap.Error(err))
 		os.Exit(1)
