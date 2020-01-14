@@ -22,7 +22,7 @@ func New() *Config {
 
 type Config struct {
 	Scripts     Scripts     `json:"scripts" yaml:"scripts"`
-	DataSources DataSources `json:"data_sources" yaml:"data_sources"`
+	DataSources DataSources `json:"datasources" yaml:"datasources"`
 }
 
 type DataSources struct {

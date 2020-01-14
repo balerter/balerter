@@ -86,6 +86,7 @@ func main() {
 	}
 
 	rnr.Stop()
+	dsMgr.Stop()
 
 	wg.Wait()
 

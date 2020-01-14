@@ -7,4 +7,5 @@ import (
 type Module interface {
 	Name() string
 	GetLoader() lua.LGFunction
+	Stop() error
 }

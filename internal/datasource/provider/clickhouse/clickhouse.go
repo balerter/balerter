@@ -9,18 +9,21 @@ import (
 	"github.com/balerter/balerter/internal/config"
 	"github.com/jmoiron/sqlx"
 	lua "github.com/yuin/gopher-lua"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"time"
 )
 
 type Clickhouse struct {
-	name string
-	db   *sqlx.DB
+	name   string
+	logger *zap.Logger
+	db     *sqlx.DB
 }
 
-func New(cfg config.DataSourceClickhouse) (*Clickhouse, error) {
+func New(cfg config.DataSourceClickhouse, logger *zap.Logger) (*Clickhouse, error) {
 	c := &Clickhouse{
-		name: cfg.Name,
+		name:   "clickhouse." + cfg.Name,
+		logger: logger,
 	}
 
 	chSecureString := "secure=false"
@@ -81,5 +84,15 @@ func (m *Clickhouse) GetLoader() lua.LGFunction {
 }
 
 func (m *Clickhouse) loader(L *lua.LState) int {
-	return 0
+	var exports = map[string]lua.LGFunction{
+		"query": m.query,
+	}
+
+	mod := L.SetFuncs(L.NewTable(), exports)
+	// register other stuff
+	//L.SetField(mod, "name", lua.LString("value"))
+
+	// returns the module
+	L.Push(mod)
+	return 1
 }

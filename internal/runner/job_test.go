@@ -22,6 +22,11 @@ type moduleMock struct {
 	mock.Mock
 }
 
+func (m *moduleMock) Stop() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 func (m *moduleMock) Name() string {
 	args := m.Called()
 	return args.String(0)

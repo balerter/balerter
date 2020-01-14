@@ -24,7 +24,7 @@ func New(logger *zap.Logger) *Manager {
 func (m *Manager) Init(cfg config.DataSources) error {
 
 	for _, clickhouseCfg := range cfg.Clickhouse {
-		module, err := clickhouse.New(clickhouseCfg)
+		module, err := clickhouse.New(clickhouseCfg, m.logger)
 		if err != nil {
 			return err
 		}
@@ -35,6 +35,22 @@ func (m *Manager) Init(cfg config.DataSources) error {
 	return nil
 }
 
+func (m *Manager) Stop() {
+	for _, module := range m.modules {
+		m.logger.Debug("stop module", zap.String("name", module.Name()))
+		err := module.Stop()
+		if err != nil {
+			m.logger.Error("error stop module", zap.String("name", module.Name()), zap.Error(err))
+		}
+	}
+}
+
 func (m *Manager) Get() []modules.Module {
-	return nil
+	mm := make([]modules.Module, 0)
+
+	for _, module := range m.modules {
+		mm = append(mm, module)
+	}
+
+	return mm
 }
