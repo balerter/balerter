@@ -40,6 +40,9 @@ func (m *Clickhouse) query(L *lua.LState) int {
 		case "Date":
 			dest = append(dest, new(time.Time))
 			ffs = append(ffs, convertToString_Date)
+		case "String":
+			dest = append(dest, new(string))
+			ffs = append(ffs, convertToString_String)
 		default:
 			m.logger.Error("error scan type", zap.String("typename", c.DatabaseTypeName()))
 			L.Push(lua.LNil)
@@ -79,4 +82,8 @@ func convertToString_Float64(v interface{}) string {
 
 func convertToString_Date(v interface{}) string {
 	return v.(*time.Time).Format("2006-01-02")
+}
+
+func convertToString_String(v interface{}) string {
+	return *(v.(*string))
 }
