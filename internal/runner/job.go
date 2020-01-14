@@ -62,11 +62,13 @@ func (rnr *Runner) createLuaState(jobName string) *lua.LState {
 	L.PreloadModule("log", moduleLog.New(jobName, rnr.logger))
 
 	// Init datasources
-	//for name, m := range cr.datasourcesMgr.Modules() {
-	//	moduleName := "datasource." + name
-	//	cr.logger.Debug("add module", zap.String("name", moduleName))
-	//	L.PreloadModule(moduleName, m)
-	//}
+	for _, module := range rnr.dsManager.Get() {
+		moduleName := "datasource." + module.Name()
+		rnr.logger.Debug("add module", zap.String("name", moduleName))
+
+		loader := module.GetLoader()
+		L.PreloadModule(moduleName, loader)
+	}
 
 	return L
 }

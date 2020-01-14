@@ -3,6 +3,7 @@ package runner
 import (
 	"context"
 	"github.com/balerter/balerter/internal/script/script"
+	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"sync"
 	"time"
@@ -12,19 +13,30 @@ type scriptsManager interface {
 	Get() ([]*script.Script, error)
 }
 
+type module interface {
+	Name() string
+	GetLoader() lua.LGFunction
+}
+
+type dsManager interface {
+	Get() []module
+}
+
 type Runner struct {
 	updateInterval time.Duration
 	scriptsManager scriptsManager
+	dsManager      dsManager
 	logger         *zap.Logger
 
 	poolMx sync.Mutex
 	pool   map[string]*Job
 }
 
-func New(scriptsManager scriptsManager, updateInterval time.Duration, logger *zap.Logger) *Runner {
+func New(scriptsManager scriptsManager, dsManager dsManager, updateInterval time.Duration, logger *zap.Logger) *Runner {
 	r := &Runner{
 		updateInterval: updateInterval,
 		scriptsManager: scriptsManager,
+		dsManager:      dsManager,
 		logger:         logger,
 		pool:           make(map[string]*Job),
 	}
