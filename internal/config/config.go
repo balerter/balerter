@@ -37,6 +37,18 @@ type ChannelSlack struct {
 
 type DataSources struct {
 	Clickhouse []DataSourceClickhouse `json:"clickhouse" yaml:"clickhouse"`
+	Prometheus []DataSourcePrometheus `json:"prometheus" yaml:"prometheus"`
+}
+
+type DataSourcePrometheus struct {
+	Name      string    `json:"name" yaml:"name"`
+	URL       string    `json:"url" yaml:"url"`
+	BasicAuth BasicAuth `json:"basic_auth" yaml:"basic_auth"`
+}
+
+type BasicAuth struct {
+	Username string `json:"username" yaml:"username"`
+	Password string `json:"password" yaml:"password"`
 }
 
 type DataSourceClickhouse struct {

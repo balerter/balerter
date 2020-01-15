@@ -19,10 +19,28 @@ func (cfg *Config) Validate() error {
 		}
 	}
 
+	for _, c := range cfg.DataSources.Prometheus {
+		if err := c.Validate(); err != nil {
+			return err
+		}
+	}
+
 	for _, c := range cfg.Channels.Slack {
 		if err := c.Validate(); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (cfg *DataSourcePrometheus) Validate() error {
+	if strings.TrimSpace(cfg.Name) == "" {
+		return fmt.Errorf("name must be not empty")
+	}
+
+	if strings.TrimSpace(cfg.URL) == "" {
+		return fmt.Errorf("url must be not empty")
 	}
 
 	return nil
