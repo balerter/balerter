@@ -43,7 +43,10 @@ func (p *Provider) Get() ([]*script.Script, error) {
 			Body:     body,
 			Interval: script.DefaultInterval,
 		}
-		// todo: parse meta from body and override script data
+
+		if err := s.ParseMeta(); err != nil {
+			return nil, err
+		}
 
 		ss = append(ss, s)
 	}
