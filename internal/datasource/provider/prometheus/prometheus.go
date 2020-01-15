@@ -47,7 +47,7 @@ func (m *Prometheus) GetLoader() lua.LGFunction {
 
 func (m *Prometheus) loader(L *lua.LState) int {
 	var exports = map[string]lua.LGFunction{
-		"query": m.query,
+		"querySingle": m.querySingle,
 	}
 
 	mod := L.SetFuncs(L.NewTable(), exports)
