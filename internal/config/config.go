@@ -24,6 +24,12 @@ type Config struct {
 	Scripts     Scripts     `json:"scripts" yaml:"scripts"`
 	DataSources DataSources `json:"datasources" yaml:"datasources"`
 	Channels    Channels    `json:"channels" yaml:"channels"`
+	Global      Global      `json:"global" yaml:"global"`
+}
+
+type Global struct {
+	SendStartNotification []string `json:"send_start_notification" yaml:"send_start_notification"`
+	SendStopNotification  []string `json:"send_stop_notification" yaml:"send_stop_notification"`
 }
 
 type Channels struct {
