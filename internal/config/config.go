@@ -23,6 +23,16 @@ func New() *Config {
 type Config struct {
 	Scripts     Scripts     `json:"scripts" yaml:"scripts"`
 	DataSources DataSources `json:"datasources" yaml:"datasources"`
+	Channels    Channels    `json:"channels" yaml:"channels"`
+}
+
+type Channels struct {
+	WebHook []ChannelsWebHook `json:"webhook" yaml:"webhook"`
+}
+
+type ChannelsWebHook struct {
+	Name string `json:"name" yaml:"name"`
+	URL  string `json:"url" yaml:"url"`
 }
 
 type DataSources struct {

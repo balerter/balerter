@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"io/ioutil"
+	"strings"
 )
 
 func (cfg *Config) Validate() error {
@@ -18,10 +19,20 @@ func (cfg *Config) Validate() error {
 		}
 	}
 
+	for _, c := range cfg.Channels.WebHook {
+		if err := c.Validate(); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
 func (cfg *DataSourceClickhouse) Validate() error {
+	if strings.TrimSpace(cfg.Name) == "" {
+		return fmt.Errorf("name must be not empty")
+	}
+
 	if cfg.Host == "" {
 		return fmt.Errorf("host must be defined")
 	}
@@ -36,9 +47,25 @@ func (cfg *DataSourceClickhouse) Validate() error {
 }
 
 func (cfg *ScriptSourceFolder) Validate() error {
+	if strings.TrimSpace(cfg.Name) == "" {
+		return fmt.Errorf("name must be not empty")
+	}
+
 	_, err := ioutil.ReadDir(cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error read folder '%s', %w", cfg.Path, err)
+	}
+
+	return nil
+}
+
+func (cfg *ChannelsWebHook) Validate() error {
+	if strings.TrimSpace(cfg.Name) == "" {
+		return fmt.Errorf("name must be not empty")
+	}
+
+	if strings.TrimSpace(cfg.URL) == "" {
+		return fmt.Errorf("url must be not empty")
 	}
 
 	return nil

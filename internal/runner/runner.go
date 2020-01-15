@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
+	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"sync"
 	"time"
@@ -17,21 +18,27 @@ type dsManager interface {
 	Get() []modules.Module
 }
 
+type alertManager interface {
+	Loader() lua.LGFunction
+}
+
 type Runner struct {
 	updateInterval time.Duration
 	scriptsManager scriptsManager
 	dsManager      dsManager
+	alertManager   alertManager
 	logger         *zap.Logger
 
 	poolMx sync.Mutex
 	pool   map[string]*Job
 }
 
-func New(scriptsManager scriptsManager, dsManager dsManager, updateInterval time.Duration, logger *zap.Logger) *Runner {
+func New(scriptsManager scriptsManager, dsManager dsManager, alertManager alertManager, updateInterval time.Duration, logger *zap.Logger) *Runner {
 	r := &Runner{
 		updateInterval: updateInterval,
 		scriptsManager: scriptsManager,
 		dsManager:      dsManager,
+		alertManager:   alertManager,
 		logger:         logger,
 		pool:           make(map[string]*Job),
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"github.com/balerter/balerter/internal/config"
 	dsManager "github.com/balerter/balerter/internal/datasource/manager"
 	"github.com/balerter/balerter/internal/runner"
@@ -62,9 +63,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	// alert
+	logger.Info("init alert manager")
+	alertMgr := alertManager.New(logger)
+	if err := alertMgr.Init(cfg.Channels); err != nil {
+		logger.Error("error init alert manager", zap.Error(err))
+		os.Exit(1)
+	}
+
 	// Runner
 	logger.Info("init runner")
-	rnr := runner.New(scriptsMgr, dsMgr, cfg.Scripts.Sources.UpdateInterval, logger)
+	rnr := runner.New(scriptsMgr, dsMgr, alertMgr, cfg.Scripts.Sources.UpdateInterval, logger)
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
 	wg := &sync.WaitGroup{}

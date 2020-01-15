@@ -60,6 +60,7 @@ func (rnr *Runner) createLuaState(jobName string) *lua.LState {
 
 	// Init core modules
 	L.PreloadModule("log", moduleLog.New(jobName, rnr.logger))
+	L.PreloadModule("alert", rnr.alertManager.Loader())
 
 	// Init datasources
 	for _, module := range rnr.dsManager.Get() {
