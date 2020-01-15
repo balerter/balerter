@@ -71,6 +71,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err := alertMgr.Send("BAlerter *START*", cfg.Global.SendStartNotification); err != nil {
+		logger.Error("error send start notification", zap.Error(err))
+	}
+
 	// Runner
 	logger.Info("init runner")
 	rnr := runner.New(scriptsMgr, dsMgr, alertMgr, cfg.Scripts.Sources.UpdateInterval, logger)
@@ -98,6 +102,10 @@ func main() {
 	dsMgr.Stop()
 
 	wg.Wait()
+
+	if err := alertMgr.Send("BAlerter *STOP*", cfg.Global.SendStartNotification); err != nil {
+		logger.Error("error send stop notification", zap.Error(err))
+	}
 
 	logger.Info("terminate")
 }
