@@ -1,7 +1,7 @@
 package manager
 
 import (
-	"github.com/balerter/balerter/internal/alert/webhook"
+	"github.com/balerter/balerter/internal/alert/slack"
 	"github.com/balerter/balerter/internal/config"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -33,8 +33,8 @@ func New(logger *zap.Logger) *Manager {
 
 func (m *Manager) Init(cfg config.Channels) error {
 
-	for _, configWebHook := range cfg.WebHook {
-		module, err := webhook.New(configWebHook, m.logger)
+	for _, configWebHook := range cfg.Slack {
+		module, err := slack.New(configWebHook, m.logger)
 		if err != nil {
 			return err
 		}

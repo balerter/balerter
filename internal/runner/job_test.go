@@ -9,6 +9,15 @@ import (
 	"testing"
 )
 
+type alertManagerMock struct {
+	mock.Mock
+}
+
+func (m *alertManagerMock) Loader() lua.LGFunction {
+	args := m.Called()
+	return args.Get(0).(lua.LGFunction)
+}
+
 type dsManagerMock struct {
 	mock.Mock
 }
@@ -50,9 +59,17 @@ func TestRunner_createLuaState(t *testing.T) {
 	dsManager := &dsManagerMock{}
 	dsManager.On("Get").Return([]modules.Module{m1})
 
+	alertManager := &alertManagerMock{}
+	alertManager.On("Loader").Return(func() lua.LGFunction {
+		return func(state *lua.LState) int {
+			return 0
+		}
+	}())
+
 	rnr := &Runner{
-		logger:    zap.NewNop(),
-		dsManager: dsManager,
+		logger:       zap.NewNop(),
+		dsManager:    dsManager,
+		alertManager: alertManager,
 	}
 
 	L := rnr.createLuaState("job1")

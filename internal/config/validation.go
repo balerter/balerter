@@ -19,7 +19,7 @@ func (cfg *Config) Validate() error {
 		}
 	}
 
-	for _, c := range cfg.Channels.WebHook {
+	for _, c := range cfg.Channels.Slack {
 		if err := c.Validate(); err != nil {
 			return err
 		}
@@ -59,7 +59,7 @@ func (cfg *ScriptSourceFolder) Validate() error {
 	return nil
 }
 
-func (cfg *ChannelsWebHook) Validate() error {
+func (cfg *ChannelSlack) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

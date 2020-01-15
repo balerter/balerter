@@ -27,10 +27,10 @@ type Config struct {
 }
 
 type Channels struct {
-	WebHook []ChannelsWebHook `json:"webhook" yaml:"webhook"`
+	Slack []ChannelSlack `json:"slack" yaml:"slack"`
 }
 
-type ChannelsWebHook struct {
+type ChannelSlack struct {
 	Name string `json:"name" yaml:"name"`
 	URL  string `json:"url" yaml:"url"`
 }
