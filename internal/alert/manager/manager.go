@@ -11,7 +11,9 @@ import (
 
 type alertChannel interface {
 	Name() string
-	Send(string) error
+	Send(string, string) error
+	SendSuccess(string, string) error
+	SendError(string, string) error
 }
 
 type Manager struct {
@@ -68,11 +70,13 @@ func (m *Manager) on(L *lua.LState) int {
 		return 0
 	}
 
+	alertText := L.Get(2).String()
+
 	m.activeMx.Lock()
 	defer m.activeMx.Unlock()
 	if _, ok := m.active[alertName]; !ok {
 		m.active[alertName] = 0
-		m.send("FAIL alert " + alertName)
+		m.sendError(alertName, alertText)
 	}
 	m.active[alertName]++
 
@@ -87,11 +91,13 @@ func (m *Manager) off(L *lua.LState) int {
 		return 0
 	}
 
+	alertText := L.Get(2).String()
+
 	m.activeMx.Lock()
 	defer m.activeMx.Unlock()
 	if _, ok := m.active[alertName]; ok {
 		delete(m.active, alertName)
-		m.send("OK alert " + alertName)
+		m.sendSuccess(alertName, alertText)
 	}
 
 	m.logger.Debug("call alert OFF", zap.String("alertName", alertName))
@@ -110,9 +116,17 @@ func (m *Manager) getAlertName(L *lua.LState) (string, bool) {
 	return alertName, true
 }
 
-func (m *Manager) send(message string) {
+func (m *Manager) sendSuccess(alertName, message string) {
 	for name, module := range m.channels {
-		if err := module.Send(message); err != nil {
+		if err := module.SendSuccess(alertName, message); err != nil {
+			m.logger.Error("error send message to channel", zap.String("name", name), zap.Error(err))
+		}
+	}
+}
+
+func (m *Manager) sendError(alertName, message string) {
+	for name, module := range m.channels {
+		if err := module.SendError(alertName, message); err != nil {
 			m.logger.Error("error send message to channel", zap.String("name", name), zap.Error(err))
 		}
 	}
