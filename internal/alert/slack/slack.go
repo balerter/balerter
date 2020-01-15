@@ -15,10 +15,6 @@ type Slack struct {
 	url    string
 }
 
-type slackMessage struct {
-	Text string `json:"text"`
-}
-
 func New(cfg config.ChannelSlack, logger *zap.Logger) (*Slack, error) {
 	m := &Slack{
 		logger: logger,
@@ -33,16 +29,31 @@ func (m *Slack) Name() string {
 	return m.name
 }
 
-func (m *Slack) Send(message string) error {
+func (m *Slack) SendSuccess(name, message string) error {
+	mes := createSlackMessage(name, ":eight_spoked_asterisk: "+message)
 
-	mes := slackMessage{
-		Text: message,
-	}
+	return m.send(mes)
+}
 
-	bodyRaw, err := json.Marshal(mes)
+func (m *Slack) SendError(name, message string) error {
+	mes := createSlackMessage(name, ":sos: "+message)
+
+	return m.send(mes)
+}
+
+func (m *Slack) Send(name, message string) error {
+	mes := createSlackMessage(name, message)
+
+	return m.send(mes)
+}
+
+func (m *Slack) send(message slackMessage) error {
+	bodyRaw, err := json.Marshal(message)
 	if err != nil {
 		return err
 	}
+
+	m.logger.Debug("slack message", zap.String("message", string(bodyRaw)))
 
 	body := bytes.NewReader(bodyRaw)
 
