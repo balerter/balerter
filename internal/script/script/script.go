@@ -15,6 +15,7 @@ type Script struct {
 	Name     string
 	Body     []byte
 	Interval time.Duration
+	Ignore   bool
 }
 
 func (s *Script) Hash() string {
@@ -24,6 +25,7 @@ func (s *Script) Hash() string {
 var (
 	metas = map[string]func(l string, s *Script) error{
 		"@interval": parseMetaInterval,
+		"@ignore":   parseMetaIgnore,
 	}
 )
 
@@ -58,6 +60,12 @@ func parseMetaInterval(l string, s *Script) error {
 	}
 
 	s.Interval = d
+
+	return nil
+}
+
+func parseMetaIgnore(l string, s *Script) error {
+	s.Ignore = true
 
 	return nil
 }

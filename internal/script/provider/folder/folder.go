@@ -48,6 +48,10 @@ func (p *Provider) Get() ([]*script.Script, error) {
 			return nil, err
 		}
 
+		if s.Ignore {
+			continue
+		}
+
 		ss = append(ss, s)
 	}
 
