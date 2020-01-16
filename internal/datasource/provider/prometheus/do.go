@@ -4,18 +4,49 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"github.com/prometheus/common/model"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 )
 
-func (m *Prometheus) do(query string) (model.Value, error) {
+const (
+	//statusAPIError = 422
 
-	u := fmt.Sprintf("%s/api/v1/query?query=%s", m.url, query)
+	apiPrefix = "/api/v1"
 
-	req, err := http.NewRequest(http.MethodGet, u, nil)
+	epQuery      = apiPrefix + "/query"
+	epQueryRange = apiPrefix + "/query_range"
+)
+
+func (m *Prometheus) sendRange(query string, opts queryRangeOptions) (model.Value, error) {
+	u := *m.url
+
+	q := &url.Values{}
+	q.Add("query", query)
+	q.Add("start", opts.Start)
+	q.Add("end", opts.End)
+	q.Add("step", opts.Step)
+	u.RawQuery = q.Encode()
+	u.Path = epQueryRange
+
+	return m.send(&u)
+}
+
+func (m *Prometheus) sendQuery(query string) (model.Value, error) {
+	u := *m.url
+
+	q := &url.Values{}
+	q.Add("query", query)
+	u.RawQuery = q.Encode()
+	u.Path = epQuery
+
+	return m.send(&u)
+}
+
+func (m *Prometheus) send(u *url.URL) (model.Value, error) {
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, err
 	}

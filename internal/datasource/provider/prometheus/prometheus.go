@@ -5,13 +5,14 @@ import (
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"net/http"
+	"net/url"
 	"time"
 )
 
 type Prometheus struct {
 	logger            *zap.Logger
 	name              string
-	url               string
+	url               *url.URL
 	basicAuthUsername string
 	basicAuthPassword string
 	client            http.Client
@@ -21,10 +22,17 @@ func New(cfg config.DataSourcePrometheus, logger *zap.Logger) (*Prometheus, erro
 	m := &Prometheus{
 		logger:            logger,
 		name:              "prometheus." + cfg.Name,
-		url:               cfg.URL,
 		basicAuthUsername: cfg.BasicAuth.Username,
 		basicAuthPassword: cfg.BasicAuth.Password,
 	}
+
+	var err error
+
+	m.url, err = url.Parse(cfg.URL)
+	if err != nil {
+		return nil, err
+	}
+
 	m.client = http.Client{
 		Timeout: time.Second * 30,
 	}
@@ -47,7 +55,8 @@ func (m *Prometheus) GetLoader() lua.LGFunction {
 
 func (m *Prometheus) loader(L *lua.LState) int {
 	var exports = map[string]lua.LGFunction{
-		"querySingle": m.querySingle,
+		"query": m.doQuery,
+		"range": m.doRange,
 	}
 
 	mod := L.SetFuncs(L.NewTable(), exports)
