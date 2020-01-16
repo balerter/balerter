@@ -57,8 +57,6 @@ func (m *Slack) send(message slackMessage) error {
 		return err
 	}
 
-	m.logger.Debug("slack message", zap.String("message", string(bodyRaw)))
-
 	body := bytes.NewReader(bodyRaw)
 
 	res, err := http.Post(m.url, "application/json", body)
@@ -67,12 +65,10 @@ func (m *Slack) send(message slackMessage) error {
 	}
 	defer res.Body.Close()
 
-	responseBody, err := ioutil.ReadAll(res.Body)
+	_, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
-
-	m.logger.Debug("response from slack", zap.String("name", m.name), zap.Int("statuscode", res.StatusCode), zap.ByteString("body", responseBody))
 
 	return nil
 }
