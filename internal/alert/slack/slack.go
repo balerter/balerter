@@ -10,16 +10,20 @@ import (
 )
 
 type Slack struct {
-	logger *zap.Logger
-	name   string
-	url    string
+	logger               *zap.Logger
+	name                 string
+	url                  string
+	messagePrefixSuccess string
+	messagePrefixError   string
 }
 
 func New(cfg config.ChannelSlack, logger *zap.Logger) (*Slack, error) {
 	m := &Slack{
-		logger: logger,
-		name:   cfg.Name,
-		url:    cfg.URL,
+		logger:               logger,
+		name:                 cfg.Name,
+		url:                  cfg.URL,
+		messagePrefixSuccess: cfg.MessagePrefixSuccess,
+		messagePrefixError:   cfg.MessagePrefixError,
 	}
 
 	return m, nil
@@ -30,13 +34,13 @@ func (m *Slack) Name() string {
 }
 
 func (m *Slack) SendSuccess(name, message string) error {
-	mes := createSlackMessage(name, ":eight_spoked_asterisk: "+message)
+	mes := createSlackMessage(name, m.messagePrefixSuccess+message)
 
 	return m.send(mes)
 }
 
 func (m *Slack) SendError(name, message string) error {
-	mes := createSlackMessage(name, ":sos: "+message)
+	mes := createSlackMessage(name, m.messagePrefixError+message)
 
 	return m.send(mes)
 }
