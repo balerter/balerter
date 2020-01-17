@@ -86,3 +86,29 @@ func TestRunner_Watch_Error(t *testing.T) {
 
 	assert.Equal(t, 1, logs.FilterMessage("error get scripts").FilterField(zap.Error(e)).Len())
 }
+
+func TestRunner_Stop(t *testing.T) {
+	j1 := &Job{stop: make(chan struct{}), script: &script.Script{Name: "s1"}}
+	j2 := &Job{stop: make(chan struct{}), script: &script.Script{Name: "s2"}}
+
+	rnr := &Runner{
+		pool:   map[string]*Job{"j1": j1, "j2": j2},
+		logger: zap.NewNop(),
+	}
+
+	rnr.Stop()
+
+	select {
+	case <-j1.stop:
+	case <-time.After(time.Millisecond * 100):
+		t.Fatal("channel j1 was not closed")
+		return
+	}
+
+	select {
+	case <-j2.stop:
+	case <-time.After(time.Millisecond * 100):
+		t.Fatal("channel j2 was not closed")
+		return
+	}
+}
