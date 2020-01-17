@@ -1,14 +1,13 @@
 package manager
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"net/url"
+	"go.uber.org/zap/zaptest/observer"
 	"testing"
 )
 
@@ -35,16 +34,6 @@ func (m *alertChannelMock) SendError(alertName string, alertText string) error {
 	args := m.Called(alertName, alertText)
 	return args.Error(0)
 }
-
-// MemorySink implements zap.Sink by writing all messages to a buffer.
-type MemorySink struct {
-	*bytes.Buffer
-}
-
-// Implement Close and Sync as no-ops to satisfy the interface. The Write
-// method is provided by the embedded buffer.
-func (s *MemorySink) Close() error { return nil }
-func (s *MemorySink) Sync() error  { return nil }
 
 func TestManager_on(t *testing.T) {
 	ch1 := &alertChannelMock{}
@@ -91,14 +80,8 @@ func TestManager_on_error(t *testing.T) {
 	ch1 := &alertChannelMock{}
 	ch1.On("SendError", "alert-name", "alert-text").Return(fmt.Errorf("error1"))
 
-	sink := &MemorySink{new(bytes.Buffer)}
-	err := zap.RegisterSink("memory", func(*url.URL) (zap.Sink, error) {
-		return sink, nil
-	})
-	require.NoError(t, err)
-	conf := zap.NewProductionConfig()
-	conf.OutputPaths = []string{"memory://"}
-	logger, _ := conf.Build()
+	core, logs := observer.New(zap.DebugLevel)
+	logger := zap.New(core)
 
 	m := New(logger)
 	m.channels["chan1"] = ch1
@@ -109,11 +92,13 @@ func TestManager_on_error(t *testing.T) {
 
 	c := m.on(L)
 
+	require.Equal(t, 2, logs.Len())
+	assert.Equal(t, 1, logs.FilterMessage("error send message to channel").FilterField(zap.String("name", "chan1")).Len())
+	assert.Equal(t, 1, logs.FilterMessage("call alert ON").FilterField(zap.String("alertName", "alert-name")).Len())
+
 	assert.Equal(t, 0, c)
 	assert.Equal(t, 1, m.active["alert-name"])
 
 	ch1.AssertCalled(t, "SendError", "alert-name", "alert-text")
 	ch1.AssertExpectations(t)
-
-	assert.True(t, bytes.Contains(sink.Bytes(), []byte(`"msg":"error send message to channel","name":"chan1","error":"error1"`)))
 }
