@@ -40,3 +40,12 @@ func TestScript_ParseMeta_WrongDuration(t *testing.T) {
 	require.Error(t, err)
 	assert.Equal(t, "time: unknown unit sm in duration 5sm", err.Error())
 }
+
+func TestScript_Hash(t *testing.T) {
+	s := &Script{
+		Name: "name",
+		Body: []byte("body"),
+	}
+
+	assert.Equal(t, "e1073eb510ec5486c4f5a62a1ba486202db8aa25", s.Hash())
+}
