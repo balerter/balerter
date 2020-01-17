@@ -7,7 +7,12 @@ import (
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
+
+type httpClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
 
 type Slack struct {
 	logger               *zap.Logger
@@ -15,6 +20,7 @@ type Slack struct {
 	url                  string
 	messagePrefixSuccess string
 	messagePrefixError   string
+	client               httpClient
 }
 
 func New(cfg config.ChannelSlack, logger *zap.Logger) (*Slack, error) {
@@ -24,6 +30,9 @@ func New(cfg config.ChannelSlack, logger *zap.Logger) (*Slack, error) {
 		url:                  cfg.URL,
 		messagePrefixSuccess: cfg.MessagePrefixSuccess,
 		messagePrefixError:   cfg.MessagePrefixError,
+		client: &http.Client{
+			Timeout: time.Second * 30,
+		},
 	}
 
 	return m, nil
@@ -58,8 +67,12 @@ func (m *Slack) send(message slackMessage) error {
 	}
 
 	body := bytes.NewReader(bodyRaw)
+	req, err := http.NewRequest(http.MethodPost, m.url, body)
+	if err != nil {
+		return err
+	}
 
-	res, err := http.Post(m.url, "application/json", body)
+	res, err := m.client.Do(req)
 	if err != nil {
 		return err
 	}
