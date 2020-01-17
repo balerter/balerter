@@ -47,3 +47,25 @@ func TestManager_Loader(t *testing.T) {
 	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("on")))
 	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("off")))
 }
+
+func TestManager_getAlertName(t *testing.T) {
+	m := New(zap.NewNop())
+	var ok bool
+	var name string
+	var L *lua.LState
+
+	L = lua.NewState()
+	_, ok = m.getAlertName(L)
+	require.False(t, ok)
+
+	L = lua.NewState()
+	L.Push(lua.LString("  "))
+	_, ok = m.getAlertName(L)
+	require.False(t, ok)
+
+	L = lua.NewState()
+	L.Push(lua.LString(" name "))
+	name, ok = m.getAlertName(L)
+	require.True(t, ok)
+	assert.Equal(t, "name", name)
+}

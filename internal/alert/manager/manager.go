@@ -68,7 +68,7 @@ func (m *Manager) getAlertName(L *lua.LState) (string, bool) {
 	alertName := L.Get(1).String()
 	alertName = strings.TrimSpace(alertName)
 
-	if alertName == "" {
+	if alertName == "" || alertName == "nil" {
 		return "", false
 	}
 
