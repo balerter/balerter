@@ -96,10 +96,10 @@ basic auth struct
 #### example
 ```yaml
 - name: prom1
-	url: http://domain.com
-	basic_auth:
-		username: service_user
-		password: QY2cvhcpCKPBnUwtPeNJUpkC
+  url: http://domain.com
+    basic_auth:
+      username: service_user
+      password: QY2cvhcpCKPBnUwtPeNJUpkC
 ```
 
 ## Alert Channels
@@ -112,3 +112,12 @@ basic auth struct
 |url|required, not empty|||
 |message_prefix_success|||will placed before success text in each message|
 |message_prefix_error|||will placed before alert text in each message|
+
+#### example
+
+```yaml
+- name: slack1
+  url: https://hooks.slack.com/services/xxx
+  message_prefix_success: ':eight_spoked_asterisk: '
+  message_prefix_error: ':sos: '
+```
