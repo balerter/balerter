@@ -20,3 +20,19 @@ func (m *Manager) Send(message string, channels []string) error {
 
 	return nil
 }
+
+func (m *Manager) sendSuccess(alertName, message string) {
+	for name, module := range m.channels {
+		if err := module.SendSuccess(alertName, message); err != nil {
+			m.logger.Error("error send message to channel", zap.String("name", name), zap.Error(err))
+		}
+	}
+}
+
+func (m *Manager) sendError(alertName, message string) {
+	for name, module := range m.channels {
+		if err := module.SendError(alertName, message); err != nil {
+			m.logger.Error("error send message to channel", zap.String("name", name), zap.Error(err))
+		}
+	}
+}

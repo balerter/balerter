@@ -64,47 +64,6 @@ func (m *Manager) loader(L *lua.LState) int {
 	return 1
 }
 
-func (m *Manager) on(L *lua.LState) int {
-	alertName, ok := m.getAlertName(L)
-	if !ok {
-		return 0
-	}
-
-	alertText := L.Get(2).String()
-
-	m.activeMx.Lock()
-	defer m.activeMx.Unlock()
-	if _, ok := m.active[alertName]; !ok {
-		m.active[alertName] = 0
-		m.sendError(alertName, alertText)
-	}
-	m.active[alertName]++
-
-	m.logger.Debug("call alert ON", zap.String("alertName", alertName), zap.Int("count", m.active[alertName]))
-
-	return 0
-}
-
-func (m *Manager) off(L *lua.LState) int {
-	alertName, ok := m.getAlertName(L)
-	if !ok {
-		return 0
-	}
-
-	alertText := L.Get(2).String()
-
-	m.activeMx.Lock()
-	defer m.activeMx.Unlock()
-	if _, ok := m.active[alertName]; ok {
-		delete(m.active, alertName)
-		m.sendSuccess(alertName, alertText)
-	}
-
-	m.logger.Debug("call alert OFF", zap.String("alertName", alertName))
-
-	return 0
-}
-
 func (m *Manager) getAlertName(L *lua.LState) (string, bool) {
 	alertName := L.Get(1).String()
 	alertName = strings.TrimSpace(alertName)
@@ -114,20 +73,4 @@ func (m *Manager) getAlertName(L *lua.LState) (string, bool) {
 	}
 
 	return alertName, true
-}
-
-func (m *Manager) sendSuccess(alertName, message string) {
-	for name, module := range m.channels {
-		if err := module.SendSuccess(alertName, message); err != nil {
-			m.logger.Error("error send message to channel", zap.String("name", name), zap.Error(err))
-		}
-	}
-}
-
-func (m *Manager) sendError(alertName, message string) {
-	for name, module := range m.channels {
-		if err := module.SendError(alertName, message); err != nil {
-			m.logger.Error("error send message to channel", zap.String("name", name), zap.Error(err))
-		}
-	}
 }
