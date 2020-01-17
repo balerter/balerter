@@ -7,6 +7,24 @@ import (
 	"time"
 )
 
+func TestScript_ParseMeta_without_meta(t *testing.T) {
+	s := &Script{
+		Interval: time.Second,
+		Body: []byte(`
+print
+-- @interval 10m
+-- @ignore
+`),
+	}
+
+	err := s.ParseMeta()
+
+	require.NoError(t, err)
+
+	assert.False(t, s.Ignore)
+	assert.Equal(t, time.Second, s.Interval)
+}
+
 func TestScript_ParseMeta(t *testing.T) {
 	s := &Script{
 		Body: []byte(`
