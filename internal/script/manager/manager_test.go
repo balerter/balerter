@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"sort"
 	"testing"
 )
 
@@ -19,7 +20,6 @@ func (m *scriptsProviderMock) Get() ([]*script.Script, error) {
 }
 
 func TestManager_Get_Success(t *testing.T) {
-	// fixme this and some tests do not should expect strong order calls
 	s11 := &script.Script{Name: "s11"}
 	s12 := &script.Script{Name: "s12"}
 	s21 := &script.Script{Name: "s21"}
@@ -45,10 +45,17 @@ func TestManager_Get_Success(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Equal(t, 4, len(ss))
-	assert.Equal(t, "s11", ss[0].Name)
-	assert.Equal(t, "s12", ss[1].Name)
-	assert.Equal(t, "s21", ss[2].Name)
-	assert.Equal(t, "s22", ss[3].Name)
+
+	names := make([]string, 0)
+	for _, s := range ss {
+		names = append(names, s.Name)
+	}
+	sort.Strings(names)
+
+	assert.Equal(t, "s11", names[0])
+	assert.Equal(t, "s12", names[1])
+	assert.Equal(t, "s21", names[2])
+	assert.Equal(t, "s22", names[3])
 
 	p1.AssertExpectations(t)
 	p2.AssertExpectations(t)
