@@ -97,9 +97,9 @@ basic auth struct
 ```yaml
 - name: prom1
   url: http://domain.com
-    basic_auth:
-      username: service_user
-      password: QY2cvhcpCKPBnUwtPeNJUpkC
+  basic_auth:
+    username: service_user
+    password: QY2cvhcpCKPBnUwtPeNJUpkC
 ```
 
 ## Alert Channels
