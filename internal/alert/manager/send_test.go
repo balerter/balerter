@@ -1,0 +1,57 @@
+package manager
+
+import (
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest/observer"
+	"testing"
+)
+
+func TestManager_Send(t *testing.T) {
+	ch1 := &alertChannelMock{}
+	ch2 := &alertChannelMock{}
+
+	ch1.On("Send", mock.Anything, mock.Anything).Return(nil)
+
+	core, logs := observer.New(zap.DebugLevel)
+	logger := zap.New(core)
+
+	m := New(logger)
+	m.channels["ch1"] = ch1
+	m.channels["ch2"] = ch2
+
+	err := m.Send("message", []string{"ch1"})
+	require.NoError(t, err)
+
+	require.Equal(t, 0, logs.Len())
+
+	ch1.AssertCalled(t, "Send", "", "message")
+	ch2.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
+
+	logger.Check(zap.ErrorLevel, "")
+
+	ch1.AssertExpectations(t)
+	ch2.AssertExpectations(t)
+}
+
+func TestManager_Send_WrongChannel(t *testing.T) {
+	ch1 := &alertChannelMock{}
+
+	core, logs := observer.New(zap.DebugLevel)
+	logger := zap.New(core)
+
+	m := New(logger)
+	m.channels["ch1"] = ch1
+
+	err := m.Send("message", []string{"ch2"})
+	require.NoError(t, err)
+
+	require.Equal(t, 1, logs.Len())
+	assert.Equal(t, 1, logs.FilterMessage("channel not found").FilterField(zap.String("channel", "ch2")).Len())
+
+	ch1.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
+
+	ch1.AssertExpectations(t)
+}
