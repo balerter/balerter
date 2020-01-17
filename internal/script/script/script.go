@@ -33,6 +33,9 @@ func (s *Script) ParseMeta() error {
 	lines := strings.Split(string(s.Body), "\n")
 	for _, l := range lines {
 		l = strings.TrimSpace(l)
+		if l == "" {
+			continue
+		}
 		if !strings.HasPrefix(l, "--") {
 			return nil
 		}
@@ -64,7 +67,7 @@ func parseMetaInterval(l string, s *Script) error {
 	return nil
 }
 
-func parseMetaIgnore(l string, s *Script) error {
+func parseMetaIgnore(_ string, s *Script) error {
 	s.Ignore = true
 
 	return nil
