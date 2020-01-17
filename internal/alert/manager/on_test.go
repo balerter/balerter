@@ -36,6 +36,16 @@ func (m *alertChannelMock) SendError(alertName string, alertText string) error {
 	return args.Error(0)
 }
 
+// MemorySink implements zap.Sink by writing all messages to a buffer.
+type MemorySink struct {
+	*bytes.Buffer
+}
+
+// Implement Close and Sync as no-ops to satisfy the interface. The Write
+// method is provided by the embedded buffer.
+func (s *MemorySink) Close() error { return nil }
+func (s *MemorySink) Sync() error  { return nil }
+
 func TestManager_on(t *testing.T) {
 	ch1 := &alertChannelMock{}
 	ch1.On("SendError", "alert-name", "alert-text").Return(nil)
@@ -54,21 +64,28 @@ func TestManager_on(t *testing.T) {
 	c := m.on(L)
 
 	assert.Equal(t, 0, c)
+	assert.Equal(t, 1, m.active["alert-name"])
 
 	ch1.AssertCalled(t, "SendError", "alert-name", "alert-text")
 	ch2.AssertCalled(t, "SendError", "alert-name", "alert-text")
 	ch1.AssertExpectations(t)
 }
 
-// MemorySink implements zap.Sink by writing all messages to a buffer.
-type MemorySink struct {
-	*bytes.Buffer
-}
+func TestManager_on_without_name(t *testing.T) {
+	ch1 := &alertChannelMock{}
 
-// Implement Close and Sync as no-ops to satisfy the interface. The Write
-// method is provided by the embedded buffer.
-func (s *MemorySink) Close() error { return nil }
-func (s *MemorySink) Sync() error  { return nil }
+	m := New(zap.NewNop())
+	m.channels["chan1"] = ch1
+
+	L := lua.NewState()
+
+	c := m.on(L)
+
+	assert.Equal(t, 0, c)
+
+	ch1.AssertNotCalled(t, "SendError", mock.Anything, mock.Anything)
+	ch1.AssertExpectations(t)
+}
 
 func TestManager_on_error(t *testing.T) {
 	ch1 := &alertChannelMock{}
@@ -93,6 +110,7 @@ func TestManager_on_error(t *testing.T) {
 	c := m.on(L)
 
 	assert.Equal(t, 0, c)
+	assert.Equal(t, 1, m.active["alert-name"])
 
 	ch1.AssertCalled(t, "SendError", "alert-name", "alert-text")
 	ch1.AssertExpectations(t)
