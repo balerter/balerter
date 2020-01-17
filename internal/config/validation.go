@@ -68,6 +68,9 @@ func (cfg *ScriptSourceFolder) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}
+	if strings.TrimSpace(cfg.Path) == "" {
+		return fmt.Errorf("path must be not empty")
+	}
 
 	_, err := ioutil.ReadDir(cfg.Path)
 	if err != nil {
