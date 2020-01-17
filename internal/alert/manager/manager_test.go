@@ -37,7 +37,8 @@ func TestManager_Loader(t *testing.T) {
 
 	L := lua.NewState()
 
-	c := m.loader(L)
+	f := m.Loader()
+	c := f(L)
 	assert.Equal(t, 1, c)
 
 	v := L.Get(1).(*lua.LTable)
