@@ -2,7 +2,9 @@ package manager
 
 import (
 	"github.com/balerter/balerter/internal/config"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"testing"
 )
@@ -28,4 +30,20 @@ func TestManager_Init(t *testing.T) {
 
 	_, ok := m.channels["slack1"]
 	require.True(t, ok)
+}
+
+func TestManager_Loader(t *testing.T) {
+	m := New(zap.NewNop())
+
+	L := lua.NewState()
+
+	c := m.loader(L)
+	assert.Equal(t, 1, c)
+
+	v := L.Get(1).(*lua.LTable)
+
+	assert.IsType(t, &lua.LNilType{}, v.RawGet(lua.LString("wrong-name")))
+
+	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("on")))
+	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("off")))
 }
