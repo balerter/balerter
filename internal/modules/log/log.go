@@ -34,18 +34,18 @@ func (l *Log) Loader(L *lua.LState) int {
 }
 
 func (l *Log) error(L *lua.LState) int {
-	l.logger.Error(L.Get(1).String())
+	l.logger.Error(L.Get(1).String(), zap.String("job", l.jobName))
 	return 0
 }
 func (l *Log) warn(L *lua.LState) int {
-	l.logger.Warn(L.Get(1).String())
+	l.logger.Warn(L.Get(1).String(), zap.String("job", l.jobName))
 	return 0
 }
 func (l *Log) info(L *lua.LState) int {
-	l.logger.Info(L.Get(1).String())
+	l.logger.Info(L.Get(1).String(), zap.String("job", l.jobName))
 	return 0
 }
 func (l *Log) debug(L *lua.LState) int {
-	l.logger.Debug(L.Get(1).String())
+	l.logger.Debug(L.Get(1).String(), zap.String("job", l.jobName))
 	return 0
 }
