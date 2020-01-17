@@ -19,6 +19,7 @@ func (m *scriptsProviderMock) Get() ([]*script.Script, error) {
 }
 
 func TestManager_Get_Success(t *testing.T) {
+	// fixme this and some tests do not should expect strong order calls
 	s11 := &script.Script{Name: "s11"}
 	s12 := &script.Script{Name: "s12"}
 	s21 := &script.Script{Name: "s21"}
