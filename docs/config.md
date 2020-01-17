@@ -98,8 +98,8 @@ basic auth struct
 - name: prom1
   url: http://domain.com
   basic_auth:
-    username: service_user
-    password: QY2cvhcpCKPBnUwtPeNJUpkC
+    username: user
+    password: secret
 ```
 
 ## Alert Channels
