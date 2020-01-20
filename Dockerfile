@@ -15,6 +15,6 @@ RUN go build -o /balerter -ldflags "-X main.version=${version} -s -w"  ./cmd/bal
 
 # -----
 
-FROM scratch
+FROM alpine:3.11.3
 COPY --from=build /balerter /
 CMD ["/balerter"]
