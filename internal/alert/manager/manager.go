@@ -16,18 +16,22 @@ type alertChannel interface {
 	SendError(string, string) error
 }
 
+type alertInfo struct {
+	count int
+}
+
 type Manager struct {
 	logger   *zap.Logger
 	channels map[string]alertChannel
 	activeMx sync.RWMutex
-	active   map[string]int
+	active   map[string]*alertInfo
 }
 
 func New(logger *zap.Logger) *Manager {
 	m := &Manager{
 		logger:   logger,
 		channels: make(map[string]alertChannel),
-		active:   make(map[string]int),
+		active:   make(map[string]*alertInfo),
 	}
 
 	return m

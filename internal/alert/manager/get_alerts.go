@@ -11,10 +11,10 @@ func (m *Manager) GetAlerts() []*AlertInfo {
 
 	info := make([]*AlertInfo, 0)
 
-	for name, count := range m.active {
+	for name, i := range m.active {
 		info = append(info, &AlertInfo{
 			Name:  name,
-			Count: count,
+			Count: i.count,
 		})
 	}
 

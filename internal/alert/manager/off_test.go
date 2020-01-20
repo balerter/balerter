@@ -21,7 +21,7 @@ func TestManager_off(t *testing.T) {
 	m := New(zap.NewNop())
 	m.channels["chan1"] = ch1
 	m.channels["chan2"] = ch2
-	m.active["alert-name"] = 10
+	m.active["alert-name"] = &alertInfo{count: 10}
 
 	L := lua.NewState()
 	L.Push(lua.LString("alert-name"))
@@ -63,7 +63,7 @@ func TestManager_off_error(t *testing.T) {
 
 	m := New(logger)
 	m.channels["chan1"] = ch1
-	m.active["alert-name"] = 10
+	m.active["alert-name"] = &alertInfo{count: 10}
 
 	L := lua.NewState()
 	L.Push(lua.LString("alert-name"))

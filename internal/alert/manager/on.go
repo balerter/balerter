@@ -15,13 +15,15 @@ func (m *Manager) on(L *lua.LState) int {
 
 	m.activeMx.Lock()
 	defer m.activeMx.Unlock()
-	if _, ok := m.active[alertName]; !ok {
-		m.active[alertName] = 0
+	info, ok := m.active[alertName]
+	if !ok {
+		info = &alertInfo{}
+		m.active[alertName] = info
 		m.sendError(alertName, alertText)
 	}
-	m.active[alertName]++
+	info.count++
 
-	m.logger.Debug("call alert ON", zap.String("alertName", alertName), zap.Int("count", m.active[alertName]))
+	m.logger.Debug("call alert ON", zap.String("alertName", alertName), zap.Int("count", info.count))
 
 	return 0
 }

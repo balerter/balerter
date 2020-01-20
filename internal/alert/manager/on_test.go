@@ -53,7 +53,9 @@ func TestManager_on(t *testing.T) {
 	c := m.on(L)
 
 	assert.Equal(t, 0, c)
-	assert.Equal(t, 1, m.active["alert-name"])
+	i, ok := m.active["alert-name"]
+	require.True(t, ok)
+	assert.Equal(t, 1, i.count)
 
 	ch1.AssertCalled(t, "SendError", "alert-name", "alert-text")
 	ch2.AssertCalled(t, "SendError", "alert-name", "alert-text")
@@ -97,7 +99,9 @@ func TestManager_on_error(t *testing.T) {
 	assert.Equal(t, 1, logs.FilterMessage("call alert ON").FilterField(zap.String("alertName", "alert-name")).Len())
 
 	assert.Equal(t, 0, c)
-	assert.Equal(t, 1, m.active["alert-name"])
+	i, ok := m.active["alert-name"]
+	require.True(t, ok)
+	assert.Equal(t, 1, i.count)
 
 	ch1.AssertCalled(t, "SendError", "alert-name", "alert-text")
 	ch1.AssertExpectations(t)
