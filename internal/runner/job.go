@@ -35,7 +35,7 @@ func (rnr *Runner) runJob(j *Job, wg *sync.WaitGroup) {
 	defer wg.Done()
 	rnr.logger.Debug("run job loop", zap.String("name", j.name))
 
-	L := rnr.createLuaState(j.name)
+	L := rnr.createLuaState(j)
 	defer L.Close()
 
 	for {
@@ -53,14 +53,14 @@ func (rnr *Runner) runJob(j *Job, wg *sync.WaitGroup) {
 	}
 }
 
-func (rnr *Runner) createLuaState(jobName string) *lua.LState {
-	rnr.logger.Debug("create job", zap.String("name", jobName))
+func (rnr *Runner) createLuaState(j *Job) *lua.LState {
+	rnr.logger.Debug("create job", zap.String("name", j.name))
 
 	L := lua.NewState()
 
 	// Init core modules
-	L.PreloadModule("log", moduleLog.New(jobName, rnr.logger))
-	L.PreloadModule("alert", rnr.alertManager.Loader())
+	L.PreloadModule("log", moduleLog.New(j.name, rnr.logger))
+	L.PreloadModule("alert", rnr.alertManager.Loader(j.script))
 
 	// Init datasources
 	for _, module := range rnr.dsManager.Get() {

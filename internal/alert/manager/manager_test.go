@@ -2,6 +2,7 @@ package manager
 
 import (
 	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
@@ -37,7 +38,7 @@ func TestManager_Loader(t *testing.T) {
 
 	L := lua.NewState()
 
-	f := m.Loader()
+	f := m.Loader(&script.Script{})
 	c := f(L)
 	assert.Equal(t, 1, c)
 

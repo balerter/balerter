@@ -19,7 +19,7 @@ type dsManager interface {
 }
 
 type alertManager interface {
-	Loader() lua.LGFunction
+	Loader(*script.Script) lua.LGFunction
 }
 
 type Runner struct {

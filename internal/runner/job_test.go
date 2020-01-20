@@ -2,6 +2,7 @@ package runner
 
 import (
 	"github.com/balerter/balerter/internal/modules"
+	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
@@ -14,8 +15,8 @@ type alertManagerMock struct {
 	mock.Mock
 }
 
-func (m *alertManagerMock) Loader() lua.LGFunction {
-	args := m.Called()
+func (m *alertManagerMock) Loader(s *script.Script) lua.LGFunction {
+	args := m.Called(s)
 	return args.Get(0).(lua.LGFunction)
 }
 
@@ -61,7 +62,7 @@ func TestRunner_createLuaState(t *testing.T) {
 	dsManager.On("Get").Return([]modules.Module{m1})
 
 	alertManager := &alertManagerMock{}
-	alertManager.On("Loader").Return(func() lua.LGFunction {
+	alertManager.On("Loader", mock.Anything).Return(func() lua.LGFunction {
 		return func(state *lua.LState) int {
 			return 0
 		}
@@ -73,7 +74,7 @@ func TestRunner_createLuaState(t *testing.T) {
 		alertManager: alertManager,
 	}
 
-	L := rnr.createLuaState("job1")
+	L := rnr.createLuaState(&Job{name: "job1"})
 
 	m1.AssertCalled(t, "Name")
 	m1.AssertCalled(t, "GetLoader")

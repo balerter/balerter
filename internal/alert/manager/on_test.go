@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -50,12 +51,13 @@ func TestManager_on(t *testing.T) {
 	L.Push(lua.LString("alert-name"))
 	L.Push(lua.LString("alert-text"))
 
-	c := m.on(L)
+	f := m.on(&script.Script{})
+	c := f(L)
 
 	assert.Equal(t, 0, c)
 	i, ok := m.active["alert-name"]
 	require.True(t, ok)
-	assert.Equal(t, 1, i.count)
+	assert.Equal(t, 1, i.Count)
 
 	ch1.AssertCalled(t, "SendError", "alert-name", "alert-text")
 	ch2.AssertCalled(t, "SendError", "alert-name", "alert-text")
@@ -70,7 +72,8 @@ func TestManager_on_without_name(t *testing.T) {
 
 	L := lua.NewState()
 
-	c := m.on(L)
+	f := m.on(&script.Script{})
+	c := f(L)
 
 	assert.Equal(t, 0, c)
 
@@ -92,7 +95,8 @@ func TestManager_on_error(t *testing.T) {
 	L.Push(lua.LString("alert-name"))
 	L.Push(lua.LString("alert-text"))
 
-	c := m.on(L)
+	f := m.on(&script.Script{})
+	c := f(L)
 
 	require.Equal(t, 2, logs.Len())
 	assert.Equal(t, 1, logs.FilterMessage("error send message to channel").FilterField(zap.String("name", "chan1")).Len())
@@ -101,7 +105,7 @@ func TestManager_on_error(t *testing.T) {
 	assert.Equal(t, 0, c)
 	i, ok := m.active["alert-name"]
 	require.True(t, ok)
-	assert.Equal(t, 1, i.count)
+	assert.Equal(t, 1, i.Count)
 
 	ch1.AssertCalled(t, "SendError", "alert-name", "alert-text")
 	ch1.AssertExpectations(t)

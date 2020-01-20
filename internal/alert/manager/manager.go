@@ -3,6 +3,7 @@ package manager
 import (
 	"github.com/balerter/balerter/internal/alert/slack"
 	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"strings"
@@ -17,7 +18,8 @@ type alertChannel interface {
 }
 
 type alertInfo struct {
-	count int
+	ScriptName string
+	Count      int
 }
 
 type Manager struct {
@@ -51,20 +53,20 @@ func (m *Manager) Init(cfg config.Channels) error {
 	return nil
 }
 
-func (m *Manager) Loader() lua.LGFunction {
-	return m.loader
-}
+func (m *Manager) Loader(script *script.Script) lua.LGFunction {
+	return func() lua.LGFunction {
+		return func(L *lua.LState) int {
+			var exports = map[string]lua.LGFunction{
+				"on":  m.on(script),
+				"off": m.off(script),
+			}
 
-func (m *Manager) loader(L *lua.LState) int {
-	var exports = map[string]lua.LGFunction{
-		"on":  m.on,
-		"off": m.off,
-	}
+			mod := L.SetFuncs(L.NewTable(), exports)
 
-	mod := L.SetFuncs(L.NewTable(), exports)
-
-	L.Push(mod)
-	return 1
+			L.Push(mod)
+			return 1
+		}
+	}()
 }
 
 func (m *Manager) getAlertName(L *lua.LState) (string, bool) {

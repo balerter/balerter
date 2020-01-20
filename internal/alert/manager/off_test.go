@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -21,13 +22,14 @@ func TestManager_off(t *testing.T) {
 	m := New(zap.NewNop())
 	m.channels["chan1"] = ch1
 	m.channels["chan2"] = ch2
-	m.active["alert-name"] = &alertInfo{count: 10}
+	m.active["alert-name"] = &alertInfo{Count: 10}
 
 	L := lua.NewState()
 	L.Push(lua.LString("alert-name"))
 	L.Push(lua.LString("alert-text"))
 
-	c := m.off(L)
+	f := m.off(&script.Script{})
+	c := f(L)
 
 	assert.Equal(t, 0, c)
 	_, ok := m.active["alert-name"]
@@ -46,7 +48,8 @@ func TestManager_off_without_name(t *testing.T) {
 
 	L := lua.NewState()
 
-	c := m.off(L)
+	f := m.off(&script.Script{})
+	c := f(L)
 
 	assert.Equal(t, 0, c)
 
@@ -63,13 +66,14 @@ func TestManager_off_error(t *testing.T) {
 
 	m := New(logger)
 	m.channels["chan1"] = ch1
-	m.active["alert-name"] = &alertInfo{count: 10}
+	m.active["alert-name"] = &alertInfo{Count: 10}
 
 	L := lua.NewState()
 	L.Push(lua.LString("alert-name"))
 	L.Push(lua.LString("alert-text"))
 
-	c := m.off(L)
+	f := m.off(&script.Script{})
+	c := f(L)
 
 	require.Equal(t, 2, logs.Len())
 	assert.Equal(t, 1, logs.FilterMessage("error send message to channel").FilterField(zap.String("name", "chan1")).Len())
