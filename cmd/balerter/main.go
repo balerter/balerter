@@ -10,6 +10,7 @@ import (
 	"github.com/balerter/balerter/internal/logger"
 	"github.com/balerter/balerter/internal/runner"
 	scriptsManager "github.com/balerter/balerter/internal/script/manager"
+	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"log"
 	"os"
@@ -29,6 +30,9 @@ var (
 )
 
 func main() {
+	LuaLDir := "./modules"
+	lua.LuaPathDefault = "./?.lua;" + LuaLDir + "/?.lua;" + LuaLDir + "/?/init.lua"
+
 	flag.Parse()
 
 	if err := validateLogLevel(*logLevel); err != nil {
