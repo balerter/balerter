@@ -4,29 +4,6 @@ Balerter is a scripts based alerting system.
 
 > todo 
 
-### Modules support
-
-Currently supports:
-
-|data source|script source|alert channel|
-|-----------|-------------|-------------|
-| clickhouse |filesystem folder |slack |
-| prometheus|||​
-
-Nearest plans to support:
-
-|data source|script source|alert channel|
-|-----------|-------------|-------------|
-|postgres||email|
-|http||telegram|
-
-Possible plans to support:
-
-|data source|script source|alert channel|
-|-----------|-------------|-------------|
-|mysql|postgres|webpush|
-||consul|whatsapp|
-
 ## Example
 
 Config file `config.yml`
@@ -87,6 +64,58 @@ else
     alert.off("rps-min-limit", "Requests RPS ok"")
 end 
 ```
+
+## Modules
+
+Internal modules are divided into three types:
+- Data Source
+- Scripts Source
+- Alert Channel
+
+**Data Source** allows give access to data for analyze 
+
+**Script Source** allows obtain scripts for run
+
+**Alert Channel** allows send notifications  
+
+### internal modules support
+
+Currently supports:
+
+|data source|script source|alert channel|
+|-----------|-------------|-------------|
+| clickhouse |filesystem folder |slack |
+| prometheus| | |​
+
+Plans to support:
+
+|data source|script source|alert channel|
+|-----------|-------------|-------------|
+|postgres| |email|
+|http| |telegram|
+
+Possible plans to support:
+
+|data source|script source|alert channel|
+|-----------|-------------|-------------|
+|mysql|postgres|webpush|
+| | |whatsapp|
+
+### external modules
+
+Also supports external LUA-script modules. You should place it into `./modules` folder.
+In `./modules` folder present two demo modules: demo and demo2.
+You can use it by follow example:
+```
+local demo = require('demo')
+local demo2 = require('demo2')
+
+print(demo.foo())
+print(demo2.bar())
+```
+
+You can place into this folder your own modules and use it. 
+More modules can be found in the repo https://github.com/balerter/modules
 
 ## Documentation
 
