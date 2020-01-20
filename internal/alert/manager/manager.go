@@ -62,7 +62,6 @@ func (m *Manager) loader(L *lua.LState) int {
 	}
 
 	mod := L.SetFuncs(L.NewTable(), exports)
-	//L.SetField(mod, "name", lua.LString("value"))
 
 	L.Push(mod)
 	return 1
