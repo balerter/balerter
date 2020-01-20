@@ -37,7 +37,7 @@ This options contains alert channels names for send message on start/stop balert
 ### Folder
 
 |field|format|default|description|
-|-|-|-|-|
+|-----|------|-------|-----------|
 |name|required, not empty|||
 |path|required, not empty|||
 |mask||*.lua||
@@ -55,7 +55,7 @@ This options contains alert channels names for send message on start/stop balert
 ### Clickhouse
 
 |field|format|default|description|
-|-|-|-|-|
+|-----|------|-------|-----------|
 |name|required, not empty|||
 |host|required, not empty|||
 |port|required, not zero|||
@@ -81,7 +81,7 @@ This options contains alert channels names for send message on start/stop balert
 ### Prometheus
 
 |field|format|default|description|
-|-|-|-|-|
+|-----|------|-------|-----------|
 |name|required, not empty|||
 |url|required, not empty|||
 |basic_auth|||basic auth struct|
@@ -89,7 +89,7 @@ This options contains alert channels names for send message on start/stop balert
 basic auth struct
 
 |field|format|default|description|
-|-|-|-|-|
+|-----|------|-------|-----------|
 |username||||
 |password||||
 
@@ -107,7 +107,7 @@ basic auth struct
 ### Slack
 
 |field|format|default|description|
-|-|-|-|-|
+|-----|------|-------|-----------|
 |name|required, not empty|||
 |url|required, not empty|||
 |message_prefix_success|||will placed before success text in each message|

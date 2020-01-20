@@ -9,21 +9,21 @@ Balerter is a scripts based alerting system.
 Currently supports:
 
 |data source|script source|alert channel|
-|-|-|-|
+|-----------|-------------|-------------|
 | clickhouse |filesystem folder |slack |
-| prometheus|||​    
+| prometheus|||​
 
 Nearest plans to support:
 
 |data source|script source|alert channel|
-|-|-|-|
+|-----------|-------------|-------------|
 |postgres||email|
 |http||telegram|
 
 Possible plans to support:
 
 |data source|script source|alert channel|
-|-|-|-|
+|-----------|-------------|-------------|
 |mysql|postgres|webpush|
 ||consul|whatsapp|
 
