@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
+	"github.com/balerter/balerter/internal/api"
 	"github.com/balerter/balerter/internal/config"
 	dsManager "github.com/balerter/balerter/internal/datasource/manager"
 	"github.com/balerter/balerter/internal/logger"
@@ -88,12 +89,16 @@ func main() {
 		lgr.Logger().Error("error send start notification", zap.Error(err))
 	}
 
+	ctx, ctxCancel := context.WithCancel(context.Background())
+	wg := &sync.WaitGroup{}
+
+	wg.Add(1)
+	apis := api.New(cfg.Global.API, alertMgr, lgr.Logger())
+	go apis.Run(ctx, ctxCancel, wg)
+
 	// Runner
 	lgr.Logger().Info("init runner")
 	rnr := runner.New(scriptsMgr, dsMgr, alertMgr, cfg.Scripts.Sources.UpdateInterval, lgr.Logger())
-
-	ctx, ctxCancel := context.WithCancel(context.Background())
-	wg := &sync.WaitGroup{}
 
 	lgr.Logger().Info("run runner")
 	go rnr.Watch(ctx, wg)
