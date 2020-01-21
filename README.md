@@ -2,7 +2,13 @@
 
 Balerter is a scripts based alerting system.
 
-> todo 
+In your script you may:
+- obtain needed data from different data sources (prometheus, clickhouse, postgres, external HTTP API etc.)
+- analyze data and make a decision about alert status
+- switch on/off any numbers of alerts 
+
+In the example bellow we create one Clickhouse datasource, one scripts source and one alert channel.
+In the script we run query to clickhouse, check the value and fire the alert (or switch off it)   
 
 ## Example
 
@@ -33,12 +39,6 @@ channels:
       url: https://hooks.slack.com/services/hash
       message_prefix_success: ':eight_spoked_asterisk: '
       message_prefix_error: ':sos: '
-
-global:
-  send_start_notification:
-    - slack1
-  send_stop_notification:
-    - slack1
 ```
 
 Sample script `rps.lua`
@@ -84,8 +84,8 @@ Currently supports:
 
 |data source|script source|alert channel|
 |-----------|-------------|-------------|
-| clickhouse |filesystem folder |slack |
-| prometheus| | |​
+| [clickhouse](docs/modules/clickhouse.md) |filesystem folder |slack |
+| [prometheus](docs/modules/prometheus.md) | | |​
 
 Plans to support:
 
@@ -120,3 +120,7 @@ More modules can be found in the repo https://github.com/balerter/modules
 ## Documentation
 
 - [configuration](docs/config.md)
+- internal modules
+    - datasource
+        - [clickhouse](docs/modules/clickhouse.md)
+        - [prometheus](docs/modules/prometheus.md)
