@@ -31,6 +31,7 @@ func TestScript_ParseMeta(t *testing.T) {
 -- header
 -- @interval 5m
 -- foo
+-- @name newname
 --
 -- @ignore
 -- @interval 6m
@@ -46,6 +47,7 @@ print
 
 	assert.True(t, s.Ignore)
 	assert.Equal(t, time.Minute*6, s.Interval)
+	assert.Equal(t, "newname", s.Name)
 }
 
 func TestScript_ParseMeta_WrongDuration(t *testing.T) {
@@ -57,6 +59,17 @@ func TestScript_ParseMeta_WrongDuration(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Equal(t, "time: unknown unit sm in duration 5sm", err.Error())
+}
+
+func TestScript_ParseMeta_EmptyName(t *testing.T) {
+	s := &Script{
+		Body: []byte(`-- @name  `),
+	}
+
+	err := s.ParseMeta()
+
+	require.Error(t, err)
+	assert.Equal(t, "name must be not empty", err.Error())
 }
 
 func TestScript_Hash(t *testing.T) {

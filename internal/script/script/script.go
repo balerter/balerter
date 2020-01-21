@@ -26,6 +26,7 @@ var (
 	metas = map[string]func(l string, s *Script) error{
 		"@interval": parseMetaInterval,
 		"@ignore":   parseMetaIgnore,
+		"@name":     parseMetaName,
 	}
 )
 
@@ -45,7 +46,7 @@ func (s *Script) ParseMeta() error {
 		for prefix, f := range metas {
 			if strings.HasPrefix(l, prefix) {
 				l = l[len(prefix):]
-				if err := f(l, s); err != nil {
+				if err := f(strings.TrimSpace(l), s); err != nil {
 					return err
 				}
 				break
@@ -69,6 +70,16 @@ func parseMetaInterval(l string, s *Script) error {
 
 func parseMetaIgnore(_ string, s *Script) error {
 	s.Ignore = true
+
+	return nil
+}
+
+func parseMetaName(l string, s *Script) error {
+	if l == "" {
+		return fmt.Errorf("name must be not empty")
+	}
+
+	s.Name = l
 
 	return nil
 }
