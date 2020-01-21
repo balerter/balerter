@@ -120,8 +120,11 @@ More modules can be found in the repo https://github.com/balerter/modules
 ## Documentation
 
 - [configuration](docs/config.md)
-- internal modules
+- internal modules providers
     - datasource
         - [clickhouse](docs/modules/clickhouse.md)
         - [prometheus](docs/modules/prometheus.md)
-- [script meta](docs/script.md)
+- [log module](docs/modules/log.md)
+- [alert module](docs/modules/alert.md)
+- script
+    - [script meta](docs/script.md)
