@@ -124,3 +124,4 @@ More modules can be found in the repo https://github.com/balerter/modules
     - datasource
         - [clickhouse](docs/modules/clickhouse.md)
         - [prometheus](docs/modules/prometheus.md)
+- [script meta](docs/script.md)
