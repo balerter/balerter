@@ -5,23 +5,50 @@ import (
 )
 
 func createSlackMessageOptions(alertName, alertText string, fields ...string) []slack.MsgOption {
-	opts := make([]slack.MsgOption, 0)
 
-	mainTextBlock := slack.NewTextBlockObject("mrkdwn", alertText, false, false)
+	blocks := make([]slack.Block, 0)
 
-	fieldsBlocks := make([]*slack.TextBlockObject, 0)
-
-	for _, field := range fields {
-		fieldsBlocks = append(fieldsBlocks, slack.NewTextBlockObject("mrkdwn", field, false, false))
+	if alertText != "" {
+		mainTextBlock := slack.NewTextBlockObject("mrkdwn", alertText, false, false)
+		mainSectionBlock := slack.NewSectionBlock(mainTextBlock, nil, nil)
+		blocks = append(blocks, mainSectionBlock)
 	}
 
-	sectionBlock := slack.NewSectionBlock(mainTextBlock, fieldsBlocks, nil)
-	divBlock := slack.NewDividerBlock()
-	alertNameBlock := slack.NewContextBlock("", slack.NewTextBlockObject("mrkdwn", alertName, true, false))
+	fieldsBlocks := make([][]*slack.TextBlockObject, 0)
 
-	opts = append(opts, slack.MsgOptionBlocks(sectionBlock, divBlock, alertNameBlock))
-	opts = append(opts, slack.MsgOptionBlocks(sectionBlock))
-	opts = append(opts, slack.MsgOptionText(alertText, true), slack.MsgOptionAsUser(true))
+	ff := make([]*slack.TextBlockObject, 0)
+
+	// Slack supports up to 10 fields
+	for idx, field := range fields {
+		ff = append(ff, slack.NewTextBlockObject("mrkdwn", field, false, false))
+
+		if (idx+1)%10 == 0 {
+			fieldsBlocks = append(fieldsBlocks, ff)
+			ff = make([]*slack.TextBlockObject, 0)
+		}
+	}
+
+	if len(fields) > 0 && len(fields)%10 != 0 {
+		fieldsBlocks = append(fieldsBlocks, ff)
+	}
+
+	for _, fieldBlock := range fieldsBlocks {
+		blocks = append(blocks, slack.NewSectionBlock(nil, fieldBlock, nil))
+	}
+
+	blocks = append(blocks, slack.NewDividerBlock())
+
+	if alertName != "" {
+		alertNameBlock := slack.NewContextBlock("alertName", slack.NewTextBlockObject("mrkdwn", alertName, false, false))
+		blocks = append(blocks, alertNameBlock)
+	}
+
+	opts := make([]slack.MsgOption, 0)
+	opts = append(opts, slack.MsgOptionBlocks(blocks...))
+
+	if alertText != "" {
+		opts = append(opts, slack.MsgOptionText(alertText, true), slack.MsgOptionAsUser(true))
+	}
 
 	return opts
 }
