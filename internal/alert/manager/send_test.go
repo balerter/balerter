@@ -14,7 +14,7 @@ func TestManager_Send(t *testing.T) {
 	ch1 := &alertChannelMock{}
 	ch2 := &alertChannelMock{}
 
-	ch1.On("Send", mock.Anything, mock.Anything).Return(nil)
+	ch1.On("Send", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 	core, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(core)
@@ -28,8 +28,8 @@ func TestManager_Send(t *testing.T) {
 
 	require.Equal(t, 0, logs.Len())
 
-	ch1.AssertCalled(t, "Send", "", "message")
-	ch2.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
+	ch1.AssertCalled(t, "Send", mock.Anything)
+	ch2.AssertNotCalled(t, "Send", mock.Anything)
 
 	logger.Check(zap.ErrorLevel, "")
 
@@ -61,7 +61,7 @@ func TestManager_Send_error(t *testing.T) {
 	e := fmt.Errorf("error")
 
 	ch1 := &alertChannelMock{}
-	ch1.On("Send", mock.Anything, mock.Anything).Return(e)
+	ch1.On("Send", mock.Anything).Return(e)
 
 	core, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(core)
@@ -75,7 +75,7 @@ func TestManager_Send_error(t *testing.T) {
 	require.Equal(t, 1, logs.Len())
 	assert.Equal(t, 1, logs.FilterMessage("error send message").FilterField(zap.String("channel", "ch1")).FilterField(zap.Error(e)).Len())
 
-	ch1.AssertCalled(t, "Send", "", "message")
+	ch1.AssertCalled(t, "Send", mock.Anything)
 
 	logger.Check(zap.ErrorLevel, "")
 

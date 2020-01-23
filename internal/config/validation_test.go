@@ -65,13 +65,18 @@ func TestConfig_Validate_Error_DSPrometheus(t *testing.T) {
 }
 
 func TestConfig_Validate_Error_CHSlack(t *testing.T) {
-	cfg := &Config{Channels: Channels{Slack: []ChannelSlack{{Name: "", URL: ""}}}}
+	cfg := &Config{Channels: Channels{Slack: []ChannelSlack{{Name: "", Token: "", Channel: ""}}}}
 	err := cfg.Validate()
 	require.Error(t, err)
 	assert.Equal(t, "name must be not empty", err.Error())
 
-	cfg = &Config{Channels: Channels{Slack: []ChannelSlack{{Name: "name1", URL: ""}}}}
+	cfg = &Config{Channels: Channels{Slack: []ChannelSlack{{Name: "name1", Token: "", Channel: ""}}}}
 	err = cfg.Validate()
 	require.Error(t, err)
-	assert.Equal(t, "url must be not empty", err.Error())
+	assert.Equal(t, "token must be not empty", err.Error())
+
+	cfg = &Config{Channels: Channels{Slack: []ChannelSlack{{Name: "name1", Token: "token", Channel: ""}}}}
+	err = cfg.Validate()
+	require.Error(t, err)
+	assert.Equal(t, "channel must be not empty", err.Error())
 }

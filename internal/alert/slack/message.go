@@ -1,47 +1,27 @@
 package slack
 
-type slackMessage struct {
-	Text   string  `json:"text"`
-	Blocks []block `json:"blocks"`
-}
+import (
+	"github.com/nlopes/slack"
+)
 
-type block struct {
-	Type    string       `json:"type"`
-	Section *blockText   `json:"text,omitempty"`
-	Context *[]blockText `json:"elements,omitempty"`
-}
+func createSlackMessageOptions(alertName, alertText string, fields ...string) []slack.MsgOption {
+	opts := make([]slack.MsgOption, 0)
 
-type blockText struct {
-	Type  string `json:"type"`
-	Emoji bool   `json:"emoji,omitempty"`
-	Text  string `json:"text"`
-}
+	mainTextBlock := slack.NewTextBlockObject("mrkdwn", alertText, false, false)
 
-func createSlackMessage(alertName, alertText string) slackMessage {
-	s := slackMessage{
-		Text: alertText,
-		Blocks: []block{
-			{
-				Type: "section",
-				Section: &blockText{
-					Type: "mrkdwn",
-					Text: alertText,
-				},
-			},
-		},
+	fieldsBlocks := make([]*slack.TextBlockObject, 0)
+
+	for _, field := range fields {
+		fieldsBlocks = append(fieldsBlocks, slack.NewTextBlockObject("mrkdwn", field, false, false))
 	}
 
-	if alertName != "" {
-		s.Blocks = append(s.Blocks, block{
-			Type: "context",
-			Context: &[]blockText{
-				{
-					Type: "mrkdwn",
-					Text: "Alert name: " + alertName,
-				},
-			},
-		})
-	}
+	sectionBlock := slack.NewSectionBlock(mainTextBlock, fieldsBlocks, nil)
+	divBlock := slack.NewDividerBlock()
+	alertNameBlock := slack.NewContextBlock("", slack.NewTextBlockObject("mrkdwn", alertName, true, false))
 
-	return s
+	opts = append(opts, slack.MsgOptionBlocks(sectionBlock, divBlock, alertNameBlock))
+	opts = append(opts, slack.MsgOptionBlocks(sectionBlock))
+	opts = append(opts, slack.MsgOptionText(alertText, true), slack.MsgOptionAsUser(true))
+
+	return opts
 }

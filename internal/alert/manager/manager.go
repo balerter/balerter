@@ -1,20 +1,20 @@
 package manager
 
 import (
+	"github.com/balerter/balerter/internal/alert/message"
 	"github.com/balerter/balerter/internal/alert/slack"
 	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"strings"
 	"sync"
 )
 
 type alertChannel interface {
 	Name() string
-	Send(string, string) error
-	SendSuccess(string, string) error
-	SendError(string, string) error
+	Send(*message.Message) error
+	SendSuccess(*message.Message) error
+	SendError(*message.Message) error
 }
 
 type alertInfo struct {
@@ -67,15 +67,4 @@ func (m *Manager) Loader(script *script.Script) lua.LGFunction {
 			return 1
 		}
 	}()
-}
-
-func (m *Manager) getAlertName(L *lua.LState) (string, bool) {
-	alertName := L.Get(1).String()
-	alertName = strings.TrimSpace(alertName)
-
-	if alertName == "" || alertName == "nil" {
-		return "", false
-	}
-
-	return alertName, true
 }

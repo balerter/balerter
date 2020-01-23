@@ -1,11 +1,11 @@
 package manager
 
 import (
+	"github.com/balerter/balerter/internal/alert/message"
 	"go.uber.org/zap"
 )
 
-func (m *Manager) Send(message string, channels []string) error {
-
+func (m *Manager) Send(text string, channels []string) error {
 	for _, channelName := range channels {
 		ch, ok := m.channels[channelName]
 		if !ok {
@@ -13,7 +13,7 @@ func (m *Manager) Send(message string, channels []string) error {
 			continue
 		}
 
-		if err := ch.Send("", message); err != nil {
+		if err := ch.Send(message.New("", text)); err != nil {
 			m.logger.Error("error send message", zap.String("channel", channelName), zap.Error(err))
 		}
 	}
@@ -21,17 +21,17 @@ func (m *Manager) Send(message string, channels []string) error {
 	return nil
 }
 
-func (m *Manager) sendSuccess(alertName, message string) {
+func (m *Manager) sendSuccess(alertName, text string, fields ...string) {
 	for name, module := range m.channels {
-		if err := module.SendSuccess(alertName, message); err != nil {
+		if err := module.SendSuccess(message.New(alertName, text, fields...)); err != nil {
 			m.logger.Error("error send message to channel", zap.String("name", name), zap.Error(err))
 		}
 	}
 }
 
-func (m *Manager) sendError(alertName, message string) {
+func (m *Manager) sendError(alertName, text string, fields ...string) {
 	for name, module := range m.channels {
-		if err := module.SendError(alertName, message); err != nil {
+		if err := module.SendError(message.New(alertName, text, fields...)); err != nil {
 			m.logger.Error("error send message to channel", zap.String("name", name), zap.Error(err))
 		}
 	}

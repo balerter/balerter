@@ -85,8 +85,12 @@ func (cfg *ChannelSlack) Validate() error {
 		return fmt.Errorf("name must be not empty")
 	}
 
-	if strings.TrimSpace(cfg.URL) == "" {
-		return fmt.Errorf("url must be not empty")
+	if strings.TrimSpace(cfg.Token) == "" {
+		return fmt.Errorf("token must be not empty")
+	}
+
+	if strings.TrimSpace(cfg.Channel) == "" {
+		return fmt.Errorf("channel must be not empty")
 	}
 
 	return nil

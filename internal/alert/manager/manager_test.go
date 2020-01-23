@@ -18,7 +18,8 @@ func TestManager_Init(t *testing.T) {
 		Slack: []config.ChannelSlack{
 			{
 				Name:                 "slack1",
-				URL:                  "url",
+				Token:                "token",
+				Channel:              "channel",
 				MessagePrefixSuccess: "success",
 				MessagePrefixError:   "error",
 			},
@@ -52,22 +53,22 @@ func TestManager_Loader(t *testing.T) {
 
 func TestManager_getAlertName(t *testing.T) {
 	m := New(zap.NewNop())
-	var ok bool
+	var err error
 	var name string
 	var L *lua.LState
 
 	L = lua.NewState()
-	_, ok = m.getAlertName(L)
-	require.False(t, ok)
+	_, err = m.getAlertName(L)
+	require.Error(t, err)
 
 	L = lua.NewState()
 	L.Push(lua.LString("  "))
-	_, ok = m.getAlertName(L)
-	require.False(t, ok)
+	_, err = m.getAlertName(L)
+	require.Error(t, err)
 
 	L = lua.NewState()
 	L.Push(lua.LString(" name "))
-	name, ok = m.getAlertName(L)
-	require.True(t, ok)
+	name, err = m.getAlertName(L)
+	require.NoError(t, err)
 	assert.Equal(t, "name", name)
 }

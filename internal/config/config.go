@@ -43,7 +43,8 @@ type Channels struct {
 
 type ChannelSlack struct {
 	Name                 string `json:"name" yaml:"name"`
-	URL                  string `json:"url" yaml:"url"`
+	Token                string `json:"token" yaml:"token"`
+	Channel              string `json:"channel" yaml:"channel"`
 	MessagePrefixSuccess string `json:"message_prefix_success" yaml:"message_prefix_success"`
 	MessagePrefixError   string `json:"message_prefix_error" yaml:"message_prefix_error"`
 }

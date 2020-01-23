@@ -1,39 +1,31 @@
 package slack
 
 import (
-	"bytes"
-	"encoding/json"
+	"github.com/balerter/balerter/internal/alert/message"
 	"github.com/balerter/balerter/internal/config"
+	"github.com/nlopes/slack"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
-	"time"
 )
-
-type httpClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
 
 type Slack struct {
 	logger               *zap.Logger
 	name                 string
-	url                  string
+	channel              string
 	messagePrefixSuccess string
 	messagePrefixError   string
-	client               httpClient
+	api                  *slack.Client
 }
 
 func New(cfg config.ChannelSlack, logger *zap.Logger) (*Slack, error) {
 	m := &Slack{
 		logger:               logger,
 		name:                 cfg.Name,
-		url:                  cfg.URL,
+		channel:              cfg.Channel,
 		messagePrefixSuccess: cfg.MessagePrefixSuccess,
 		messagePrefixError:   cfg.MessagePrefixError,
-		client: &http.Client{
-			Timeout: time.Second * 30,
-		},
 	}
+
+	m.api = slack.New(cfg.Token)
 
 	return m, nil
 }
@@ -42,46 +34,28 @@ func (m *Slack) Name() string {
 	return m.name
 }
 
-func (m *Slack) SendSuccess(name, message string) error {
-	mes := createSlackMessage(name, m.messagePrefixSuccess+message)
+func (m *Slack) SendSuccess(message *message.Message) error {
+	msgOptions := createSlackMessageOptions(message.AlertName, m.messagePrefixSuccess+message.Text, message.Fields...)
 
-	return m.send(mes)
+	return m.send(msgOptions)
 }
 
-func (m *Slack) SendError(name, message string) error {
-	mes := createSlackMessage(name, m.messagePrefixError+message)
+func (m *Slack) SendError(message *message.Message) error {
+	msgOptions := createSlackMessageOptions(message.AlertName, m.messagePrefixError+message.Text, message.Fields...)
 
-	return m.send(mes)
+	return m.send(msgOptions)
 }
 
-func (m *Slack) Send(name, message string) error {
-	mes := createSlackMessage(name, message)
+func (m *Slack) Send(message *message.Message) error {
+	msgOptions := createSlackMessageOptions(message.AlertName, message.Text, message.Fields...)
 
-	return m.send(mes)
+	return m.send(msgOptions)
 }
 
-func (m *Slack) send(message slackMessage) error {
-	bodyRaw, err := json.Marshal(message)
-	if err != nil {
-		return err
-	}
+func (m *Slack) send(opts []slack.MsgOption) error {
+	_channel, _timestamp, _text, err := m.api.SendMessage(m.channel, opts...)
 
-	body := bytes.NewReader(bodyRaw)
-	req, err := http.NewRequest(http.MethodPost, m.url, body)
-	if err != nil {
-		return err
-	}
+	m.logger.Debug("send slack message", zap.String("channel", _channel), zap.String("timestamp", _timestamp), zap.String("text", _text), zap.Error(err))
 
-	res, err := m.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	_, err = ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
