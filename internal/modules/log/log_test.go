@@ -1,6 +1,7 @@
 package log
 
 import (
+	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -13,7 +14,8 @@ func TestLog_Loader(t *testing.T) {
 
 	L := lua.NewState()
 
-	n := logger.Loader(L)
+	f := logger.GetLoader(&script.Script{Name: "scriptName"})
+	n := f(L)
 	assert.Equal(t, 1, n)
 
 	v := L.Get(1).(*lua.LTable)
@@ -31,44 +33,43 @@ func TestLog_levels(t *testing.T) {
 	core, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(core)
 	lg := &Log{
-		logger:  logger,
-		jobName: "jobname",
+		logger: logger,
 	}
 
 	L := lua.NewState()
 	L.Push(lua.LString("message error"))
-	lg.error(L)
-	assert.Equal(t, 1, logs.FilterMessage("message error").FilterField(zap.String("job", lg.jobName)).Len())
-	assert.Equal(t, 0, logs.FilterMessage("message warn").FilterField(zap.String("job", lg.jobName)).Len())
-	assert.Equal(t, 0, logs.FilterMessage("message info").FilterField(zap.String("job", lg.jobName)).Len())
-	assert.Equal(t, 0, logs.FilterMessage("message debug").FilterField(zap.String("job", lg.jobName)).Len())
+	lg.error("scriptName")(L)
+	assert.Equal(t, 1, logs.FilterMessage("message error").FilterField(zap.String("scriptName", "scriptName")).Len())
+	assert.Equal(t, 0, logs.FilterMessage("message warn").FilterField(zap.String("scriptName", "scriptName")).Len())
+	assert.Equal(t, 0, logs.FilterMessage("message info").FilterField(zap.String("scriptName", "scriptName")).Len())
+	assert.Equal(t, 0, logs.FilterMessage("message debug").FilterField(zap.String("scriptName", "scriptName")).Len())
 
 	L = lua.NewState()
 	L.Push(lua.LString("message warn"))
-	lg.warn(L)
-	assert.Equal(t, 1, logs.FilterMessage("message error").FilterField(zap.String("job", lg.jobName)).Len())
-	assert.Equal(t, 1, logs.FilterMessage("message warn").FilterField(zap.String("job", lg.jobName)).Len())
-	assert.Equal(t, 0, logs.FilterMessage("message info").FilterField(zap.String("job", lg.jobName)).Len())
-	assert.Equal(t, 0, logs.FilterMessage("message debug").FilterField(zap.String("job", lg.jobName)).Len())
+	lg.warn("scriptName")(L)
+	assert.Equal(t, 1, logs.FilterMessage("message error").FilterField(zap.String("scriptName", "scriptName")).Len())
+	assert.Equal(t, 1, logs.FilterMessage("message warn").FilterField(zap.String("scriptName", "scriptName")).Len())
+	assert.Equal(t, 0, logs.FilterMessage("message info").FilterField(zap.String("scriptName", "scriptName")).Len())
+	assert.Equal(t, 0, logs.FilterMessage("message debug").FilterField(zap.String("scriptName", "scriptName")).Len())
 
 	L = lua.NewState()
 	L.Push(lua.LString("message info"))
-	lg.info(L)
-	assert.Equal(t, 1, logs.FilterMessage("message error").FilterField(zap.String("job", lg.jobName)).Len())
-	assert.Equal(t, 1, logs.FilterMessage("message warn").FilterField(zap.String("job", lg.jobName)).Len())
-	assert.Equal(t, 1, logs.FilterMessage("message info").FilterField(zap.String("job", lg.jobName)).Len())
-	assert.Equal(t, 0, logs.FilterMessage("message debug").FilterField(zap.String("job", lg.jobName)).Len())
+	lg.info("scriptName")(L)
+	assert.Equal(t, 1, logs.FilterMessage("message error").FilterField(zap.String("scriptName", "scriptName")).Len())
+	assert.Equal(t, 1, logs.FilterMessage("message warn").FilterField(zap.String("scriptName", "scriptName")).Len())
+	assert.Equal(t, 1, logs.FilterMessage("message info").FilterField(zap.String("scriptName", "scriptName")).Len())
+	assert.Equal(t, 0, logs.FilterMessage("message debug").FilterField(zap.String("scriptName", "scriptName")).Len())
 
 	L = lua.NewState()
 	L.Push(lua.LString("message debug"))
-	lg.debug(L)
-	assert.Equal(t, 1, logs.FilterMessage("message error").FilterField(zap.String("job", lg.jobName)).Len())
-	assert.Equal(t, 1, logs.FilterMessage("message warn").FilterField(zap.String("job", lg.jobName)).Len())
-	assert.Equal(t, 1, logs.FilterMessage("message info").FilterField(zap.String("job", lg.jobName)).Len())
-	assert.Equal(t, 1, logs.FilterMessage("message debug").FilterField(zap.String("job", lg.jobName)).Len())
+	lg.debug("scriptName")(L)
+	assert.Equal(t, 1, logs.FilterMessage("message error").FilterField(zap.String("scriptName", "scriptName")).Len())
+	assert.Equal(t, 1, logs.FilterMessage("message warn").FilterField(zap.String("scriptName", "scriptName")).Len())
+	assert.Equal(t, 1, logs.FilterMessage("message info").FilterField(zap.String("scriptName", "scriptName")).Len())
+	assert.Equal(t, 1, logs.FilterMessage("message debug").FilterField(zap.String("scriptName", "scriptName")).Len())
 }
 
 func TestNew(t *testing.T) {
-	lgfunc := New("jobname", zap.NewNop())
-	assert.IsType(t, func() lua.LGFunction { return func(L *lua.LState) int { return 0 } }(), lgfunc)
+	lgfunc := New(zap.NewNop())
+	assert.IsType(t, &Log{}, lgfunc)
 }

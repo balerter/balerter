@@ -11,6 +11,7 @@ import (
 	"github.com/balerter/balerter/internal/logger"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/modules/kv"
+	logModule "github.com/balerter/balerter/internal/modules/log"
 	"github.com/balerter/balerter/internal/runner"
 	scriptsManager "github.com/balerter/balerter/internal/script/manager"
 	lua "github.com/yuin/gopher-lua"
@@ -122,8 +123,8 @@ func main() {
 	// |
 	// | Log
 	// |
-
-	// todo: log module
+	logMod := logModule.New(lgr.Logger())
+	coreModules = append(coreModules, logMod)
 
 	// ---------------------
 	// |
