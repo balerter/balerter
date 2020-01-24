@@ -57,9 +57,6 @@ func (rnr *Runner) createLuaState(j *Job) *lua.LState {
 
 	L := lua.NewState()
 
-	// Init core modules
-	//L.PreloadModule("log", moduleLog.New(j.name, rnr.logger))
-	//L.PreloadModule("alert", rnr.alertManager.Loader(j.script))
 	for _, m := range rnr.coreModules {
 		L.PreloadModule(m.Name(), m.GetLoader(j.script))
 	}
@@ -67,7 +64,7 @@ func (rnr *Runner) createLuaState(j *Job) *lua.LState {
 	// Init datasources
 	for _, module := range rnr.dsManager.Get() {
 		moduleName := "datasource." + module.Name()
-		rnr.logger.Debug("add module", zap.String("name", moduleName))
+		rnr.logger.Debug("add datasource module", zap.String("name", moduleName))
 
 		loader := module.GetLoader(j.script)
 		L.PreloadModule(moduleName, loader)

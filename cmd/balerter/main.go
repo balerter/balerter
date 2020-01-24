@@ -118,6 +118,15 @@ func main() {
 
 	// ---------------------
 	// |
+	// | Core Modules
+	// |
+	// | Log
+	// |
+
+	// todo: log module
+
+	// ---------------------
+	// |
 	// | Runner
 	// |
 	lgr.Logger().Info("init runner")

@@ -15,7 +15,17 @@ type alertManagerMock struct {
 	mock.Mock
 }
 
-func (m *alertManagerMock) Loader(s *script.Script) lua.LGFunction {
+func (m *alertManagerMock) Stop() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *alertManagerMock) Name() string {
+	args := m.Called()
+	return args.String(0)
+}
+
+func (m *alertManagerMock) GetLoader(s *script.Script) lua.LGFunction {
 	args := m.Called(s)
 	return args.Get(0).(lua.LGFunction)
 }
@@ -43,8 +53,8 @@ func (m *moduleMock) Name() string {
 	return args.String(0)
 }
 
-func (m *moduleMock) GetLoader() lua.LGFunction {
-	args := m.Called()
+func (m *moduleMock) GetLoader(script *script.Script) lua.LGFunction {
+	args := m.Called(script)
 	return args.Get(0).(lua.LGFunction)
 }
 
@@ -52,7 +62,7 @@ func TestRunner_createLuaState(t *testing.T) {
 
 	m1 := &moduleMock{}
 	m1.On("Name").Return("module1")
-	m1.On("GetLoader").Return(func() lua.LGFunction {
+	m1.On("GetLoader", mock.Anything).Return(func() lua.LGFunction {
 		return func(state *lua.LState) int {
 			return 0
 		}
@@ -62,22 +72,23 @@ func TestRunner_createLuaState(t *testing.T) {
 	dsManager.On("Get").Return([]modules.Module{m1})
 
 	alertManager := &alertManagerMock{}
-	alertManager.On("Loader", mock.Anything).Return(func() lua.LGFunction {
+	alertManager.On("Name").Return("alert")
+	alertManager.On("GetLoader", mock.Anything).Return(func() lua.LGFunction {
 		return func(state *lua.LState) int {
 			return 0
 		}
 	}())
 
 	rnr := &Runner{
-		logger:       zap.NewNop(),
-		dsManager:    dsManager,
-		alertManager: alertManager,
+		logger:      zap.NewNop(),
+		dsManager:   dsManager,
+		coreModules: []modules.Module{alertManager},
 	}
 
 	L := rnr.createLuaState(&Job{name: "job1"})
 
 	m1.AssertCalled(t, "Name")
-	m1.AssertCalled(t, "GetLoader")
+	m1.AssertCalled(t, "GetLoader", mock.Anything)
 
 	require.NotNil(t, L)
 	m1.AssertExpectations(t)

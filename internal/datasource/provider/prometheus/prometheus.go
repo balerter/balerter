@@ -2,6 +2,7 @@ package prometheus
 
 import (
 	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"net/http"
@@ -49,7 +50,7 @@ func (m *Prometheus) Name() string {
 	return m.name
 }
 
-func (m *Prometheus) GetLoader() lua.LGFunction {
+func (m *Prometheus) GetLoader(_ *script.Script) lua.LGFunction {
 	return m.loader
 }
 

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
 	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/script/script"
 	"github.com/jmoiron/sqlx"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -79,7 +80,7 @@ func (m *Clickhouse) Name() string {
 	return m.name
 }
 
-func (m *Clickhouse) GetLoader() lua.LGFunction {
+func (m *Clickhouse) GetLoader(_ *script.Script) lua.LGFunction {
 	return m.loader
 }
 

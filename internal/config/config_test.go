@@ -7,5 +7,5 @@ import (
 
 func TestNew(t *testing.T) {
 	cfg := New()
-	assert.Equal(t, defaultScriptsUpdateInterval, cfg.Scripts.Sources.UpdateInterval)
+	assert.IsType(t, &Config{}, cfg)
 }

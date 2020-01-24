@@ -4,18 +4,8 @@ import (
 	"time"
 )
 
-const (
-	defaultScriptsUpdateInterval time.Duration = time.Second * 60
-)
-
 func New() *Config {
-	cfg := &Config{
-		Scripts: Scripts{
-			Sources: ScriptsSources{
-				UpdateInterval: defaultScriptsUpdateInterval,
-			},
-		},
-	}
+	cfg := &Config{}
 
 	return cfg
 }

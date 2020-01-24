@@ -22,7 +22,6 @@ func TestRunner_Watch(t *testing.T) {
 	var wg *sync.WaitGroup
 
 	rnr := &Runner{
-		updateInterval: time.Minute,
 		pool:           make(map[string]*Job),
 		scriptsManager: scriptsMgr,
 		logger:         zap.NewNop(),
@@ -61,7 +60,6 @@ func TestRunner_Watch_Error(t *testing.T) {
 	logger := zap.New(core)
 
 	rnr := &Runner{
-		updateInterval: time.Minute,
 		pool:           make(map[string]*Job),
 		scriptsManager: scriptsMgr,
 		logger:         logger,

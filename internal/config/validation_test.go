@@ -14,17 +14,17 @@ func TestConfig_Validate_NoError(t *testing.T) {
 }
 
 func TestConfig_Validate_Error_Folder(t *testing.T) {
-	cfg := &Config{Scripts: Scripts{Sources: ScriptsSources{UpdateInterval: 0, Folder: []ScriptSourceFolder{{Name: "", Path: ""}}}}}
+	cfg := &Config{Scripts: Scripts{Sources: ScriptsSources{Folder: []ScriptSourceFolder{{Name: "", Path: ""}}}}}
 	err := cfg.Validate()
 	require.Error(t, err)
 	assert.Equal(t, "name must be not empty", err.Error())
 
-	cfg = &Config{Scripts: Scripts{Sources: ScriptsSources{UpdateInterval: 0, Folder: []ScriptSourceFolder{{Name: "name1", Path: ""}}}}}
+	cfg = &Config{Scripts: Scripts{Sources: ScriptsSources{Folder: []ScriptSourceFolder{{Name: "name1", Path: ""}}}}}
 	err = cfg.Validate()
 	require.Error(t, err)
 	assert.Equal(t, "path must be not empty", err.Error())
 
-	cfg = &Config{Scripts: Scripts{Sources: ScriptsSources{UpdateInterval: 0, Folder: []ScriptSourceFolder{{Name: "name1", Path: "wrongpath"}}}}}
+	cfg = &Config{Scripts: Scripts{Sources: ScriptsSources{Folder: []ScriptSourceFolder{{Name: "name1", Path: "wrongpath"}}}}}
 	err = cfg.Validate()
 	require.Error(t, err)
 	assert.Equal(t, "error read folder 'wrongpath', open wrongpath: no such file or directory", err.Error())

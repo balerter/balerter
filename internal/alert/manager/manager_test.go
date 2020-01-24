@@ -39,7 +39,7 @@ func TestManager_Loader(t *testing.T) {
 
 	L := lua.NewState()
 
-	f := m.Loader(&script.Script{})
+	f := m.GetLoader(&script.Script{})
 	c := f(L)
 	assert.Equal(t, 1, c)
 
