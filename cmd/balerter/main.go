@@ -114,7 +114,11 @@ func main() {
 	// |
 	// | KV
 	// |
-	kvModule := kv.New()
+	kvModule, err := kv.New(kv.ProviderTypeMemory)
+	if err != nil {
+		lgr.Logger().Error("error create kvModule", zap.Error(err))
+		os.Exit(1)
+	}
 	coreModules = append(coreModules, kvModule)
 
 	// ---------------------
