@@ -4,10 +4,13 @@ import (
 	"context"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
-	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"sync"
 	"time"
+)
+
+var (
+	scriptSourcesReloadInterval = time.Second * 20
 )
 
 type scriptsManager interface {
@@ -18,28 +21,23 @@ type dsManager interface {
 	Get() []modules.Module
 }
 
-type alertManager interface {
-	Loader(*script.Script) lua.LGFunction
-}
-
 type Runner struct {
-	updateInterval time.Duration
 	scriptsManager scriptsManager
 	dsManager      dsManager
-	alertManager   alertManager
 	logger         *zap.Logger
+
+	coreModules []modules.Module
 
 	poolMx sync.Mutex
 	pool   map[string]*Job
 }
 
-func New(scriptsManager scriptsManager, dsManager dsManager, alertManager alertManager, updateInterval time.Duration, logger *zap.Logger) *Runner {
+func New(scriptsManager scriptsManager, dsManager dsManager, coreModules []modules.Module, logger *zap.Logger) *Runner {
 	r := &Runner{
-		updateInterval: updateInterval,
 		scriptsManager: scriptsManager,
 		dsManager:      dsManager,
-		alertManager:   alertManager,
 		logger:         logger,
+		coreModules:    coreModules,
 		pool:           make(map[string]*Job),
 	}
 
@@ -59,7 +57,8 @@ func (rnr *Runner) Watch(ctx context.Context, wg *sync.WaitGroup) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(rnr.updateInterval):
+
+		case <-time.After(scriptSourcesReloadInterval):
 		}
 	}
 }

@@ -81,12 +81,12 @@ type Scripts struct {
 }
 
 type ScriptsSources struct {
-	UpdateInterval time.Duration        `json:"update_interval" yaml:"update_interval"`
-	Folder         []ScriptSourceFolder `json:"folder" yaml:"folder"`
+	Folder []ScriptSourceFolder `json:"folder" yaml:"folder"`
 }
 
 type ScriptSourceFolder struct {
-	Name string `json:"name" yaml:"name"`
-	Path string `json:"path" yaml:"path"`
-	Mask string `json:"mask" yaml:"mask"`
+	UpdateInterval time.Duration `json:"update_interval" yaml:"update_interval"`
+	Name           string        `json:"name" yaml:"name"`
+	Path           string        `json:"path" yaml:"path"`
+	Mask           string        `json:"mask" yaml:"mask"`
 }

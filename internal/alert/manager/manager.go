@@ -40,7 +40,6 @@ func New(logger *zap.Logger) *Manager {
 }
 
 func (m *Manager) Init(cfg config.Channels) error {
-
 	for _, configWebHook := range cfg.Slack {
 		module, err := slack.New(configWebHook, m.logger)
 		if err != nil {
@@ -53,7 +52,15 @@ func (m *Manager) Init(cfg config.Channels) error {
 	return nil
 }
 
-func (m *Manager) Loader(script *script.Script) lua.LGFunction {
+func (m *Manager) Name() string {
+	return "alert"
+}
+
+func (m *Manager) Stop() error {
+	return nil
+}
+
+func (m *Manager) GetLoader(script *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(L *lua.LState) int {
 			var exports = map[string]lua.LGFunction{

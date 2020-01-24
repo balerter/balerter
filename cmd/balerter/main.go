@@ -9,6 +9,8 @@ import (
 	"github.com/balerter/balerter/internal/config"
 	dsManager "github.com/balerter/balerter/internal/datasource/manager"
 	"github.com/balerter/balerter/internal/logger"
+	"github.com/balerter/balerter/internal/modules"
+	"github.com/balerter/balerter/internal/modules/kv"
 	"github.com/balerter/balerter/internal/runner"
 	scriptsManager "github.com/balerter/balerter/internal/script/manager"
 	lua "github.com/yuin/gopher-lua"
@@ -33,6 +35,8 @@ var (
 func main() {
 	LuaLDir := "./modules"
 	lua.LuaPathDefault = "./?.lua;" + LuaLDir + "/?.lua;" + LuaLDir + "/?/init.lua"
+
+	coreModules := make([]modules.Module, 0)
 
 	flag.Parse()
 
@@ -77,7 +81,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	// alert
+	// ---------------------
+	// |
+	// | Core Modules
+	// |
+	// | AlertManager
+	// |
 	lgr.Logger().Info("init alert manager")
 	alertMgr := alertManager.New(lgr.Logger())
 	if err := alertMgr.Init(cfg.Channels); err != nil {
@@ -96,13 +105,31 @@ func main() {
 	apis := api.New(cfg.Global.API, alertMgr, lgr.Logger())
 	go apis.Run(ctx, ctxCancel, wg)
 
-	// Runner
+	coreModules = append(coreModules, alertMgr)
+
+	// ---------------------
+	// |
+	// | Core Modules
+	// |
+	// | KV
+	// |
+	kvModule := kv.New()
+	coreModules = append(coreModules, kvModule)
+
+	// ---------------------
+	// |
+	// | Runner
+	// |
 	lgr.Logger().Info("init runner")
-	rnr := runner.New(scriptsMgr, dsMgr, alertMgr, cfg.Scripts.Sources.UpdateInterval, lgr.Logger())
+	rnr := runner.New(scriptsMgr, dsMgr, coreModules, lgr.Logger())
 
 	lgr.Logger().Info("run runner")
 	go rnr.Watch(ctx, wg)
 
+	// ---------------------
+	// |
+	// | Shutdown
+	// |
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGINT)
 	signal.Notify(ch, syscall.SIGTERM)

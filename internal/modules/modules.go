@@ -1,13 +1,14 @@
 package modules
 
 import (
+	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/mock"
 	lua "github.com/yuin/gopher-lua"
 )
 
 type Module interface {
 	Name() string
-	GetLoader() lua.LGFunction
+	GetLoader(script *script.Script) lua.LGFunction
 	Stop() error
 }
 
@@ -20,8 +21,8 @@ func (m *ModuleMock) Name() string {
 	return args.String(0)
 }
 
-func (m *ModuleMock) GetLoader() lua.LGFunction {
-	args := m.Called()
+func (m *ModuleMock) GetLoader(script *script.Script) lua.LGFunction {
+	args := m.Called(script)
 	return args.Get(0).(lua.LGFunction)
 }
 
