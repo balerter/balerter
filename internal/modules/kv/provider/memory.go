@@ -31,6 +31,15 @@ func (m *Memory) Put(name string, val string) error {
 	return nil
 }
 
+func (m *Memory) Upsert(name string, val string) error {
+	m.mx.Lock()
+	defer m.mx.Unlock()
+
+	m.storage[name] = val
+
+	return nil
+}
+
 func (m *Memory) Get(name string) (string, error) {
 	m.mx.RLock()
 	defer m.mx.RUnlock()

@@ -10,6 +10,7 @@ import (
 type KVer interface {
 	Put(string, string) error
 	Get(string) (string, error)
+	Upsert(string, string) error
 	Delete(string) error
 }
 
@@ -47,6 +48,7 @@ func (kv *KV) GetLoader(script *script.Script) lua.LGFunction {
 				"get":    kv.get,
 				"put":    kv.put,
 				"delete": kv.delete,
+				"upsert": kv.upsert,
 			}
 
 			mod := L.SetFuncs(L.NewTable(), exports)
@@ -87,7 +89,20 @@ func (kv *KV) put(L *lua.LState) int {
 		return 1
 	}
 
-	return 01
+	return 0
+}
+
+func (kv *KV) upsert(L *lua.LState) int {
+	varName := L.Get(1).String()
+	varVal := L.Get(2).String()
+
+	err := kv.engine.Upsert(varName, varVal)
+	if err != nil {
+		L.Push(lua.LString(err.Error()))
+		return 1
+	}
+
+	return 0
 }
 
 func (kv *KV) delete(L *lua.LState) int {
