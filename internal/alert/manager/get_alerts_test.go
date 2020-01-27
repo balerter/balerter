@@ -3,6 +3,7 @@ package manager
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"sort"
 	"testing"
 )
 
@@ -17,6 +18,10 @@ func TestManager_GetAlerts(t *testing.T) {
 
 	data := m.GetAlerts()
 	require.Equal(t, 3, len(data))
+
+	sort.Slice(data, func(i, j int) bool {
+		return data[i].Name < data[j].Name
+	})
 
 	assert.Equal(t, "a1", data[0].Name)
 	assert.Equal(t, "s1", data[0].ScriptName)
