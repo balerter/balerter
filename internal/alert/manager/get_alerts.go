@@ -2,7 +2,7 @@ package manager
 
 type AlertInfo struct {
 	Name       string `json:"name"`
-	Count      int    `json:"count"`
+	Active     bool   `json:"active"`
 	ScriptName string `json:"script_name"`
 }
 
@@ -15,6 +15,7 @@ func (m *Manager) GetAlerts() []*AlertInfo {
 	for name, i := range m.active {
 		info = append(info, &AlertInfo{
 			Name:       name,
+			Active:     i.Active,
 			ScriptName: i.ScriptName,
 		})
 	}
