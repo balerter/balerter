@@ -2,8 +2,6 @@ package api
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"github.com/balerter/balerter/internal/config"
 	"go.uber.org/zap"
@@ -64,24 +62,5 @@ func (api *API) Run(ctx context.Context, ctxCancel context.CancelFunc, wg *sync.
 
 	if err := api.server.Shutdown(ctx); err != nil {
 		api.logger.Error("error shutdown api server", zap.Error(err))
-	}
-}
-
-func (api *API) handlerAlerts(rw http.ResponseWriter, req *http.Request) {
-	info := api.alertManager.GetAlerts()
-
-	data, err := json.Marshal(info)
-	if err != nil {
-		api.logger.Error("error marshaling response", zap.Error(err))
-		rw.WriteHeader(500)
-		return
-	}
-
-	rw.Header().Add("Content-Type", "application/json")
-
-	if _, err = fmt.Fprintf(rw, "%s", data); err != nil {
-		api.logger.Error("error write response", zap.Error(err))
-		rw.WriteHeader(500)
-		return
 	}
 }
