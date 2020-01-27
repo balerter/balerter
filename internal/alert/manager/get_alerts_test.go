@@ -9,7 +9,7 @@ import (
 func TestManager_GetAlerts(t *testing.T) {
 	m := &Manager{}
 
-	m.active = map[string]*alertInfo{
+	m.alerts = map[string]*alertInfo{
 		"a1": {Active: true, ScriptName: "s1"},
 		"a2": {Active: false, ScriptName: "s2"},
 		"a3": {Active: true, ScriptName: "s3"},

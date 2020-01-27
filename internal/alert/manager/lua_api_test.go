@@ -56,7 +56,7 @@ func TestManager_on(t *testing.T) {
 	c := f(L)
 
 	assert.Equal(t, 0, c)
-	i, ok := m.active["alert-name"]
+	i, ok := m.alerts["alert-name"]
 	require.True(t, ok)
 	assert.True(t, i.Active)
 
@@ -106,7 +106,7 @@ func TestManager_on_error(t *testing.T) {
 	assert.Equal(t, 1, logs.FilterMessage("call alert ON").FilterField(zap.String("alertName", "alert-name")).Len())
 
 	assert.Equal(t, 0, c)
-	i, ok := m.active["alert-name"]
+	i, ok := m.alerts["alert-name"]
 	require.True(t, ok)
 	assert.True(t, i.Active)
 
@@ -122,7 +122,7 @@ func TestManager_off(t *testing.T) {
 	m := New(zap.NewNop())
 	m.channels["chan1"] = ch1
 	m.channels["chan2"] = ch2
-	m.active["alert-name"] = &alertInfo{}
+	m.alerts["alert-name"] = &alertInfo{}
 
 	L := lua.NewState()
 	L.Push(lua.LString("alert-name"))
@@ -132,7 +132,7 @@ func TestManager_off(t *testing.T) {
 	c := f(L)
 
 	assert.Equal(t, 0, c)
-	info, ok := m.active["alert-name"]
+	info, ok := m.alerts["alert-name"]
 	assert.True(t, ok)
 	assert.False(t, info.Active)
 
@@ -169,7 +169,7 @@ func TestManager_off_error(t *testing.T) {
 
 	m := New(logger)
 	m.channels["chan1"] = ch1
-	m.active["alert-name"] = &alertInfo{}
+	m.alerts["alert-name"] = &alertInfo{}
 
 	L := lua.NewState()
 	L.Push(lua.LString("alert-name"))
@@ -183,7 +183,7 @@ func TestManager_off_error(t *testing.T) {
 	assert.Equal(t, 1, logs.FilterMessage("call alert OFF").FilterField(zap.String("alertName", "alert-name")).Len())
 
 	assert.Equal(t, 0, c)
-	info, ok := m.active["alert-name"]
+	info, ok := m.alerts["alert-name"]
 	assert.True(t, ok)
 	assert.False(t, info.Active)
 

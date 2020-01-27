@@ -50,13 +50,13 @@ func (m *Manager) on(s *script.Script) lua.LGFunction {
 
 		m.activeMx.Lock()
 		defer m.activeMx.Unlock()
-		info, ok := m.active[alertName]
+		info, ok := m.alerts[alertName]
 		if !ok {
 			info = &alertInfo{
 				Active:     false,
 				ScriptName: s.Name,
 			}
-			m.active[alertName] = info
+			m.alerts[alertName] = info
 		}
 
 		if !info.Active {
@@ -82,13 +82,13 @@ func (m *Manager) off(s *script.Script) lua.LGFunction {
 
 		m.activeMx.Lock()
 		defer m.activeMx.Unlock()
-		info, ok := m.active[alertName]
+		info, ok := m.alerts[alertName]
 		if !ok {
 			info = &alertInfo{
 				Active:     false,
 				ScriptName: s.Name,
 			}
-			m.active[alertName] = info
+			m.alerts[alertName] = info
 		}
 
 		if info.Active {

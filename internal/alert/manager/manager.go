@@ -26,14 +26,14 @@ type Manager struct {
 	logger   *zap.Logger
 	channels map[string]alertChannel
 	activeMx sync.RWMutex
-	active   map[string]*alertInfo
+	alerts   map[string]*alertInfo
 }
 
 func New(logger *zap.Logger) *Manager {
 	m := &Manager{
 		logger:   logger,
 		channels: make(map[string]alertChannel),
-		active:   make(map[string]*alertInfo),
+		alerts:   make(map[string]*alertInfo),
 	}
 
 	return m
