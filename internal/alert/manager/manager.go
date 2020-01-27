@@ -18,8 +18,8 @@ type alertChannel interface {
 }
 
 type alertInfo struct {
+	Active     bool
 	ScriptName string
-	Count      int
 }
 
 type Manager struct {

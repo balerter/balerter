@@ -15,7 +15,6 @@ func (m *Manager) GetAlerts() []*AlertInfo {
 	for name, i := range m.active {
 		info = append(info, &AlertInfo{
 			Name:       name,
-			Count:      i.Count,
 			ScriptName: i.ScriptName,
 		})
 	}

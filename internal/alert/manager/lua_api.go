@@ -53,14 +53,19 @@ func (m *Manager) on(s *script.Script) lua.LGFunction {
 		info, ok := m.active[alertName]
 		if !ok {
 			info = &alertInfo{
+				Active:     false,
 				ScriptName: s.Name,
 			}
 			m.active[alertName] = info
+		}
+
+		if !info.Active {
 			m.sendError(alertName, text, fields...)
 		}
-		info.Count++
 
-		m.logger.Debug("call alert ON", zap.String("alertName", alertName), zap.Int("count", info.Count), zap.String("scriptName", s.Name))
+		info.Active = true
+
+		m.logger.Debug("call alert ON", zap.String("alertName", alertName), zap.String("scriptName", s.Name))
 
 		return 0
 	}
@@ -77,10 +82,20 @@ func (m *Manager) off(s *script.Script) lua.LGFunction {
 
 		m.activeMx.Lock()
 		defer m.activeMx.Unlock()
-		if _, ok := m.active[alertName]; ok {
-			delete(m.active, alertName)
+		info, ok := m.active[alertName]
+		if !ok {
+			info = &alertInfo{
+				Active:     false,
+				ScriptName: s.Name,
+			}
+			m.active[alertName] = info
+		}
+
+		if info.Active {
 			m.sendSuccess(alertName, text, fields...)
 		}
+
+		info.Active = false
 
 		m.logger.Debug("call alert OFF", zap.String("alertName", alertName), zap.String("scriptName", s.Name))
 
