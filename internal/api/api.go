@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"github.com/balerter/balerter/internal/config"
 	"go.uber.org/zap"
@@ -19,6 +20,8 @@ type API struct {
 	server       *http.Server
 	alertManager alertManagerAPIer
 	logger       *zap.Logger
+
+	pathPrefix string
 }
 
 func New(cfg config.API, alertManager alertManagerAPIer, logger *zap.Logger) *API {
@@ -27,11 +30,12 @@ func New(cfg config.API, alertManager alertManagerAPIer, logger *zap.Logger) *AP
 		server:       &http.Server{},
 		alertManager: alertManager,
 		logger:       logger,
+		pathPrefix:   fmt.Sprintf("/api/%s", "v1"),
 	}
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/alerts", api.handlerAlerts)
+	mux.HandleFunc(api.pathPrefix+"/alerts", api.handlerAlerts)
 
 	api.server.Handler = mux
 

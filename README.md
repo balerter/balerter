@@ -127,6 +127,7 @@ More modules can be found in the repo https://github.com/balerter/modules
 - core modules        
     - [log](docs/modules/log.md)
     - [alert](docs/modules/alert.md)
-    - [kv](docs/modules/kv.md)
+    - [key/value storage](docs/modules/kv.md)
+    - [HTTP API](docs/modules/api.md)
 - script
     - [script meta](docs/script.md)
