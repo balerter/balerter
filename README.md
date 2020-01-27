@@ -124,7 +124,9 @@ More modules can be found in the repo https://github.com/balerter/modules
     - datasource
         - [clickhouse](docs/modules/clickhouse.md)
         - [prometheus](docs/modules/prometheus.md)
-- [log module](docs/modules/log.md)
-- [alert module](docs/modules/alert.md)
+- core modules        
+    - [log](docs/modules/log.md)
+    - [alert](docs/modules/alert.md)
+    - [kv](docs/modules/kv.md)
 - script
     - [script meta](docs/script.md)
