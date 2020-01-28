@@ -3,6 +3,7 @@ package manager
 import (
 	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/datasource/provider/clickhouse"
+	"github.com/balerter/balerter/internal/datasource/provider/postgres"
 	"github.com/balerter/balerter/internal/datasource/provider/prometheus"
 	"github.com/balerter/balerter/internal/modules"
 	"go.uber.org/zap"
@@ -34,6 +35,14 @@ func (m *Manager) Init(cfg config.DataSources) error {
 
 	for _, prometheusCfg := range cfg.Prometheus {
 		module, err := prometheus.New(prometheusCfg, m.logger)
+		if err != nil {
+			return err
+		}
+		m.modules[module.Name()] = module
+	}
+
+	for _, postgresCfg := range cfg.Postgres {
+		module, err := postgres.New(postgresCfg, m.logger)
 		if err != nil {
 			return err
 		}

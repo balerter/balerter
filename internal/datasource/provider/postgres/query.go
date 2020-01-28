@@ -1,4 +1,4 @@
-package clickhouse
+package postgres
 
 import (
 	"context"
@@ -8,18 +8,18 @@ import (
 	"time"
 )
 
-func (m *Clickhouse) query(L *lua.LState) int {
+func (m *Postgres) query(L *lua.LState) int {
 
 	q := L.Get(1).String()
 
-	m.logger.Debug("call clickhouse query", zap.String("query", q))
+	m.logger.Debug("call postgres query", zap.String("query", q))
 
 	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*3) // todo: timeout to settings
 	defer ctxCancel()
 
 	rows, err := m.db.QueryContext(ctx, q)
 	if err != nil {
-		m.logger.Error("error clickhouse query", zap.String("query", q), zap.Error(err))
+		m.logger.Error("error postgres query", zap.String("query", q), zap.Error(err))
 		L.Push(lua.LNil)
 		L.Push(lua.LString(err.Error()))
 		return 2
@@ -33,24 +33,21 @@ func (m *Clickhouse) query(L *lua.LState) int {
 
 	for _, c := range cct {
 		switch c.DatabaseTypeName() {
-		case "Float64":
+		case "NUMERIC":
 			dest = append(dest, new(float64))
 			ffs = append(ffs, converter.FromFloat64)
-		case "Date":
-			dest = append(dest, new(time.Time))
-			ffs = append(ffs, converter.FromDate)
-		case "DateTime":
+		case "TIMESTAMPTZ":
 			dest = append(dest, new(time.Time))
 			ffs = append(ffs, converter.FromDateTime)
-		case "String":
+		case "VARCHAR":
 			dest = append(dest, new(string))
 			ffs = append(ffs, converter.FromString)
-		case "UInt8", "UInt16", "UInt32", "UInt64":
-			dest = append(dest, new(uint))
-			ffs = append(ffs, converter.FromUInt)
-		case "Int8", "Int16", "Int32", "Int64":
+		case "INT4":
 			dest = append(dest, new(int))
 			ffs = append(ffs, converter.FromInt)
+		case "BOOL":
+			dest = append(dest, new(bool))
+			ffs = append(ffs, converter.FromBoolean)
 		default:
 			m.logger.Error("error scan type", zap.String("typename", c.DatabaseTypeName()))
 			L.Push(lua.LNil)
