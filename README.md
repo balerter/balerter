@@ -13,6 +13,18 @@ In the script we run query to clickhouse, check the value and fire the alert (or
 
 ## Example
 
+```
+docker pull balerter/balerter
+```
+
+```
+docker run \
+    -v /peth/to/config.yml:/opt/config.yml \
+    -v /path/to/scripts:/opt/scripts \ 
+    -v /path/to/cert.crt:/home/user/db.crt \
+    balerter/balerter -config=/opt/config.yml
+```
+
 Config file `config.yml`
 ```yaml
 scripts:
@@ -20,7 +32,7 @@ scripts:
     update_interval: 5s
     folder:
       - name: debug-folder
-        path: /home/user/scripts
+        path: /opt/scripts
         mask: '*.lua'
 
 datasources:
