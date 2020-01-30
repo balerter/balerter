@@ -16,6 +16,7 @@ type Script struct {
 	Body     []byte
 	Interval time.Duration
 	Ignore   bool
+	Channels []string
 }
 
 func (s *Script) Hash() string {
@@ -27,6 +28,7 @@ var (
 		"@interval": parseMetaInterval,
 		"@ignore":   parseMetaIgnore,
 		"@name":     parseMetaName,
+		"@channels": parseMetaChannels,
 	}
 )
 
@@ -80,6 +82,23 @@ func parseMetaName(l string, s *Script) error {
 	}
 
 	s.Name = l
+
+	return nil
+}
+
+func parseMetaChannels(l string, s *Script) error {
+	if l == "" {
+		return fmt.Errorf("channels must be not empty")
+	}
+
+	for _, channelName := range strings.Split(l, ",") {
+		channelName = strings.TrimSpace(channelName)
+		if channelName == "" {
+			return fmt.Errorf("channel name must be not empty")
+		}
+
+		s.Channels = append(s.Channels, channelName)
+	}
 
 	return nil
 }

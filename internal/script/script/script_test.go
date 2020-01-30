@@ -94,3 +94,46 @@ func TestScript_Hash(t *testing.T) {
 
 	assert.Equal(t, "e1073eb510ec5486c4f5a62a1ba486202db8aa25", s.Hash())
 }
+
+func TestScript_ParseMeta_EmptyChannels(t *testing.T) {
+	s := &Script{
+		Body: []byte(`-- @channels `),
+	}
+
+	err := s.ParseMeta()
+
+	require.Error(t, err)
+	assert.Equal(t, "channels must be not empty", err.Error())
+}
+
+func TestScript_ParseMeta_EmptyChannel(t *testing.T) {
+	s := &Script{Body: []byte(`-- @channels foo,`)}
+	err := s.ParseMeta()
+	require.Error(t, err)
+	assert.Equal(t, "channel name must be not empty", err.Error())
+
+	s = &Script{Body: []byte(`-- @channels ,foo`)}
+	err = s.ParseMeta()
+	require.Error(t, err)
+	assert.Equal(t, "channel name must be not empty", err.Error())
+
+	s = &Script{Body: []byte(`-- @channels bar,,foo`)}
+	err = s.ParseMeta()
+	require.Error(t, err)
+	assert.Equal(t, "channel name must be not empty", err.Error())
+}
+
+func TestScript_ParseMeta_Channels(t *testing.T) {
+	s := &Script{Body: []byte(`-- @channels foo`)}
+	err := s.ParseMeta()
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(s.Channels))
+	assert.Contains(t, s.Channels, "foo")
+
+	s = &Script{Body: []byte(`-- @channels foo, bar`)}
+	err = s.ParseMeta()
+	require.NoError(t, err)
+	assert.Equal(t, 2, len(s.Channels))
+	assert.Contains(t, s.Channels, "foo")
+	assert.Contains(t, s.Channels, "bar")
+}
