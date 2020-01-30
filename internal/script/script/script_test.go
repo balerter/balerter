@@ -23,6 +23,20 @@ print
 
 	assert.False(t, s.Ignore)
 	assert.Equal(t, time.Second, s.Interval)
+
+	s = &Script{
+		Interval: time.Second,
+		Body: []byte(`
+-- hello 
+`),
+	}
+
+	err = s.ParseMeta()
+
+	require.NoError(t, err)
+
+	assert.False(t, s.Ignore)
+	assert.Equal(t, time.Second, s.Interval)
 }
 
 func TestScript_ParseMeta(t *testing.T) {
