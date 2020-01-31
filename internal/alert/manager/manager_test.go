@@ -1,28 +1,41 @@
 package manager
 
-//func TestManager_Init(t *testing.T) {
-//
-//	m := New(zap.NewNop())
-//
-//	cfg := config.Channels{
-//		Slack: []config.ChannelSlack{
-//			{
-//				Name:                 "slack1",
-//				Token:                "token",
-//				Channel:              "channel",
-//				MessagePrefixSuccess: "success",
-//				MessagePrefixError:   "error",
-//			},
-//		},
-//	}
-//
-//	err := m.Init(cfg)
-//	require.NoError(t, err)
-//	require.Equal(t, 1, len(m.channels))
-//
-//	_, ok := m.channels["slack1"]
-//	require.True(t, ok)
-//}
+import (
+	"github.com/balerter/balerter/internal/config"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
+	"testing"
+)
+
+func TestManager_Init(t *testing.T) {
+	m := New(zap.NewNop())
+
+	cfg := config.Channels{
+		Slack: []config.ChannelSlack{
+			{
+				Name:    "slack1",
+				Token:   "token",
+				Channel: "channel",
+				Prefixes: config.ChannelPrefixes{
+					Error:   "1",
+					Warn:    "2",
+					Success: "3",
+					Info:    "4",
+				},
+			},
+		},
+	}
+
+	err := m.Init(cfg)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(m.channels))
+
+	c, ok := m.channels["slack1"]
+	require.True(t, ok)
+	assert.Equal(t, "slack1", c.Name())
+}
+
 //
 //func TestManager_Loader(t *testing.T) {
 //	m := New(zap.NewNop())
