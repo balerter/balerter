@@ -2,8 +2,10 @@ package manager
 
 import (
 	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"testing"
 )
@@ -36,23 +38,29 @@ func TestManager_Init(t *testing.T) {
 	assert.Equal(t, "slack1", c.Name())
 }
 
-//
-//func TestManager_Loader(t *testing.T) {
-//	m := New(zap.NewNop())
-//
-//	L := lua.NewState()
-//
-//	f := m.GetLoader(&script.Script{})
-//	c := f(L)
-//	assert.Equal(t, 1, c)
-//
-//	v := L.Get(1).(*lua.LTable)
-//
-//	assert.IsType(t, &lua.LNilType{}, v.RawGet(lua.LString("wrong-name")))
-//
-//	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("on")))
-//	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("off")))
-//}
+func TestManager_Loader(t *testing.T) {
+	m := New(zap.NewNop())
+
+	L := lua.NewState()
+
+	f := m.GetLoader(&script.Script{})
+	c := f(L)
+	assert.Equal(t, 1, c)
+
+	v := L.Get(1).(*lua.LTable)
+
+	assert.IsType(t, &lua.LNilType{}, v.RawGet(lua.LString("wrong-name")))
+
+	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("warn")))
+	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("info")))
+	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("on")))
+	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("error")))
+	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("fail")))
+	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("success")))
+	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("off")))
+	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("ok")))
+}
+
 //
 //func TestManager_getAlertName(t *testing.T) {
 //	m := New(zap.NewNop())
