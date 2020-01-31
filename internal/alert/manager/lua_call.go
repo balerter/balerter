@@ -59,19 +59,6 @@ func (m *Manager) getAlertData(L *lua.LState) (alertName string, alertText strin
 		err = fmt.Errorf("wrong options format: %v", err)
 		return
 	}
-	//L.ToTable(3).ForEach(func(value lua.LValue, value2 lua.LValue) {
-	//	//fields = append(fields, value2.String())
-	//	log.Printf("%v, %v", value, value2)
-	//})
-
-	//flds := L.Get(3)
-	//if flds.Type() == lua.LTNil {
-	//	return
-	//}
-	//
-	//L.ToTable(3).ForEach(func(value lua.LValue, value2 lua.LValue) {
-	//	fields = append(fields, value2.String())
-	//})
 
 	return
 }
