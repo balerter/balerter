@@ -2,35 +2,29 @@ package manager
 
 import (
 	"github.com/balerter/balerter/internal/alert/alert"
+	"github.com/balerter/balerter/internal/alert/message"
+	"github.com/balerter/balerter/internal/script/script"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"reflect"
 	"testing"
 )
 
-//type alertChannelMock struct {
-//	mock.Mock
-//}
-//
-//func (m *alertChannelMock) Name() string {
-//	args := m.Called()
-//	return args.String(0)
-//}
-//
-//func (m *alertChannelMock) Send(message *message.Message) error {
-//	args := m.Called(message)
-//	return args.Error(0)
-//}
-//
-//func (m *alertChannelMock) SendSuccess(message *message.Message) error {
-//	args := m.Called(message)
-//	return args.Error(0)
-//}
-//
-//func (m *alertChannelMock) SendError(message *message.Message) error {
-//	args := m.Called(message)
-//	return args.Error(0)
-//}
+type alertChannelMock struct {
+	mock.Mock
+}
+
+func (m *alertChannelMock) Name() string {
+	args := m.Called()
+	return args.String(0)
+}
+
+func (m *alertChannelMock) Send(level alert.Level, message *message.Message) error {
+	args := m.Called(level, message)
+	return args.Error(0)
+}
 
 func TestManager_getAlertData(t *testing.T) {
 	type fields struct {
@@ -185,4 +179,44 @@ func TestManager_getAlertData(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestManager_luaCall_repeat(t *testing.T) {
+	chan1 := &alertChannelMock{}
+	chan1.On("Send", mock.Anything, mock.Anything).Return(nil)
+
+	m := &Manager{
+		logger:   zap.NewNop(),
+		channels: map[string]alertChannel{"chan1": chan1},
+		alerts:   map[string]*alert.Alert{},
+	}
+
+	opts := &lua.LTable{}
+	opts.RawSet(lua.LString("repeat"), lua.LNumber(2))
+
+	L := lua.NewState()
+	L.Push(lua.LString("alertName"))
+	L.Push(lua.LString("alertText1"))
+	L.Push(opts)
+	n := m.luaCall(script.New(), alert.LevelError)(L)
+	assert.Equal(t, 0, n)
+	chan1.AssertCalled(t, "Send", alert.LevelError, &message.Message{AlertName: "alertName", Text: "alertText1"})
+
+	L = lua.NewState()
+	L.Push(lua.LString("alertName"))
+	L.Push(lua.LString("alertText2"))
+	L.Push(opts)
+	n = m.luaCall(script.New(), alert.LevelError)(L)
+	assert.Equal(t, 0, n)
+	chan1.AssertNotCalled(t, "Send", alert.LevelError, &message.Message{AlertName: "alertName", Text: "alertText2"})
+
+	L = lua.NewState()
+	L.Push(lua.LString("alertName"))
+	L.Push(lua.LString("alertText3"))
+	L.Push(opts)
+	n = m.luaCall(script.New(), alert.LevelError)(L)
+	assert.Equal(t, 0, n)
+	chan1.AssertCalled(t, "Send", alert.LevelError, &message.Message{AlertName: "alertName", Text: "alertText3"})
+
+	chan1.AssertExpectations(t)
 }

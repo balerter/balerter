@@ -17,18 +17,20 @@ const (
 type Alert struct {
 	mx sync.RWMutex
 
-	Level      Level
-	LastChange time.Time
-	Start      time.Time
+	level      Level
+	lastChange time.Time
+	start      time.Time
+	count      int
 }
 
 func New() *Alert {
 	now := time.Now()
 
 	a := &Alert{
-		Level:      LevelInfo,
-		LastChange: now,
-		Start:      now,
+		level:      LevelInfo,
+		lastChange: now,
+		start:      now,
+		count:      0,
 	}
 
 	return a
@@ -36,8 +38,34 @@ func New() *Alert {
 
 func (a *Alert) UpdateLevel(level Level) {
 	a.mx.Lock()
-	defer a.mx.RUnlock()
+	defer a.mx.Unlock()
 
-	a.Level = level
-	a.LastChange = time.Now()
+	a.level = level
+	a.lastChange = time.Now()
+	a.count = 0
+}
+
+func (a *Alert) Inc() {
+	a.mx.Lock()
+	defer a.mx.Unlock()
+
+	a.count++
+}
+
+func (a *Alert) Level() Level {
+	a.mx.Lock()
+	defer a.mx.Unlock()
+
+	l := a.level
+
+	return l
+}
+
+func (a *Alert) Count() int {
+	a.mx.Lock()
+	defer a.mx.Unlock()
+
+	c := a.count
+
+	return c
 }

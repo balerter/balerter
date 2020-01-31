@@ -14,12 +14,14 @@ type options struct {
 	Fields   []string
 	Channels []string
 	Quiet    bool
+	Repeat   int
 }
 
 func defaultOptions() options {
 	return options{
 		Fields: nil,
 		Quiet:  false,
+		Repeat: 0,
 	}
 }
 
@@ -78,7 +80,7 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 		m.alertsMx.Lock()
 		a, ok := m.alerts[alertName]
 		if !ok {
-			a := alert.New()
+			a = alert.New()
 			m.alerts[alertName] = a
 		}
 		m.alertsMx.Unlock()
@@ -91,7 +93,13 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 			return 0
 		}
 
-		if a.Level == alertLevel {
+		if a.Level() == alertLevel {
+			a.Inc()
+
+			if alertOptions.Repeat > 0 && a.Count()%alertOptions.Repeat == 0 {
+				m.Send(alertLevel, alertName, alertText, alertOptions.Channels, alertOptions.Fields)
+			}
+
 			return 0
 		}
 
