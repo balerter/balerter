@@ -11,8 +11,9 @@ import (
 )
 
 type options struct {
-	Fields []string
-	Quiet  bool
+	Fields   []string
+	Channels []string
+	Quiet    bool
 }
 
 func defaultOptions() options {
@@ -72,26 +73,31 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 			return 1
 		}
 
-		_, _, _ = alertName, alertText, alertOptions
+		m.logger.Debug("call alert luaCall", zap.String("alertName", alertName), zap.String("scriptName", s.Name), zap.String("alertText", alertText), zap.Int("alertLevel", int(alertLevel)), zap.Any("alertOptions", alertOptions))
 
 		m.alertsMx.Lock()
-		defer m.alertsMx.Unlock()
-		//info, ok := m.alerts[alertName]
-		//if !ok {
-		//	info = &alertInfo{
-		//		Active:     false,
-		//		ScriptName: s.Name,
-		//	}
-		//	m.alerts[alertName] = info
-		//}
-		//
-		//if info.Active {
-		//	m.sendSuccess(alertName, text, fields...)
-		//}
-		//
-		//info.Active = false
-		//
-		//m.logger.Debug("call alert OFF", zap.String("alertName", alertName), zap.String("scriptName", s.Name))
+		a, ok := m.alerts[alertName]
+		if !ok {
+			a := alert.New()
+			m.alerts[alertName] = a
+		}
+		m.alertsMx.Unlock()
+
+		// if a level equals Info, always send the message (but only if not a quiet options)
+		if alertLevel == alert.LevelInfo {
+			if !alertOptions.Quiet {
+				m.Send(alertLevel, alertName, alertText, alertOptions.Channels, alertOptions.Fields)
+			}
+			return 0
+		}
+
+		if a.Level == alertLevel {
+			return 0
+		}
+
+		a.UpdateLevel(alertLevel)
+
+		m.Send(alertLevel, alertName, alertText, alertOptions.Channels, alertOptions.Fields)
 
 		return 0
 	}

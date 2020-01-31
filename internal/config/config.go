@@ -18,9 +18,9 @@ type Config struct {
 }
 
 type Global struct {
-	SendStartNotification map[string]struct{} `json:"send_start_notification" yaml:"send_start_notification"`
-	SendStopNotification  map[string]struct{} `json:"send_stop_notification" yaml:"send_stop_notification"`
-	API                   API                 `json:"api" yaml:"api"`
+	SendStartNotification []string `json:"send_start_notification" yaml:"send_start_notification"`
+	SendStopNotification  []string `json:"send_stop_notification" yaml:"send_stop_notification"`
+	API                   API      `json:"api" yaml:"api"`
 }
 
 type API struct {

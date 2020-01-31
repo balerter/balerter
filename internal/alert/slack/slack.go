@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"github.com/balerter/balerter/internal/alert/alert"
 	"github.com/balerter/balerter/internal/alert/message"
 	"github.com/balerter/balerter/internal/config"
 	"github.com/nlopes/slack"
@@ -32,7 +33,7 @@ func (m *Slack) Name() string {
 	return m.name
 }
 
-func (m *Slack) Send(level message.Level, message *message.Message) error {
+func (m *Slack) Send(level alert.Level, message *message.Message) error {
 	opts := createSlackMessageOptions(message.AlertName, message.Text, message.Fields...)
 
 	_channel, _timestamp, _text, err := m.api.SendMessage(m.channel, opts...)

@@ -13,7 +13,7 @@ import (
 
 type alertChannel interface {
 	Name() string
-	Send(message.Level, *message.Message) error
+	Send(alert.Level, *message.Message) error
 }
 
 type Manager struct {

@@ -1,6 +1,9 @@
 package alert
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
 type Level int
 
@@ -12,6 +15,8 @@ const (
 )
 
 type Alert struct {
+	mx sync.RWMutex
+
 	Level      Level
 	LastChange time.Time
 	Start      time.Time
@@ -27,4 +32,12 @@ func New() *Alert {
 	}
 
 	return a
+}
+
+func (a *Alert) UpdateLevel(level Level) {
+	a.mx.Lock()
+	defer a.mx.RUnlock()
+
+	a.Level = level
+	a.LastChange = time.Now()
 }
