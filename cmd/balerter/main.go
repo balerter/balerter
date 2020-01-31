@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
+	"github.com/balerter/balerter/internal/alert/message"
 	"github.com/balerter/balerter/internal/api"
 	"github.com/balerter/balerter/internal/config"
 	dsManager "github.com/balerter/balerter/internal/datasource/manager"
@@ -95,8 +96,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := alertMgr.Send("BAlerter *START*", cfg.Global.SendStartNotification); err != nil {
-		lgr.Logger().Error("error send start notification", zap.Error(err))
+	if len(cfg.Global.SendStartNotification) > 0 {
+		alertMgr.Send(message.LevelInfo, "", "Balerter Start", cfg.Global.SendStartNotification)
 	}
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
@@ -162,8 +163,8 @@ func main() {
 
 	wg.Wait()
 
-	if err := alertMgr.Send("BAlerter *STOP*", cfg.Global.SendStartNotification); err != nil {
-		lgr.Logger().Error("error send stop notification", zap.Error(err))
+	if len(cfg.Global.SendStopNotification) > 0 {
+		alertMgr.Send(message.LevelInfo, "", "Balerter Stop", cfg.Global.SendStopNotification)
 	}
 
 	lgr.Logger().Info("terminate")

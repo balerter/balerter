@@ -5,34 +5,17 @@ import (
 	"go.uber.org/zap"
 )
 
-func (m *Manager) Send(text string, channels []string) error {
-	for _, channelName := range channels {
-		ch, ok := m.channels[channelName]
-		if !ok {
-			m.logger.Warn("channel not found", zap.String("channel", channelName))
-			continue
-		}
-
-		if err := ch.Send(message.New("", text)); err != nil {
-			m.logger.Error("error send message", zap.String("channel", channelName), zap.Error(err))
-		}
-	}
-
-	return nil
-}
-
-func (m *Manager) sendSuccess(alertName, text string, fields ...string) {
+func (m *Manager) Send(level message.Level, alertName, text string, channels map[string]struct{}, fields ...string) {
 	for name, module := range m.channels {
-		if err := module.SendSuccess(message.New(alertName, text, fields...)); err != nil {
-			m.logger.Error("error send message to channel", zap.String("name", name), zap.Error(err))
+		if channels != nil {
+			if _, ok := channels[name]; len(channels) > 0 && !ok {
+				m.logger.Debug("skip send message to channel", zap.String("channel name", name))
+				continue
+			}
 		}
-	}
-}
 
-func (m *Manager) sendError(alertName, text string, fields ...string) {
-	for name, module := range m.channels {
-		if err := module.SendError(message.New(alertName, text, fields...)); err != nil {
-			m.logger.Error("error send message to channel", zap.String("name", name), zap.Error(err))
+		if err := module.Send(level, message.New(alertName, text, fields...)); err != nil {
+			m.logger.Error("error send message to channel", zap.String("channel name", name), zap.Error(err))
 		}
 	}
 }

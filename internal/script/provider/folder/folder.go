@@ -38,11 +38,9 @@ func (p *Provider) Get() ([]*script.Script, error) {
 			return nil, err
 		}
 
-		s := &script.Script{
-			Name:     fileInfo.Name(),
-			Body:     body,
-			Interval: script.DefaultInterval,
-		}
+		s := script.New()
+		s.Name = fileInfo.Name()
+		s.Body = body
 
 		if err := s.ParseMeta(); err != nil {
 			return nil, err

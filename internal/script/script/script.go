@@ -11,12 +11,21 @@ const (
 	DefaultInterval time.Duration = time.Second * 30
 )
 
+func New() *Script {
+	s := &Script{
+		Interval: DefaultInterval,
+		Channels: map[string]struct{}{},
+	}
+
+	return s
+}
+
 type Script struct {
 	Name     string
 	Body     []byte
 	Interval time.Duration
 	Ignore   bool
-	Channels []string
+	Channels map[string]struct{}
 }
 
 func (s *Script) Hash() string {
@@ -97,7 +106,7 @@ func parseMetaChannels(l string, s *Script) error {
 			return fmt.Errorf("channel name must be not empty")
 		}
 
-		s.Channels = append(s.Channels, channelName)
+		s.Channels[channelName] = struct{}{}
 	}
 
 	return nil

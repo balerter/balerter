@@ -18,9 +18,9 @@ type Config struct {
 }
 
 type Global struct {
-	SendStartNotification []string `json:"send_start_notification" yaml:"send_start_notification"`
-	SendStopNotification  []string `json:"send_stop_notification" yaml:"send_stop_notification"`
-	API                   API      `json:"api" yaml:"api"`
+	SendStartNotification map[string]struct{} `json:"send_start_notification" yaml:"send_start_notification"`
+	SendStopNotification  map[string]struct{} `json:"send_stop_notification" yaml:"send_stop_notification"`
+	API                   API                 `json:"api" yaml:"api"`
 }
 
 type API struct {
@@ -32,11 +32,17 @@ type Channels struct {
 }
 
 type ChannelSlack struct {
-	Name                 string `json:"name" yaml:"name"`
-	Token                string `json:"token" yaml:"token"`
-	Channel              string `json:"channel" yaml:"channel"`
-	MessagePrefixSuccess string `json:"message_prefix_success" yaml:"message_prefix_success"`
-	MessagePrefixError   string `json:"message_prefix_error" yaml:"message_prefix_error"`
+	Name     string          `json:"name" yaml:"name"`
+	Token    string          `json:"token" yaml:"token"`
+	Channel  string          `json:"channel" yaml:"channel"`
+	Prefixes ChannelPrefixes `json:"prefixes" yaml:"prefixes"`
+}
+
+type ChannelPrefixes struct {
+	Error   string `json:"error" yaml:"error"`
+	Warn    string `json:"warn" yaml:"warn"`
+	Success string `json:"success" yaml:"success"`
+	Info    string `json:"info" yaml:"info"`
 }
 
 type DataSources struct {
