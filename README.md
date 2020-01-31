@@ -1,5 +1,6 @@
 # balerter [![Go Report Card](https://goreportcard.com/badge/github.com/balerter/balerter)](https://goreportcard.com/report/github.com/balerter/balerter) ![Test](https://github.com/balerter/balerter/workflows/Test/badge.svg)
 
+> A Project in active development. Features may have breaking changes at any time before v1.0.0 version 
 
 Balerter is a scripts based alerting system.
 
