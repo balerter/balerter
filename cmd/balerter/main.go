@@ -38,6 +38,9 @@ func main() {
 	LuaLDir := "./modules"
 	lua.LuaPathDefault = "./?.lua;" + LuaLDir + "/?.lua;" + LuaLDir + "/?/init.lua"
 
+	ctx, ctxCancel := context.WithCancel(context.Background())
+	wg := &sync.WaitGroup{}
+
 	coreModules := make([]modules.Module, 0)
 
 	flag.Parse()
@@ -95,19 +98,19 @@ func main() {
 		lgr.Logger().Error("error init alert manager", zap.Error(err))
 		os.Exit(1)
 	}
+	coreModules = append(coreModules, alertMgr)
 
 	if len(cfg.Global.SendStartNotification) > 0 {
 		alertMgr.Send(alert.LevelInfo, "", "Balerter Start", cfg.Global.SendStartNotification, nil)
 	}
 
-	ctx, ctxCancel := context.WithCancel(context.Background())
-	wg := &sync.WaitGroup{}
-
+	// ---------------------
+	// |
+	// | API
+	// |
 	wg.Add(1)
 	apis := api.New(cfg.Global.API, alertMgr, lgr.Logger())
 	go apis.Run(ctx, ctxCancel, wg)
-
-	coreModules = append(coreModules, alertMgr)
 
 	// ---------------------
 	// |
