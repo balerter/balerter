@@ -207,6 +207,30 @@ func TestManager_getAlertData(t *testing.T) {
 	}
 }
 
+func TestManager_luaCall_errorGetAlertData(t *testing.T) {
+	chan1 := &alertChannelMock{}
+
+	m := &Manager{
+		logger:   zap.NewNop(),
+		channels: map[string]alertChannel{"chan1": chan1},
+		alerts:   map[string]*alert.Alert{},
+	}
+
+	opts := &lua.LTable{}
+	opts.RawSet(lua.LString("repeat"), lua.LString("wrong value"))
+
+	L := lua.NewState()
+	L.Push(lua.LString("alertName"))
+	L.Push(lua.LString("alertText1"))
+	L.Push(opts)
+	n := m.luaCall(script.New(), alert.LevelError)(L)
+	assert.Equal(t, 1, n)
+
+	v := L.Get(4).String()
+
+	assert.Equal(t, "error get arguments: wrong options format: 1 error(s) decoding:\n\n* cannot parse 'Repeat' as int: strconv.ParseInt: parsing \"wrong value\": invalid syntax", v)
+}
+
 func TestManager_luaCall_repeat(t *testing.T) {
 	chan1 := &alertChannelMock{}
 	chan1.On("Send", mock.Anything, mock.Anything).Return(nil)
