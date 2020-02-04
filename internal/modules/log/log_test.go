@@ -73,3 +73,13 @@ func TestNew(t *testing.T) {
 	lgfunc := New(zap.NewNop())
 	assert.IsType(t, &Log{}, lgfunc)
 }
+
+func TestName(t *testing.T) {
+	l := &Log{}
+	assert.Equal(t, "log", l.Name())
+}
+
+func TestStop(t *testing.T) {
+	l := &Log{}
+	assert.NoError(t, l.Stop())
+}
