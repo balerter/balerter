@@ -155,6 +155,32 @@ func TestManager_getAlertData(t *testing.T) {
 			wantAlertOptions: options{Quiet: true, Fields: []string{"foo", "bar"}},
 			wantErr:          false,
 		},
+		{
+			name:   "with wrong options",
+			fields: defaultFields,
+			args: args{
+				L: func() *lua.LState {
+					L := lua.NewState()
+					L.Push(lua.LString("alertName1"))
+					L.Push(lua.LString("alertText1"))
+
+					opts := &lua.LTable{}
+					opts.RawSet(lua.LString("quiet"), lua.LString("not bool"))
+					fields := &lua.LTable{}
+					fields.RawSetInt(1, lua.LString("foo"))
+					fields.RawSetInt(2, lua.LString("bar"))
+					opts.RawSet(lua.LString("fields"), fields)
+
+					L.Push(opts)
+
+					return L
+				}(),
+			},
+			wantAlertName:    "alertName1",
+			wantAlertText:    "alertText1",
+			wantAlertOptions: options{Quiet: false, Fields: []string{"foo", "bar"}},
+			wantErr:          true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
