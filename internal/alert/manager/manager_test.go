@@ -60,3 +60,15 @@ func TestManager_Loader(t *testing.T) {
 	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("off")))
 	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("ok")))
 }
+
+func TestManager_Name(t *testing.T) {
+	m := &Manager{}
+
+	assert.Equal(t, "alert", m.Name())
+}
+
+func TestManager_Stop(t *testing.T) {
+	m := &Manager{}
+
+	assert.NoError(t, m.Stop())
+}
