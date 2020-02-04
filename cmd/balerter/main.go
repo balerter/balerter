@@ -174,9 +174,11 @@ func main() {
 }
 
 func validateLogLevel(level string) error {
-	if level != "ERROR" && level != "WARN" && level != "INFO" && level != "DEBUG" {
-		return fmt.Errorf("wrong log level")
+	for _, l := range []string{"ERROR", "WARN", "INFO", "DEBUG"} {
+		if l == level {
+			return nil
+		}
 	}
 
-	return nil
+	return fmt.Errorf("wrong log level")
 }
