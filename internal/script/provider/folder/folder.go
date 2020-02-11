@@ -5,6 +5,7 @@ import (
 	"github.com/balerter/balerter/internal/script/script"
 	"io/ioutil"
 	"path"
+	"path/filepath"
 )
 
 type Provider struct {
@@ -24,22 +25,22 @@ func New(cfg config.ScriptSourceFolder) *Provider {
 func (p *Provider) Get() ([]*script.Script, error) {
 	ss := make([]*script.Script, 0)
 
-	fi, err := ioutil.ReadDir(p.path)
+	mask := path.Join(p.path, p.mask)
+
+	matches, err := filepath.Glob(mask)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, fileInfo := range fi {
+	for _, filename := range matches {
 
-		// todo: check file mask
-
-		body, err := ioutil.ReadFile(path.Join(p.path, fileInfo.Name()))
+		body, err := ioutil.ReadFile(path.Join(filename))
 		if err != nil {
 			return nil, err
 		}
 
 		s := script.New()
-		s.Name = fileInfo.Name()
+		s.Name = filename
 		s.Body = body
 
 		if err := s.ParseMeta(); err != nil {
