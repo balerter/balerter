@@ -80,7 +80,6 @@ type DataSourceClickhouse struct {
 	Username    string `json:"username" yaml:"username"`
 	Password    string `json:"password" yaml:"password"`
 	Database    string `json:"database" yaml:"database"`
-	SSLMode     string `json:"ssl_mode" yaml:"ssl_mode"`
 	SSLCertPath string `json:"ssl_cert_path" yaml:"ssl_cert_path"`
 }
 
