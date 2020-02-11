@@ -25,6 +25,8 @@ github.com/json-iterator/go
 # github.com/lib/pq v1.0.0
 github.com/lib/pq
 github.com/lib/pq/oid
+# github.com/mitchellh/mapstructure v1.1.2
+github.com/mitchellh/mapstructure
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 github.com/modern-go/concurrent
 # github.com/modern-go/reflect2 v1.0.1
@@ -49,6 +51,8 @@ github.com/stretchr/objx
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/mock
 github.com/stretchr/testify/require
+# github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7
+github.com/yuin/gluamapper
 # github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb
 github.com/yuin/gopher-lua
 github.com/yuin/gopher-lua/ast
