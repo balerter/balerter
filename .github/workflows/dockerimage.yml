@@ -13,4 +13,4 @@ jobs:
         name: balerter/balerter
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        tags: "latest,${{ GITHUB_REF }}"
+        tags: "latest"
