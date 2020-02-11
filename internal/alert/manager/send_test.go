@@ -21,10 +21,11 @@ func TestManager_Send_no_channels(t *testing.T) {
 
 	m.Send(alert.LevelSuccess, "alertName", "alertText", nil, nil)
 
-	assert.Equal(t, 0, logs.Len())
+	assert.Equal(t, 1, logs.Len())
+	assert.Equal(t, 1, logs.FilterMessage("empty channels").Len())
 }
 
-func TestManager_Send_skip(t *testing.T) {
+func TestManager_Send_channel_not_found(t *testing.T) {
 	core, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(core)
 
@@ -41,7 +42,9 @@ func TestManager_Send_skip(t *testing.T) {
 
 	chan1.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
 
-	assert.Equal(t, 1, logs.FilterMessage("skip send message to channel").Len())
+	assert.Equal(t, 2, logs.Len())
+	assert.Equal(t, 1, logs.FilterMessage("channel not found").FilterField(zap.String("channel name", "chan2")).Len())
+	assert.Equal(t, 1, logs.FilterMessage("empty channels").Len())
 
 	chan1.AssertExpectations(t)
 }

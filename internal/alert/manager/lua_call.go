@@ -75,6 +75,10 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 			return 1
 		}
 
+		if len(alertOptions.Channels) == 0 {
+			alertOptions.Channels = s.Channels
+		}
+
 		m.logger.Debug("call alert luaCall", zap.String("alertName", alertName), zap.String("scriptName", s.Name), zap.String("alertText", alertText), zap.Int("alertLevel", int(alertLevel)), zap.Any("alertOptions", alertOptions))
 
 		m.alertsMx.Lock()
