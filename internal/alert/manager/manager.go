@@ -60,7 +60,6 @@ func (m *Manager) GetLoader(script *script.Script) lua.LGFunction {
 		return func(L *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
 				"warn": m.luaCall(script, alert.LevelWarn),
-				"info": m.luaCall(script, alert.LevelInfo),
 
 				"error": m.luaCall(script, alert.LevelError),
 				"on":    m.luaCall(script, alert.LevelError),

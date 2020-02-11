@@ -85,14 +85,6 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 		}
 		m.alertsMx.Unlock()
 
-		// if a level equals Info, always send the message (but only if not a quiet options)
-		if alertLevel == alert.LevelInfo {
-			if !alertOptions.Quiet {
-				m.Send(alertLevel, alertName, alertText, alertOptions.Channels, alertOptions.Fields)
-			}
-			return 0
-		}
-
 		if a.Level() == alertLevel {
 			a.Inc()
 

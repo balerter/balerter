@@ -231,47 +231,6 @@ func TestManager_luaCall_errorGetAlertData(t *testing.T) {
 	assert.Equal(t, "error get arguments: wrong options format: 1 error(s) decoding:\n\n* cannot parse 'Repeat' as int: strconv.ParseInt: parsing \"wrong value\": invalid syntax", v)
 }
 
-func TestManager_luaCall_send_info(t *testing.T) {
-	chan1 := &alertChannelMock{}
-	chan1.On("Send", mock.Anything, mock.Anything).Return(nil)
-
-	m := &Manager{
-		logger:   zap.NewNop(),
-		channels: map[string]alertChannel{"chan1": chan1},
-		alerts:   map[string]*alert.Alert{},
-	}
-
-	//opts := &lua.LTable{}
-	//opts.RawSet(lua.LString("quiet"), lua.LBool(true))
-	L := lua.NewState()
-	L.Push(lua.LString("alertName1"))
-	L.Push(lua.LString("alertText1"))
-	//L.Push(opts)
-	n := m.luaCall(script.New(), alert.LevelInfo)(L)
-	assert.Equal(t, 0, n)
-	chan1.AssertCalled(t, "Send", alert.LevelInfo, &message.Message{AlertName: "alertName1", Text: "alertText1"})
-
-	opts := &lua.LTable{}
-	opts.RawSet(lua.LString("quiet"), lua.LBool(false))
-	L = lua.NewState()
-	L.Push(lua.LString("alertName2"))
-	L.Push(lua.LString("alertText2"))
-	L.Push(opts)
-	n = m.luaCall(script.New(), alert.LevelInfo)(L)
-	assert.Equal(t, 0, n)
-	chan1.AssertCalled(t, "Send", alert.LevelInfo, &message.Message{AlertName: "alertName2", Text: "alertText2"})
-
-	opts = &lua.LTable{}
-	opts.RawSet(lua.LString("quiet"), lua.LBool(true))
-	L = lua.NewState()
-	L.Push(lua.LString("alertName3"))
-	L.Push(lua.LString("alertText3"))
-	L.Push(opts)
-	n = m.luaCall(script.New(), alert.LevelInfo)(L)
-	assert.Equal(t, 0, n)
-	chan1.AssertNotCalled(t, "Send", alert.LevelInfo, &message.Message{AlertName: "alertName3", Text: "alertText3"})
-}
-
 func TestManager_luaCall_repeat(t *testing.T) {
 	chan1 := &alertChannelMock{}
 	chan1.On("Send", mock.Anything, mock.Anything).Return(nil)

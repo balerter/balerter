@@ -63,7 +63,7 @@ func TestManager_Send_no_channels(t *testing.T) {
 		channels: map[string]alertChannel{},
 	}
 
-	m.Send(alert.LevelInfo, "alertName", "alertText", nil, nil)
+	m.Send(alert.LevelSuccess, "alertName", "alertText", nil, nil)
 
 	assert.Equal(t, 0, logs.Len())
 }
@@ -81,7 +81,7 @@ func TestManager_Send_skip(t *testing.T) {
 		},
 	}
 
-	m.Send(alert.LevelInfo, "alertName", "alertText", []string{"chan2"}, nil)
+	m.Send(alert.LevelSuccess, "alertName", "alertText", []string{"chan2"}, nil)
 
 	chan1.AssertNotCalled(t, "Send", mock.Anything, mock.Anything)
 
@@ -104,7 +104,7 @@ func TestManager_Send_ok(t *testing.T) {
 		},
 	}
 
-	m.Send(alert.LevelInfo, "alertName", "alertText", nil, nil)
+	m.Send(alert.LevelSuccess, "alertName", "alertText", nil, nil)
 
 	chan1.AssertCalled(t, "Send", mock.Anything, mock.Anything)
 
@@ -127,7 +127,7 @@ func TestManager_Send_error(t *testing.T) {
 		},
 	}
 
-	m.Send(alert.LevelInfo, "alertName", "alertText", nil, nil)
+	m.Send(alert.LevelSuccess, "alertName", "alertText", nil, nil)
 
 	chan1.AssertCalled(t, "Send", mock.Anything, mock.Anything)
 

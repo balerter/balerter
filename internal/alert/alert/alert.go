@@ -8,7 +8,6 @@ import (
 type Level int
 
 const (
-	LevelInfo    Level = 0
 	LevelSuccess Level = 1
 	LevelError   Level = 2
 	LevelWarn    Level = 3
@@ -27,7 +26,7 @@ func New() *Alert {
 	now := time.Now()
 
 	a := &Alert{
-		level:      LevelInfo,
+		level:      LevelSuccess,
 		lastChange: now,
 		start:      now,
 		count:      0,
