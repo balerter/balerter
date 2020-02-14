@@ -10,11 +10,16 @@ import (
 	"strings"
 )
 
+type optionsChart struct {
+	Series map[string][]float64
+}
+
 type options struct {
 	Fields   []string
 	Channels []string
 	Quiet    bool
 	Repeat   int
+	Chart    *optionsChart
 }
 
 func defaultOptions() options {
