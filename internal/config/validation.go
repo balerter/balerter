@@ -31,6 +31,12 @@ func (cfg *Config) Validate() error {
 		}
 	}
 
+	for _, c := range cfg.Channels.Telegram {
+		if err := c.Validate(); err != nil {
+			return fmt.Errorf("validate channel telegram: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -91,6 +97,22 @@ func (cfg *ChannelSlack) Validate() error {
 
 	if strings.TrimSpace(cfg.Channel) == "" {
 		return fmt.Errorf("channel must be not empty")
+	}
+
+	return nil
+}
+
+func (cfg *ChannelTelegram) Validate() error {
+	if strings.TrimSpace(cfg.Name) == "" {
+		return fmt.Errorf("name must be not empty")
+	}
+
+	if strings.TrimSpace(cfg.Token) == "" {
+		return fmt.Errorf("token must be not empty")
+	}
+
+	if cfg.ChatID == 0 {
+		return fmt.Errorf("chat id must be not empty")
 	}
 
 	return nil

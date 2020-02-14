@@ -80,3 +80,20 @@ func TestConfig_Validate_Error_CHSlack(t *testing.T) {
 	require.Error(t, err)
 	assert.Equal(t, "validate channel slack: channel must be not empty", err.Error())
 }
+
+func TestConfig_Validate_Error_CHTelegram(t *testing.T) {
+	cfg := &Config{Channels: Channels{Telegram: []ChannelTelegram{{Name: "", Token: "", ChatID: 0}}}}
+	err := cfg.Validate()
+	require.Error(t, err)
+	assert.Equal(t, "validate channel telegram: name must be not empty", err.Error())
+
+	cfg = &Config{Channels: Channels{Telegram: []ChannelTelegram{{Name: "name", Token: "", ChatID: 0}}}}
+	err = cfg.Validate()
+	require.Error(t, err)
+	assert.Equal(t, "validate channel telegram: token must be not empty", err.Error())
+
+	cfg = &Config{Channels: Channels{Telegram: []ChannelTelegram{{Name: "name", Token: "token", ChatID: 0}}}}
+	err = cfg.Validate()
+	require.Error(t, err)
+	assert.Equal(t, "validate channel telegram: chat id must be not empty", err.Error())
+}
