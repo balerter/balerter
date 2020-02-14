@@ -32,11 +32,6 @@ type Channels struct {
 	Telegram []ChannelTelegram `json:"telegram" yaml:"telegram"`
 }
 
-//type ChannelBase struct {
-//	Name     string          `json:"name" yaml:"name"`
-//	Prefixes ChannelPrefixes `json:"prefixes" yaml:"prefixes"`
-//}
-
 type ProxyConfig struct {
 	Address string           `json:"address" yaml:"address"`
 	Auth    *ProxyAuthConfig `json:"auth" yaml:"auth"`
@@ -48,25 +43,16 @@ type ProxyAuthConfig struct {
 }
 
 type ChannelTelegram struct {
-	Name     string          `json:"name" yaml:"name"`
-	Prefixes ChannelPrefixes `json:"prefixes" yaml:"prefixes"`
-	Token    string          `json:"token" yaml:"token"`
-	ChatID   int64           `json:"chat_id" yaml:"chat_id"`
-	Proxy    *ProxyConfig    `json:"proxy"`
+	Name   string       `json:"name" yaml:"name"`
+	Token  string       `json:"token" yaml:"token"`
+	ChatID int64        `json:"chat_id" yaml:"chat_id"`
+	Proxy  *ProxyConfig `json:"proxy"`
 }
 
 type ChannelSlack struct {
-	Name     string          `json:"name" yaml:"name"`
-	Prefixes ChannelPrefixes `json:"prefixes" yaml:"prefixes"`
-	Token    string          `json:"token" yaml:"token"`
-	Channel  string          `json:"channel" yaml:"channel"`
-}
-
-type ChannelPrefixes struct {
-	Error   string `json:"error" yaml:"error"`
-	Warn    string `json:"warn" yaml:"warn"`
-	Success string `json:"success" yaml:"success"`
-	Info    string `json:"info" yaml:"info"`
+	Name    string `json:"name" yaml:"name"`
+	Token   string `json:"token" yaml:"token"`
+	Channel string `json:"channel" yaml:"channel"`
 }
 
 type DataSources struct {

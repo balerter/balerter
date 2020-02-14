@@ -19,12 +19,6 @@ func TestManager_Init(t *testing.T) {
 				Name:    "slack1",
 				Token:   "token",
 				Channel: "channel",
-				Prefixes: config.ChannelPrefixes{
-					Error:   "1",
-					Warn:    "2",
-					Success: "3",
-					Info:    "4",
-				},
 			},
 		},
 	}

@@ -9,19 +9,17 @@ import (
 )
 
 type Slack struct {
-	logger   *zap.Logger
-	name     string
-	channel  string
-	api      *slack.Client
-	prefixes config.ChannelPrefixes
+	logger  *zap.Logger
+	name    string
+	channel string
+	api     *slack.Client
 }
 
 func New(cfg config.ChannelSlack, logger *zap.Logger) (*Slack, error) {
 	m := &Slack{
-		logger:   logger,
-		name:     cfg.Name,
-		channel:  cfg.Channel,
-		prefixes: cfg.Prefixes,
+		logger:  logger,
+		name:    cfg.Name,
+		channel: cfg.Channel,
 	}
 
 	m.api = slack.New(cfg.Token)
