@@ -28,14 +28,38 @@ type API struct {
 }
 
 type Channels struct {
-	Slack []ChannelSlack `json:"slack" yaml:"slack"`
+	Slack    []ChannelSlack    `json:"slack" yaml:"slack"`
+	Telegram []ChannelTelegram `json:"telegram" yaml:"telegram"`
+}
+
+//type ChannelBase struct {
+//	Name     string          `json:"name" yaml:"name"`
+//	Prefixes ChannelPrefixes `json:"prefixes" yaml:"prefixes"`
+//}
+
+type ProxyConfig struct {
+	Address string           `json:"address" yaml:"address"`
+	Auth    *ProxyAuthConfig `json:"auth" yaml:"auth"`
+}
+
+type ProxyAuthConfig struct {
+	Username string `json:"username" yaml:"username"`
+	Password string `json:"password" yaml:"password"`
+}
+
+type ChannelTelegram struct {
+	Name     string          `json:"name" yaml:"name"`
+	Prefixes ChannelPrefixes `json:"prefixes" yaml:"prefixes"`
+	Token    string          `json:"token" yaml:"token"`
+	ChatID   int64           `json:"chat_id" yaml:"chat_id"`
+	Proxy    *ProxyConfig    `json:"proxy"`
 }
 
 type ChannelSlack struct {
 	Name     string          `json:"name" yaml:"name"`
+	Prefixes ChannelPrefixes `json:"prefixes" yaml:"prefixes"`
 	Token    string          `json:"token" yaml:"token"`
 	Channel  string          `json:"channel" yaml:"channel"`
-	Prefixes ChannelPrefixes `json:"prefixes" yaml:"prefixes"`
 }
 
 type ChannelPrefixes struct {

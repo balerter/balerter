@@ -9,25 +9,25 @@ import (
 func (cfg *Config) Validate() error {
 	for _, c := range cfg.Scripts.Sources.Folder {
 		if err := c.Validate(); err != nil {
-			return err
+			return fmt.Errorf("validate script source folder: %w", err)
 		}
 	}
 
 	for _, c := range cfg.DataSources.Clickhouse {
 		if err := c.Validate(); err != nil {
-			return err
+			return fmt.Errorf("validate data source clickhouse: %w", err)
 		}
 	}
 
 	for _, c := range cfg.DataSources.Prometheus {
 		if err := c.Validate(); err != nil {
-			return err
+			return fmt.Errorf("validate data source prometheus: %w", err)
 		}
 	}
 
 	for _, c := range cfg.Channels.Slack {
 		if err := c.Validate(); err != nil {
-			return err
+			return fmt.Errorf("validate channel slack: %w", err)
 		}
 	}
 
