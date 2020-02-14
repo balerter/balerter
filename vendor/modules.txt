@@ -11,12 +11,19 @@ github.com/ClickHouse/clickhouse-go/lib/lz4
 github.com/ClickHouse/clickhouse-go/lib/protocol
 github.com/ClickHouse/clickhouse-go/lib/types
 github.com/ClickHouse/clickhouse-go/lib/writebuffer
+# github.com/ajstarks/svgo v0.0.0-20180226025133-644b8db467af
+github.com/ajstarks/svgo
 # github.com/cloudflare/golz4 v0.0.0-20150217214814-ef862a3cdc58
 github.com/cloudflare/golz4
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
+# github.com/fogleman/gg v1.3.0
+github.com/fogleman/gg
 # github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 github.com/go-telegram-bot-api/telegram-bot-api
+# github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
+github.com/golang/freetype/raster
+github.com/golang/freetype/truetype
 # github.com/gorilla/websocket v1.4.1
 github.com/gorilla/websocket
 # github.com/jmoiron/sqlx v1.2.0
@@ -24,6 +31,8 @@ github.com/jmoiron/sqlx
 github.com/jmoiron/sqlx/reflectx
 # github.com/json-iterator/go v1.1.8
 github.com/json-iterator/go
+# github.com/jung-kurt/gofpdf v1.0.3-0.20190309125859-24315acbbda5
+github.com/jung-kurt/gofpdf
 # github.com/lib/pq v1.0.0
 github.com/lib/pq
 github.com/lib/pq/oid
@@ -76,6 +85,14 @@ go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
 go.uber.org/zap/zapcore
 go.uber.org/zap/zaptest/observer
+# golang.org/x/image v0.0.0-20190227222117-0694c2d4d067
+golang.org/x/image/draw
+golang.org/x/image/font
+golang.org/x/image/font/basicfont
+golang.org/x/image/math/f64
+golang.org/x/image/math/fixed
+golang.org/x/image/tiff
+golang.org/x/image/tiff/lzw
 # golang.org/x/lint v0.0.0-20190930215403-16217165b5de
 golang.org/x/lint
 golang.org/x/lint/golint
@@ -98,6 +115,19 @@ golang.org/x/tools/internal/fastwalk
 golang.org/x/tools/internal/gopathwalk
 golang.org/x/tools/internal/semver
 golang.org/x/tools/internal/span
+# gonum.org/v1/plot v0.0.0-20200212202559-4d97eda4de95
+gonum.org/v1/plot
+gonum.org/v1/plot/palette
+gonum.org/v1/plot/plotter
+gonum.org/v1/plot/plotutil
+gonum.org/v1/plot/tools/bezier
+gonum.org/v1/plot/vg
+gonum.org/v1/plot/vg/draw
+gonum.org/v1/plot/vg/fonts
+gonum.org/v1/plot/vg/vgeps
+gonum.org/v1/plot/vg/vgimg
+gonum.org/v1/plot/vg/vgpdf
+gonum.org/v1/plot/vg/vgsvg
 # gopkg.in/yaml.v2 v2.2.2
 gopkg.in/yaml.v2
 # honnef.co/go/tools v0.0.1-2019.2.3

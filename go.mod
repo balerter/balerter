@@ -19,6 +19,8 @@ require (
 	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb
 	go.uber.org/zap v1.13.0
 	golang.org/x/net v0.0.0-20190620200207-3b0461eec859
+	gonum.org/v1/netlib v0.0.0-20191229114700-bbb4dff026f8 // indirect
+	gonum.org/v1/plot v0.0.0-20200212202559-4d97eda4de95
 	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 )
