@@ -68,3 +68,21 @@ func (a *Alert) Count() int {
 
 	return c
 }
+
+func (a *Alert) GetLastChangeTime() time.Time {
+	a.mx.Lock()
+	defer a.mx.Unlock()
+
+	r := a.lastChange
+
+	return r
+}
+
+func (a *Alert) GetStartTime() time.Time {
+	a.mx.Lock()
+	defer a.mx.Unlock()
+
+	r := a.start
+
+	return r
+}

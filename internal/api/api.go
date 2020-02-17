@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"github.com/balerter/balerter/internal/config"
 	"go.uber.org/zap"
 	"net"
@@ -11,7 +12,7 @@ import (
 )
 
 type alertManagerAPIer interface {
-	//GetAlerts() []*alertManager.AlertInfo
+	GetAlerts() []*alertManager.APIAlertInfo
 }
 
 type API struct {
