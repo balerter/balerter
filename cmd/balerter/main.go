@@ -109,7 +109,7 @@ func main() {
 	// | API
 	// |
 	wg.Add(1)
-	apis := api.New(cfg.Global.API, alertMgr, lgr.Logger())
+	apis := api.New(cfg.Global.API, *cfg, alertMgr, lgr.Logger())
 	go apis.Run(ctx, ctxCancel, wg)
 
 	// ---------------------

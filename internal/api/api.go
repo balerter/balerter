@@ -20,22 +20,25 @@ type API struct {
 	server       *http.Server
 	alertManager alertManagerAPIer
 	logger       *zap.Logger
+	config       config.Config
 
 	pathPrefix string
 }
 
-func New(cfg config.API, alertManager alertManagerAPIer, logger *zap.Logger) *API {
+func New(cfg config.API, fullConfig config.Config, alertManager alertManagerAPIer, logger *zap.Logger) *API {
 	api := &API{
 		address:      cfg.Address,
 		server:       &http.Server{},
 		alertManager: alertManager,
 		logger:       logger,
 		pathPrefix:   fmt.Sprintf("/api/%s", "v1"),
+		config:       fullConfig,
 	}
 
 	mux := http.NewServeMux()
 
 	mux.HandleFunc(api.pathPrefix+"/alerts", api.handlerAlerts)
+	mux.HandleFunc(api.pathPrefix+"/config", api.handlerConfig)
 
 	api.server.Handler = mux
 
