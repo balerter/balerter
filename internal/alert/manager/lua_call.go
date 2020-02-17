@@ -92,7 +92,7 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 		if a.Level() == alertLevel {
 			a.Inc()
 
-			if alertOptions.Repeat > 0 && a.Count()%alertOptions.Repeat == 0 {
+			if !alertOptions.Quiet && alertOptions.Repeat > 0 && a.Count()%alertOptions.Repeat == 0 {
 				m.Send(alertLevel, alertName, alertText, alertOptions.Channels, alertOptions.Fields)
 			}
 
@@ -101,7 +101,9 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 
 		a.UpdateLevel(alertLevel)
 
-		m.Send(alertLevel, alertName, alertText, alertOptions.Channels, alertOptions.Fields)
+		if !alertOptions.Quiet {
+			m.Send(alertLevel, alertName, alertText, alertOptions.Channels, alertOptions.Fields)
+		}
 
 		return 0
 	}
