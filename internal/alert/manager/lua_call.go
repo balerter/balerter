@@ -10,8 +10,18 @@ import (
 	"strings"
 )
 
+type optionsChartSeriesItem struct {
+	Timestamp int64
+	Value     float64
+}
+
+type optionsChartSeries struct {
+	Data []optionsChartSeriesItem
+}
+
 type optionsChart struct {
-	Series map[string][]float64
+	Title  string
+	Series []optionsChartSeries
 }
 
 type options struct {
@@ -79,6 +89,19 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 			L.Push(lua.LString("error get arguments: " + err.Error()))
 			return 1
 		}
+
+		var chartURL string
+
+		if alertOptions.Chart != nil {
+			chartURL, err = m.makeChart(alertOptions.Chart)
+			if err != nil {
+				m.logger.Error("error generate chart", zap.Error(err))
+				L.Push(lua.LString("error generate chart: " + err.Error()))
+				return 1
+			}
+		}
+
+		_ = chartURL
 
 		if len(alertOptions.Channels) == 0 {
 			alertOptions.Channels = s.Channels
