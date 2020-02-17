@@ -103,10 +103,12 @@ func (m *Prometheus) doRange(L *lua.LState) int {
 			}
 
 			values := &lua.LTable{}
-			for key, val := range s.Values {
-				//values.RawSet(lua.LString(key), lua.LNumber(val.Value))
-				_ = key
-				values.Append(lua.LNumber(val.Value))
+			for _, val := range s.Values {
+				value := &lua.LTable{}
+				value.RawSet(lua.LString("timestamp"), lua.LNumber(val.Timestamp.Unix()))
+				value.RawSet(lua.LString("value"), lua.LNumber(val.Value))
+
+				values.Append(value)
 			}
 
 			row.RawSet(lua.LString("metrics"), metrics)
