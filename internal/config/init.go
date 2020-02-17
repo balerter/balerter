@@ -16,5 +16,7 @@ func (cfg *Config) Init(configSource string) error {
 		return err
 	}
 
+	cfg.Global.SetDefaults()
+
 	return nil
 }

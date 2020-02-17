@@ -4,6 +4,10 @@ import (
 	"time"
 )
 
+const (
+	defaultAPIAddress = "127.0.0.1:2000"
+)
+
 func New() *Config {
 	cfg := &Config{}
 
@@ -23,8 +27,18 @@ type Global struct {
 	API                   API      `json:"api" yaml:"api"`
 }
 
+func (cfg *Global) SetDefaults() {
+	cfg.API.SetDefaults()
+}
+
 type API struct {
 	Address string `json:"address" yaml:"address"`
+}
+
+func (cfg *API) SetDefaults() {
+	if cfg.Address == "" {
+		cfg.Address = defaultAPIAddress
+	}
 }
 
 type Channels struct {
