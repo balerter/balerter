@@ -1,9 +1,9 @@
 package prometheus
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/prometheus/common/model"
+	"github.com/yuin/gluamapper"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"strings"
@@ -55,9 +55,9 @@ func (m *Prometheus) doQuery(L *lua.LState) int {
 }
 
 type queryRangeOptions struct {
-	Start string `json:"start,omitempty"`
-	End   string `json:"end,omitempty"`
-	Step  string `json:"step,omitempty"`
+	Start string
+	End   string
+	Step  string
 }
 
 func (m *Prometheus) doRange(L *lua.LState) int {
@@ -68,10 +68,11 @@ func (m *Prometheus) doRange(L *lua.LState) int {
 		return 2
 	}
 
-	options := L.Get(2).String()
-	opts := queryRangeOptions{}
-	if options != "nil" {
-		if err := json.Unmarshal([]byte(options), &opts); err != nil {
+	options := L.Get(2)
+	rangeOptions := queryRangeOptions{}
+	if options.Type() == lua.LTTable {
+		err := gluamapper.Map(options.(*lua.LTable), &rangeOptions)
+		if err != nil {
 			m.logger.Error("error decode query range options", zap.Error(err))
 			L.Push(lua.LNil)
 			L.Push(lua.LString("error decode query range options"))
@@ -81,7 +82,7 @@ func (m *Prometheus) doRange(L *lua.LState) int {
 
 	m.logger.Debug("call prometheus query range", zap.String("name", m.name), zap.String("query", query))
 
-	v, err := m.sendRange(query, opts)
+	v, err := m.sendRange(query, rangeOptions)
 	if err != nil {
 		m.logger.Error("error send query to prometheus", zap.Error(err))
 		L.Push(lua.LNil)
