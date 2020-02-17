@@ -39,7 +39,12 @@ func (m *Prometheus) doQuery(L *lua.LState) int {
 				metrics.RawSet(lua.LString(key), lua.LString(val))
 			}
 			row.RawSet(lua.LString("metrics"), metrics)
-			row.RawSet(lua.LString("value"), lua.LNumber(s.Value))
+
+			value := &lua.LTable{}
+			value.RawSet(lua.LString("timestamp"), lua.LNumber(s.Timestamp.Unix()))
+			value.RawSet(lua.LString("value"), lua.LNumber(s.Value))
+
+			row.RawSet(lua.LString("value"), value)
 			tbl.Append(row)
 		}
 
