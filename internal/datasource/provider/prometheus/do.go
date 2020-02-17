@@ -25,20 +25,29 @@ func (m *Prometheus) sendRange(query string, opts queryRangeOptions) (model.Valu
 
 	q := &url.Values{}
 	q.Add("query", query)
-	q.Add("start", opts.Start)
-	q.Add("end", opts.End)
-	q.Add("step", opts.Step)
+	if opts.Start != "" {
+		q.Add("start", opts.Start)
+	}
+	if opts.End != "" {
+		q.Add("end", opts.End)
+	}
+	if opts.Step != "" {
+		q.Add("step", opts.Step)
+	}
 	u.RawQuery = q.Encode()
 	u.Path = epQueryRange
 
 	return m.send(&u)
 }
 
-func (m *Prometheus) sendQuery(query string) (model.Value, error) {
+func (m *Prometheus) sendQuery(query string, opts queryQueryOptions) (model.Value, error) {
 	u := *m.url
 
 	q := &url.Values{}
 	q.Add("query", query)
+	if opts.Time != "" {
+		q.Add("time", opts.Time)
+	}
 	u.RawQuery = q.Encode()
 	u.Path = epQuery
 

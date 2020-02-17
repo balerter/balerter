@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+type queryQueryOptions struct {
+	Time string
+}
+
 func (m *Prometheus) doQuery(L *lua.LState) int {
 	query := strings.TrimSpace(L.Get(1).String())
 	if query == "" {
@@ -17,9 +21,21 @@ func (m *Prometheus) doQuery(L *lua.LState) int {
 		return 2
 	}
 
+	options := L.Get(2)
+	queryOptions := queryQueryOptions{}
+	if options.Type() == lua.LTTable {
+		err := gluamapper.Map(options.(*lua.LTable), &queryOptions)
+		if err != nil {
+			m.logger.Error("error decode query query options", zap.Error(err))
+			L.Push(lua.LNil)
+			L.Push(lua.LString("error decode query query options"))
+			return 2
+		}
+	}
+
 	m.logger.Debug("call prometheus query", zap.String("name", m.name), zap.String("query", query))
 
-	v, err := m.sendQuery(query)
+	v, err := m.sendQuery(query, queryOptions)
 	if err != nil {
 		m.logger.Error("error send query to prometheus", zap.Error(err))
 		L.Push(lua.LNil)
