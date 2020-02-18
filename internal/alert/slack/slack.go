@@ -32,7 +32,7 @@ func (m *Slack) Name() string {
 }
 
 func (m *Slack) Send(level alert.Level, message *message.Message) error {
-	opts := createSlackMessageOptions(message.AlertName, message.Text, message.Fields...)
+	opts := createSlackMessageOptions(message.AlertName, message.Text, message.Image, message.Fields...)
 
 	_channel, _timestamp, _text, err := m.api.SendMessage(m.channel, opts...)
 

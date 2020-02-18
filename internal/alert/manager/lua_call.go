@@ -15,6 +15,7 @@ type options struct {
 	Channels []string
 	Quiet    bool
 	Repeat   int
+	Image    string
 }
 
 func defaultOptions() options {
@@ -93,7 +94,7 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 			a.Inc()
 
 			if !alertOptions.Quiet && alertOptions.Repeat > 0 && a.Count()%alertOptions.Repeat == 0 {
-				m.Send(alertLevel, alertName, alertText, alertOptions.Channels, alertOptions.Fields)
+				m.Send(alertLevel, alertName, alertText, alertOptions.Channels, alertOptions.Fields, alertOptions.Image)
 			}
 
 			return 0
@@ -102,7 +103,7 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 		a.UpdateLevel(alertLevel)
 
 		if !alertOptions.Quiet {
-			m.Send(alertLevel, alertName, alertText, alertOptions.Channels, alertOptions.Fields)
+			m.Send(alertLevel, alertName, alertText, alertOptions.Channels, alertOptions.Fields, alertOptions.Image)
 		}
 
 		return 0

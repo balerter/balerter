@@ -87,6 +87,7 @@ func (p *Provider) upload(L *lua.LState, extension string) int {
 	obj.SetKey(filename)
 	obj.SetBody(bytes.NewReader(data))
 	obj.SetContentLength(int64(len(data)))
+	obj.SetContentType("image/png")
 
 	_, err = svc.PutObjectWithContext(ctx, obj)
 	if err != nil {

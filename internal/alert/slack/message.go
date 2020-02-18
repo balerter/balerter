@@ -4,9 +4,15 @@ import (
 	"github.com/nlopes/slack"
 )
 
-func createSlackMessageOptions(alertName, alertText string, fields ...string) []slack.MsgOption {
+func createSlackMessageOptions(alertName, alertText, imageURL string, fields ...string) []slack.MsgOption {
 
 	blocks := make([]slack.Block, 0)
+
+	if imageURL != "" {
+		imgTextBlock := slack.NewTextBlockObject("plain_text", "chart", false, false)
+		imgBlock := slack.NewImageBlock(imageURL, "chart", "", imgTextBlock)
+		blocks = append(blocks, imgBlock)
+	}
 
 	if alertText != "" {
 		mainTextBlock := slack.NewTextBlockObject("mrkdwn", alertText, false, false)

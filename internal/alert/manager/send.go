@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (m *Manager) Send(level alert.Level, alertName, text string, channels []string, fields []string) {
+func (m *Manager) Send(level alert.Level, alertName, text string, channels []string, fields []string, imageURL string) {
 	chs := make(map[string]alertChannel)
 
 	if len(channels) > 0 {
@@ -28,7 +28,7 @@ func (m *Manager) Send(level alert.Level, alertName, text string, channels []str
 	}
 
 	for name, module := range chs {
-		if err := module.Send(level, message.New(alertName, text, fields)); err != nil {
+		if err := module.Send(level, message.New(alertName, text, fields, imageURL)); err != nil {
 			m.logger.Error("error send message to channel", zap.String("channel name", name), zap.Error(err))
 		}
 	}
