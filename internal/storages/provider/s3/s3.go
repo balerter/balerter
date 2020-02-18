@@ -8,14 +8,24 @@ import (
 )
 
 type Provider struct {
-	name   string
-	logger *zap.Logger
+	name     string
+	region   string
+	endpoint string
+	key      string
+	secret   string
+	bucket   string
+	logger   *zap.Logger
 }
 
 func New(cfg config.StorageS3, logger *zap.Logger) (*Provider, error) {
 	p := &Provider{
-		name:   "s3." + cfg.Name,
-		logger: logger,
+		name:     "s3." + cfg.Name,
+		region:   cfg.Region,
+		endpoint: cfg.Endpoint,
+		key:      cfg.Key,
+		secret:   cfg.Secret,
+		bucket:   cfg.Bucket,
+		logger:   logger,
 	}
 
 	return p, nil
