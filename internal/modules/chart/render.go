@@ -29,6 +29,10 @@ var (
 func (ch *Chart) parseColor(s string) (color.RGBA, error) {
 	var c color.RGBA
 
+	if s == "" {
+		return color.RGBA{A: 255}, nil
+	}
+
 	if c, ok := defaultColors[s]; ok {
 		return c, nil
 	}
