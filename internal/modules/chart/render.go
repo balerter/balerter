@@ -6,7 +6,6 @@ import (
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg/draw"
 	"io"
-	"log"
 )
 
 const (
@@ -14,34 +13,7 @@ const (
 	defaultChartHeight = 200
 )
 
-type Chart struct {
-	title  string
-	series []Series
-}
-
-func New(title string) *Chart {
-	ch := &Chart{
-		title: title,
-	}
-
-	return ch
-}
-
-type Datum struct {
-	Timestamp int64
-	Value     float64
-}
-
-type Series struct {
-	Title string
-	Data  []Datum
-}
-
-func (ch *Chart) AddSeries(s Series) {
-	ch.series = append(ch.series, s)
-}
-
-func (ch *Chart) Render(w io.Writer) error {
+func (ch *Chart) _render(title string, data *Data, w io.Writer) error {
 
 	p, err := plot.New()
 	if err != nil {
@@ -50,7 +22,7 @@ func (ch *Chart) Render(w io.Writer) error {
 
 	xticks := plot.TimeTicks{Format: "2006-01-02\n15:04"}
 
-	p.Title.Text = ch.title
+	p.Title.Text = title
 	//p.X.Label.Text = "X"
 	//p.Y.Label.Text = "Y"
 	p.X.Tick.Marker = xticks
@@ -58,13 +30,11 @@ func (ch *Chart) Render(w io.Writer) error {
 	//p.Y.Max = 1
 	//p.Add(plotter.NewGrid())
 
-	for seriesID, series := range ch.series {
-		_ = seriesID
-		//cnt := 0
+	for _, series := range data.Series {
 		data := make(plotter.XYs, 0)
-		for _, value := range series.Data {
+		for _, value := range series.Values {
 			xy := plotter.XY{
-				X: float64(value.Timestamp),
+				X: value.Timestamp,
 				Y: value.Value,
 			}
 			data = append(data, xy)
@@ -72,7 +42,7 @@ func (ch *Chart) Render(w io.Writer) error {
 
 		line, points, err := plotter.NewLinePoints(data)
 		if err != nil {
-			log.Panic(err)
+			return fmt.Errorf("error create line points, %w", err)
 		}
 		//line.Color = color.RGBA{R: 0, G: 0, B: 180, A: 255}
 		//points.Color = color.RGBA{R: 0, G: 0, B: 255, A: 255}
@@ -83,10 +53,13 @@ func (ch *Chart) Render(w io.Writer) error {
 
 	ww, err := p.WriterTo(defaultChartWidth, defaultChartHeight, "png")
 	if err != nil {
-		return err
+		return fmt.Errorf("error render data, %w", err)
 	}
 
 	_, err = ww.WriteTo(w)
+	if err != nil {
+		return fmt.Errorf("error write rendered data, %w", err)
+	}
 
-	return err
+	return nil
 }

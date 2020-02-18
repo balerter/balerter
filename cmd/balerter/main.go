@@ -11,6 +11,7 @@ import (
 	dsManager "github.com/balerter/balerter/internal/datasource/manager"
 	"github.com/balerter/balerter/internal/logger"
 	"github.com/balerter/balerter/internal/modules"
+	chartModule "github.com/balerter/balerter/internal/modules/chart"
 	"github.com/balerter/balerter/internal/modules/kv"
 	logModule "github.com/balerter/balerter/internal/modules/log"
 	"github.com/balerter/balerter/internal/runner"
@@ -133,6 +134,15 @@ func main() {
 	// |
 	logMod := logModule.New(lgr.Logger())
 	coreModules = append(coreModules, logMod)
+
+	// ---------------------
+	// |
+	// | Core Modules
+	// |
+	// | Chart
+	// |
+	chartMod := chartModule.New(lgr.Logger())
+	coreModules = append(coreModules, chartMod)
 
 	// ---------------------
 	// |
