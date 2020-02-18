@@ -14,7 +14,10 @@ type DataItem struct {
 }
 
 type DataSeries struct {
-	Values []DataItem
+	Color      string
+	LineColor  string
+	PointColor string
+	Data       []DataItem
 }
 
 type Data struct {
