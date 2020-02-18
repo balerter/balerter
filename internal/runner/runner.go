@@ -13,6 +13,10 @@ var (
 	scriptSourcesReloadInterval = time.Second * 20
 )
 
+type storagesManager interface {
+	Get() []modules.Module
+}
+
 type scriptsManager interface {
 	Get() ([]*script.Script, error)
 }
@@ -22,9 +26,10 @@ type dsManager interface {
 }
 
 type Runner struct {
-	scriptsManager scriptsManager
-	dsManager      dsManager
-	logger         *zap.Logger
+	scriptsManager  scriptsManager
+	dsManager       dsManager
+	storagesManager storagesManager
+	logger          *zap.Logger
 
 	coreModules []modules.Module
 
@@ -32,13 +37,14 @@ type Runner struct {
 	pool   map[string]*Job
 }
 
-func New(scriptsManager scriptsManager, dsManager dsManager, coreModules []modules.Module, logger *zap.Logger) *Runner {
+func New(scriptsManager scriptsManager, dsManager dsManager, storagesManager storagesManager, coreModules []modules.Module, logger *zap.Logger) *Runner {
 	r := &Runner{
-		scriptsManager: scriptsManager,
-		dsManager:      dsManager,
-		logger:         logger,
-		coreModules:    coreModules,
-		pool:           make(map[string]*Job),
+		scriptsManager:  scriptsManager,
+		dsManager:       dsManager,
+		storagesManager: storagesManager,
+		logger:          logger,
+		coreModules:     coreModules,
+		pool:            make(map[string]*Job),
 	}
 
 	return r

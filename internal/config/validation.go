@@ -37,6 +37,20 @@ func (cfg *Config) Validate() error {
 		}
 	}
 
+	for _, c := range cfg.Storages.S3 {
+		if err := c.Validate(); err != nil {
+			return fmt.Errorf("validate storage s3: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (cfg *StorageS3) Validate() error {
+	if strings.TrimSpace(cfg.Name) == "" {
+		return fmt.Errorf("name must be not empty")
+	}
+
 	return nil
 }
 

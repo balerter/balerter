@@ -39,6 +39,15 @@ func (m *dsManagerMock) Get() []modules.Module {
 	return args.Get(0).([]modules.Module)
 }
 
+type storagesManagerMock struct {
+	mock.Mock
+}
+
+func (m *storagesManagerMock) Get() []modules.Module {
+	args := m.Called()
+	return args.Get(0).([]modules.Module)
+}
+
 type moduleMock struct {
 	mock.Mock
 }
@@ -71,6 +80,9 @@ func TestRunner_createLuaState(t *testing.T) {
 	dsManager := &dsManagerMock{}
 	dsManager.On("Get").Return([]modules.Module{m1})
 
+	storagesManager := &storagesManagerMock{}
+	storagesManager.On("Get").Return([]modules.Module{m1})
+
 	alertManager := &alertManagerMock{}
 	alertManager.On("Name").Return("alert")
 	alertManager.On("GetLoader", mock.Anything).Return(func() lua.LGFunction {
@@ -80,9 +92,10 @@ func TestRunner_createLuaState(t *testing.T) {
 	}())
 
 	rnr := &Runner{
-		logger:      zap.NewNop(),
-		dsManager:   dsManager,
-		coreModules: []modules.Module{alertManager},
+		logger:          zap.NewNop(),
+		dsManager:       dsManager,
+		storagesManager: storagesManager,
+		coreModules:     []modules.Module{alertManager},
 	}
 
 	L := rnr.createLuaState(&Job{name: "job1"})

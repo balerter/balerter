@@ -18,6 +18,7 @@ type Config struct {
 	Scripts     Scripts     `json:"scripts" yaml:"scripts"`
 	DataSources DataSources `json:"datasources" yaml:"datasources"`
 	Channels    Channels    `json:"channels" yaml:"channels"`
+	Storages    Storages    `json:"storages" yaml:"storages"`
 	Global      Global      `json:"global" yaml:"global"`
 }
 
@@ -39,6 +40,14 @@ func (cfg *API) SetDefaults() {
 	if cfg.Address == "" {
 		cfg.Address = defaultAPIAddress
 	}
+}
+
+type Storages struct {
+	S3 []StorageS3 `json:"s3" yaml:"s3"`
+}
+
+type StorageS3 struct {
+	Name string `json:"name" yaml:"name"`
 }
 
 type Channels struct {

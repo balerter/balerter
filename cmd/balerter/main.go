@@ -16,6 +16,7 @@ import (
 	logModule "github.com/balerter/balerter/internal/modules/log"
 	"github.com/balerter/balerter/internal/runner"
 	scriptsManager "github.com/balerter/balerter/internal/script/manager"
+	storagesManager "github.com/balerter/balerter/internal/storages/manager"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"log"
@@ -87,6 +88,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	// storages
+	lgr.Logger().Info("init storages manager")
+	storagesMgr := storagesManager.New(lgr.Logger())
+	if err := storagesMgr.Init(cfg.Storages); err != nil {
+		lgr.Logger().Error("error init storages manager", zap.Error(err))
+		os.Exit(1)
+	}
+
 	// ---------------------
 	// |
 	// | Core Modules
@@ -149,7 +158,7 @@ func main() {
 	// | Runner
 	// |
 	lgr.Logger().Info("init runner")
-	rnr := runner.New(scriptsMgr, dsMgr, coreModules, lgr.Logger())
+	rnr := runner.New(scriptsMgr, dsMgr, storagesMgr, coreModules, lgr.Logger())
 
 	lgr.Logger().Info("run runner")
 	go rnr.Watch(ctx, wg)

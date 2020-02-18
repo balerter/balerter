@@ -61,6 +61,15 @@ func (rnr *Runner) createLuaState(j *Job) *lua.LState {
 		L.PreloadModule(m.Name(), m.GetLoader(j.script))
 	}
 
+	// Init storages
+	for _, module := range rnr.storagesManager.Get() {
+		moduleName := "storage." + module.Name()
+		rnr.logger.Debug("add storage module", zap.String("name", moduleName))
+
+		loader := module.GetLoader(j.script)
+		L.PreloadModule(moduleName, loader)
+	}
+
 	// Init datasources
 	for _, module := range rnr.dsManager.Get() {
 		moduleName := "datasource." + module.Name()
