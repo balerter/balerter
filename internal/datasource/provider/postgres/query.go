@@ -34,16 +34,16 @@ func (m *Postgres) query(L *lua.LState) int {
 
 	for _, c := range cct {
 		switch c.DatabaseTypeName() {
-		case "NUMERIC":
+		case "FLOAT8", "FLOAT16", "FLOAT32", "FLOAT64", "NUMERIC":
 			dest = append(dest, new(sql.NullFloat64))
 			ffs = append(ffs, converter.FromFloat64)
 		case "TIMESTAMPTZ", "TIMESTAMP":
 			dest = append(dest, new(sql.NullTime))
 			ffs = append(ffs, converter.FromDateTime)
-		case "VARCHAR", "TEXT":
+		case "VARCHAR", "TEXT", "JSONB":
 			dest = append(dest, new(sql.NullString))
 			ffs = append(ffs, converter.FromString)
-		case "INT4", "INT8", "INT16", "INT32", "INT64":
+		case "INT2", "INT4", "INT8", "INT16", "INT32", "INT64":
 			dest = append(dest, new(sql.NullInt64))
 			ffs = append(ffs, converter.FromInt)
 		case "BOOL":
