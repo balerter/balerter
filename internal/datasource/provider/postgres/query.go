@@ -29,20 +29,20 @@ func (m *Postgres) query(L *lua.LState) int {
 	cct, _ := rows.ColumnTypes()
 
 	dest := make([]interface{}, 0)
-	ffs := make([]func(v interface{}) string, 0)
+	ffs := make([]func(v interface{}) lua.LValue, 0)
 
 	for _, c := range cct {
 		switch c.DatabaseTypeName() {
 		case "NUMERIC":
 			dest = append(dest, new(float64))
 			ffs = append(ffs, converter.FromFloat64)
-		case "TIMESTAMPTZ":
+		case "TIMESTAMPTZ", "TIMESTAMP":
 			dest = append(dest, new(time.Time))
 			ffs = append(ffs, converter.FromDateTime)
-		case "VARCHAR":
+		case "VARCHAR", "TEXT":
 			dest = append(dest, new(string))
 			ffs = append(ffs, converter.FromString)
-		case "INT4":
+		case "INT4", "INT8", "INT16", "INT32", "INT64":
 			dest = append(dest, new(int))
 			ffs = append(ffs, converter.FromInt)
 		case "BOOL":
@@ -70,7 +70,7 @@ func (m *Postgres) query(L *lua.LState) int {
 
 		for idx, c := range cct {
 			v := ffs[idx](dest[idx])
-			row.RawSet(lua.LString(c.Name()), lua.LString(v))
+			row.RawSet(lua.LString(c.Name()), v)
 		}
 
 		result.Append(row)

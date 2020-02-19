@@ -29,7 +29,7 @@ func (m *Clickhouse) query(L *lua.LState) int {
 	cct, _ := rows.ColumnTypes()
 
 	dest := make([]interface{}, 0)
-	ffs := make([]func(v interface{}) string, 0)
+	ffs := make([]func(v interface{}) lua.LValue, 0)
 
 	for _, c := range cct {
 		switch c.DatabaseTypeName() {
@@ -73,7 +73,7 @@ func (m *Clickhouse) query(L *lua.LState) int {
 
 		for idx, c := range cct {
 			v := ffs[idx](dest[idx])
-			row.RawSet(lua.LString(c.Name()), lua.LString(v))
+			row.RawSet(lua.LString(c.Name()), v)
 		}
 
 		result.Append(row)

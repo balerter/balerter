@@ -1,34 +1,38 @@
 package converter
 
 import (
-	"strconv"
+	lua "github.com/yuin/gopher-lua"
 	"time"
 )
 
-func FromFloat64(v interface{}) string {
-	return strconv.FormatFloat(*(v.(*float64)), 'f', -1, 64)
+func FromFloat64(v interface{}) lua.LValue {
+	return lua.LNumber(*(v.(*float64)))
 }
 
-func FromDate(v interface{}) string {
-	return v.(*time.Time).Format("2006-01-02")
+func FromDate(v interface{}) lua.LValue {
+	return lua.LString(v.(*time.Time).Format("2006-01-02"))
 }
 
-func FromDateTime(v interface{}) string {
-	return v.(*time.Time).Format(time.RFC3339)
+func FromDateTime(v interface{}) lua.LValue {
+	return lua.LString(v.(*time.Time).Format(time.RFC3339))
 }
 
-func FromString(v interface{}) string {
-	return *(v.(*string))
+func FromString(v interface{}) lua.LValue {
+	return lua.LString(*(v.(*string)))
 }
 
-func FromBoolean(v interface{}) string {
-	return strconv.FormatBool(*v.(*bool))
+func FromBoolean(v interface{}) lua.LValue {
+	return lua.LBool(*v.(*bool))
 }
 
-func FromUInt(v interface{}) string {
-	return strconv.Itoa(int(*(v.(*uint))))
+func FromUInt(v interface{}) lua.LValue {
+	return lua.LNumber(int(*(v.(*uint))))
 }
 
-func FromInt(v interface{}) string {
-	return strconv.Itoa(int(*(v.(*int))))
+func FromInt(v interface{}) lua.LValue {
+	return lua.LNumber(int(*(v.(*int))))
+}
+
+func FromTimestamp(v interface{}) lua.LValue {
+	return lua.LString("<NOT IMPLEMENTED>")
 }
