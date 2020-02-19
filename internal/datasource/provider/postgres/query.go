@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"github.com/balerter/balerter/internal/datasource/converter"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -34,19 +35,19 @@ func (m *Postgres) query(L *lua.LState) int {
 	for _, c := range cct {
 		switch c.DatabaseTypeName() {
 		case "NUMERIC":
-			dest = append(dest, new(float64))
+			dest = append(dest, new(sql.NullFloat64))
 			ffs = append(ffs, converter.FromFloat64)
 		case "TIMESTAMPTZ", "TIMESTAMP":
-			dest = append(dest, new(time.Time))
+			dest = append(dest, new(sql.NullTime))
 			ffs = append(ffs, converter.FromDateTime)
 		case "VARCHAR", "TEXT":
-			dest = append(dest, new(string))
+			dest = append(dest, new(sql.NullString))
 			ffs = append(ffs, converter.FromString)
 		case "INT4", "INT8", "INT16", "INT32", "INT64":
-			dest = append(dest, new(int))
+			dest = append(dest, new(sql.NullInt64))
 			ffs = append(ffs, converter.FromInt)
 		case "BOOL":
-			dest = append(dest, new(bool))
+			dest = append(dest, new(sql.NullBool))
 			ffs = append(ffs, converter.FromBoolean)
 		default:
 			m.logger.Error("error scan type", zap.String("typename", c.DatabaseTypeName()))

@@ -2,6 +2,7 @@ package clickhouse
 
 import (
 	"context"
+	"database/sql"
 	"github.com/balerter/balerter/internal/datasource/converter"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -34,22 +35,23 @@ func (m *Clickhouse) query(L *lua.LState) int {
 	for _, c := range cct {
 		switch c.DatabaseTypeName() {
 		case "UInt8", "UInt16", "UInt32", "UInt64":
+			// database/sql does not have NullUInt type
 			dest = append(dest, new(uint))
 			ffs = append(ffs, converter.FromUInt)
 		case "Int8", "Int16", "Int32", "Int64":
-			dest = append(dest, new(int))
+			dest = append(dest, new(sql.NullInt64))
 			ffs = append(ffs, converter.FromInt)
 		case "Float32", "Float64":
-			dest = append(dest, new(float64))
+			dest = append(dest, new(sql.NullFloat64))
 			ffs = append(ffs, converter.FromFloat64)
 		case "String", "UUID":
-			dest = append(dest, new(string))
+			dest = append(dest, new(sql.NullString))
 			ffs = append(ffs, converter.FromString)
 		case "Date":
-			dest = append(dest, new(time.Time))
+			dest = append(dest, new(sql.NullTime))
 			ffs = append(ffs, converter.FromDate)
 		case "DateTime":
-			dest = append(dest, new(time.Time))
+			dest = append(dest, new(sql.NullTime))
 			ffs = append(ffs, converter.FromDateTime)
 		default:
 			m.logger.Error("error scan type", zap.String("typename", c.DatabaseTypeName()))
