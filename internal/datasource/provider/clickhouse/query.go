@@ -33,24 +33,24 @@ func (m *Clickhouse) query(L *lua.LState) int {
 
 	for _, c := range cct {
 		switch c.DatabaseTypeName() {
-		case "Float64":
-			dest = append(dest, new(float64))
-			ffs = append(ffs, converter.FromFloat64)
-		case "Date":
-			dest = append(dest, new(time.Time))
-			ffs = append(ffs, converter.FromDate)
-		case "DateTime":
-			dest = append(dest, new(time.Time))
-			ffs = append(ffs, converter.FromDateTime)
-		case "String":
-			dest = append(dest, new(string))
-			ffs = append(ffs, converter.FromString)
 		case "UInt8", "UInt16", "UInt32", "UInt64":
 			dest = append(dest, new(uint))
 			ffs = append(ffs, converter.FromUInt)
 		case "Int8", "Int16", "Int32", "Int64":
 			dest = append(dest, new(int))
 			ffs = append(ffs, converter.FromInt)
+		case "Float32", "Float64":
+			dest = append(dest, new(float64))
+			ffs = append(ffs, converter.FromFloat64)
+		case "String", "UUID":
+			dest = append(dest, new(string))
+			ffs = append(ffs, converter.FromString)
+		case "Date":
+			dest = append(dest, new(time.Time))
+			ffs = append(ffs, converter.FromDate)
+		case "DateTime":
+			dest = append(dest, new(time.Time))
+			ffs = append(ffs, converter.FromDateTime)
 		default:
 			m.logger.Error("error scan type", zap.String("typename", c.DatabaseTypeName()))
 			L.Push(lua.LNil)
