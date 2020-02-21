@@ -87,7 +87,7 @@ func (ch *Chart) render(_ *script.Script) lua.LGFunction {
 
 		buf := bytes.NewBuffer([]byte{})
 
-		err = ch._render(chartTitle.String(), data, buf)
+		err = ch.Render(chartTitle.String(), data, buf)
 		if err != nil {
 			L.Push(lua.LNil)
 			L.Push(lua.LString("error render chart, " + err.Error()))

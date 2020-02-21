@@ -105,7 +105,7 @@ func parseColor8(s string) (color.RGBA, error) {
 	return c, nil
 }
 
-func (ch *Chart) _render(title string, data *Data, w io.Writer) error {
+func (ch *Chart) Render(title string, data *Data, w io.Writer) error {
 
 	p, err := plot.New()
 	if err != nil {
