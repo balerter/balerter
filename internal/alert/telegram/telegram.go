@@ -1,13 +1,11 @@
 package telegram
 
 import (
-	"github.com/balerter/balerter/internal/alert/alert"
-	"github.com/balerter/balerter/internal/alert/message"
+	"fmt"
 	"github.com/balerter/balerter/internal/config"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"go.uber.org/zap"
 	"golang.org/x/net/proxy"
-	"log"
 	"net/http"
 	"time"
 )
@@ -49,7 +47,7 @@ func New(cfg config.ChannelTelegram, logger *zap.Logger) (*Telegram, error) {
 
 		d, err := proxy.SOCKS5("tcp4", cfg.Proxy.Address, proxyAuth, nil)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error create proxy, %w", err)
 		}
 
 		tr = &http.Transport{
@@ -68,7 +66,7 @@ func New(cfg config.ChannelTelegram, logger *zap.Logger) (*Telegram, error) {
 
 	tg.bot, err = tgbotapi.NewBotAPIWithClient(cfg.Token, tg.httpClient)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error connect to bot API, %w", err)
 	}
 
 	return tg, nil
@@ -76,17 +74,4 @@ func New(cfg config.ChannelTelegram, logger *zap.Logger) (*Telegram, error) {
 
 func (tg *Telegram) Name() string {
 	return tg.name
-}
-
-func (tg *Telegram) Send(level alert.Level, mes *message.Message) error {
-
-	log.Printf("Authorized on account %s", tg.bot.Self.UserName)
-
-	msg := tgbotapi.NewMessage(tg.chatID, mes.Text)
-	_, err := tg.bot.Send(msg)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

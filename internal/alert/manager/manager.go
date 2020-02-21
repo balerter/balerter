@@ -1,11 +1,13 @@
 package manager
 
 import (
+	"fmt"
 	"github.com/balerter/balerter/internal/alert/alert"
 	"github.com/balerter/balerter/internal/alert/message"
 	"github.com/balerter/balerter/internal/alert/slack"
 	"github.com/balerter/balerter/internal/alert/telegram"
 	"github.com/balerter/balerter/internal/config"
+	chartModule "github.com/balerter/balerter/internal/modules/chart"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -14,7 +16,7 @@ import (
 
 type alertChannel interface {
 	Name() string
-	Send(alert.Level, *message.Message) error
+	Send(alert.Level, *message.Message, *chartModule.Data) error
 }
 
 type Manager struct {
@@ -39,7 +41,7 @@ func (m *Manager) Init(cfg config.Channels) error {
 	for _, configWebHook := range cfg.Slack {
 		module, err := slack.New(configWebHook, m.logger)
 		if err != nil {
-			return err
+			return fmt.Errorf("error init slack channel %s, %w", configWebHook.Name, err)
 		}
 
 		m.channels[module.Name()] = module
@@ -48,7 +50,7 @@ func (m *Manager) Init(cfg config.Channels) error {
 	for _, cfg := range cfg.Telegram {
 		module, err := telegram.New(cfg, m.logger)
 		if err != nil {
-			return err
+			return fmt.Errorf("error init telegram channel %s, %w", cfg.Name, err)
 		}
 
 		m.channels[module.Name()] = module
