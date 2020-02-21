@@ -21,6 +21,7 @@ type DataSeries struct {
 }
 
 type Data struct {
+	Title  string
 	Series []DataSeries
 }
 
