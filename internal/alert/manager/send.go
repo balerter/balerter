@@ -1,13 +1,13 @@
 package manager
 
 import (
-	"github.com/balerter/balerter/internal/alert/alert"
 	"github.com/balerter/balerter/internal/alert/message"
-	chartModule "github.com/balerter/balerter/internal/modules/chart"
 	"go.uber.org/zap"
 )
 
-func (m *Manager) Send(level alert.Level, alertName, text string, channels []string, fields []string, chartData *chartModule.Data) {
+type SendOption func()
+
+func (m *Manager) Send(alertName, text string, channels []string, fields []string, image string) {
 	chs := make(map[string]alertChannel)
 
 	if len(channels) > 0 {
@@ -29,7 +29,7 @@ func (m *Manager) Send(level alert.Level, alertName, text string, channels []str
 	}
 
 	for name, module := range chs {
-		if err := module.Send(level, message.New(alertName, text, fields), chartData); err != nil {
+		if err := module.Send(message.New(alertName, text, fields, image)); err != nil {
 			m.logger.Error("error send message to channel", zap.String("channel name", name), zap.Error(err))
 		}
 	}

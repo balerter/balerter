@@ -7,7 +7,6 @@ import (
 	"github.com/balerter/balerter/internal/alert/provider/slack"
 	"github.com/balerter/balerter/internal/alert/provider/telegram"
 	"github.com/balerter/balerter/internal/config"
-	chartModule "github.com/balerter/balerter/internal/modules/chart"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -16,7 +15,7 @@ import (
 
 type alertChannel interface {
 	Name() string
-	Send(alert.Level, *message.Message, *chartModule.Data) error
+	Send(*message.Message) error
 }
 
 type Manager struct {

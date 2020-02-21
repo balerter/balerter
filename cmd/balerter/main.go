@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/balerter/balerter/internal/alert/alert"
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"github.com/balerter/balerter/internal/api"
 	"github.com/balerter/balerter/internal/config"
@@ -111,7 +110,7 @@ func main() {
 	coreModules = append(coreModules, alertMgr)
 
 	if len(cfg.Global.SendStartNotification) > 0 {
-		alertMgr.Send(alert.LevelSuccess, "", "Balerter Start", cfg.Global.SendStartNotification, nil, nil)
+		alertMgr.Send("", "Balerter Start", cfg.Global.SendStartNotification, nil, "")
 	}
 
 	// ---------------------
@@ -186,7 +185,7 @@ func main() {
 	wg.Wait()
 
 	if len(cfg.Global.SendStopNotification) > 0 {
-		alertMgr.Send(alert.LevelSuccess, "", "Balerter Stop", cfg.Global.SendStopNotification, nil, nil)
+		alertMgr.Send("", "Balerter Stop", cfg.Global.SendStopNotification, nil, "")
 	}
 
 	lgr.Logger().Info("terminate")

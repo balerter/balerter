@@ -3,7 +3,6 @@ package manager
 import (
 	"github.com/balerter/balerter/internal/alert/alert"
 	"github.com/balerter/balerter/internal/alert/message"
-	chartModule "github.com/balerter/balerter/internal/modules/chart"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -22,8 +21,8 @@ func (m *alertChannelMock) Name() string {
 	return args.String(0)
 }
 
-func (m *alertChannelMock) Send(level alert.Level, message *message.Message, chartData *chartModule.Data) error {
-	args := m.Called(level, message, chartData)
+func (m *alertChannelMock) Send(message *message.Message) error {
+	args := m.Called(message)
 	return args.Error(0)
 }
 

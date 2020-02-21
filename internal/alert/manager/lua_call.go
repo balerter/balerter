@@ -3,7 +3,6 @@ package manager
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert/alert"
-	chartModule "github.com/balerter/balerter/internal/modules/chart"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/yuin/gluamapper"
 	lua "github.com/yuin/gopher-lua"
@@ -17,7 +16,6 @@ type options struct {
 	Quiet    bool
 	Repeat   int
 	Image    string
-	Chart    *chartModule.Data
 }
 
 func defaultOptions() options {
@@ -96,7 +94,7 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 			a.Inc()
 
 			if !alertOptions.Quiet && alertOptions.Repeat > 0 && a.Count()%alertOptions.Repeat == 0 {
-				m.Send(alertLevel, alertName, alertText, alertOptions.Channels, alertOptions.Fields, alertOptions.Chart)
+				m.Send(alertName, alertText, alertOptions.Channels, alertOptions.Fields, alertOptions.Image)
 			}
 
 			return 0
@@ -105,7 +103,7 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 		a.UpdateLevel(alertLevel)
 
 		if !alertOptions.Quiet {
-			m.Send(alertLevel, alertName, alertText, alertOptions.Channels, alertOptions.Fields, alertOptions.Chart)
+			m.Send(alertName, alertText, alertOptions.Channels, alertOptions.Fields, alertOptions.Image)
 		}
 
 		return 0

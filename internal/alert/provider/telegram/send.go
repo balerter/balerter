@@ -1,28 +1,22 @@
 package telegram
 
 import (
-	"github.com/balerter/balerter/internal/alert/alert"
 	"github.com/balerter/balerter/internal/alert/message"
-	chartModule "github.com/balerter/balerter/internal/modules/chart"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/balerter/balerter/internal/alert/provider/telegram/api"
+	"go.uber.org/zap"
 )
 
-func (tg *Telegram) Send(level alert.Level, mes *message.Message, chartData *chartModule.Data) error {
+func (tg *Telegram) Send(mes *message.Message) error {
+	tg.logger.Debug("tg send message")
 
-	//log.Printf("Authorized on account %s", tg.bot.Self.UserName)
-
-	//if mes.Image != "" {
-	//	_, err := tg.bot.SetChatPhoto(tgbotapi.NewSetChatPhotoUpload(tg.chatID, mes.Image))
-	//	if err != nil {
-	//		tg.logger.Error("error send image to telegram", zap.Error(err))
-	//	}
-	//}
-
-	msg := tgbotapi.NewMessage(tg.chatID, mes.Text)
-	_, err := tg.bot.Send(msg)
-	if err != nil {
-		return err
+	if mes.Image != "" {
+		tgMessage := api.NewPhotoMessage(tg.chatID, mes.Image, "")
+		err := tg.api.SendPhotoMessage(tgMessage)
+		if err != nil {
+			tg.logger.Error("error send photo", zap.Error(err))
+		}
 	}
 
-	return nil
+	tgMessage := api.NewTextMessage(tg.chatID, mes.Text)
+	return tg.api.SendTextMessage(tgMessage)
 }
