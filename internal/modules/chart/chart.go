@@ -61,7 +61,7 @@ func (ch *Chart) GetLoader(script *script.Script) lua.LGFunction {
 
 func (ch *Chart) render(_ *script.Script) lua.LGFunction {
 	return func(L *lua.LState) int {
-		ch.logger.Info("Chart.Render")
+		ch.logger.Debug("Chart.Render")
 
 		chartTitle := L.Get(1)
 		if chartTitle.Type() == lua.LTNil {
