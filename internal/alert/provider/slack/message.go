@@ -4,7 +4,7 @@ import (
 	"github.com/nlopes/slack"
 )
 
-func createSlackMessageOptions(alertName, alertText, imageURL string, fields ...string) []slack.MsgOption {
+func createSlackMessageOptions(alertText, imageURL string, fields ...string) []slack.MsgOption {
 
 	blocks := make([]slack.Block, 0)
 
@@ -40,13 +40,6 @@ func createSlackMessageOptions(alertName, alertText, imageURL string, fields ...
 
 	for _, fieldBlock := range fieldsBlocks {
 		blocks = append(blocks, slack.NewSectionBlock(nil, fieldBlock, nil))
-	}
-
-	blocks = append(blocks, slack.NewDividerBlock())
-
-	if alertName != "" {
-		alertNameBlock := slack.NewContextBlock("alertName", slack.NewTextBlockObject("mrkdwn", alertName, false, false))
-		blocks = append(blocks, alertNameBlock)
 	}
 
 	opts := make([]slack.MsgOption, 0)
