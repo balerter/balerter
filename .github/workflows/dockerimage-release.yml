@@ -1,0 +1,24 @@
+name: Publish Docker
+on:
+  release:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Publish Balerter to Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: balerter/balerter
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        tags: "${{ GITHUB_REF }}"
+        dockerfile: ./contrib/balerter.Dockerfile
+    - name: Publish tgtool to Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: balerter/balerter
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        tags: "${{ GITHUB_REF }}"
+        dockerfile: ./contrib/tgtool.Dockerfile
