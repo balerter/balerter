@@ -16,7 +16,7 @@ jobs:
     - name: Publish tgtool to Registry
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
-        name: balerter/balerter
+        name: balerter/tgtool
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         tags: "latest"
