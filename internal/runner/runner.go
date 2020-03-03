@@ -92,7 +92,7 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, 
 			continue
 		}
 
-		rnr.logger.Debug("run script job", zap.String("hash", s.Hash()), zap.String("script name", s.Name))
+		rnr.logger.Debug("run script job", zap.String("hash", s.Hash()), zap.String("script name", s.Name), zap.Duration("interval", s.Interval))
 		job := newJob(s, rnr.logger)
 
 		wg.Add(1)
