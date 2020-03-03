@@ -34,6 +34,7 @@ func (cfg *Global) SetDefaults() {
 
 type API struct {
 	Address string `json:"address" yaml:"address"`
+	Metrics bool   `json:"metrics" yaml:"metrics"`
 }
 
 func (cfg *API) SetDefaults() {
