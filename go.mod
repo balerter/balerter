@@ -11,8 +11,8 @@ require (
 	github.com/lib/pq v1.0.0
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/nlopes/slack v0.6.0
-	github.com/prometheus/client_golang v1.3.0
-	github.com/prometheus/common v0.7.0
+	github.com/prometheus/client_golang v1.4.1
+	github.com/prometheus/common v0.9.1
 	github.com/stretchr/testify v1.4.0
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7
@@ -22,5 +22,5 @@ require (
 	golang.org/x/text v0.3.2 // indirect
 	gonum.org/v1/netlib v0.0.0-20191229114700-bbb4dff026f8 // indirect
 	gonum.org/v1/plot v0.0.0-20200212202559-4d97eda4de95
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.2.5
 )
