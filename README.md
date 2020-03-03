@@ -2,6 +2,8 @@
 
 > A Project in active development. Features may have breaking changes at any time before v1.0.0 version 
 
+- [Telegram Group](https://t.me/balerter)
+
 Balerter is a scripts based alerting system.
 
 In your script you may:
