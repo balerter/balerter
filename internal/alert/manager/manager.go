@@ -5,6 +5,7 @@ import (
 	"github.com/balerter/balerter/internal/alert/alert"
 	"github.com/balerter/balerter/internal/alert/message"
 	"github.com/balerter/balerter/internal/alert/provider/slack"
+	"github.com/balerter/balerter/internal/alert/provider/syslog"
 	"github.com/balerter/balerter/internal/alert/provider/telegram"
 	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/script/script"
@@ -50,6 +51,15 @@ func (m *Manager) Init(cfg config.Channels) error {
 		module, err := telegram.New(cfg, m.logger)
 		if err != nil {
 			return fmt.Errorf("error init telegram channel %s, %w", cfg.Name, err)
+		}
+
+		m.channels[module.Name()] = module
+	}
+
+	for _, cfg := range cfg.Syslog {
+		module, err := syslog.New(cfg, m.logger)
+		if err != nil {
+			return fmt.Errorf("error init syslog channel %s, %w", cfg.Name, err)
 		}
 
 		m.channels[module.Name()] = module

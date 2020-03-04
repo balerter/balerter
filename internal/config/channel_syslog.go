@@ -10,18 +10,12 @@ var (
 	syslogFacility = []string{"KERN", "USER", "MAIL", "DAEMON", "AUTH", "SYSLOG", "LPR", "NEWS", "UUCP", "CRON", "AUTHPRIV", "FTP", "LOCAL0", "LOCAL1", "LOCAL2", "LOCAL3", "LOCAL4", "LOCAL5", "LOCAL6", "LOCAL7"}
 )
 
-type ChannelSyslogPriority struct {
-	Alert   string `json:"alert" yaml:"alert"`
-	Warning string `json:"warning" yaml:"warning"`
-	Success string `json:"success" yaml:"success"`
-}
-
 type ChannelSyslog struct {
-	Name     string                `json:"name" yaml:"name"`
-	Tag      string                `json:"tag" yaml:"tag"`
-	Network  string                `json:"network" yaml:"network"`
-	Address  string                `json:"address" yaml:"address"`
-	Priority ChannelSyslogPriority `json:"priority" yaml:"priority"`
+	Name     string `json:"name" yaml:"name"`
+	Tag      string `json:"tag" yaml:"tag"`
+	Network  string `json:"network" yaml:"network"`
+	Address  string `json:"address" yaml:"address"`
+	Priority string `json:"priority" yaml:"priority"`
 }
 
 func (cfg ChannelSyslog) SetDefaults() {
@@ -37,28 +31,7 @@ func (cfg ChannelSyslog) Validate() error {
 		return fmt.Errorf("corrent values for 'network': 'tcp', 'udp' or empty value")
 	}
 
-	if strings.TrimSpace(cfg.Address) == "" {
-		return fmt.Errorf("address must be not empty")
-	}
-
-	if err := cfg.Priority.Validate(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (cfg ChannelSyslogPriority) Validate() error {
-
-	if err := validatePriority(cfg.Alert); err != nil {
-		return fmt.Errorf("error validate priority: %w", err)
-	}
-
-	if err := validatePriority(cfg.Warning); err != nil {
-		return fmt.Errorf("error validate priority: %w", err)
-	}
-
-	if err := validatePriority(cfg.Success); err != nil {
+	if err := validatePriority(cfg.Priority); err != nil {
 		return fmt.Errorf("error validate priority: %w", err)
 	}
 

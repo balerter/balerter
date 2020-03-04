@@ -1,10 +1,10 @@
 package message
 
 type Message struct {
-	AlertName string
-	Text      string
-	Fields    []string
-	Image     string
+	AlertName string   `json:"alert_name"`
+	Text      string   `json:"text"`
+	Fields    []string `json:"fields,omitempty"`
+	Image     string   `json:"image,omitempty"`
 }
 
 func New(alertName, text string, fields []string, image string) *Message {

@@ -65,10 +65,6 @@ func main() {
 		lgr.Logger().Error("error init config", zap.Error(err))
 		os.Exit(1)
 	}
-	if err := cfg.Validate(); err != nil {
-		lgr.Logger().Error("error validate config", zap.Error(err))
-		os.Exit(1)
-	}
 	lgr.Logger().Debug("loaded configuration", zap.Any("config", cfg))
 
 	// Scripts sources
