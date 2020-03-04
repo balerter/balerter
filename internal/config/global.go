@@ -6,10 +6,10 @@ type Global struct {
 	API                   API      `json:"api" yaml:"api"`
 }
 
-func (cfg *Global) SetDefaults() {
+func (cfg Global) SetDefaults() {
 	cfg.API.SetDefaults()
 }
 
-func (cfg *Global) Validate() error {
+func (cfg Global) Validate() error {
 	return cfg.API.Validate()
 }

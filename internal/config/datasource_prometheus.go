@@ -11,11 +11,11 @@ type DataSourcePrometheus struct {
 	BasicAuth BasicAuth `json:"basic_auth" yaml:"basic_auth"`
 }
 
-func (cfg *DataSourcePrometheus) SetDefaults() {
+func (cfg DataSourcePrometheus) SetDefaults() {
 	cfg.URL = "127.0.0.1:9090"
 }
 
-func (cfg *DataSourcePrometheus) Validate() error {
+func (cfg DataSourcePrometheus) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

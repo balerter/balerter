@@ -14,12 +14,12 @@ type ScriptSourceFolder struct {
 	Mask           string        `json:"mask" yaml:"mask"`
 }
 
-func (cfg *ScriptSourceFolder) SetDefaults() {
+func (cfg ScriptSourceFolder) SetDefaults() {
 	cfg.Mask = "*.lua"
 	cfg.UpdateInterval = time.Second * 60
 }
 
-func (cfg *ScriptSourceFolder) Validate() error {
+func (cfg ScriptSourceFolder) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

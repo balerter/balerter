@@ -8,7 +8,7 @@ type Channels struct {
 	Syslog   []ChannelSyslog   `json:"syslog" yaml:"syslog"`
 }
 
-func (cfg *Channels) SetDefaults() {
+func (cfg Channels) SetDefaults() {
 	for _, c := range cfg.Slack {
 		c.SetDefaults()
 	}
@@ -20,7 +20,7 @@ func (cfg *Channels) SetDefaults() {
 	}
 }
 
-func (cfg *Channels) Validate() error {
+func (cfg Channels) Validate() error {
 	for _, c := range cfg.Slack {
 		if err := c.Validate(); err != nil {
 			return fmt.Errorf("validate channel slack: %w", err)

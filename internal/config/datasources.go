@@ -6,7 +6,7 @@ type DataSources struct {
 	Postgres   []DataSourcePostgres   `json:"postgres" yaml:"postgres"`
 }
 
-func (cfg *DataSources) SetDefaults() {
+func (cfg DataSources) SetDefaults() {
 	for _, c := range cfg.Clickhouse {
 		c.SetDefaults()
 	}
@@ -18,7 +18,7 @@ func (cfg *DataSources) SetDefaults() {
 	}
 }
 
-func (cfg *DataSources) Validate() error {
+func (cfg DataSources) Validate() error {
 	for _, c := range cfg.Clickhouse {
 		if err := c.Validate(); err != nil {
 			return err

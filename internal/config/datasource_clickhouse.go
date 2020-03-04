@@ -15,14 +15,14 @@ type DataSourceClickhouse struct {
 	SSLCertPath string `json:"ssl_cert_path" yaml:"ssl_cert_path"`
 }
 
-func (cfg *DataSourceClickhouse) SetDefaults() {
+func (cfg DataSourceClickhouse) SetDefaults() {
 	cfg.Host = "127.0.0.1"
 	cfg.Port = 9000
 	cfg.Username = "default"
 	cfg.Database = "default"
 }
 
-func (cfg *DataSourceClickhouse) Validate() error {
+func (cfg DataSourceClickhouse) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

@@ -5,12 +5,12 @@ type API struct {
 	Metrics bool   `json:"metrics" yaml:"metrics"`
 }
 
-func (cfg *API) SetDefaults() {
+func (cfg API) SetDefaults() {
 	if cfg.Address == "" {
 		cfg.Address = defaultAPIAddress
 	}
 }
 
-func (cfg *API) Validate() error {
+func (cfg API) Validate() error {
 	return nil
 }

@@ -22,11 +22,11 @@ type ChannelTelegram struct {
 	Proxy  *ProxyConfig `json:"proxy"`
 }
 
-func (cfg *ChannelTelegram) SetDefaults() {
+func (cfg ChannelTelegram) SetDefaults() {
 
 }
 
-func (cfg *ChannelTelegram) Validate() error {
+func (cfg ChannelTelegram) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

@@ -16,14 +16,14 @@ type DataSourcePostgres struct {
 	SSLCertPath string `json:"ssl_cert_path" yaml:"ssl_cert_path"`
 }
 
-func (cfg *DataSourcePostgres) SetDefaults() {
+func (cfg DataSourcePostgres) SetDefaults() {
 	cfg.Host = "127.0.0.1"
 	cfg.Port = 5432
 	cfg.Username = "postgres"
 	cfg.Database = "postgres"
 }
 
-func (cfg *DataSourcePostgres) Validate() error {
+func (cfg DataSourcePostgres) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}
