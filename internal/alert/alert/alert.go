@@ -13,6 +13,19 @@ const (
 	LevelWarn    Level = 3
 )
 
+func (l *Level) String() string {
+	switch *l {
+	case LevelSuccess:
+		return "success"
+	case LevelError:
+		return "error"
+	case LevelWarn:
+		return "warning"
+	}
+
+	panic("unexpected level value")
+}
+
 type Alert struct {
 	mx sync.RWMutex
 

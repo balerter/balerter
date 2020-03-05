@@ -106,7 +106,7 @@ func main() {
 	coreModules = append(coreModules, alertMgr)
 
 	if len(cfg.Global.SendStartNotification) > 0 {
-		alertMgr.Send("", "Balerter Start", cfg.Global.SendStartNotification, nil, "")
+		alertMgr.Send("", "", "Balerter Start", cfg.Global.SendStartNotification, nil, "")
 	}
 
 	// ---------------------
@@ -181,7 +181,7 @@ func main() {
 	wg.Wait()
 
 	if len(cfg.Global.SendStopNotification) > 0 {
-		alertMgr.Send("", "Balerter Stop", cfg.Global.SendStopNotification, nil, "")
+		alertMgr.Send("", "", "Balerter Stop", cfg.Global.SendStopNotification, nil, "")
 	}
 
 	lgr.Logger().Info("terminate")

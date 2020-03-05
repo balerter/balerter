@@ -7,7 +7,7 @@ import (
 
 type SendOption func()
 
-func (m *Manager) Send(alertName, text string, channels []string, fields []string, image string) {
+func (m *Manager) Send(level, alertName, text string, channels []string, fields []string, image string) {
 	chs := make(map[string]alertChannel)
 
 	if len(channels) > 0 {
@@ -29,7 +29,7 @@ func (m *Manager) Send(alertName, text string, channels []string, fields []strin
 	}
 
 	for name, module := range chs {
-		if err := module.Send(message.New(alertName, text, fields, image)); err != nil {
+		if err := module.Send(message.New(level, alertName, text, fields, image)); err != nil {
 			m.logger.Error("error send message to channel", zap.String("channel name", name), zap.Error(err))
 		}
 	}
