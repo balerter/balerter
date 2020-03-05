@@ -3,6 +3,7 @@ package manager
 import (
 	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/datasource/provider/clickhouse"
+	"github.com/balerter/balerter/internal/datasource/provider/mysql"
 	"github.com/balerter/balerter/internal/datasource/provider/postgres"
 	"github.com/balerter/balerter/internal/datasource/provider/prometheus"
 	"github.com/balerter/balerter/internal/modules"
@@ -43,6 +44,14 @@ func (m *Manager) Init(cfg config.DataSources) error {
 
 	for _, postgresCfg := range cfg.Postgres {
 		module, err := postgres.New(postgresCfg, m.logger)
+		if err != nil {
+			return err
+		}
+		m.modules[module.Name()] = module
+	}
+
+	for _, c := range cfg.MySQL {
+		module, err := mysql.New(c, m.logger)
 		if err != nil {
 			return err
 		}

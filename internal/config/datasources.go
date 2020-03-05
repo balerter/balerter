@@ -4,6 +4,7 @@ type DataSources struct {
 	Clickhouse []DataSourceClickhouse `json:"clickhouse" yaml:"clickhouse"`
 	Prometheus []DataSourcePrometheus `json:"prometheus" yaml:"prometheus"`
 	Postgres   []DataSourcePostgres   `json:"postgres" yaml:"postgres"`
+	MySQL      []DataSourceMysql      `json:"mysql" yaml:"mysql"`
 }
 
 func (cfg DataSources) SetDefaults() {
@@ -14,6 +15,9 @@ func (cfg DataSources) SetDefaults() {
 		c.SetDefaults()
 	}
 	for _, c := range cfg.Postgres {
+		c.SetDefaults()
+	}
+	for _, c := range cfg.MySQL {
 		c.SetDefaults()
 	}
 }
@@ -30,6 +34,11 @@ func (cfg DataSources) Validate() error {
 		}
 	}
 	for _, c := range cfg.Postgres {
+		if err := c.Validate(); err != nil {
+			return err
+		}
+	}
+	for _, c := range cfg.MySQL {
 		if err := c.Validate(); err != nil {
 			return err
 		}

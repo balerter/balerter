@@ -66,6 +66,8 @@ github.com/cloudflare/golz4
 github.com/davecgh/go-spew/spew
 # github.com/fogleman/gg v1.3.0
 github.com/fogleman/gg
+# github.com/go-sql-driver/mysql v1.5.0
+github.com/go-sql-driver/mysql
 # github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 github.com/go-telegram-bot-api/telegram-bot-api
 # github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0

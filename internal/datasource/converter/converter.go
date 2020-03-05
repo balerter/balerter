@@ -58,3 +58,8 @@ func FromInt(v interface{}) lua.LValue {
 	}
 	return lua.LNumber(int(vt.Int64))
 }
+
+func FromDateBytes(v interface{}) lua.LValue {
+	t := v.(*[]byte)
+	return lua.LString(string(*t))
+}
