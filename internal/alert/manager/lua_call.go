@@ -3,6 +3,7 @@ package manager
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert/alert"
+	"github.com/balerter/balerter/internal/metrics"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/yuin/gluamapper"
 	lua "github.com/yuin/gopher-lua"
@@ -75,6 +76,8 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 			L.Push(lua.LString("error get arguments: " + err.Error()))
 			return 1
 		}
+
+		metrics.SetAlertLevel(alertName, alertLevel)
 
 		if len(alertOptions.Channels) == 0 {
 			alertOptions.Channels = s.Channels

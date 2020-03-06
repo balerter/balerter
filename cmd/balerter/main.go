@@ -9,6 +9,7 @@ import (
 	"github.com/balerter/balerter/internal/config"
 	dsManager "github.com/balerter/balerter/internal/datasource/manager"
 	"github.com/balerter/balerter/internal/logger"
+	"github.com/balerter/balerter/internal/metrics"
 	"github.com/balerter/balerter/internal/modules"
 	chartModule "github.com/balerter/balerter/internal/modules/chart"
 	"github.com/balerter/balerter/internal/modules/kv"
@@ -56,6 +57,8 @@ func main() {
 		log.Printf("error init zap logger, %v", err)
 		os.Exit(1)
 	}
+
+	metrics.SetVersion(version)
 
 	lgr.Logger().Info("balerter start", zap.String("version", version))
 

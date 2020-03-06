@@ -5,6 +5,7 @@ import (
 	"fmt"
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/metrics"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 	"net"
@@ -44,6 +45,7 @@ func New(cfg config.API, fullConfig config.Config, alertManager alertManagerAPIe
 	if cfg.Metrics {
 		api.logger.Info("enable exposing prometheus metrics")
 		mux.Handle("/metrics", promhttp.Handler())
+		metrics.Register(logger)
 	}
 
 	api.server.Handler = mux

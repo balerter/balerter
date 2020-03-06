@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"github.com/balerter/balerter/internal/metrics"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
 	"go.uber.org/zap"
@@ -53,6 +54,8 @@ func New(scriptsManager scriptsManager, dsManager dsManager, storagesManager sto
 func (rnr *Runner) Watch(ctx context.Context, wg *sync.WaitGroup) {
 	for {
 		ss, err := rnr.scriptsManager.Get()
+
+		metrics.SetScriptsCount(len(ss))
 
 		if err != nil {
 			rnr.logger.Error("error get scripts", zap.Error(err))
