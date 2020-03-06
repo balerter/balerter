@@ -82,3 +82,44 @@ else
     alert.success("rps-min-limit", "Requests RPS ok"")
 end 
 ```
+
+## Roadmap
+
+### For v1.0.0
+
+- [ ] add filters to api `/alerts`
+    - [ ] by alert level
+    - [ ] by alert name 
+    - [ ] by date (last change) - select a dates interval
+- [ ] stabilize core modules
+    - [ ] support max field types for Postgres
+    - [ ] support max field types for Clickhouse
+    - [ ] support max field types for MySQL
+- [ ] full translate the documentation to English
+- [ ] add core module `http` for send requests from scripts
+
+### Other
+
+- core modules enhancements
+    - [ ] add prometheus methods for querying metadata
+        - [ ] series
+        - [ ] labels
+        - [ ] label values
+- [ ] Official grafana dashboard
+- New script sources
+    - [ ] Postgres - select scripts from Postgres table
+    - [ ] ...
+- new entity: external KV storage - for persist data
+- engines for external KV storage
+    - [ ] file
+    - [ ] consul
+    - [ ] postgres
+- New datasources
+    - [ ] MongoDB
+    - [ ] ...
+- New channels
+    - [ ] email
+    - [ ] webhook
+    - [ ] rocketchat
+    - [ ] ...
+- [ ] chart module enhancement
