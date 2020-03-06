@@ -1,10 +1,10 @@
-TAG := 'latest' # $(shell git describe --tag)
+TAG := latest # $(shell git describe --tag)
 
 .PHONY: build-balerter push-balerter gobuild-balerter
 
 build-balerter:
 	@echo Build Balerter $(TAG)
-	docker build --build-arg revision=$(TAG) -t balerter/balerter:$(TAG) -f ./contrib/balerter.Dockerfile .
+	docker build --build-arg version=$(TAG) -t balerter/balerter:$(TAG) -f ./contrib/balerter.Dockerfile .
 push-balerter:
 	@echo Push Balerter $(TAG)
 	docker push balerter/balerter:$(TAG)
