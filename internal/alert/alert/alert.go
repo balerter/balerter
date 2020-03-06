@@ -9,18 +9,18 @@ type Level int
 
 const (
 	LevelSuccess Level = 1
-	LevelError   Level = 2
-	LevelWarn    Level = 3
+	LevelWarn    Level = 2
+	LevelError   Level = 3
 )
 
 func (l *Level) String() string {
 	switch *l {
 	case LevelSuccess:
 		return "success"
-	case LevelError:
-		return "error"
 	case LevelWarn:
 		return "warning"
+	case LevelError:
+		return "error"
 	}
 
 	panic("unexpected level value")
