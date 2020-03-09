@@ -40,9 +40,7 @@ func (p *Provider) getArgs(L *lua.LState) ([]byte, string, error) {
 	case lua.LTString:
 		filename = filenameValue.String()
 		for _, s := range []string{".png", ".jpg", ".jpeg"} {
-			if strings.HasSuffix(filename, s) {
-				filename = filename[:len(filename)-len(s)]
-			}
+			filename = strings.TrimSuffix(filename, s)
 		}
 	default:
 	}
