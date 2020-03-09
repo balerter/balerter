@@ -9,7 +9,6 @@ import (
 
 type Telegram struct {
 	name   string
-	token  string
 	chatID int64
 	logger *zap.Logger
 	api    *api.API
