@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - name: Publish Balerter to Registry
+    - name: Publish Balerter to Registry Release
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
         name: balerter/balerter
@@ -13,7 +13,7 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
         tags: "${{ GITHUB_REF }}"
         dockerfile: ./contrib/balerter.Dockerfile
-    - name: Publish tgtool to Registry
+    - name: Publish tgtool to Registry Release
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
         name: balerter/tgtool
