@@ -96,7 +96,7 @@ end
     - [ ] support max field types for Clickhouse
     - [ ] support max field types for MySQL
 - [ ] full translate the documentation to English
-- [ ] add core module `http` for send requests from scripts
+- [x] add core module `http` for send requests from scripts
 
 ### Other
 
