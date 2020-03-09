@@ -55,12 +55,12 @@ func TestMemory_Delete(t *testing.T) {
 func TestMemory_Get(t *testing.T) {
 	m := New()
 
-	v, err := m.Get("foo")
+	_, err := m.Get("foo")
 	require.Error(t, err)
 
 	m.storage["foo"] = "bar"
 
-	v, err = m.Get("foo")
+	v, err := m.Get("foo")
 	require.NoError(t, err)
 
 	assert.Equal(t, "bar", v)
