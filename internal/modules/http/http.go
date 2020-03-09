@@ -33,7 +33,7 @@ func (h *HTTP) Name() string {
 	return "http"
 }
 
-func (h *HTTP) GetLoader(script *script.Script) lua.LGFunction {
+func (h *HTTP) GetLoader(_ *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(L *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
@@ -46,15 +46,15 @@ func (h *HTTP) GetLoader(script *script.Script) lua.LGFunction {
 
 			mod := L.SetFuncs(L.NewTable(), exports)
 
-			mod.RawSetString("methodGet", lua.LString("GET"))
-			mod.RawSetString("methodHead", lua.LString("HEAD"))
-			mod.RawSetString("methodPost", lua.LString("POST"))
-			mod.RawSetString("methodPut", lua.LString("PUT"))
-			mod.RawSetString("methodPatch", lua.LString("PATCH"))
-			mod.RawSetString("methodDelete", lua.LString("DELETE"))
-			mod.RawSetString("methodConnect", lua.LString("CONNECT"))
-			mod.RawSetString("methodOptions", lua.LString("OPTIONS"))
-			mod.RawSetString("methodTrace", lua.LString("TRACE"))
+			mod.RawSetString("methodGet", lua.LString(http.MethodGet))
+			mod.RawSetString("methodHead", lua.LString(http.MethodHead))
+			mod.RawSetString("methodPost", lua.LString(http.MethodPost))
+			mod.RawSetString("methodPut", lua.LString(http.MethodPut))
+			mod.RawSetString("methodPatch", lua.LString(http.MethodPatch))
+			mod.RawSetString("methodDelete", lua.LString(http.MethodDelete))
+			mod.RawSetString("methodConnect", lua.LString(http.MethodConnect))
+			mod.RawSetString("methodOptions", lua.LString(http.MethodOptions))
+			mod.RawSetString("methodTrace", lua.LString(http.MethodTrace))
 
 			L.Push(mod)
 			return 1
