@@ -12,6 +12,7 @@ import (
 	"github.com/balerter/balerter/internal/metrics"
 	"github.com/balerter/balerter/internal/modules"
 	chartModule "github.com/balerter/balerter/internal/modules/chart"
+	httpModule "github.com/balerter/balerter/internal/modules/http"
 	"github.com/balerter/balerter/internal/modules/kv"
 	logModule "github.com/balerter/balerter/internal/modules/log"
 	"github.com/balerter/balerter/internal/runner"
@@ -150,6 +151,15 @@ func main() {
 	// |
 	chartMod := chartModule.New(lgr.Logger())
 	coreModules = append(coreModules, chartMod)
+
+	// ---------------------
+	// |
+	// | Core Modules
+	// |
+	// | http
+	// |
+	httpMod := httpModule.New(lgr.Logger())
+	coreModules = append(coreModules, httpMod)
 
 	// ---------------------
 	// |
