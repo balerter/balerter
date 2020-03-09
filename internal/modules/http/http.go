@@ -54,7 +54,7 @@ func (h *HTTP) GetLoader(script *script.Script) lua.LGFunction {
 			mod.RawSetString("methodDelete", lua.LString("DELETE"))
 			mod.RawSetString("methodConnect", lua.LString("CONNECT"))
 			mod.RawSetString("methodOptions", lua.LString("OPTIONS"))
-			mod.RawSetString("msethodTrace", lua.LString("TRACE"))
+			mod.RawSetString("methodTrace", lua.LString("TRACE"))
 
 			L.Push(mod)
 			return 1
