@@ -91,10 +91,7 @@ end
     - [ ] by alert level
     - [ ] by alert name 
     - [ ] by date (last change) - select a dates interval
-- [ ] stabilize core modules
-    - [ ] support max field types for Postgres
-    - [ ] support max field types for Clickhouse
-    - [ ] support max field types for MySQL
+- [x] stabilize core DB modules
 - [ ] full translate the documentation to English
 - [x] add core module `http` for send requests from scripts
 
