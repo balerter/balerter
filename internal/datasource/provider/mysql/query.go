@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"context"
-	"database/sql"
 	"github.com/balerter/balerter/internal/datasource/converter"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -32,31 +31,9 @@ func (m *MySQL) query(L *lua.LState) int {
 	dest := make([]interface{}, 0)
 	ffs := make([]func(v interface{}) lua.LValue, 0)
 
-	for _, c := range cct {
-		switch c.DatabaseTypeName() {
-		case "FLOAT":
-			dest = append(dest, new(sql.NullFloat64))
-			ffs = append(ffs, converter.FromFloat64)
-		case "BLOB", "CHAR", "JSON", "TEXT", "VARCHAR":
-			dest = append(dest, new(sql.NullString))
-			ffs = append(ffs, converter.FromString)
-		case "BIGINT", "BINARY", "TINYINT", "DECIMAL", "DOUBLE", "INT", "MEDIUMINT", "SMALLINT":
-			dest = append(dest, new(sql.NullInt64))
-			ffs = append(ffs, converter.FromInt)
-		case "DATE", "DATETIME", "TIME", "TIMESTAMP", "YEAR":
-			dest = append(dest, new([]byte))
-			ffs = append(ffs, converter.FromDateBytes)
-		case "BIT", "ENUM", "GEOMETRY":
-			m.logger.Error("error scan type", zap.String("typename", c.DatabaseTypeName()))
-			L.Push(lua.LNil)
-			L.Push(lua.LString("unsupported database type"))
-			return 2
-		default:
-			m.logger.Error("error scan type", zap.String("typename", c.DatabaseTypeName()))
-			L.Push(lua.LNil)
-			L.Push(lua.LString("error database type"))
-			return 2
-		}
+	for range cct {
+		dest = append(dest, new([]byte))
+		ffs = append(ffs, converter.FromDateBytes)
 	}
 
 	result := &lua.LTable{}

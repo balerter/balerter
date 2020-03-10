@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"github.com/balerter/balerter/internal/datasource/converter"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -32,29 +31,9 @@ func (m *Postgres) query(L *lua.LState) int {
 	dest := make([]interface{}, 0)
 	ffs := make([]func(v interface{}) lua.LValue, 0)
 
-	for _, c := range cct {
-		switch c.DatabaseTypeName() {
-		case "FLOAT8", "FLOAT16", "FLOAT32", "FLOAT64", "NUMERIC":
-			dest = append(dest, new(sql.NullFloat64))
-			ffs = append(ffs, converter.FromFloat64)
-		case "TIMESTAMPTZ", "TIMESTAMP":
-			dest = append(dest, new(sql.NullTime))
-			ffs = append(ffs, converter.FromDateTime)
-		case "VARCHAR", "TEXT", "JSONB":
-			dest = append(dest, new(sql.NullString))
-			ffs = append(ffs, converter.FromString)
-		case "INT2", "INT4", "INT8", "INT16", "INT32", "INT64":
-			dest = append(dest, new(sql.NullInt64))
-			ffs = append(ffs, converter.FromInt)
-		case "BOOL":
-			dest = append(dest, new(sql.NullBool))
-			ffs = append(ffs, converter.FromBoolean)
-		default:
-			m.logger.Error("error scan type", zap.String("typename", c.DatabaseTypeName()))
-			L.Push(lua.LNil)
-			L.Push(lua.LString("error database type"))
-			return 2
-		}
+	for range cct {
+		dest = append(dest, new([]byte))
+		ffs = append(ffs, converter.FromDateBytes)
 	}
 
 	result := &lua.LTable{}
