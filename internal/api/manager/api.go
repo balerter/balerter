@@ -1,9 +1,9 @@
-package api
+package manager
 
 import (
 	"context"
-	"fmt"
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
+	"github.com/balerter/balerter/internal/api/alerts"
 	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/metrics"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -14,41 +14,33 @@ import (
 )
 
 type alertManagerAPIer interface {
-	GetAlerts() []*alertManager.APIAlertInfo
+	GetAlerts() []*alertManager.AlertInfo
 }
 
 type API struct {
-	address      string
-	server       *http.Server
-	alertManager alertManagerAPIer
-	logger       *zap.Logger
-	config       config.Config
-
-	pathPrefix string
+	address string
+	server  *http.Server
+	logger  *zap.Logger
 }
 
-func New(cfg config.API, fullConfig config.Config, alertManager alertManagerAPIer, logger *zap.Logger) *API {
+func New(cfg config.API, alertManager alertManagerAPIer, logger *zap.Logger) *API {
 	api := &API{
-		address:      cfg.Address,
-		server:       &http.Server{},
-		alertManager: alertManager,
-		logger:       logger,
-		pathPrefix:   fmt.Sprintf("/api/%s", "v1"),
-		config:       fullConfig,
+		address: cfg.Address,
+		server:  &http.Server{},
+		logger:  logger,
 	}
 
-	mux := http.NewServeMux()
+	m := http.NewServeMux()
 
-	mux.HandleFunc(api.pathPrefix+"/alerts", api.handlerAlerts)
-	mux.HandleFunc(api.pathPrefix+"/config", api.handlerConfig)
+	m.HandleFunc("/api/v1/alerts", alerts.Handler(alertManager, logger))
 
 	if cfg.Metrics {
 		api.logger.Info("enable exposing prometheus metrics")
-		mux.Handle("/metrics", promhttp.Handler())
+		m.Handle("/metrics", promhttp.Handler())
 		metrics.Register(logger)
 	}
 
-	api.server.Handler = mux
+	api.server.Handler = m
 
 	return api
 }

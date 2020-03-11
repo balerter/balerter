@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
-	"github.com/balerter/balerter/internal/api"
+	apiManager "github.com/balerter/balerter/internal/api/manager"
 	"github.com/balerter/balerter/internal/config"
 	dsManager "github.com/balerter/balerter/internal/datasource/manager"
 	"github.com/balerter/balerter/internal/logger"
@@ -118,7 +118,7 @@ func main() {
 	// | API
 	// |
 	wg.Add(1)
-	apis := api.New(cfg.Global.API, *cfg, alertMgr, lgr.Logger())
+	apis := apiManager.New(cfg.Global.API, alertMgr, lgr.Logger())
 	go apis.Run(ctx, ctxCancel, wg)
 
 	// ---------------------

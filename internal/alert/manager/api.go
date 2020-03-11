@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type APIAlertInfo struct {
+type AlertInfo struct {
 	Name       string      `json:"name"`
 	Level      alert.Level `json:"level"`
 	LastChange time.Time   `json:"last_change"`
@@ -13,14 +13,14 @@ type APIAlertInfo struct {
 	Count      int         `json:"count"`
 }
 
-func (m *Manager) GetAlerts() []*APIAlertInfo {
+func (m *Manager) GetAlerts() []*AlertInfo {
 	m.alertsMx.RLock()
 	defer m.alertsMx.RUnlock()
 
-	result := make([]*APIAlertInfo, 0)
+	result := make([]*AlertInfo, 0)
 
 	for name, a := range m.alerts {
-		alertInfo := &APIAlertInfo{
+		alertInfo := &AlertInfo{
 			Name:       name,
 			Level:      a.Level(),
 			LastChange: a.GetLastChangeTime(),

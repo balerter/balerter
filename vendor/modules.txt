@@ -130,6 +130,7 @@ github.com/prometheus/procfs/internal/util
 github.com/stretchr/objx
 # github.com/stretchr/testify v1.4.0
 github.com/stretchr/testify/assert
+github.com/stretchr/testify/http
 github.com/stretchr/testify/mock
 github.com/stretchr/testify/require
 # github.com/technoweenie/multipartstreamer v1.0.1

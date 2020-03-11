@@ -1,6 +1,7 @@
 package alert
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -12,6 +13,19 @@ const (
 	LevelWarn    Level = 2
 	LevelError   Level = 3
 )
+
+func LevelFromString(s string) (Level, error) {
+	switch s {
+	case "success":
+		return LevelSuccess, nil
+	case "warn", "warning":
+		return LevelWarn, nil
+	case "error":
+		return LevelError, nil
+	}
+
+	return 0, fmt.Errorf("bad level")
+}
 
 func (l *Level) String() string {
 	switch *l {
