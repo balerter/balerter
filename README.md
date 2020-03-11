@@ -87,10 +87,9 @@ end
 
 ### For v1.0.0
 
-- [ ] add filters to api `/alerts`
-    - [ ] by alert level
-    - [ ] by alert name 
-    - [ ] by date (last change) - select a dates interval
+- [x] add filters to api `/alerts`
+    - [x] by alert level
+    - [x] by alert name 
 - [x] stabilize core DB modules
 - [ ] full translate the documentation to English
 - [x] add core module `http` for send requests from scripts
