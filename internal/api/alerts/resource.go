@@ -5,6 +5,7 @@ import (
 	"fmt"
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"net/http"
+	"time"
 )
 
 type resource struct {
@@ -12,8 +13,10 @@ type resource struct {
 }
 
 type resourceItem struct {
-	Name  string `json:"name"`
-	Level string `json:"level"`
+	Name      string `json:"name"`
+	Level     string `json:"level"`
+	Count     int    `json:"count"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 func newResource(data []*alertManager.AlertInfo) *resource {
@@ -21,8 +24,10 @@ func newResource(data []*alertManager.AlertInfo) *resource {
 
 	for _, item := range data {
 		i := resourceItem{
-			Name:  item.Name,
-			Level: item.Level.String(),
+			Name:      item.Name,
+			Level:     item.Level.String(),
+			Count:     item.Count,
+			UpdatedAt: item.LastChange.Format(time.RFC3339),
 		}
 
 		res.items = append(res.items, i)

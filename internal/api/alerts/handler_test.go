@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"testing"
+	"time"
 )
 
 type alertManagerAPIerMock struct {
@@ -22,7 +23,7 @@ func (m *alertManagerAPIerMock) GetAlerts() []*alertManager.AlertInfo {
 
 func TestHandler(t *testing.T) {
 	resultData := []*alertManager.AlertInfo{
-		{Name: "foo", Level: alert.LevelError},
+		{Name: "foo", Level: alert.LevelError, Count: 5, LastChange: time.Date(2020, 01, 01, 10, 10, 10, 0, time.UTC)},
 	}
 
 	am := &alertManagerAPIerMock{}
@@ -36,7 +37,7 @@ func TestHandler(t *testing.T) {
 	f(rw, req)
 
 	assert.Equal(t, 200, rw.StatusCode)
-	assert.Equal(t, `[{"name":"foo","level":"error"}]`, rw.Output)
+	assert.Equal(t, `[{"name":"foo","level":"error","count":5,"updated_at":"2020-01-01T10:10:10Z"}]`, rw.Output)
 }
 
 func TestHandler_BadLevelArgument(t *testing.T) {
