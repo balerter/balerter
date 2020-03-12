@@ -6,6 +6,7 @@ type Channels struct {
 	Slack    []ChannelSlack    `json:"slack" yaml:"slack"`
 	Telegram []ChannelTelegram `json:"telegram" yaml:"telegram"`
 	Syslog   []ChannelSyslog   `json:"syslog" yaml:"syslog"`
+	Notify   []ChannelNotify   `json:"notify" yaml:"notify"`
 }
 
 func (cfg Channels) SetDefaults() {
@@ -16,6 +17,9 @@ func (cfg Channels) SetDefaults() {
 		c.SetDefaults()
 	}
 	for _, c := range cfg.Syslog {
+		c.SetDefaults()
+	}
+	for _, c := range cfg.Notify {
 		c.SetDefaults()
 	}
 }
@@ -36,6 +40,12 @@ func (cfg Channels) Validate() error {
 	for _, c := range cfg.Syslog {
 		if err := c.Validate(); err != nil {
 			return fmt.Errorf("validate channel syslog: %w", err)
+		}
+	}
+
+	for _, c := range cfg.Notify {
+		if err := c.Validate(); err != nil {
+			return fmt.Errorf("validate channel notify: %w", err)
 		}
 	}
 
