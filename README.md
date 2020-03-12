@@ -1,5 +1,7 @@
 # balerter [![Go Report Card](https://goreportcard.com/badge/github.com/balerter/balerter)](https://goreportcard.com/report/github.com/balerter/balerter) ![Test](https://github.com/balerter/balerter/workflows/Test/badge.svg)
 
+![logo.png](logo.png)
+
 > A Project in active development. Features may have breaking changes at any time before v1.0.0 version 
 
 - [Telegram Group](https://t.me/balerter)
