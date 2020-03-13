@@ -33,7 +33,7 @@ func (s *Storage) GetOrNew(name string) (*alert.Alert, error) {
 		return a, nil
 	}
 
-	err = a.Unmarshal(v, a)
+	err = a.Unmarshal(v)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshal alert, %w", err)
 	}
