@@ -11,7 +11,7 @@ import (
 )
 
 func TestManager_Init(t *testing.T) {
-	m := New(zap.NewNop())
+	m := New(nil, zap.NewNop())
 
 	cfg := config.Channels{
 		Slack: []config.ChannelSlack{
@@ -33,7 +33,7 @@ func TestManager_Init(t *testing.T) {
 }
 
 func TestManager_Loader(t *testing.T) {
-	m := New(zap.NewNop())
+	m := New(nil, zap.NewNop())
 
 	L := lua.NewState()
 

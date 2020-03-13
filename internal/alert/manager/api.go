@@ -9,22 +9,18 @@ type AlertInfo struct {
 	Name       string      `json:"name"`
 	Level      alert.Level `json:"level"`
 	LastChange time.Time   `json:"last_change"`
-	Start      time.Time   `json:"start"`
 	Count      int         `json:"count"`
 }
 
 func (m *Manager) GetAlerts() []*AlertInfo {
-	m.alertsMx.RLock()
-	defer m.alertsMx.RUnlock()
 
 	result := make([]*AlertInfo, 0)
 
-	for name, a := range m.alerts {
+	for _, a := range m.engine.All() {
 		alertInfo := &AlertInfo{
-			Name:       name,
+			Name:       a.Name(),
 			Level:      a.Level(),
 			LastChange: a.GetLastChangeTime(),
-			Start:      a.GetStartTime(),
 			Count:      a.Count(),
 		}
 

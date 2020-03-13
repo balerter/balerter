@@ -15,7 +15,7 @@ func TestMemory_Put(t *testing.T) {
 	err = m.Put("foo", "bar2")
 	require.Error(t, err)
 
-	v, ok := m.storage["foo"]
+	v, ok := m.kv["foo"]
 	assert.True(t, ok)
 	assert.Equal(t, "bar", v)
 }
@@ -29,7 +29,7 @@ func TestMemory_Upsert(t *testing.T) {
 	err = m.Upsert("foo", "bar2")
 	require.NoError(t, err)
 
-	v, ok := m.storage["foo"]
+	v, ok := m.kv["foo"]
 	assert.True(t, ok)
 	assert.Equal(t, "bar2", v)
 }
@@ -37,7 +37,7 @@ func TestMemory_Upsert(t *testing.T) {
 func TestMemory_Delete(t *testing.T) {
 	m := New()
 
-	m.storage["foo"] = "bar"
+	m.kv["foo"] = "bar"
 
 	err := m.Delete("foo2")
 	require.Error(t, err)
@@ -45,7 +45,7 @@ func TestMemory_Delete(t *testing.T) {
 	err = m.Delete("foo")
 	require.NoError(t, err)
 
-	_, ok := m.storage["foo"]
+	_, ok := m.kv["foo"]
 	assert.False(t, ok)
 
 	err = m.Delete("foo")
@@ -58,7 +58,7 @@ func TestMemory_Get(t *testing.T) {
 	_, err := m.Get("foo")
 	require.Error(t, err)
 
-	m.storage["foo"] = "bar"
+	m.kv["foo"] = "bar"
 
 	v, err := m.Get("foo")
 	require.NoError(t, err)

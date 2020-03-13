@@ -12,7 +12,6 @@ import (
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"sync"
 )
 
 type alertChannel interface {
@@ -20,19 +19,24 @@ type alertChannel interface {
 	Send(*message.Message) error
 }
 
+type storageEngine interface {
+	GetOrNew(string) (*alert.Alert, error)
+	All() []*alert.Alert
+	Release(a *alert.Alert)
+}
+
 type Manager struct {
 	logger   *zap.Logger
 	channels map[string]alertChannel
 
-	alertsMx sync.RWMutex
-	alerts   map[string]*alert.Alert
+	engine storageEngine
 }
 
-func New(logger *zap.Logger) *Manager {
+func New(engine storageEngine, logger *zap.Logger) *Manager {
 	m := &Manager{
 		logger:   logger,
+		engine:   engine,
 		channels: make(map[string]alertChannel),
-		alerts:   make(map[string]*alert.Alert),
 	}
 
 	return m
@@ -90,7 +94,8 @@ func (m *Manager) GetLoader(script *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(L *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
-				"warn": m.luaCall(script, alert.LevelWarn),
+				"warn":    m.luaCall(script, alert.LevelWarn),
+				"warning": m.luaCall(script, alert.LevelWarn),
 
 				"error": m.luaCall(script, alert.LevelError),
 				"on":    m.luaCall(script, alert.LevelError),
