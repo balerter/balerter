@@ -7,11 +7,9 @@ import (
 	"github.com/balerter/balerter/internal/core_storage/provider/file"
 	"github.com/balerter/balerter/internal/core_storage/provider/memory"
 	"go.uber.org/zap"
-	"sync"
 )
 
 type Manager struct {
-	mx       sync.RWMutex
 	storages map[string]coreStorage.CoreStorage
 }
 
