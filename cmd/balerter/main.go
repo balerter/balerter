@@ -111,7 +111,13 @@ func main() {
 	// | AlertManager
 	// |
 	lgr.Logger().Info("init alert manager")
-	alertMgr := alertManager.New(lgr.Logger())
+
+	alertManagerStorageEngine, err := coreStoragesMgr.Get(cfg.Global.Storages.Alert)
+	if err != nil {
+		lgr.Logger().Error("error get core storages engine for alert", zap.String("name", cfg.Global.Storages.Alert), zap.Error(err))
+		os.Exit(1)
+	}
+	alertMgr := alertManager.New(alertManagerStorageEngine, lgr.Logger())
 	if err := alertMgr.Init(cfg.Channels); err != nil {
 		lgr.Logger().Error("error init alert manager", zap.Error(err))
 		os.Exit(1)
