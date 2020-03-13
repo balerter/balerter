@@ -11,7 +11,9 @@ type DataSourceMysql struct {
 }
 
 func (cfg DataSourceMysql) SetDefaults() {
-	cfg.DSN = "user:secret@tcp(127.0.0.1:3306)/db"
+	if cfg.DSN == "" {
+		cfg.DSN = "user:secret@tcp(127.0.0.1:3306)/db"
+	}
 }
 
 func (cfg DataSourceMysql) Validate() error {

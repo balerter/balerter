@@ -11,12 +11,12 @@ func (cfg *Config) Init(configSource string) error {
 		return err
 	}
 
-	cfg.SetDefaults()
-
 	err = yaml.Unmarshal(body, cfg)
 	if err != nil {
 		return err
 	}
+
+	cfg.SetDefaults()
 
 	return cfg.Validate()
 }

@@ -16,10 +16,18 @@ type DataSourceClickhouse struct {
 }
 
 func (cfg DataSourceClickhouse) SetDefaults() {
-	cfg.Host = "127.0.0.1"
-	cfg.Port = 9000
-	cfg.Username = "default"
-	cfg.Database = "default"
+	if cfg.Host == "" {
+		cfg.Host = "127.0.0.1"
+	}
+	if cfg.Port == 0 {
+		cfg.Port = 9000
+	}
+	if cfg.Username == "" {
+		cfg.Username = "default"
+	}
+	if cfg.Database == "" {
+		cfg.Database = "default"
+	}
 }
 
 func (cfg DataSourceClickhouse) Validate() error {

@@ -7,6 +7,7 @@ import (
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	apiManager "github.com/balerter/balerter/internal/api/manager"
 	"github.com/balerter/balerter/internal/config"
+	coreStorageManager "github.com/balerter/balerter/internal/core_storage/manager"
 	dsManager "github.com/balerter/balerter/internal/datasource/manager"
 	"github.com/balerter/balerter/internal/logger"
 	"github.com/balerter/balerter/internal/metrics"
@@ -17,7 +18,7 @@ import (
 	logModule "github.com/balerter/balerter/internal/modules/log"
 	"github.com/balerter/balerter/internal/runner"
 	scriptsManager "github.com/balerter/balerter/internal/script/manager"
-	storagesManager "github.com/balerter/balerter/internal/storages/manager"
+	uploadStorageManager "github.com/balerter/balerter/internal/upload_storage/manager"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"log"
@@ -87,11 +88,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	// storages
-	lgr.Logger().Info("init storages manager")
-	storagesMgr := storagesManager.New(lgr.Logger())
-	if err := storagesMgr.Init(cfg.Storages); err != nil {
-		lgr.Logger().Error("error init storages manager", zap.Error(err))
+	// upload storages
+	lgr.Logger().Info("init upload storages manager")
+	uploadStoragesMgr := uploadStorageManager.New(lgr.Logger())
+	if err := uploadStoragesMgr.Init(cfg.Storages.Upload); err != nil {
+		lgr.Logger().Error("error init upload storages manager", zap.Error(err))
+		os.Exit(1)
+	}
+
+	// core storages
+	lgr.Logger().Info("init core storages manager")
+	coreStoragesMgr, err := coreStorageManager.New(cfg.Storages.Core, lgr.Logger())
+	if err != nil {
+		lgr.Logger().Error("error create core storages manager", zap.Error(err))
 		os.Exit(1)
 	}
 
@@ -127,11 +136,13 @@ func main() {
 	// |
 	// | KV
 	// |
-	kvModule, err := kv.New(kv.ProviderTypeMemory)
+	kvEngine, err := coreStoragesMgr.Get(cfg.Global.Storages.KV)
 	if err != nil {
-		lgr.Logger().Error("error create kvModule", zap.Error(err))
+		lgr.Logger().Error("error get kv storage engine", zap.String("name", cfg.Global.Storages.KV), zap.Error(err))
 		os.Exit(1)
 	}
+	lgr.Logger().Info("init kv storage", zap.String("engine", cfg.Global.Storages.KV))
+	kvModule := kv.New(kvEngine)
 	coreModules = append(coreModules, kvModule)
 
 	// ---------------------
@@ -166,7 +177,7 @@ func main() {
 	// | Runner
 	// |
 	lgr.Logger().Info("init runner")
-	rnr := runner.New(scriptsMgr, dsMgr, storagesMgr, coreModules, lgr.Logger())
+	rnr := runner.New(scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
 
 	lgr.Logger().Info("run runner")
 	go rnr.Watch(ctx, wg)

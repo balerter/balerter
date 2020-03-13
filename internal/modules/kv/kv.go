@@ -1,47 +1,34 @@
 package kv
 
 import (
-	"fmt"
-	"github.com/balerter/balerter/internal/modules/kv/provider"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 )
 
-type KVer interface {
+type kvEngine interface {
 	Put(string, string) error
 	Get(string) (string, error)
 	Upsert(string, string) error
 	Delete(string) error
 }
 
-type ProviderType int
-
-const (
-	ProviderTypeMemory ProviderType = 0
-)
-
 type KV struct {
-	engine KVer
+	engine kvEngine
 }
 
-func New(providerType ProviderType) (*KV, error) {
-	kv := &KV{}
-
-	switch providerType {
-	case ProviderTypeMemory:
-		kv.engine = provider.New()
-	default:
-		return nil, fmt.Errorf("unexpected kv provider type")
+func New(engine kvEngine) *KV {
+	kv := &KV{
+		engine: engine,
 	}
 
-	return kv, nil
+	return kv
 }
 
 func (kv *KV) Name() string {
 	return "kv"
 }
 
-func (kv *KV) GetLoader(script *script.Script) lua.LGFunction {
+func (kv *KV) GetLoader(_ *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(L *lua.LState) int {
 			var exports = map[string]lua.LGFunction{

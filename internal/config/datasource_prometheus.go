@@ -12,7 +12,9 @@ type DataSourcePrometheus struct {
 }
 
 func (cfg DataSourcePrometheus) SetDefaults() {
-	cfg.URL = "127.0.0.1:9090"
+	if cfg.URL == "" {
+		cfg.URL = "127.0.0.1:9090"
+	}
 }
 
 func (cfg DataSourcePrometheus) Validate() error {

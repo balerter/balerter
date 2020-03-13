@@ -17,10 +17,18 @@ type DataSourcePostgres struct {
 }
 
 func (cfg DataSourcePostgres) SetDefaults() {
-	cfg.Host = "127.0.0.1"
-	cfg.Port = 5432
-	cfg.Username = "postgres"
-	cfg.Database = "postgres"
+	if cfg.Host == "" {
+		cfg.Host = "127.0.0.1"
+	}
+	if cfg.Port == 0 {
+		cfg.Port = 5432
+	}
+	if cfg.Username == "" {
+		cfg.Username = "postgres"
+	}
+	if cfg.Username == "" {
+		cfg.Username = "postgres"
+	}
 }
 
 func (cfg DataSourcePostgres) Validate() error {

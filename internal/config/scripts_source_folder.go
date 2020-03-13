@@ -15,8 +15,12 @@ type ScriptSourceFolder struct {
 }
 
 func (cfg ScriptSourceFolder) SetDefaults() {
-	cfg.Mask = "*.lua"
-	cfg.UpdateInterval = time.Second * 60
+	if cfg.Mask == "" {
+		cfg.Mask = "*.lua"
+	}
+	if cfg.UpdateInterval == 0 {
+		cfg.UpdateInterval = time.Second * 60
+	}
 }
 
 func (cfg ScriptSourceFolder) Validate() error {

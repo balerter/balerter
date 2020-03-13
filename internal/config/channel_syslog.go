@@ -19,7 +19,9 @@ type ChannelSyslog struct {
 }
 
 func (cfg ChannelSyslog) SetDefaults() {
-	cfg.Priority = "EMERG"
+	if cfg.Priority == "" {
+		cfg.Priority = "EMERG"
+	}
 }
 
 func (cfg ChannelSyslog) Validate() error {

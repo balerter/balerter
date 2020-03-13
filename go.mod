@@ -21,6 +21,7 @@ require (
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7
 	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb
+	go.etcd.io/bbolt v1.3.3
 	go.uber.org/zap v1.13.0
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	golang.org/x/text v0.3.2 // indirect
