@@ -14,6 +14,28 @@ const (
 	LevelError   Level = 3
 )
 
+var (
+	alertsPool = sync.Pool{}
+)
+
+func AcquireAlert() *Alert {
+	a := alertsPool.Get()
+	if a == nil {
+		a := &Alert{}
+		a.init()
+		return a
+	}
+
+	a.(*Alert).init()
+
+	return a.(*Alert)
+}
+
+func ReleaseAlert(a *Alert) {
+	a.reset()
+	alertsPool.Put(a)
+}
+
 func LevelFromString(s string) (Level, error) {
 	switch s {
 	case "success":
@@ -43,23 +65,32 @@ func (l *Level) String() string {
 type Alert struct {
 	mx sync.RWMutex
 
+	name       string
 	level      Level
 	lastChange time.Time
 	start      time.Time
 	count      int
 }
 
-func New() *Alert {
+func (a *Alert) init() {
 	now := time.Now()
 
-	a := &Alert{
-		level:      LevelSuccess,
-		lastChange: now,
-		start:      now,
-		count:      0,
-	}
+	a.level = LevelSuccess
+	a.lastChange = now
+	a.start = now
+	a.count = 0
+}
 
-	return a
+func (a *Alert) reset() {
+	a.name = ""
+	a.level = 0
+	a.lastChange = time.Time{}
+	a.start = time.Time{}
+	a.count = 0
+}
+
+func (a *Alert) SetName(name string) {
+	a.name = name
 }
 
 func (a *Alert) UpdateLevel(level Level) {
@@ -112,4 +143,8 @@ func (a *Alert) GetStartTime() time.Time {
 	r := a.start
 
 	return r
+}
+
+func (a *Alert) Name() string {
+	return a.name
 }
