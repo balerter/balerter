@@ -44,20 +44,14 @@ func New(config config.StorageCoreFile, logger *zap.Logger) (*Storage, error) {
 
 func (s *Storage) init() error {
 	err := s.db.Update(func(tx *bbolt.Tx) error {
-		b := tx.Bucket(bucketKV)
-		if b == nil {
-			_, err := tx.CreateBucket(bucketKV)
-			if err != nil {
-				return fmt.Errorf("error create bucket 'kv': %w", err)
-			}
+		_, err := tx.CreateBucketIfNotExists(bucketKV)
+		if err != nil {
+			return fmt.Errorf("error create bucket 'kv': %w", err)
 		}
 
-		b = tx.Bucket(bucketAlert)
-		if b == nil {
-			_, err := tx.CreateBucket(bucketAlert)
-			if err != nil {
-				return fmt.Errorf("error create bucket 'alert': %w", err)
-			}
+		_, err = tx.CreateBucketIfNotExists(bucketAlert)
+		if err != nil {
+			return fmt.Errorf("error create bucket 'alert': %w", err)
 		}
 
 		return nil
