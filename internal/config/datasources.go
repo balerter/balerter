@@ -5,6 +5,7 @@ type DataSources struct {
 	Prometheus []DataSourcePrometheus `json:"prometheus" yaml:"prometheus"`
 	Postgres   []DataSourcePostgres   `json:"postgres" yaml:"postgres"`
 	MySQL      []DataSourceMysql      `json:"mysql" yaml:"mysql"`
+	Loki       []DataSourceLoki       `json:"loki" yaml:"loki"`
 }
 
 func (cfg DataSources) SetDefaults() {
@@ -18,6 +19,9 @@ func (cfg DataSources) SetDefaults() {
 		c.SetDefaults()
 	}
 	for _, c := range cfg.MySQL {
+		c.SetDefaults()
+	}
+	for _, c := range cfg.Loki {
 		c.SetDefaults()
 	}
 }
@@ -39,6 +43,11 @@ func (cfg DataSources) Validate() error {
 		}
 	}
 	for _, c := range cfg.MySQL {
+		if err := c.Validate(); err != nil {
+			return err
+		}
+	}
+	for _, c := range cfg.Loki {
 		if err := c.Validate(); err != nil {
 			return err
 		}
