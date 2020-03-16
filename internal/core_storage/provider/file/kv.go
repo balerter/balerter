@@ -19,7 +19,7 @@ func (s *Storage) Put(key string, value string) error {
 		}
 		v := b.Get([]byte(key))
 		if len(v) > 0 {
-			return fmt.Errorf("key alredy exists")
+			return fmt.Errorf("key already exists")
 		}
 
 		return b.Put([]byte(key), []byte(value))
