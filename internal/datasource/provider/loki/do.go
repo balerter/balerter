@@ -5,9 +5,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	lokihttp "github.com/grafana/loki/pkg/loghttp"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -23,6 +25,9 @@ func (m *Loki) sendRange(query string, opts *rangeOptions) (*lokihttp.QueryRespo
 
 	q := &url.Values{}
 	q.Add("query", query)
+	if opts.Limit > 0 {
+		q.Add("limit", strconv.Itoa(opts.Limit))
+	}
 	if opts.Start != "" {
 		q.Add("start", opts.Start)
 	}
@@ -31,6 +36,9 @@ func (m *Loki) sendRange(query string, opts *rangeOptions) (*lokihttp.QueryRespo
 	}
 	if opts.Step != "" {
 		q.Add("step", opts.Step)
+	}
+	if opts.Direction != "" {
+		q.Add("direction", opts.Direction)
 	}
 	u.RawQuery = q.Encode()
 	u.Path = epQueryRange
@@ -43,8 +51,14 @@ func (m *Loki) sendQuery(query string, opts *queryOptions) (*lokihttp.QueryRespo
 
 	q := &url.Values{}
 	q.Add("query", query)
+	if opts.Limit > 0 {
+		q.Add("limit", strconv.Itoa(opts.Limit))
+	}
 	if opts.Time != "" {
 		q.Add("time", opts.Time)
+	}
+	if opts.Direction != "" {
+		q.Add("direction", opts.Direction)
 	}
 	u.RawQuery = q.Encode()
 	u.Path = epQuery
@@ -53,6 +67,8 @@ func (m *Loki) sendQuery(query string, opts *queryOptions) (*lokihttp.QueryRespo
 }
 
 func (m *Loki) send(u *url.URL) (*lokihttp.QueryResponse, error) {
+	m.logger.Debug("request to loki", zap.String("url", u.String()))
+
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, err

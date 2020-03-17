@@ -85,7 +85,7 @@ func (m *Loki) doRange(L *lua.LState) int {
 		return 2
 	}
 
-	m.logger.Debug("call loki query range", zap.String("name", m.name), zap.String("query", query))
+	m.logger.Debug("call loki query range", zap.String("name", m.name), zap.String("query", query), zap.Any("options", rangeOptions))
 
 	v, err := m.sendRange(query, rangeOptions)
 	if err != nil {
