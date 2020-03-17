@@ -10,10 +10,6 @@ import (
 	"time"
 )
 
-var (
-	scriptSourcesReloadInterval = time.Second * 20
-)
-
 type storagesManager interface {
 	Get() []modules.Module
 }
@@ -31,6 +27,7 @@ type Runner struct {
 	dsManager       dsManager
 	storagesManager storagesManager
 	logger          *zap.Logger
+	updateInterval  time.Duration
 
 	coreModules []modules.Module
 
@@ -38,11 +35,12 @@ type Runner struct {
 	pool   map[string]*Job
 }
 
-func New(scriptsManager scriptsManager, dsManager dsManager, storagesManager storagesManager, coreModules []modules.Module, logger *zap.Logger) *Runner {
+func New(updateInterval time.Duration, scriptsManager scriptsManager, dsManager dsManager, storagesManager storagesManager, coreModules []modules.Module, logger *zap.Logger) *Runner {
 	r := &Runner{
 		scriptsManager:  scriptsManager,
 		dsManager:       dsManager,
 		storagesManager: storagesManager,
+		updateInterval:  updateInterval,
 		logger:          logger,
 		coreModules:     coreModules,
 		pool:            make(map[string]*Job),
@@ -67,7 +65,7 @@ func (rnr *Runner) Watch(ctx context.Context, wg *sync.WaitGroup) {
 		case <-ctx.Done():
 			return
 
-		case <-time.After(scriptSourcesReloadInterval):
+		case <-time.After(rnr.updateInterval):
 		}
 	}
 }

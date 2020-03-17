@@ -12,22 +12,7 @@ type DataSourceClickhouse struct {
 	Username    string `json:"username" yaml:"username"`
 	Password    string `json:"password" yaml:"password"`
 	Database    string `json:"database" yaml:"database"`
-	SSLCertPath string `json:"ssl_cert_path" yaml:"ssl_cert_path"`
-}
-
-func (cfg DataSourceClickhouse) SetDefaults() {
-	if cfg.Host == "" {
-		cfg.Host = "127.0.0.1"
-	}
-	if cfg.Port == 0 {
-		cfg.Port = 9000
-	}
-	if cfg.Username == "" {
-		cfg.Username = "default"
-	}
-	if cfg.Database == "" {
-		cfg.Database = "default"
-	}
+	SSLCertPath string `json:"sslCertPath" yaml:"sslCertPath"`
 }
 
 func (cfg DataSourceClickhouse) Validate() error {

@@ -9,21 +9,6 @@ type Channels struct {
 	Notify   []ChannelNotify   `json:"notify" yaml:"notify"`
 }
 
-func (cfg Channels) SetDefaults() {
-	for _, c := range cfg.Slack {
-		c.SetDefaults()
-	}
-	for _, c := range cfg.Telegram {
-		c.SetDefaults()
-	}
-	for _, c := range cfg.Syslog {
-		c.SetDefaults()
-	}
-	for _, c := range cfg.Notify {
-		c.SetDefaults()
-	}
-}
-
 func (cfg Channels) Validate() error {
 	for _, c := range cfg.Slack {
 		if err := c.Validate(); err != nil {

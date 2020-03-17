@@ -8,24 +8,6 @@ type DataSources struct {
 	Loki       []DataSourceLoki       `json:"loki" yaml:"loki"`
 }
 
-func (cfg DataSources) SetDefaults() {
-	for _, c := range cfg.Clickhouse {
-		c.SetDefaults()
-	}
-	for _, c := range cfg.Prometheus {
-		c.SetDefaults()
-	}
-	for _, c := range cfg.Postgres {
-		c.SetDefaults()
-	}
-	for _, c := range cfg.MySQL {
-		c.SetDefaults()
-	}
-	for _, c := range cfg.Loki {
-		c.SetDefaults()
-	}
-}
-
 func (cfg DataSources) Validate() error {
 	for _, c := range cfg.Clickhouse {
 		if err := c.Validate(); err != nil {

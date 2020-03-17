@@ -19,6 +19,10 @@ func New(cfg config.ScriptSourceFolder) *Provider {
 		mask: cfg.Mask,
 	}
 
+	if p.mask == "" {
+		p.mask = "*.lua"
+	}
+
 	return p
 }
 

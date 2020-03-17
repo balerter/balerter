@@ -23,7 +23,7 @@ type API struct {
 	logger  *zap.Logger
 }
 
-func New(cfg *config.API, alertManager alertManagerAPIer, logger *zap.Logger) *API {
+func New(cfg config.API, alertManager alertManagerAPIer, logger *zap.Logger) *API {
 	api := &API{
 		address: cfg.Address,
 		server:  &http.Server{},

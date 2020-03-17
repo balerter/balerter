@@ -2,19 +2,40 @@ package config
 
 import (
 	"fmt"
+	"github.com/spf13/viper"
+	"strings"
 )
 
-const (
-	defaultAPIAddress = "127.0.0.1:2000"
-)
+func New(configSource string) (*Config, error) {
+	cfg := &Config{
+		viper: viper.New(),
+	}
 
-func New() *Config {
-	cfg := &Config{}
+	cfg.viper.SetConfigName(configSource)
+	cfg.viper.SetConfigType("yaml")
+	cfg.viper.AddConfigPath(".")
+	err := cfg.viper.ReadInConfig()
+	if err != nil {
+		return nil, fmt.Errorf("error read config file, %w", err)
+	}
 
-	return cfg
+	cfg.SetDefaults()
+
+	err = cfg.viper.Unmarshal(&cfg)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarchal config, %w", err)
+	}
+
+	if err := cfg.Validate(); err != nil {
+		return nil, fmt.Errorf("error config validation")
+	}
+
+	return cfg, nil
 }
 
 type Config struct {
+	viper *viper.Viper
+
 	Scripts     Scripts     `json:"scripts" yaml:"scripts"`
 	DataSources DataSources `json:"datasources" yaml:"datasources"`
 	Channels    Channels    `json:"channels" yaml:"channels"`
@@ -23,11 +44,10 @@ type Config struct {
 }
 
 func (cfg *Config) SetDefaults() {
-	cfg.Scripts.SetDefaults()
-	cfg.DataSources.SetDefaults()
-	cfg.Channels.SetDefaults()
-	cfg.Storages.SetDefaults()
-	cfg.Global.SetDefaults()
+	cfg.viper.SetDefault("global.storages.alert", "memory")
+	cfg.viper.SetDefault("global.storages.kv", "memory")
+	cfg.viper.SetDefault("global.api.address", "127.0.0.1:2000")
+	cfg.viper.SetDefault("scripts.updateInterval", "1m")
 }
 
 func (cfg *Config) Validate() error {
@@ -67,4 +87,20 @@ func inArray(value string, arr []string) bool {
 	}
 
 	return false
+}
+
+// check a slice for unique values,
+// If founded non unique elements, returns a conflict element name. Else returns empty string
+func checkUnique(data []string) string {
+	m := map[string]struct{}{}
+
+	for _, item := range data {
+		item = strings.ToLower(item)
+		if _, ok := m[item]; ok {
+			return item
+		}
+		m[item] = struct{}{}
+	}
+
+	return ""
 }

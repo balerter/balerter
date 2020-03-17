@@ -18,12 +18,6 @@ type ChannelSyslog struct {
 	Priority string `json:"priority" yaml:"priority"`
 }
 
-func (cfg ChannelSyslog) SetDefaults() {
-	if cfg.Priority == "" {
-		cfg.Priority = "EMERG"
-	}
-}
-
 func (cfg ChannelSyslog) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")

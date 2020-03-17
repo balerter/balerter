@@ -4,23 +4,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
-	"time"
 )
 
 type ScriptSourceFolder struct {
-	UpdateInterval time.Duration `json:"update_interval" yaml:"update_interval"`
-	Name           string        `json:"name" yaml:"name"`
-	Path           string        `json:"path" yaml:"path"`
-	Mask           string        `json:"mask" yaml:"mask"`
-}
-
-func (cfg ScriptSourceFolder) SetDefaults() {
-	if cfg.Mask == "" {
-		cfg.Mask = "*.lua"
-	}
-	if cfg.UpdateInterval == 0 {
-		cfg.UpdateInterval = time.Second * 60
-	}
+	Name string `json:"name" yaml:"name"`
+	Path string `json:"path" yaml:"path"`
+	Mask string `json:"mask" yaml:"mask"`
 }
 
 func (cfg ScriptSourceFolder) Validate() error {

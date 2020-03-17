@@ -5,11 +5,14 @@ import (
 	"github.com/balerter/balerter/internal/config"
 	"go.etcd.io/bbolt"
 	"go.uber.org/zap"
+	"time"
 )
 
 var (
 	bucketKV    = []byte("kv")
 	bucketAlert = []byte("alert")
+
+	defaultTimeout = time.Second
 )
 
 type Storage struct {
@@ -28,6 +31,10 @@ func New(config config.StorageCoreFile, logger *zap.Logger) (*Storage, error) {
 
 	options := &bbolt.Options{
 		Timeout: config.Timeout,
+	}
+
+	if options.Timeout == 0 {
+		options.Timeout = defaultTimeout
 	}
 
 	s.db, err = bbolt.Open(config.Path, 0666, options)

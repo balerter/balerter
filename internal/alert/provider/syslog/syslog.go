@@ -21,6 +21,10 @@ func New(cfg config.ChannelSyslog, logger *zap.Logger) (*Syslog, error) {
 
 	var err error
 
+	if cfg.Priority == "" {
+		cfg.Priority = "EMERG"
+	}
+
 	sl.w, err = syslog.Dial(cfg.Network, cfg.Address, parsePriority(cfg.Priority), cfg.Tag)
 	if err != nil {
 		return nil, err

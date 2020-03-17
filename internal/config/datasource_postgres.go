@@ -12,23 +12,8 @@ type DataSourcePostgres struct {
 	Username    string `json:"username" yaml:"username"`
 	Password    string `json:"password" yaml:"password"`
 	Database    string `json:"database" yaml:"database"`
-	SSLMode     string `json:"ssl_mode" yaml:"ssl_mode"`
-	SSLCertPath string `json:"ssl_cert_path" yaml:"ssl_cert_path"`
-}
-
-func (cfg DataSourcePostgres) SetDefaults() {
-	if cfg.Host == "" {
-		cfg.Host = "127.0.0.1"
-	}
-	if cfg.Port == 0 {
-		cfg.Port = 5432
-	}
-	if cfg.Username == "" {
-		cfg.Username = "postgres"
-	}
-	if cfg.Username == "" {
-		cfg.Username = "postgres"
-	}
+	SSLMode     string `json:"sslMode" yaml:"sslMode"`
+	SSLCertPath string `json:"sslCertPath" yaml:"sslCertPath"`
 }
 
 func (cfg DataSourcePostgres) Validate() error {

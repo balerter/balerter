@@ -10,12 +10,6 @@ type DataSourceMysql struct {
 	DSN  string `json:"dsn" yaml:"dsn"`
 }
 
-func (cfg DataSourceMysql) SetDefaults() {
-	if cfg.DSN == "" {
-		cfg.DSN = "user:secret@tcp(127.0.0.1:3306)/db"
-	}
-}
-
 func (cfg DataSourceMysql) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")

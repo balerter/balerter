@@ -65,8 +65,8 @@ func main() {
 	lgr.Logger().Info("balerter start", zap.String("version", version))
 
 	// Configuration
-	cfg := config.New()
-	if err := cfg.Init(*configSource); err != nil {
+	cfg, err := config.New(*configSource)
+	if err != nil {
 		lgr.Logger().Error("error init config", zap.Error(err))
 		os.Exit(1)
 	}
@@ -183,7 +183,7 @@ func main() {
 	// | Runner
 	// |
 	lgr.Logger().Info("init runner")
-	rnr := runner.New(scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
+	rnr := runner.New(cfg.Scripts.UpdateInterval, scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
 
 	lgr.Logger().Info("run runner")
 	go rnr.Watch(ctx, wg)

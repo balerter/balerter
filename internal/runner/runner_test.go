@@ -60,6 +60,7 @@ func TestRunner_Watch_Error(t *testing.T) {
 	logger := zap.New(core)
 
 	rnr := &Runner{
+		updateInterval: time.Second,
 		pool:           make(map[string]*Job),
 		scriptsManager: scriptsMgr,
 		logger:         logger,

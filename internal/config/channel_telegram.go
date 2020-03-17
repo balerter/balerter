@@ -18,12 +18,8 @@ type ProxyAuthConfig struct {
 type ChannelTelegram struct {
 	Name   string       `json:"name" yaml:"name"`
 	Token  string       `json:"token" yaml:"token"`
-	ChatID int64        `json:"chat_id" yaml:"chat_id"`
+	ChatID int64        `json:"chatId" yaml:"chatId"`
 	Proxy  *ProxyConfig `json:"proxy"`
-}
-
-func (cfg ChannelTelegram) SetDefaults() {
-
 }
 
 func (cfg ChannelTelegram) Validate() error {

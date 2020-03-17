@@ -1,13 +1,18 @@
 package config
 
-type Scripts struct {
-	Sources ScriptsSources `json:"sources" yaml:"sources"`
-}
+import (
+	"fmt"
+	"time"
+)
 
-func (cfg Scripts) SetDefaults() {
-	cfg.Sources.SetDefaults()
+type Scripts struct {
+	UpdateInterval time.Duration  `json:"updateInterval" yaml:"updateInterval"`
+	Sources        ScriptsSources `json:"sources" yaml:"sources"`
 }
 
 func (cfg Scripts) Validate() error {
+	if cfg.UpdateInterval < 0 {
+		return fmt.Errorf("updateInterval must be not less than 0")
+	}
 	return cfg.Sources.Validate()
 }
