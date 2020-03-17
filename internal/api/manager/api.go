@@ -14,7 +14,7 @@ import (
 )
 
 type alertManagerAPIer interface {
-	GetAlerts() []*alertManager.AlertInfo
+	GetAlerts() ([]*alertManager.AlertInfo, error)
 }
 
 type API struct {

@@ -42,10 +42,45 @@ func (s *Storage) GetOrNew(name string) (*alert.Alert, error) {
 
 }
 
-func (s *Storage) All() []*alert.Alert {
+func (s *Storage) All() ([]*alert.Alert, error) {
+	var vv [][]byte
+
+	err := s.db.View(func(tx *bbolt.Tx) error {
+		b := tx.Bucket(bucketAlert)
+		if b == nil {
+			return errBucketNotFound
+		}
+		err := b.ForEach(func(k, v []byte) error {
+			vv = append(vv, v)
+			return nil
+		})
+
+		return err
+	})
+
+	if err != nil {
+		s.logger.Error("bbolt: error get items", zap.ByteString("bucket", bucketAlert), zap.Error(err))
+		return nil, fmt.Errorf("error get item, %w", err)
+	}
+
 	res := make([]*alert.Alert, 0)
-	panic("not implemented")
-	return res
+
+	for _, v := range vv {
+		if len(v) == 0 {
+			continue
+		}
+
+		a := alert.AcquireAlert()
+
+		err = a.Unmarshal(v)
+		if err != nil {
+			return nil, fmt.Errorf("error unmarshal alert, %w", err)
+		}
+
+		res = append(res, a)
+	}
+
+	return res, nil
 }
 
 func (s *Storage) Release(a *alert.Alert) {

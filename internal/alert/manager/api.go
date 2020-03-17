@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"fmt"
 	"github.com/balerter/balerter/internal/alert/alert"
 	"time"
 )
@@ -12,11 +13,16 @@ type AlertInfo struct {
 	Count      int         `json:"count"`
 }
 
-func (m *Manager) GetAlerts() []*AlertInfo {
+func (m *Manager) GetAlerts() ([]*AlertInfo, error) {
 
 	result := make([]*AlertInfo, 0)
 
-	for _, a := range m.engine.All() {
+	alerts, err := m.engine.All()
+	if err != nil {
+		return nil, fmt.Errorf("error get alerts, %w", err)
+	}
+
+	for _, a := range alerts {
 		alertInfo := &AlertInfo{
 			Name:       a.Name(),
 			Level:      a.Level(),
@@ -27,5 +33,5 @@ func (m *Manager) GetAlerts() []*AlertInfo {
 		result = append(result, alertInfo)
 	}
 
-	return result
+	return result, nil
 }

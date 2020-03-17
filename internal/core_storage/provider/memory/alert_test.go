@@ -39,7 +39,8 @@ func TestAlert_All(t *testing.T) {
 	a2.SetName("bar")
 	m.alerts["bar"] = a2
 
-	aa := m.All()
+	aa, err := m.All()
+	require.NoError(t, err)
 	require.Equal(t, 2, len(aa))
 	assert.Contains(t, aa, a1)
 	assert.Contains(t, aa, a2)

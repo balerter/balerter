@@ -25,7 +25,7 @@ func (m *Memory) GetOrNew(name string) (*alert.Alert, error) {
 	return a, nil
 }
 
-func (m *Memory) All() []*alert.Alert {
+func (m *Memory) All() ([]*alert.Alert, error) {
 	var result []*alert.Alert
 
 	m.mxAlerts.RLock()
@@ -35,7 +35,7 @@ func (m *Memory) All() []*alert.Alert {
 		result = append(result, a)
 	}
 
-	return result
+	return result, nil
 }
 
-func (m *Memory) Release(a *alert.Alert) {}
+func (m *Memory) Release(_ *alert.Alert) {}

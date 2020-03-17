@@ -7,7 +7,7 @@ import (
 )
 
 type alertManagerAPIer interface {
-	GetAlerts() []*alertManager.AlertInfo
+	GetAlerts() ([]*alertManager.AlertInfo, error)
 }
 
 // Handler handle API request GET /api/v1/alerts
@@ -24,7 +24,13 @@ func Handler(alertManager alertManagerAPIer, logger *zap.Logger) http.HandlerFun
 	return func(rw http.ResponseWriter, req *http.Request) {
 		var err error
 
-		data := alertManager.GetAlerts()
+		data, err := alertManager.GetAlerts()
+		if err != nil {
+			logger.Error("error get alerts", zap.Error(err))
+			rw.Header().Add("X-Error", err.Error())
+			rw.WriteHeader(500)
+			return
+		}
 
 		data, err = filter(req, data)
 		if err != nil {

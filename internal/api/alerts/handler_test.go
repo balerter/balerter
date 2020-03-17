@@ -17,8 +17,9 @@ type alertManagerAPIerMock struct {
 	mock.Mock
 }
 
-func (m *alertManagerAPIerMock) GetAlerts() []*alertManager.AlertInfo {
-	return m.Called().Get(0).([]*alertManager.AlertInfo)
+func (m *alertManagerAPIerMock) GetAlerts() ([]*alertManager.AlertInfo, error) {
+	args := m.Called()
+	return args.Get(0).([]*alertManager.AlertInfo), args.Error(1)
 }
 
 func TestHandler(t *testing.T) {
@@ -27,7 +28,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	am := &alertManagerAPIerMock{}
-	am.On("GetAlerts").Return(resultData)
+	am.On("GetAlerts").Return(resultData, nil)
 
 	f := Handler(am, zap.NewNop())
 
@@ -46,7 +47,7 @@ func TestHandler_BadLevelArgument(t *testing.T) {
 	}
 
 	am := &alertManagerAPIerMock{}
-	am.On("GetAlerts").Return(resultData)
+	am.On("GetAlerts").Return(resultData, nil)
 
 	f := Handler(am, zap.NewNop())
 
