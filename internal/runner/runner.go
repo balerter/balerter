@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+var (
+	defaultUpdateInterval = time.Minute
+)
+
 type storagesManager interface {
 	Get() []modules.Module
 }
@@ -44,6 +48,10 @@ func New(updateInterval time.Duration, scriptsManager scriptsManager, dsManager 
 		logger:          logger,
 		coreModules:     coreModules,
 		pool:            make(map[string]*Job),
+	}
+
+	if r.updateInterval == 0 {
+		r.updateInterval = defaultUpdateInterval
 	}
 
 	return r

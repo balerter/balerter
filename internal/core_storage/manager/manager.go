@@ -33,6 +33,10 @@ func New(cfg config.StoragesCore, logger *zap.Logger) (*Manager, error) {
 }
 
 func (m *Manager) Get(name string) (coreStorage.CoreStorage, error) {
+	if name == "" {
+		name = "memory"
+	}
+
 	s, ok := m.storages[name]
 	if !ok {
 		return nil, fmt.Errorf("storage not found")

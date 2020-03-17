@@ -2,52 +2,36 @@ package config
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"strings"
 )
 
 func New(configSource string) (*Config, error) {
-	cfg := &Config{
-		viper: viper.New(),
-	}
+	cfg := &Config{}
 
-	cfg.viper.SetConfigName(configSource)
-	cfg.viper.SetConfigType("yaml")
-	cfg.viper.AddConfigPath(".")
-	err := cfg.viper.ReadInConfig()
+	data, err := ioutil.ReadFile(configSource)
 	if err != nil {
 		return nil, fmt.Errorf("error read config file, %w", err)
 	}
 
-	cfg.SetDefaults()
-
-	err = cfg.viper.Unmarshal(&cfg)
-	if err != nil {
-		return nil, fmt.Errorf("error unmarchal config, %w", err)
+	if err := yaml.Unmarshal(data, cfg); err != nil {
+		return nil, fmt.Errorf("error parse config file, %w", err)
 	}
 
 	if err := cfg.Validate(); err != nil {
-		return nil, fmt.Errorf("error config validation")
+		return nil, fmt.Errorf("error config validation, %w", err)
 	}
 
 	return cfg, nil
 }
 
 type Config struct {
-	viper *viper.Viper
-
 	Scripts     Scripts     `json:"scripts" yaml:"scripts"`
 	DataSources DataSources `json:"datasources" yaml:"datasources"`
 	Channels    Channels    `json:"channels" yaml:"channels"`
 	Storages    Storages    `json:"storages" yaml:"storages"`
 	Global      Global      `json:"global" yaml:"global"`
-}
-
-func (cfg *Config) SetDefaults() {
-	cfg.viper.SetDefault("global.storages.alert", "memory")
-	cfg.viper.SetDefault("global.storages.kv", "memory")
-	cfg.viper.SetDefault("global.api.address", "127.0.0.1:2000")
-	cfg.viper.SetDefault("scripts.updateInterval", "1m")
 }
 
 func (cfg *Config) Validate() error {
