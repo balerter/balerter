@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/prometheus/common/model"
+	lokihttp "github.com/grafana/loki/pkg/loghttp"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -12,15 +12,13 @@ import (
 )
 
 const (
-	//statusAPIError = 422
-
 	apiPrefix = "/loki/api/v1"
 
 	epQuery      = apiPrefix + "/query"
 	epQueryRange = apiPrefix + "/query_range"
 )
 
-func (m *Loki) sendRange(query string, opts queryRangeOptions) (model.Value, error) {
+func (m *Loki) sendRange(query string, opts *rangeOptions) (*lokihttp.QueryResponse, error) {
 	u := *m.url
 
 	q := &url.Values{}
@@ -40,7 +38,7 @@ func (m *Loki) sendRange(query string, opts queryRangeOptions) (model.Value, err
 	return m.send(&u)
 }
 
-func (m *Loki) sendQuery(query string, opts queryQueryOptions) (model.Value, error) {
+func (m *Loki) sendQuery(query string, opts *queryOptions) (*lokihttp.QueryResponse, error) {
 	u := *m.url
 
 	q := &url.Values{}
@@ -54,7 +52,7 @@ func (m *Loki) sendQuery(query string, opts queryQueryOptions) (model.Value, err
 	return m.send(&u)
 }
 
-func (m *Loki) send(u *url.URL) (model.Value, error) {
+func (m *Loki) send(u *url.URL) (*lokihttp.QueryResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, err
@@ -82,18 +80,12 @@ func (m *Loki) send(u *url.URL) (model.Value, error) {
 		return nil, err
 	}
 
-	var apires apiResponse
-	var qres queryResult
+	var apires *lokihttp.QueryResponse
 
 	err = json.Unmarshal(body, &apires)
 	if err != nil {
 		return nil, err
 	}
 
-	err = json.Unmarshal(apires.Data, &qres)
-	if err != nil {
-		return nil, err
-	}
-
-	return qres.v, nil
+	return apires, nil
 }

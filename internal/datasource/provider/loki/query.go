@@ -2,16 +2,11 @@ package loki
 
 import (
 	"fmt"
-	"github.com/prometheus/common/model"
-	"github.com/yuin/gluamapper"
+	lokihttp "github.com/grafana/loki/pkg/loghttp"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"strings"
 )
-
-type queryQueryOptions struct {
-	Time string
-}
 
 func (m *Loki) doQuery(L *lua.LState) int {
 	query := strings.TrimSpace(L.Get(1).String())
@@ -21,19 +16,15 @@ func (m *Loki) doQuery(L *lua.LState) int {
 		return 2
 	}
 
-	options := L.Get(2)
-	queryOptions := queryQueryOptions{}
-	if options.Type() == lua.LTTable {
-		err := gluamapper.Map(options.(*lua.LTable), &queryOptions)
-		if err != nil {
-			m.logger.Error("error decode query query options", zap.Error(err))
-			L.Push(lua.LNil)
-			L.Push(lua.LString("error decode query query options"))
-			return 2
-		}
+	queryOptions, err := m.parseQueryOptions(L)
+	if err != nil {
+		m.logger.Error("error parse query options", zap.Error(err))
+		L.Push(lua.LNil)
+		L.Push(lua.LString("error parse query options"))
+		return 2
 	}
 
-	m.logger.Debug("call loki query", zap.String("name", m.name), zap.String("query", query))
+	m.logger.Debug("call loki query", zap.String("name", m.name), zap.String("query", query), zap.Any("options", queryOptions))
 
 	v, err := m.sendQuery(query, queryOptions)
 	if err != nil {
@@ -43,24 +34,27 @@ func (m *Loki) doQuery(L *lua.LState) int {
 		return 2
 	}
 
-	switch v.Type() {
-	case model.ValVector:
-		vv := v.(model.Vector)
+	switch v.Data.Result.Type() {
+	case lokihttp.ResultTypeStream:
+		vv := v.Data.Result.(lokihttp.Streams)
 
 		tbl := &lua.LTable{}
 		for _, s := range vv {
 			row := &lua.LTable{}
-			metrics := &lua.LTable{}
-			for key, val := range s.Metric {
-				metrics.RawSet(lua.LString(key), lua.LString(val))
+			labels := &lua.LTable{}
+			for key, val := range s.Labels {
+				labels.RawSet(lua.LString(key), lua.LString(val))
 			}
-			row.RawSet(lua.LString("metrics"), metrics)
+			row.RawSet(lua.LString("labels"), labels)
 
-			value := &lua.LTable{}
-			value.RawSet(lua.LString("timestamp"), lua.LNumber(s.Timestamp.Unix()))
-			value.RawSet(lua.LString("value"), lua.LNumber(s.Value))
-
-			row.RawSet(lua.LString("value"), value)
+			entries := &lua.LTable{}
+			for _, e := range s.Entries {
+				value := &lua.LTable{}
+				value.RawSet(lua.LString("timestamp"), lua.LNumber(e.Timestamp.Unix()))
+				value.RawSet(lua.LString("line"), lua.LString(e.Line))
+				entries.Append(value)
+			}
+			row.RawSet(lua.LString("entries"), entries)
 			tbl.Append(row)
 		}
 
@@ -75,12 +69,6 @@ func (m *Loki) doQuery(L *lua.LState) int {
 	return 2
 }
 
-type queryRangeOptions struct {
-	Start string
-	End   string
-	Step  string
-}
-
 func (m *Loki) doRange(L *lua.LState) int {
 	query := strings.TrimSpace(L.Get(1).String())
 	if query == "" {
@@ -89,16 +77,12 @@ func (m *Loki) doRange(L *lua.LState) int {
 		return 2
 	}
 
-	options := L.Get(2)
-	rangeOptions := queryRangeOptions{}
-	if options.Type() == lua.LTTable {
-		err := gluamapper.Map(options.(*lua.LTable), &rangeOptions)
-		if err != nil {
-			m.logger.Error("error decode query range options", zap.Error(err))
-			L.Push(lua.LNil)
-			L.Push(lua.LString("error decode query range options"))
-			return 2
-		}
+	rangeOptions, err := m.parseRangeOptions(L)
+	if err != nil {
+		m.logger.Error("error parse range options", zap.Error(err))
+		L.Push(lua.LNil)
+		L.Push(lua.LString("error parse range options"))
+		return 2
 	}
 
 	m.logger.Debug("call loki query range", zap.String("name", m.name), zap.String("query", query))
@@ -111,47 +95,27 @@ func (m *Loki) doRange(L *lua.LState) int {
 		return 2
 	}
 
-	switch v.Type() {
-	case model.ValMatrix:
-		vv := v.(model.Matrix)
+	switch v.Data.Result.Type() {
+	case lokihttp.ResultTypeStream:
+		vv := v.Data.Result.(lokihttp.Streams)
 
 		tbl := &lua.LTable{}
 		for _, s := range vv {
 			row := &lua.LTable{}
-
-			metrics := &lua.LTable{}
-			for key, val := range s.Metric {
-				metrics.RawSet(lua.LString(key), lua.LString(val))
+			labels := &lua.LTable{}
+			for key, val := range s.Labels {
+				labels.RawSet(lua.LString(key), lua.LString(val))
 			}
+			row.RawSet(lua.LString("labels"), labels)
 
-			values := &lua.LTable{}
-			for _, val := range s.Values {
+			entries := &lua.LTable{}
+			for _, e := range s.Entries {
 				value := &lua.LTable{}
-				value.RawSet(lua.LString("timestamp"), lua.LNumber(val.Timestamp.Unix()))
-				value.RawSet(lua.LString("value"), lua.LNumber(val.Value))
-
-				values.Append(value)
+				value.RawSet(lua.LString("timestamp"), lua.LNumber(e.Timestamp.Unix()))
+				value.RawSet(lua.LString("line"), lua.LString(e.Line))
+				entries.Append(value)
 			}
-
-			row.RawSet(lua.LString("metrics"), metrics)
-			row.RawSet(lua.LString("values"), values)
-			tbl.Append(row)
-		}
-
-		L.Push(tbl)
-
-	case model.ValVector:
-		vv := v.(model.Vector)
-
-		tbl := &lua.LTable{}
-		for _, s := range vv {
-			row := &lua.LTable{}
-			metrics := &lua.LTable{}
-			for key, val := range s.Metric {
-				metrics.RawSet(lua.LString(key), lua.LString(val))
-			}
-			row.RawSet(lua.LString("metrics"), metrics)
-			row.RawSet(lua.LString("value"), lua.LNumber(s.Value))
+			row.RawSet(lua.LString("entries"), entries)
 			tbl.Append(row)
 		}
 
