@@ -21,5 +21,9 @@ func (cfg StorageCoreFile) Validate() error {
 		return fmt.Errorf("path must be not empty")
 	}
 
+	if cfg.Timeout < 0 {
+		return fmt.Errorf("timeout must be greater than 0")
+	}
+
 	return nil
 }
