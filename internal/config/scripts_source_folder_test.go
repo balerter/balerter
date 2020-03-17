@@ -15,14 +15,16 @@ func TestScriptSourceFolder_Validate(t *testing.T) {
 		errText string
 	}{
 		{
-			name: "",
-			fields: fields{
-				Name: "",
-				Path: "",
-				Mask: "",
-			},
-			wantErr: false,
-			errText: "",
+			name:    "empty name",
+			fields:  fields{Name: "", Path: ""},
+			wantErr: true,
+			errText: "name must be not empty",
+		},
+		{
+			name:    "empty path",
+			fields:  fields{Name: "a", Path: ""},
+			wantErr: true,
+			errText: "path must be not empty",
 		},
 	}
 	for _, tt := range tests {
