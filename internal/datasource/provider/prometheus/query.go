@@ -1,7 +1,6 @@
 package prometheus
 
 import (
-	"fmt"
 	"github.com/prometheus/common/model"
 	"github.com/yuin/gluamapper"
 	lua "github.com/yuin/gopher-lua"
@@ -66,8 +65,10 @@ func (m *Prometheus) doQuery(L *lua.LState) int {
 
 		L.Push(tbl)
 	default:
+		m.logger.Debug("query error: unexpected prometheus model type")
 		L.Push(lua.LNil)
-		return m.luaError(L, fmt.Errorf("unexpected prom model type"))
+		L.Push(lua.LString("query error: unexpected prometheus model type"))
+		return 2
 	}
 
 	L.Push(lua.LNil)
@@ -157,18 +158,13 @@ func (m *Prometheus) doRange(L *lua.LState) int {
 
 		L.Push(tbl)
 	default:
+		m.logger.Debug("query error: unexpected prometheus model type")
 		L.Push(lua.LNil)
-		return m.luaError(L, fmt.Errorf("unexpected prom model type"))
+		L.Push(lua.LString("query error: unexpected prometheus model type"))
+		return 2
 	}
 
 	L.Push(lua.LNil)
 
-	return 2
-}
-
-func (m *Prometheus) luaError(L *lua.LState, err error) int {
-	m.logger.Debug("query error", zap.Error(err))
-	L.Push(lua.LNil)
-	L.Push(lua.LString(err.Error()))
 	return 2
 }

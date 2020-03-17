@@ -1,7 +1,6 @@
 package loki
 
 import (
-	"fmt"
 	lokihttp "github.com/grafana/loki/pkg/loghttp"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -60,8 +59,10 @@ func (m *Loki) doQuery(L *lua.LState) int {
 
 		L.Push(tbl)
 	default:
+		m.logger.Error("query error: unexpected loki model type")
 		L.Push(lua.LNil)
-		return m.luaError(L, fmt.Errorf("unexpected loki model type"))
+		L.Push(lua.LString("query error: unexpected loki model type"))
+		return 2
 	}
 
 	L.Push(lua.LNil)
@@ -121,18 +122,13 @@ func (m *Loki) doRange(L *lua.LState) int {
 
 		L.Push(tbl)
 	default:
+		m.logger.Error("query error: unexpected loki model type")
 		L.Push(lua.LNil)
-		return m.luaError(L, fmt.Errorf("unexpected loki model type"))
+		L.Push(lua.LString("query error: unexpected loki model type"))
+		return 2
 	}
 
 	L.Push(lua.LNil)
 
-	return 2
-}
-
-func (m *Loki) luaError(L *lua.LState, err error) int {
-	m.logger.Debug("query error", zap.Error(err))
-	L.Push(lua.LNil)
-	L.Push(lua.LString(err.Error()))
 	return 2
 }
