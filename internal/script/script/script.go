@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	DefaultInterval time.Duration = time.Second * 30
+	DefaultInterval = time.Second * 30
 )
 
 func New() *Script {

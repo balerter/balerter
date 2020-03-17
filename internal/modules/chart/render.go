@@ -18,11 +18,11 @@ const (
 
 var (
 	defaultColors = map[string]color.RGBA{
-		"blue":   color.RGBA{R: 0, G: 0, B: 255, A: 255},
-		"red":    color.RGBA{R: 255, G: 0, B: 0, A: 255},
-		"black":  color.RGBA{R: 0, G: 0, B: 0, A: 255},
-		"green":  color.RGBA{R: 0, G: 255, B: 0, A: 255},
-		"yellow": color.RGBA{R: 255, G: 255, B: 0, A: 255},
+		"blue":   {R: 0, G: 0, B: 255, A: 255},
+		"red":    {R: 255, G: 0, B: 0, A: 255},
+		"black":  {R: 0, G: 0, B: 0, A: 255},
+		"green":  {R: 0, G: 255, B: 0, A: 255},
+		"yellow": {R: 255, G: 255, B: 0, A: 255},
 	}
 )
 
