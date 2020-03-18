@@ -66,7 +66,7 @@ func New(cfg config.DataSourceClickhouse, logger *zap.Logger) (*Clickhouse, erro
 		chSecureString,
 	)
 
-	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, ctxCancel := context.WithTimeout(context.Background(), c.timeout)
 	defer ctxCancel()
 
 	var err error
