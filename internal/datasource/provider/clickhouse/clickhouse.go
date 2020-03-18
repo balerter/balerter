@@ -15,16 +15,26 @@ import (
 	"time"
 )
 
+var (
+	defaultTimeout = time.Second * 5
+)
+
 type Clickhouse struct {
-	name   string
-	logger *zap.Logger
-	db     *sqlx.DB
+	name    string
+	logger  *zap.Logger
+	db      *sqlx.DB
+	timeout time.Duration
 }
 
 func New(cfg config.DataSourceClickhouse, logger *zap.Logger) (*Clickhouse, error) {
 	c := &Clickhouse{
-		name:   "clickhouse." + cfg.Name,
-		logger: logger,
+		name:    "clickhouse." + cfg.Name,
+		logger:  logger,
+		timeout: cfg.Timeout,
+	}
+
+	if c.timeout == 0 {
+		c.timeout = defaultTimeout
 	}
 
 	chSecureString := "secure=false"

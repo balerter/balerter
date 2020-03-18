@@ -1,6 +1,9 @@
 package config
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestDataSourceClickhouse_Validate(t *testing.T) {
 	type fields struct {
@@ -11,6 +14,7 @@ func TestDataSourceClickhouse_Validate(t *testing.T) {
 		Password    string
 		Database    string
 		SSLCertPath string
+		Timeout     time.Duration
 	}
 	tests := []struct {
 		name    string
@@ -37,6 +41,12 @@ func TestDataSourceClickhouse_Validate(t *testing.T) {
 			errText: "port must be defined",
 		},
 		{
+			name:    "wrong timeout",
+			fields:  fields{Name: "a", Host: "a", Port: 10, Timeout: -1},
+			wantErr: true,
+			errText: "timeout must be greater than 0",
+		},
+		{
 			name:    "ok",
 			fields:  fields{Name: "a", Host: "a", Port: 10},
 			wantErr: false,
@@ -53,6 +63,7 @@ func TestDataSourceClickhouse_Validate(t *testing.T) {
 				Password:    tt.fields.Password,
 				Database:    tt.fields.Database,
 				SSLCertPath: tt.fields.SSLCertPath,
+				Timeout:     tt.fields.Timeout,
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {

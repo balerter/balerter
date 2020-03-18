@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 type DataSourceClickhouse struct {
@@ -13,6 +14,7 @@ type DataSourceClickhouse struct {
 	Password    string `json:"password" yaml:"password"`
 	Database    string `json:"database" yaml:"database"`
 	SSLCertPath string `json:"sslCertPath" yaml:"sslCertPath"`
+	Timeout     time.Duration
 }
 
 func (cfg DataSourceClickhouse) Validate() error {
@@ -25,6 +27,9 @@ func (cfg DataSourceClickhouse) Validate() error {
 	}
 	if cfg.Port == 0 {
 		return fmt.Errorf("port must be defined")
+	}
+	if cfg.Timeout < 0 {
+		return fmt.Errorf("timeout must be greater than 0")
 	}
 
 	return nil
