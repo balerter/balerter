@@ -1,12 +1,16 @@
 package config
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestDataSourceLoki_Validate(t *testing.T) {
 	type fields struct {
 		Name      string
 		URL       string
 		BasicAuth BasicAuth
+		Timeout   time.Duration
 	}
 	tests := []struct {
 		name    string
@@ -27,6 +31,12 @@ func TestDataSourceLoki_Validate(t *testing.T) {
 			errText: "url must be not empty",
 		},
 		{
+			name:    "wrong timeout",
+			fields:  fields{Name: "foo", URL: "a", Timeout: -1},
+			wantErr: true,
+			errText: "timeout must be greater than 0",
+		},
+		{
 			name:    "ok",
 			fields:  fields{Name: "foo", URL: "a"},
 			wantErr: false,
@@ -39,6 +49,7 @@ func TestDataSourceLoki_Validate(t *testing.T) {
 				Name:      tt.fields.Name,
 				URL:       tt.fields.URL,
 				BasicAuth: tt.fields.BasicAuth,
+				Timeout:   tt.fields.Timeout,
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {
