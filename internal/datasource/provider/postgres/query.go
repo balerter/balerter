@@ -5,7 +5,6 @@ import (
 	"github.com/balerter/balerter/internal/datasource/converter"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"time"
 )
 
 func (m *Postgres) query(L *lua.LState) int {
@@ -14,7 +13,7 @@ func (m *Postgres) query(L *lua.LState) int {
 
 	m.logger.Debug("call postgres query", zap.String("query", q))
 
-	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*3) // todo: timeout to settings
+	ctx, ctxCancel := context.WithTimeout(context.Background(), m.timeout)
 	defer ctxCancel()
 
 	rows, err := m.db.QueryContext(ctx, q)

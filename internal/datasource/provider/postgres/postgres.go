@@ -8,18 +8,29 @@ import (
 	_ "github.com/lib/pq"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+	"time"
+)
+
+var (
+	defaultTimeout = time.Second * 5
 )
 
 type Postgres struct {
-	name   string
-	logger *zap.Logger
-	db     *sqlx.DB
+	name    string
+	logger  *zap.Logger
+	db      *sqlx.DB
+	timeout time.Duration
 }
 
 func New(cfg config.DataSourcePostgres, logger *zap.Logger) (*Postgres, error) {
 	p := &Postgres{
-		name:   "postgres." + cfg.Name,
-		logger: logger,
+		name:    "postgres." + cfg.Name,
+		logger:  logger,
+		timeout: cfg.Timeout,
+	}
+
+	if p.timeout == 0 {
+		p.timeout = defaultTimeout
 	}
 
 	pgConnString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s&sslrootcert=%s",

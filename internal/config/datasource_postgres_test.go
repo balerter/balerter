@@ -1,6 +1,9 @@
 package config
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestDataSourcePostgres_Validate(t *testing.T) {
 	type fields struct {
@@ -12,6 +15,7 @@ func TestDataSourcePostgres_Validate(t *testing.T) {
 		Database    string
 		SSLMode     string
 		SSLCertPath string
+		Timeout     time.Duration
 	}
 	tests := []struct {
 		name    string
@@ -38,6 +42,12 @@ func TestDataSourcePostgres_Validate(t *testing.T) {
 			errText: "port must be defined",
 		},
 		{
+			name:    "wrong timeout",
+			fields:  fields{Name: "a", Host: "a", Port: 10, Timeout: -1},
+			wantErr: true,
+			errText: "timeout must be greater than 0",
+		},
+		{
 			name:    "ok",
 			fields:  fields{Name: "a", Host: "a", Port: 10},
 			wantErr: false,
@@ -55,6 +65,7 @@ func TestDataSourcePostgres_Validate(t *testing.T) {
 				Database:    tt.fields.Database,
 				SSLMode:     tt.fields.SSLMode,
 				SSLCertPath: tt.fields.SSLCertPath,
+				Timeout:     tt.fields.Timeout,
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {
