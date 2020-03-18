@@ -87,29 +87,21 @@ end
 
 ## Roadmap
 
-### For v1.0.0
-
-- [x] add filters to api `/alerts`
-    - [x] by alert level
-    - [x] by alert name 
-- [x] stabilize core DB modules
-- [ ] full translate the documentation to English
-- [x] add core module `http` for send requests from scripts
-
-### Other
-
 - core modules enhancements
     - [ ] add prometheus methods for querying metadata
         - [ ] series
         - [ ] labels
         - [ ] label values
-- [ ] Official grafana dashboard
+    - [ ] add loki methods for querying metadata
+        - [ ] series
+        - [ ] labels
+        - [ ] label values
+- [ ] official grafana dashboard
 - New script sources
     - [ ] Postgres - select scripts from Postgres table
     - [ ] ...
-- new entity: external KV storage - for persist data
 - engines for external KV storage
-    - [ ] file
+    - [x] file
     - [ ] consul
     - [ ] postgres
 - New datasources
