@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 type ProxyConfig struct {
@@ -16,10 +17,11 @@ type ProxyAuthConfig struct {
 }
 
 type ChannelTelegram struct {
-	Name   string       `json:"name" yaml:"name"`
-	Token  string       `json:"token" yaml:"token"`
-	ChatID int64        `json:"chatId" yaml:"chatId"`
-	Proxy  *ProxyConfig `json:"proxy"`
+	Name    string        `json:"name" yaml:"name"`
+	Token   string        `json:"token" yaml:"token"`
+	ChatID  int64         `json:"chatId" yaml:"chatId"`
+	Proxy   *ProxyConfig  `json:"proxy"`
+	Timeout time.Duration `json:"timeout" yaml:"timeout"`
 }
 
 func (cfg ChannelTelegram) Validate() error {
@@ -33,6 +35,10 @@ func (cfg ChannelTelegram) Validate() error {
 
 	if cfg.ChatID == 0 {
 		return fmt.Errorf("chat id must be not empty")
+	}
+
+	if cfg.Timeout < 0 {
+		return fmt.Errorf("timeout must be greater than 0")
 	}
 
 	return nil

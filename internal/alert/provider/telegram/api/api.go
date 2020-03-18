@@ -10,7 +10,7 @@ import (
 
 const (
 	apiEndpoint              = "https://api.telegram.org/bot"
-	defaultHttpClientTimeout = time.Second * 10
+	defaultHttpClientTimeout = time.Second * 5
 
 	methodSendMessage = "sendMessage"
 	methodSendPhoto   = "sendPhoto"
@@ -55,7 +55,11 @@ func New(cfg config.ChannelTelegram) (*API, error) {
 		Transport:     tr,
 		CheckRedirect: nil,
 		Jar:           nil,
-		Timeout:       defaultHttpClientTimeout,
+		Timeout:       cfg.Timeout,
+	}
+
+	if a.httpClient.Timeout == 0 {
+		a.httpClient.Timeout = defaultHttpClientTimeout
 	}
 
 	return a, nil

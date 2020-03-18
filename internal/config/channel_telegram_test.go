@@ -1,13 +1,16 @@
 package config
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestChannelTelegram_Validate(t *testing.T) {
 	type fields struct {
-		Name   string
-		Token  string
-		ChatID int64
-		Proxy  *ProxyConfig
+		Name    string
+		Token   string
+		ChatID  int64
+		Timeout time.Duration
 	}
 	tests := []struct {
 		name    string
@@ -34,6 +37,12 @@ func TestChannelTelegram_Validate(t *testing.T) {
 			errText: "chat id must be not empty",
 		},
 		{
+			name:    "low timeout",
+			fields:  fields{Name: "foo", Token: "foo", ChatID: 10, Timeout: -1},
+			wantErr: true,
+			errText: "timeout must be greater than 0",
+		},
+		{
 			name:    "ok",
 			fields:  fields{Name: "foo", Token: "foo", ChatID: 10},
 			wantErr: false,
@@ -43,10 +52,10 @@ func TestChannelTelegram_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := ChannelTelegram{
-				Name:   tt.fields.Name,
-				Token:  tt.fields.Token,
-				ChatID: tt.fields.ChatID,
-				Proxy:  tt.fields.Proxy,
+				Name:    tt.fields.Name,
+				Token:   tt.fields.Token,
+				ChatID:  tt.fields.ChatID,
+				Timeout: tt.fields.Timeout,
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {
