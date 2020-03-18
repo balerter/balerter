@@ -1,3 +1,4 @@
+PKG_PREFIX := github.com/balerter/balerter
 TAG := latest # $(shell git describe --tag)
 
 .PHONY: build-balerter push-balerter gobuild-balerter
@@ -18,3 +19,6 @@ build-tgtool:
 push-tgtool:
 	@echo Push tgtool $(TAG)
 	docker push balerter/tgtool:$(TAG)
+
+test-full:
+	GO111MODULE=on go test -mod=vendor -coverprofile=coverage.txt -covermode=atomic ./internal/... ./cmd/...

@@ -14,5 +14,11 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@v1
-      - name: Test
-        run: go test ./...
+      - name: Build
+        run: |
+          make test-full
+      - name: Publish coverage
+        uses: codecov/codecov-action@v1.0.6
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          file: ./coverage.txt
