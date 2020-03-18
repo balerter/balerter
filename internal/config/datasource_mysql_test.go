@@ -1,11 +1,15 @@
 package config
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestDataSourceMysql_Validate(t *testing.T) {
 	type fields struct {
-		Name string
-		DSN  string
+		Name    string
+		DSN     string
+		Timeout time.Duration
 	}
 	tests := []struct {
 		name    string
@@ -26,6 +30,12 @@ func TestDataSourceMysql_Validate(t *testing.T) {
 			errText: "DSN must be not empty",
 		},
 		{
+			name:    "wrong timeout",
+			fields:  fields{Name: "foo", DSN: "a", Timeout: -1},
+			wantErr: true,
+			errText: "timeout must be greater than 0",
+		},
+		{
 			name:    "ok",
 			fields:  fields{Name: "foo", DSN: "a"},
 			wantErr: false,
@@ -35,8 +45,9 @@ func TestDataSourceMysql_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := DataSourceMysql{
-				Name: tt.fields.Name,
-				DSN:  tt.fields.DSN,
+				Name:    tt.fields.Name,
+				DSN:     tt.fields.DSN,
+				Timeout: tt.fields.Timeout,
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {

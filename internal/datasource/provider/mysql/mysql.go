@@ -7,18 +7,29 @@ import (
 	"github.com/jmoiron/sqlx"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+	"time"
+)
+
+var (
+	defaultTimeout = time.Second * 5
 )
 
 type MySQL struct {
-	name   string
-	logger *zap.Logger
-	db     *sqlx.DB
+	name    string
+	logger  *zap.Logger
+	db      *sqlx.DB
+	timeout time.Duration
 }
 
 func New(cfg config.DataSourceMysql, logger *zap.Logger) (*MySQL, error) {
 	p := &MySQL{
-		name:   "mysql." + cfg.Name,
-		logger: logger,
+		name:    "mysql." + cfg.Name,
+		logger:  logger,
+		timeout: cfg.Timeout,
+	}
+
+	if p.timeout == 0 {
+		p.timeout = defaultTimeout
 	}
 
 	var err error
