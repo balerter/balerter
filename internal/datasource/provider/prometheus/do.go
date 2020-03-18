@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"time"
 )
 
 const (
@@ -65,7 +64,7 @@ func (m *Prometheus) send(u *url.URL) (model.Value, error) {
 		req.Header.Add("Authorization", "Basic "+ba)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 	defer cancel()
 
 	req = req.WithContext(ctx)

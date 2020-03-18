@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+var (
+	defaultTimeout = time.Second * 5
+)
+
 type Prometheus struct {
 	logger            *zap.Logger
 	name              string
@@ -17,6 +21,7 @@ type Prometheus struct {
 	basicAuthUsername string
 	basicAuthPassword string
 	client            http.Client
+	timeout           time.Duration
 }
 
 func New(cfg config.DataSourcePrometheus, logger *zap.Logger) (*Prometheus, error) {
@@ -25,6 +30,11 @@ func New(cfg config.DataSourcePrometheus, logger *zap.Logger) (*Prometheus, erro
 		name:              "prometheus." + cfg.Name,
 		basicAuthUsername: cfg.BasicAuth.Username,
 		basicAuthPassword: cfg.BasicAuth.Password,
+		timeout:           cfg.Timeout,
+	}
+
+	if m.timeout == 0 {
+		m.timeout = defaultTimeout
 	}
 
 	var err error
