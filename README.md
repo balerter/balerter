@@ -1,4 +1,4 @@
-# balerter [![Go Report Card](https://goreportcard.com/badge/github.com/balerter/balerter)](https://goreportcard.com/report/github.com/balerter/balerter) ![Test](https://github.com/balerter/balerter/workflows/Test/badge.svg)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/balerter/balerter) [![Go Report Card](https://goreportcard.com/badge/github.com/balerter/balerter)](https://goreportcard.com/report/github.com/balerter/balerter) ![Test](https://github.com/balerter/balerter/workflows/Test/badge.svg) [![codecov](https://codecov.io/gh/balerter/balerter/branch/master/graph/badge.svg)](https://codecov.io/gh/balerter/balerter) 
 
 ![logo.png](logo.png)
 
