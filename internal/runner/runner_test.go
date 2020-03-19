@@ -34,7 +34,7 @@ func TestRunner_Watch(t *testing.T) {
 	var cancelled bool
 
 	go func() {
-		rnr.Watch(ctx, wg)
+		rnr.Watch(ctx, ctxCancel, wg, false)
 		cancelled = true
 	}()
 
@@ -73,7 +73,7 @@ func TestRunner_Watch_Error(t *testing.T) {
 	var cancelled bool
 
 	go func() {
-		rnr.Watch(ctx, wg)
+		rnr.Watch(ctx, ctxCancel, wg, false)
 		cancelled = true
 	}()
 

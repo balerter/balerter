@@ -57,7 +57,7 @@ func New(updateInterval time.Duration, scriptsManager scriptsManager, dsManager 
 	return r
 }
 
-func (rnr *Runner) Watch(ctx context.Context, wg *sync.WaitGroup) {
+func (rnr *Runner) Watch(ctx context.Context, ctxCancel context.CancelFunc, wg *sync.WaitGroup, once bool) {
 	for {
 		ss, err := rnr.scriptsManager.Get()
 
@@ -67,6 +67,11 @@ func (rnr *Runner) Watch(ctx context.Context, wg *sync.WaitGroup) {
 			rnr.logger.Error("error get scripts", zap.Error(err))
 		} else {
 			rnr.updateScripts(ctx, ss, wg)
+		}
+
+		if once {
+			ctxCancel()
+			return
 		}
 
 		select {

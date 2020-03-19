@@ -36,6 +36,7 @@ var (
 	configSource = flag.String("config", "config.yml", "Configuration source. Currently supports only path to yaml file.")
 	logLevel     = flag.String("logLevel", "INFO", "Log level. ERROR, WARN, INFO or DEBUG")
 	debug        = flag.Bool("debug", false, "debug mode")
+	once         = flag.Bool("once", false, "once run scripts and exit")
 
 	defaultLuaModulesPath = "./?.lua;./modules/?.lua;./modules/?/init.lua"
 )
@@ -193,7 +194,7 @@ func main() {
 	rnr := runner.New(cfg.Scripts.UpdateInterval, scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
 
 	lgr.Logger().Info("run runner")
-	go rnr.Watch(ctx, wg)
+	go rnr.Watch(ctx, ctxCancel, wg, *once)
 
 	// ---------------------
 	// |
@@ -213,9 +214,10 @@ func main() {
 	}
 
 	rnr.Stop()
-	dsMgr.Stop()
 
 	wg.Wait()
+
+	dsMgr.Stop()
 
 	if len(cfg.Global.SendStopNotification) > 0 {
 		alertMgr.Send("", "", "Balerter Stop", cfg.Global.SendStopNotification, nil, "")
