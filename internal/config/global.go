@@ -5,6 +5,7 @@ type Global struct {
 	SendStopNotification  []string       `json:"sendStopNotification" yaml:"sendStopNotification"`
 	API                   API            `json:"api" yaml:"api"`
 	Storages              GlobalStorages `json:"storages" yaml:"storages"`
+	LuaModulesPath        string         `json:"luaModulesPath" yaml:"luaModulesPath"`
 }
 
 func (cfg Global) Validate() error {

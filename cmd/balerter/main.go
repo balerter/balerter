@@ -36,11 +36,12 @@ var (
 	configSource = flag.String("config", "config.yml", "Configuration source. Currently supports only path to yaml file.")
 	logLevel     = flag.String("logLevel", "INFO", "Log level. ERROR, WARN, INFO or DEBUG")
 	debug        = flag.Bool("debug", false, "debug mode")
+
+	defaultLuaModulesPath = "./?.lua;./modules/?.lua;./modules/?/init.lua"
 )
 
 func main() {
-	LuaLDir := "./modules"
-	lua.LuaPathDefault = "./?.lua;" + LuaLDir + "/?.lua;" + LuaLDir + "/?/init.lua"
+	lua.LuaPathDefault = defaultLuaModulesPath
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
 	wg := &sync.WaitGroup{}
@@ -71,6 +72,12 @@ func main() {
 		os.Exit(1)
 	}
 	lgr.Logger().Debug("loaded configuration", zap.Any("config", cfg))
+
+	if cfg.Global.LuaModulesPath != "" {
+		lua.LuaPathDefault = cfg.Global.LuaModulesPath
+	}
+
+	lgr.Logger().Debug("lua modules path", zap.String("path", lua.LuaPathDefault))
 
 	// Scripts sources
 	lgr.Logger().Info("init scripts manager")
