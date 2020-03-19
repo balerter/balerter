@@ -1,8 +1,8 @@
 package alerts
 
 import (
+	"fmt"
 	"github.com/balerter/balerter/internal/alert/alert"
-	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"github.com/stretchr/testify/assert"
 	httpTestify "github.com/stretchr/testify/http"
 	"github.com/stretchr/testify/mock"
@@ -13,22 +13,52 @@ import (
 	"time"
 )
 
-type alertManagerAPIerMock struct {
+type coreStorageMock struct {
 	mock.Mock
 }
 
-func (m *alertManagerAPIerMock) GetAlerts() ([]*alertManager.AlertInfo, error) {
+func (m *coreStorageMock) GetOrNew(string) (*alert.Alert, error) {
 	args := m.Called()
-	return args.Get(0).([]*alertManager.AlertInfo), args.Error(1)
+	return args.Get(0).(*alert.Alert), args.Error(1)
+}
+func (m *coreStorageMock) All() ([]*alert.Alert, error) {
+	args := m.Called()
+	return args.Get(0).([]*alert.Alert), args.Error(1)
+}
+func (m *coreStorageMock) Release(_ *alert.Alert) {
+}
+
+func TestHandler_ErrorGetAlerts(t *testing.T) {
+	var resultData []*alert.Alert
+
+	am := &coreStorageMock{}
+	am.On("All").Return(resultData, fmt.Errorf("error1"))
+
+	f := Handler(am, zap.NewNop())
+
+	rw := &httpTestify.TestResponseWriter{}
+	req := &http.Request{URL: &url.URL{}}
+
+	f(rw, req)
+
+	assert.Equal(t, 500, rw.StatusCode)
+	assert.Equal(t, "error1", rw.Header().Get("X-Error"))
+	assert.Equal(t, "", rw.Output)
 }
 
 func TestHandler(t *testing.T) {
-	resultData := []*alertManager.AlertInfo{
-		{Name: "foo", Level: alert.LevelError, Count: 5, LastChange: time.Date(2020, 01, 01, 10, 10, 10, 0, time.UTC)},
-	}
+	var resultData []*alert.Alert
 
-	am := &alertManagerAPIerMock{}
-	am.On("GetAlerts").Return(resultData, nil)
+	a1 := alert.AcquireAlert()
+	a1.SetName("foo")
+	a1.UpdateLevel(alert.LevelError)
+	a1.Inc()
+	resultData = append(resultData, a1)
+
+	updatedAt := a1.GetLastChangeTime().Format(time.RFC3339)
+
+	am := &coreStorageMock{}
+	am.On("All").Return(resultData, nil)
 
 	f := Handler(am, zap.NewNop())
 
@@ -38,16 +68,14 @@ func TestHandler(t *testing.T) {
 	f(rw, req)
 
 	assert.Equal(t, 200, rw.StatusCode)
-	assert.Equal(t, `[{"name":"foo","level":"error","count":5,"updated_at":"2020-01-01T10:10:10Z"}]`, rw.Output)
+	assert.Equal(t, `[{"name":"foo","level":"error","count":1,"updated_at":"`+updatedAt+`"}]`, rw.Output)
 }
 
 func TestHandler_BadLevelArgument(t *testing.T) {
-	resultData := []*alertManager.AlertInfo{
-		{Name: "foo", Level: alert.LevelError},
-	}
+	var resultData []*alert.Alert
 
-	am := &alertManagerAPIerMock{}
-	am.On("GetAlerts").Return(resultData, nil)
+	am := &coreStorageMock{}
+	am.On("All").Return(resultData, nil)
 
 	f := Handler(am, zap.NewNop())
 

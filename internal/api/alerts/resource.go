@@ -3,7 +3,7 @@ package alerts
 import (
 	"encoding/json"
 	"fmt"
-	alertManager "github.com/balerter/balerter/internal/alert/manager"
+	"github.com/balerter/balerter/internal/alert/alert"
 	"net/http"
 	"time"
 )
@@ -19,15 +19,15 @@ type resourceItem struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-func newResource(data []*alertManager.AlertInfo) *resource {
+func newResource(data []*alert.Alert) *resource {
 	res := &resource{}
 
 	for _, item := range data {
 		i := resourceItem{
-			Name:      item.Name,
-			Level:     item.Level.String(),
-			Count:     item.Count,
-			UpdatedAt: item.LastChange.Format(time.RFC3339),
+			Name:      item.Name(),
+			Level:     item.Level().String(),
+			Count:     item.Count(),
+			UpdatedAt: item.GetLastChangeTime().Format(time.RFC3339),
 		}
 
 		res.items = append(res.items, i)

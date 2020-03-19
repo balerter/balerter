@@ -49,8 +49,8 @@ func LevelFromString(s string) (Level, error) {
 	return 0, fmt.Errorf("bad level")
 }
 
-func (l *Level) String() string {
-	switch *l {
+func (l Level) String() string {
+	switch l {
 	case LevelSuccess:
 		return "success"
 	case LevelWarn:

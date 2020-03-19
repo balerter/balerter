@@ -2,9 +2,9 @@ package manager
 
 import (
 	"context"
-	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"github.com/balerter/balerter/internal/api/alerts"
 	"github.com/balerter/balerter/internal/config"
+	coreStorage "github.com/balerter/balerter/internal/core_storage"
 	"github.com/balerter/balerter/internal/metrics"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
@@ -13,17 +13,13 @@ import (
 	"sync"
 )
 
-type alertManagerAPIer interface {
-	GetAlerts() ([]*alertManager.AlertInfo, error)
-}
-
 type API struct {
 	address string
 	server  *http.Server
 	logger  *zap.Logger
 }
 
-func New(cfg config.API, alertManager alertManagerAPIer, logger *zap.Logger) *API {
+func New(cfg config.API, coreStorageAlert coreStorage.CoreStorageAlert, logger *zap.Logger) *API {
 	api := &API{
 		address: cfg.Address,
 		server:  &http.Server{},
@@ -32,7 +28,7 @@ func New(cfg config.API, alertManager alertManagerAPIer, logger *zap.Logger) *AP
 
 	m := http.NewServeMux()
 
-	m.HandleFunc("/api/v1/alerts", alerts.Handler(alertManager, logger))
+	m.HandleFunc("/api/v1/alerts", alerts.Handler(coreStorageAlert, logger))
 
 	if cfg.Metrics {
 		api.logger.Info("enable exposing prometheus metrics")

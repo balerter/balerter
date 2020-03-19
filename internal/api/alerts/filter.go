@@ -3,48 +3,60 @@ package alerts
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert/alert"
-	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"net/http"
 	"strings"
 )
 
-func filter(req *http.Request, data []*alertManager.AlertInfo) ([]*alertManager.AlertInfo, error) {
-	levelsMap := map[alert.Level]struct{}{}
-	namesMap := map[string]struct{}{}
+func parseNames(argValue string) map[string]struct{} {
+	result := map[string]struct{}{}
+	if argValue == "" {
+		return result
+	}
 
-	levels := strings.Split(req.URL.Query().Get("level"), ",")
+	names := strings.Split(argValue, ",")
+	for _, n := range names {
+		result[n] = struct{}{}
+	}
+
+	return result
+}
+
+func parseLevels(argValue string) (map[alert.Level]struct{}, error) {
+	result := map[alert.Level]struct{}{}
+	if argValue == "" {
+		return result, nil
+	}
+
+	levels := strings.Split(argValue, ",")
 	for _, l := range levels {
-		if l == "" {
-			continue
-		}
 		ll, err := alert.LevelFromString(l)
 		if err != nil {
 			return nil, fmt.Errorf("bad level value")
 		}
 
-		levelsMap[ll] = struct{}{}
+		result[ll] = struct{}{}
 	}
 
-	names := strings.Split(req.URL.Query().Get("name"), ",")
-	for _, n := range names {
-		if n == "" {
-			continue
-		}
-		namesMap[n] = struct{}{}
+	return result, nil
+}
+
+func filter(req *http.Request, data []*alert.Alert) ([]*alert.Alert, error) {
+
+	levelsMap, err := parseLevels(req.URL.Query().Get("level"))
+	if err != nil {
+		return nil, err
 	}
 
-	var result []*alertManager.AlertInfo
+	namesMap := parseNames(req.URL.Query().Get("name"))
+
+	var result []*alert.Alert
 
 	for _, item := range data {
-		if len(levelsMap) > 0 {
-			if _, ok := levelsMap[item.Level]; !ok {
-				continue
-			}
+		if _, ok := levelsMap[item.Level()]; len(levelsMap) > 0 && !ok {
+			continue
 		}
-		if len(namesMap) > 0 {
-			if _, ok := namesMap[item.Name]; !ok {
-				continue
-			}
+		if _, ok := namesMap[item.Name()]; len(namesMap) > 0 && !ok {
+			continue
 		}
 
 		result = append(result, item)

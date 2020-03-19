@@ -1,14 +1,10 @@
 package alerts
 
 import (
-	alertManager "github.com/balerter/balerter/internal/alert/manager"
+	coreStorage "github.com/balerter/balerter/internal/core_storage"
 	"go.uber.org/zap"
 	"net/http"
 )
-
-type alertManagerAPIer interface {
-	GetAlerts() ([]*alertManager.AlertInfo, error)
-}
 
 // Handler handle API request GET /api/v1/alerts
 //
@@ -20,11 +16,11 @@ type alertManagerAPIer interface {
 // GET /api/v1/alerts?level=error
 // GET /api/v1/alerts?level=error,warn&name=foo
 // GET /api/v1/alerts?level=error,warn&name=foo,bar
-func Handler(alertManager alertManagerAPIer, logger *zap.Logger) http.HandlerFunc {
+func Handler(coreStorageAlert coreStorage.CoreStorageAlert, logger *zap.Logger) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		var err error
 
-		data, err := alertManager.GetAlerts()
+		data, err := coreStorageAlert.All()
 		if err != nil {
 			logger.Error("error get alerts", zap.Error(err))
 			rw.Header().Add("X-Error", err.Error())

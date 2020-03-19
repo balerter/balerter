@@ -137,14 +137,6 @@ func main() {
 
 	// ---------------------
 	// |
-	// | API
-	// |
-	wg.Add(1)
-	apis := apiManager.New(cfg.Global.API, alertMgr, lgr.Logger())
-	go apis.Run(ctx, ctxCancel, wg)
-
-	// ---------------------
-	// |
 	// | Core Modules
 	// |
 	// | KV
@@ -157,6 +149,14 @@ func main() {
 	lgr.Logger().Info("init kv storage", zap.String("engine", cfg.Global.Storages.KV))
 	kvModule := kv.New(kvEngine)
 	coreModules = append(coreModules, kvModule)
+
+	// ---------------------
+	// |
+	// | API
+	// |
+	wg.Add(1)
+	apis := apiManager.New(cfg.Global.API, alertManagerStorageEngine, lgr.Logger())
+	go apis.Run(ctx, ctxCancel, wg)
 
 	// ---------------------
 	// |
