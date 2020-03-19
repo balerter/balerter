@@ -15,8 +15,9 @@ RUN go build -o /balerter -ldflags "-X main.version=${version} -s -w"  ./cmd/bal
 
 # -----
 
-FROM alpine:3.11.3
+FROM  debian:stretch-slim
 COPY --from=build /balerter /
+COPY --from=build /build/balerter/modules /modules
 
 ENTRYPOINT ["/balerter"]
 
