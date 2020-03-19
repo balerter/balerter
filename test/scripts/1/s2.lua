@@ -1,6 +1,6 @@
 -- @interval 5s
 
-local db = require('datasource.postgres.pg1')
+local db = require('datasource.clickhouse.ch1')
 local log = require('log')
 local h = require('h')
 

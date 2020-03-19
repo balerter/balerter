@@ -1,0 +1,46 @@
+{
+    1 = {
+        id = 1
+        email = email1@domain.com
+        name = user1
+    }
+    2 = {
+        id = 2
+        email = email2@domain.com
+        name = user2
+    }
+    3 = {
+        id = 3
+        email = email3@domain.com
+        name = user3
+    }
+    4 = {
+        id = 4
+        email = email4@domain.com
+        name = user4
+    }
+    5 = {
+        id = 5
+        email = email5@domain.com
+        name = user5
+    }
+}
+
+{
+    1 = {
+        date = 2020-01-01T00:00:00Z
+        name = user1
+        age = 42
+    }
+    2 = {
+        date = 2020-01-01T00:00:00Z
+        name = user2
+        age = 42
+    }
+    3 = {
+        date = 2020-01-01T00:00:00Z
+        name = user3
+        age = 42
+    }
+}
+

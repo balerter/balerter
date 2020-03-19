@@ -22,3 +22,12 @@ push-tgtool:
 
 test-full:
 	GO111MODULE=on go test -mod=vendor -coverprofile=coverage.txt -covermode=atomic ./internal/... ./cmd/...
+
+test-integration:
+	go build -race -o ./balerter ./cmd/balerter
+	docker-compose -f ./test/docker-compose.yml up -d
+	sleep 5
+	./balerter -config ./test/config.yml -once > out.txt
+	diff out.txt ./test/out.etalon.txt
+	docker-compose -f ./test/docker-compose.yml down -v
+

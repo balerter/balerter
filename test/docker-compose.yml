@@ -7,6 +7,12 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_DB: postgres
     volumes:
-    - ./postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    - ./assets/postgres.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - 5432:5432
+  clickhouse:
+    image: yandex/clickhouse-server
+    volumes:
+    - ./assets/clickhouse.sh:/docker-entrypoint-initdb.d/init-db.sh
+    ports:
+    - 9000:9000
