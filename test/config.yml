@@ -1,0 +1,30 @@
+scripts:
+  updateInterval: 1m
+  sources:
+    folder:
+      - name: scripts
+        path: ./test/scripts/1
+
+datasources:
+
+  postgres:
+    - name: pg1
+      host: 127.0.0.1
+      port: 5432
+      username: postgres
+      password: secret
+      database: postgres
+      sslMode: disable
+
+channels:
+  syslog:
+    - name: default
+      tag: balerter
+      network: udp
+      address: 127.0.0.1:10514
+      priority: 'EMERG|DAEMON'
+
+global:
+  api:
+    address: 127.0.0.1:2000
+    metrics: true
