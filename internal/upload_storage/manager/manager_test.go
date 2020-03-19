@@ -40,6 +40,10 @@ func TestManager_Get(t *testing.T) {
 		logger  *zap.Logger
 		modules map[string]modules.Module
 	}
+
+	m1 := &moduleMock{name: "foo"}
+	m2 := &moduleMock{name: "bar"}
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -50,11 +54,11 @@ func TestManager_Get(t *testing.T) {
 			fields: fields{
 				logger: nil,
 				modules: map[string]modules.Module{
-					"foo": &moduleMock{name: "foo"},
-					"bar": &moduleMock{name: "bar"},
+					"foo": m1,
+					"bar": m2,
 				},
 			},
-			want: []modules.Module{&moduleMock{name: "foo"}, &moduleMock{name: "bar"}},
+			want: []modules.Module{m1, m2},
 		},
 	}
 	for _, tt := range tests {
