@@ -33,6 +33,34 @@ func (s *storageKV) Put(key string, value string) error {
 	return nil
 }
 
+func (s *storageKV) All() (map[string]string, error) {
+	result := make(map[string]string)
+
+	err := s.db.View(func(tx *bbolt.Tx) error {
+		b := tx.Bucket(bucketKV)
+		if b == nil {
+			return errBucketNotFound
+		}
+
+		err := b.ForEach(func(k, v []byte) error {
+			result[string(k)] = string(v)
+			return nil
+		})
+		if err != nil {
+			return fmt.Errorf("error read storage")
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		s.logger.Error("bbolt: error get data", zap.Error(err))
+		return nil, fmt.Errorf("error get data, %w", err)
+	}
+
+	return result, nil
+}
+
 func (s *storageKV) Get(key string) (string, error) {
 	var v []byte
 

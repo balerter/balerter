@@ -48,3 +48,16 @@ func (m *storageKV) Delete(name string) error {
 
 	return nil
 }
+
+func (m *storageKV) All() (map[string]string, error) {
+	m.mxKV.RLock()
+	defer m.mxKV.RUnlock()
+
+	r := make(map[string]string)
+
+	for name, value := range m.kv {
+		r[name] = value
+	}
+
+	return r, nil
+}

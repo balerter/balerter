@@ -65,3 +65,22 @@ func TestMemory_Get(t *testing.T) {
 
 	assert.Equal(t, "bar", v)
 }
+
+func TestMemory_All(t *testing.T) {
+	m := &storageKV{kv: map[string]string{
+		"f1": "v1",
+		"f2": "v2",
+	}}
+
+	result, err := m.All()
+	require.NoError(t, err)
+	assert.Equal(t, 2, len(result))
+
+	v, ok := result["f1"]
+	assert.True(t, ok)
+	assert.Equal(t, "v1", v)
+
+	v, ok = result["f2"]
+	assert.True(t, ok)
+	assert.Equal(t, "v2", v)
+}

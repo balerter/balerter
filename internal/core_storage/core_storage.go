@@ -9,6 +9,7 @@ type CoreStorageKV interface {
 	Get(string) (string, error)
 	Upsert(string, string) error
 	Delete(string) error
+	All() (map[string]string, error)
 }
 
 type CoreStorageAlert interface {
