@@ -2,21 +2,33 @@ package memory
 
 import (
 	"github.com/balerter/balerter/internal/alert/alert"
+	coreStorage "github.com/balerter/balerter/internal/core_storage"
 	"sync"
 )
 
-type Memory struct {
+type storageKV struct {
 	mxKV sync.RWMutex
 	kv   map[string]string
+}
 
+type storageAlert struct {
 	mxAlerts sync.RWMutex
 	alerts   map[string]*alert.Alert
 }
 
+type Memory struct {
+	kv    *storageKV
+	alert *storageAlert
+}
+
 func New() *Memory {
 	m := &Memory{
-		kv:     make(map[string]string),
-		alerts: make(map[string]*alert.Alert),
+		kv: &storageKV{
+			kv: make(map[string]string),
+		},
+		alert: &storageAlert{
+			alerts: make(map[string]*alert.Alert),
+		},
 	}
 
 	return m
@@ -24,4 +36,16 @@ func New() *Memory {
 
 func (m *Memory) Name() string {
 	return "memory"
+}
+
+func (m *Memory) KV() coreStorage.CoreStorageKV {
+	return m.kv
+}
+
+func (m *Memory) Alert() coreStorage.CoreStorageAlert {
+	return m.alert
+}
+
+func (m *Memory) Stop() error {
+	return nil
 }

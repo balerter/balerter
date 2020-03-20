@@ -85,7 +85,7 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 
 		m.logger.Debug("call alert luaCall", zap.String("alertName", alertName), zap.String("scriptName", s.Name), zap.String("alertText", alertText), zap.Int("alertLevel", int(alertLevel)), zap.Any("alertOptions", alertOptions))
 
-		a, err := m.engine.GetOrNew(alertName)
+		a, err := m.engine.Alert().GetOrNew(alertName)
 		if err != nil {
 			m.logger.Error("error get alert from storage", zap.Error(err))
 			L.Push(lua.LString("internal error get alert from storage: " + err.Error()))
@@ -108,7 +108,7 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 			m.Send(alertLevel.String(), alertName, alertText, alertOptions.Channels, alertOptions.Fields, alertOptions.Image)
 		}
 
-		m.engine.Release(a)
+		m.engine.Alert().Release(a)
 
 		return 0
 	}

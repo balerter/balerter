@@ -11,7 +11,7 @@ var (
 	errBucketNotFound = errors.New("bucket not found")
 )
 
-func (s *Storage) Put(key string, value string) error {
+func (s *storageKV) Put(key string, value string) error {
 	err := s.db.Update(func(tx *bbolt.Tx) error {
 		b := tx.Bucket(bucketKV)
 		if b == nil {
@@ -33,7 +33,7 @@ func (s *Storage) Put(key string, value string) error {
 	return nil
 }
 
-func (s *Storage) Get(key string) (string, error) {
+func (s *storageKV) Get(key string) (string, error) {
 	var v []byte
 
 	err := s.db.View(func(tx *bbolt.Tx) error {
@@ -58,7 +58,7 @@ func (s *Storage) Get(key string) (string, error) {
 	return string(v), nil
 }
 
-func (s *Storage) Upsert(key string, value string) error {
+func (s *storageKV) Upsert(key string, value string) error {
 	err := s.db.Update(func(tx *bbolt.Tx) error {
 		b := tx.Bucket(bucketKV)
 		if b == nil {
@@ -75,7 +75,7 @@ func (s *Storage) Upsert(key string, value string) error {
 	return nil
 }
 
-func (s *Storage) Delete(key string) error {
+func (s *storageKV) Delete(key string) error {
 	err := s.db.Update(func(tx *bbolt.Tx) error {
 		b := tx.Bucket(bucketKV)
 		if b == nil {

@@ -19,7 +19,7 @@ type API struct {
 	logger  *zap.Logger
 }
 
-func New(cfg config.API, coreStorageAlert coreStorage.CoreStorageAlert, logger *zap.Logger) *API {
+func New(cfg config.API, coreStorageAlert coreStorage.CoreStorage, logger *zap.Logger) *API {
 	api := &API{
 		address: cfg.Address,
 		server:  &http.Server{},

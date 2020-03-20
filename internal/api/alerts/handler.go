@@ -16,11 +16,11 @@ import (
 // GET /api/v1/alerts?level=error
 // GET /api/v1/alerts?level=error,warn&name=foo
 // GET /api/v1/alerts?level=error,warn&name=foo,bar
-func Handler(coreStorageAlert coreStorage.CoreStorageAlert, logger *zap.Logger) http.HandlerFunc {
+func Handler(coreStorageAlert coreStorage.CoreStorage, logger *zap.Logger) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		var err error
 
-		data, err := coreStorageAlert.All()
+		data, err := coreStorageAlert.Alert().All()
 		if err != nil {
 			logger.Error("error get alerts", zap.Error(err))
 			rw.Header().Add("X-Error", err.Error())

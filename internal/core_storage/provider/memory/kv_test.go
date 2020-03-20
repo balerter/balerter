@@ -7,7 +7,7 @@ import (
 )
 
 func TestMemory_Put(t *testing.T) {
-	m := New()
+	m := &storageKV{kv: map[string]string{}}
 
 	err := m.Put("foo", "bar")
 	require.NoError(t, err)
@@ -21,7 +21,7 @@ func TestMemory_Put(t *testing.T) {
 }
 
 func TestMemory_Upsert(t *testing.T) {
-	m := New()
+	m := &storageKV{kv: map[string]string{}}
 
 	err := m.Upsert("foo", "bar")
 	require.NoError(t, err)
@@ -35,7 +35,7 @@ func TestMemory_Upsert(t *testing.T) {
 }
 
 func TestMemory_Delete(t *testing.T) {
-	m := New()
+	m := &storageKV{kv: map[string]string{}}
 
 	m.kv["foo"] = "bar"
 
@@ -53,7 +53,7 @@ func TestMemory_Delete(t *testing.T) {
 }
 
 func TestMemory_Get(t *testing.T) {
-	m := New()
+	m := &storageKV{kv: map[string]string{}}
 
 	_, err := m.Get("foo")
 	require.Error(t, err)

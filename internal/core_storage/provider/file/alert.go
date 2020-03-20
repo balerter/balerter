@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *Storage) GetOrNew(name string) (*alert.Alert, error) {
+func (s *storageAlert) GetOrNew(name string) (*alert.Alert, error) {
 	var v []byte
 
 	err := s.db.View(func(tx *bbolt.Tx) error {
@@ -42,7 +42,7 @@ func (s *Storage) GetOrNew(name string) (*alert.Alert, error) {
 
 }
 
-func (s *Storage) All() ([]*alert.Alert, error) {
+func (s *storageAlert) All() ([]*alert.Alert, error) {
 	var vv [][]byte
 
 	err := s.db.View(func(tx *bbolt.Tx) error {
@@ -83,6 +83,6 @@ func (s *Storage) All() ([]*alert.Alert, error) {
 	return res, nil
 }
 
-func (s *Storage) Release(a *alert.Alert) {
+func (s *storageAlert) Release(a *alert.Alert) {
 	alert.ReleaseAlert(a)
 }

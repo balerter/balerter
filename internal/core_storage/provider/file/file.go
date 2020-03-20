@@ -3,6 +3,7 @@ package file
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/config"
+	coreStorage "github.com/balerter/balerter/internal/core_storage"
 	"go.etcd.io/bbolt"
 	"go.uber.org/zap"
 	"time"
@@ -15,16 +16,42 @@ var (
 	defaultTimeout = time.Second
 )
 
+type storageKV struct {
+	db     *bbolt.DB
+	logger *zap.Logger
+}
+
+type storageAlert struct {
+	db     *bbolt.DB
+	logger *zap.Logger
+}
+
 type Storage struct {
 	name   string
 	db     *bbolt.DB
 	logger *zap.Logger
+	kv     *storageKV
+	alert  *storageAlert
+}
+
+func (s *Storage) KV() coreStorage.CoreStorageKV {
+	return s.kv
+}
+
+func (s *Storage) Alert() coreStorage.CoreStorageAlert {
+	return s.alert
 }
 
 func New(config config.StorageCoreFile, logger *zap.Logger) (*Storage, error) {
 	s := &Storage{
 		name:   "file." + config.Name,
 		logger: logger,
+		kv: &storageKV{
+			logger: logger,
+		},
+		alert: &storageAlert{
+			logger: logger,
+		},
 	}
 
 	var err error
@@ -45,6 +72,9 @@ func New(config config.StorageCoreFile, logger *zap.Logger) (*Storage, error) {
 	if err := s.init(); err != nil {
 		return nil, fmt.Errorf("error init db, %w", err)
 	}
+
+	s.kv.db = s.db
+	s.alert.db = s.db
 
 	return s, nil
 }

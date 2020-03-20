@@ -8,7 +8,7 @@ import (
 )
 
 func TestAlert_GetOrNew(t *testing.T) {
-	m := New()
+	m := storageAlert{alerts: map[string]*alert.Alert{}}
 
 	a, err := m.GetOrNew("foo")
 	assert.NoError(t, err)
@@ -29,7 +29,7 @@ func TestAlert_GetOrNew(t *testing.T) {
 }
 
 func TestAlert_All(t *testing.T) {
-	m := New()
+	m := storageAlert{alerts: map[string]*alert.Alert{}}
 
 	a1 := &alert.Alert{}
 	a1.SetName("foo")

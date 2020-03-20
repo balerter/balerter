@@ -5,7 +5,6 @@ import (
 )
 
 type CoreStorageKV interface {
-	Name() string
 	Put(string, string) error
 	Get(string) (string, error)
 	Upsert(string, string) error
@@ -19,6 +18,8 @@ type CoreStorageAlert interface {
 }
 
 type CoreStorage interface {
-	CoreStorageKV
-	CoreStorageAlert
+	Name() string
+	KV() CoreStorageKV
+	Alert() CoreStorageAlert
+	Stop() error
 }

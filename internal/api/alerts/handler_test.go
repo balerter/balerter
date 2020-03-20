@@ -3,6 +3,7 @@ package alerts
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert/alert"
+	coreStorage "github.com/balerter/balerter/internal/core_storage"
 	"github.com/stretchr/testify/assert"
 	httpTestify "github.com/stretchr/testify/http"
 	"github.com/stretchr/testify/mock"
@@ -15,24 +16,47 @@ import (
 
 type coreStorageMock struct {
 	mock.Mock
+	alert *coreStorageAlertMock
 }
 
-func (m *coreStorageMock) GetOrNew(string) (*alert.Alert, error) {
+func (m *coreStorageMock) KV() coreStorage.CoreStorageKV {
+	return nil
+}
+
+func (m *coreStorageMock) Stop() error {
+	return nil
+}
+
+func (m *coreStorageMock) Name() string {
+	return ""
+}
+
+func (m *coreStorageMock) Alert() coreStorage.CoreStorageAlert {
+	return m.alert
+}
+
+type coreStorageAlertMock struct {
+	mock.Mock
+}
+
+func (m *coreStorageAlertMock) GetOrNew(string) (*alert.Alert, error) {
 	args := m.Called()
 	return args.Get(0).(*alert.Alert), args.Error(1)
 }
-func (m *coreStorageMock) All() ([]*alert.Alert, error) {
+func (m *coreStorageAlertMock) All() ([]*alert.Alert, error) {
 	args := m.Called()
 	return args.Get(0).([]*alert.Alert), args.Error(1)
 }
-func (m *coreStorageMock) Release(_ *alert.Alert) {
+func (m *coreStorageAlertMock) Release(_ *alert.Alert) {
 }
 
 func TestHandler_ErrorGetAlerts(t *testing.T) {
 	var resultData []*alert.Alert
 
-	am := &coreStorageMock{}
-	am.On("All").Return(resultData, fmt.Errorf("error1"))
+	am := &coreStorageMock{
+		alert: &coreStorageAlertMock{},
+	}
+	am.alert.On("All").Return(resultData, fmt.Errorf("error1"))
 
 	f := Handler(am, zap.NewNop())
 
@@ -57,8 +81,10 @@ func TestHandler(t *testing.T) {
 
 	updatedAt := a1.GetLastChangeTime().Format(time.RFC3339)
 
-	am := &coreStorageMock{}
-	am.On("All").Return(resultData, nil)
+	am := &coreStorageMock{
+		alert: &coreStorageAlertMock{},
+	}
+	am.alert.On("All").Return(resultData, nil)
 
 	f := Handler(am, zap.NewNop())
 
@@ -74,8 +100,10 @@ func TestHandler(t *testing.T) {
 func TestHandler_BadLevelArgument(t *testing.T) {
 	var resultData []*alert.Alert
 
-	am := &coreStorageMock{}
-	am.On("All").Return(resultData, nil)
+	am := &coreStorageMock{
+		alert: &coreStorageAlertMock{},
+	}
+	am.alert.On("All").Return(resultData, nil)
 
 	f := Handler(am, zap.NewNop())
 

@@ -9,6 +9,7 @@ import (
 	"github.com/balerter/balerter/internal/alert/provider/syslog"
 	"github.com/balerter/balerter/internal/alert/provider/telegram"
 	"github.com/balerter/balerter/internal/config"
+	coreStorage "github.com/balerter/balerter/internal/core_storage"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -19,20 +20,14 @@ type alertChannel interface {
 	Send(*message.Message) error
 }
 
-type storageEngine interface {
-	GetOrNew(string) (*alert.Alert, error)
-	All() ([]*alert.Alert, error)
-	Release(a *alert.Alert)
-}
-
 type Manager struct {
 	logger   *zap.Logger
 	channels map[string]alertChannel
 
-	engine storageEngine
+	engine coreStorage.CoreStorage
 }
 
-func New(engine storageEngine, logger *zap.Logger) *Manager {
+func New(engine coreStorage.CoreStorage, logger *zap.Logger) *Manager {
 	m := &Manager{
 		logger:   logger,
 		engine:   engine,

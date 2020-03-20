@@ -4,7 +4,7 @@ import (
 	"github.com/balerter/balerter/internal/alert/alert"
 )
 
-func (m *Memory) GetOrNew(name string) (*alert.Alert, error) {
+func (m *storageAlert) GetOrNew(name string) (*alert.Alert, error) {
 	m.mxAlerts.RLock()
 	a, ok := m.alerts[name]
 	m.mxAlerts.RUnlock()
@@ -25,7 +25,7 @@ func (m *Memory) GetOrNew(name string) (*alert.Alert, error) {
 	return a, nil
 }
 
-func (m *Memory) All() ([]*alert.Alert, error) {
+func (m *storageAlert) All() ([]*alert.Alert, error) {
 	var result []*alert.Alert
 
 	m.mxAlerts.RLock()
@@ -38,4 +38,4 @@ func (m *Memory) All() ([]*alert.Alert, error) {
 	return result, nil
 }
 
-func (m *Memory) Release(_ *alert.Alert) {}
+func (m *storageAlert) Release(_ *alert.Alert) {}

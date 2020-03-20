@@ -1,22 +1,16 @@
 package kv
 
 import (
+	coreStorage "github.com/balerter/balerter/internal/core_storage"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 )
 
-type kvEngine interface {
-	Put(string, string) error
-	Get(string) (string, error)
-	Upsert(string, string) error
-	Delete(string) error
-}
-
 type KV struct {
-	engine kvEngine
+	engine coreStorage.CoreStorage
 }
 
-func New(engine kvEngine) *KV {
+func New(engine coreStorage.CoreStorage) *KV {
 	kv := &KV{
 		engine: engine,
 	}
@@ -53,7 +47,7 @@ func (kv *KV) Stop() error {
 func (kv *KV) get(L *lua.LState) int {
 	varName := L.Get(1).String()
 
-	val, err := kv.engine.Get(varName)
+	val, err := kv.engine.KV().Get(varName)
 	if err != nil {
 		L.Push(lua.LString(""))
 		L.Push(lua.LString(err.Error()))
@@ -70,7 +64,7 @@ func (kv *KV) put(L *lua.LState) int {
 	varName := L.Get(1).String()
 	varVal := L.Get(2).String()
 
-	err := kv.engine.Put(varName, varVal)
+	err := kv.engine.KV().Put(varName, varVal)
 	if err != nil {
 		L.Push(lua.LString(err.Error()))
 		return 1
@@ -83,7 +77,7 @@ func (kv *KV) upsert(L *lua.LState) int {
 	varName := L.Get(1).String()
 	varVal := L.Get(2).String()
 
-	err := kv.engine.Upsert(varName, varVal)
+	err := kv.engine.KV().Upsert(varName, varVal)
 	if err != nil {
 		L.Push(lua.LString(err.Error()))
 		return 1
@@ -95,7 +89,7 @@ func (kv *KV) upsert(L *lua.LState) int {
 func (kv *KV) delete(L *lua.LState) int {
 	varName := L.Get(1).String()
 
-	err := kv.engine.Delete(varName)
+	err := kv.engine.KV().Delete(varName)
 	if err != nil {
 		L.Push(lua.LString(err.Error()))
 		return 1
