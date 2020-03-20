@@ -3,6 +3,7 @@ package manager
 import (
 	"context"
 	"github.com/balerter/balerter/internal/api/alerts"
+	"github.com/balerter/balerter/internal/api/kv"
 	"github.com/balerter/balerter/internal/config"
 	coreStorage "github.com/balerter/balerter/internal/core_storage"
 	"github.com/balerter/balerter/internal/metrics"
@@ -19,7 +20,7 @@ type API struct {
 	logger  *zap.Logger
 }
 
-func New(cfg config.API, coreStorageAlert coreStorage.CoreStorage, logger *zap.Logger) *API {
+func New(cfg config.API, coreStorageAlert, coreStorageKV coreStorage.CoreStorage, logger *zap.Logger) *API {
 	api := &API{
 		address: cfg.Address,
 		server:  &http.Server{},
@@ -28,7 +29,8 @@ func New(cfg config.API, coreStorageAlert coreStorage.CoreStorage, logger *zap.L
 
 	m := http.NewServeMux()
 
-	m.HandleFunc("/api/v1/alerts", alerts.Handler(coreStorageAlert, logger))
+	m.HandleFunc("/api/v1/alerts", alerts.HandlerIndex(coreStorageAlert, logger))
+	m.HandleFunc("/api/v1/kv", kv.HandlerIndex(coreStorageKV, logger))
 
 	if cfg.Metrics {
 		api.logger.Info("enable exposing prometheus metrics")

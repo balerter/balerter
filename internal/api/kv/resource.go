@@ -1,11 +1,9 @@
-package alerts
+package kv
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/balerter/balerter/internal/alert/alert"
 	"net/http"
-	"time"
 )
 
 type resource struct {
@@ -13,23 +11,19 @@ type resource struct {
 }
 
 type resourceItem struct {
-	Name      string `json:"name"`
-	Level     string `json:"level"`
-	Count     int    `json:"count"`
-	UpdatedAt string `json:"updated_at"`
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
-func newResource(data []*alert.Alert) *resource {
+func newResource(data map[string]string) *resource {
 	res := &resource{
 		items: []resourceItem{},
 	}
 
-	for _, item := range data {
+	for name, value := range data {
 		i := resourceItem{
-			Name:      item.Name(),
-			Level:     item.Level().String(),
-			Count:     item.Count(),
-			UpdatedAt: item.GetLastChangeTime().Format(time.RFC3339),
+			Name:  name,
+			Value: value,
 		}
 
 		res.items = append(res.items, i)

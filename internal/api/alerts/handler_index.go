@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// Handler handle API request GET /api/v1/alerts
+// HandlerIndex handle API request GET /api/v1/alerts
 //
 // Endpoint receive arguments:
 // name=<NAME1>,<NAME2> - filter by name
@@ -16,7 +16,7 @@ import (
 // GET /api/v1/alerts?level=error
 // GET /api/v1/alerts?level=error,warn&name=foo
 // GET /api/v1/alerts?level=error,warn&name=foo,bar
-func Handler(coreStorageAlert coreStorage.CoreStorage, logger *zap.Logger) http.HandlerFunc {
+func HandlerIndex(coreStorageAlert coreStorage.CoreStorage, logger *zap.Logger) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		var err error
 

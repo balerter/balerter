@@ -58,7 +58,7 @@ func TestHandler_ErrorGetAlerts(t *testing.T) {
 	}
 	am.alert.On("All").Return(resultData, fmt.Errorf("error1"))
 
-	f := Handler(am, zap.NewNop())
+	f := HandlerIndex(am, zap.NewNop())
 
 	rw := &httpTestify.TestResponseWriter{}
 	req := &http.Request{URL: &url.URL{}}
@@ -86,7 +86,7 @@ func TestHandler(t *testing.T) {
 	}
 	am.alert.On("All").Return(resultData, nil)
 
-	f := Handler(am, zap.NewNop())
+	f := HandlerIndex(am, zap.NewNop())
 
 	rw := &httpTestify.TestResponseWriter{}
 	req := &http.Request{URL: &url.URL{}}
@@ -105,7 +105,7 @@ func TestHandler_BadLevelArgument(t *testing.T) {
 	}
 	am.alert.On("All").Return(resultData, nil)
 
-	f := Handler(am, zap.NewNop())
+	f := HandlerIndex(am, zap.NewNop())
 
 	rw := &httpTestify.TestResponseWriter{}
 	req := &http.Request{URL: &url.URL{RawQuery: "level=foo"}}
