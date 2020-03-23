@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"fmt"
 	"github.com/balerter/balerter/internal/alert/alert"
 )
 
@@ -39,3 +40,15 @@ func (m *storageAlert) All() ([]*alert.Alert, error) {
 }
 
 func (m *storageAlert) Release(_ *alert.Alert) {}
+
+func (m *storageAlert) Get(name string) (*alert.Alert, error) {
+	m.mxAlerts.RLock()
+	defer m.mxAlerts.RUnlock()
+
+	a, ok := m.alerts[name]
+	if !ok {
+		return nil, fmt.Errorf("alert not found")
+	}
+
+	return a, nil
+}

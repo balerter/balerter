@@ -86,3 +86,36 @@ func (s *storageAlert) All() ([]*alert.Alert, error) {
 func (s *storageAlert) Release(a *alert.Alert) {
 	alert.ReleaseAlert(a)
 }
+
+func (s *storageAlert) Get(name string) (*alert.Alert, error) {
+	var res []byte
+
+	err := s.db.View(func(tx *bbolt.Tx) error {
+		b := tx.Bucket(bucketAlert)
+		if b == nil {
+			return errBucketNotFound
+		}
+
+		res = b.Get([]byte(name))
+
+		return nil
+	})
+
+	if err != nil {
+		s.logger.Error("bbolt: error get items", zap.ByteString("bucket", bucketAlert), zap.Error(err))
+		return nil, fmt.Errorf("error get item, %w", err)
+	}
+
+	if len(res) == 0 {
+		return nil, fmt.Errorf("alert not found")
+	}
+
+	a := alert.AcquireAlert()
+
+	err = a.Unmarshal(res)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshal alert, %w", err)
+	}
+
+	return a, nil
+}

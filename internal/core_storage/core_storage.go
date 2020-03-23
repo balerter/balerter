@@ -16,6 +16,7 @@ type CoreStorageAlert interface {
 	GetOrNew(string) (*alert.Alert, error)
 	All() ([]*alert.Alert, error)
 	Release(a *alert.Alert)
+	Get(string) (*alert.Alert, error)
 }
 
 type CoreStorage interface {

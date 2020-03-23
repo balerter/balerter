@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"reflect"
 	"testing"
 )
 
@@ -36,42 +35,18 @@ func TestNew(t *testing.T) {
 }
 
 func TestManager_Get(t *testing.T) {
-	type fields struct {
-		logger  *zap.Logger
-		modules map[string]modules.Module
-	}
-
 	m1 := &moduleMock{name: "foo"}
 	m2 := &moduleMock{name: "bar"}
 
-	tests := []struct {
-		name   string
-		fields fields
-		want   []modules.Module
-	}{
-		{
-			name: "",
-			fields: fields{
-				logger: nil,
-				modules: map[string]modules.Module{
-					"foo": m1,
-					"bar": m2,
-				},
-			},
-			want: []modules.Module{m1, m2},
-		},
+	m := &Manager{
+		logger:  zap.NewNop(),
+		modules: map[string]modules.Module{"foo": m1, "bar": m2},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := &Manager{
-				logger:  tt.fields.logger,
-				modules: tt.fields.modules,
-			}
-			if got := m.Get(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Get() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+
+	result := m.Get()
+	assert.Equal(t, 2, len(result))
+	assert.Contains(t, result, m1)
+	assert.Contains(t, result, m2)
 }
 
 func TestManager_Init(t *testing.T) {

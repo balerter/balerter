@@ -49,6 +49,9 @@ func (m *coreStorageAlertMock) All() ([]*alert.Alert, error) {
 }
 func (m *coreStorageAlertMock) Release(_ *alert.Alert) {
 }
+func (m *coreStorageAlertMock) Get(_ string) (*alert.Alert, error) {
+	return nil, nil
+}
 
 func TestHandler_ErrorGetAlerts(t *testing.T) {
 	var resultData []*alert.Alert

@@ -99,6 +99,8 @@ func (m *Manager) GetLoader(script *script.Script) lua.LGFunction {
 				"success": m.luaCall(script, alert.LevelSuccess),
 				"off":     m.luaCall(script, alert.LevelSuccess),
 				"ok":      m.luaCall(script, alert.LevelSuccess),
+
+				"get": m.get(script),
 			}
 
 			mod := L.SetFuncs(L.NewTable(), exports)
