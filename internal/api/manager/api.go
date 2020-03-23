@@ -2,6 +2,7 @@ package manager
 
 import (
 	"context"
+	"fmt"
 	"github.com/balerter/balerter/internal/api/alerts"
 	"github.com/balerter/balerter/internal/api/kv"
 	"github.com/balerter/balerter/internal/config"
@@ -29,6 +30,7 @@ func New(cfg config.API, coreStorageAlert, coreStorageKV coreStorage.CoreStorage
 
 	m := http.NewServeMux()
 
+	m.HandleFunc("/liveness", api.handlerLiveness)
 	m.HandleFunc("/api/v1/alerts", alerts.HandlerIndex(coreStorageAlert, logger))
 	m.HandleFunc("/api/v1/kv", kv.HandlerIndex(coreStorageKV, logger))
 
@@ -67,5 +69,12 @@ func (api *API) Run(ctx context.Context, ctxCancel context.CancelFunc, wg *sync.
 
 	if err := api.server.Shutdown(ctx); err != nil {
 		api.logger.Error("error shutdown api server", zap.Error(err))
+	}
+}
+
+func (api *API) handlerLiveness(rw http.ResponseWriter, _ *http.Request) {
+	if _, err := fmt.Fprint(rw, "ok"); err != nil {
+		api.logger.Error("error write response", zap.Error(err))
+		rw.WriteHeader(500)
 	}
 }
