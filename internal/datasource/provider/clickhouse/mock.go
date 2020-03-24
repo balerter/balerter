@@ -45,7 +45,7 @@ func (m *Mock) GetLoader(_ *script.Script) lua.LGFunction {
 func (m *Mock) loader(L *lua.LState) int {
 	var exports = map[string]lua.LGFunction{
 		"query":   m.query,
-		"onQuery": m.onQuery(),
+		"onQuery": m.onQuery,
 	}
 
 	mod := L.SetFuncs(L.NewTable(), exports)
@@ -93,22 +93,20 @@ func (m *Mock) query(L *lua.LState) int {
 	return len(args)
 }
 
-func (m *Mock) onQuery() lua.LGFunction {
-	return func(L *lua.LState) int {
+func (m *Mock) onQuery(L *lua.LState) int {
 
-		if L.GetTop() == 0 {
-			m.logger.Error("arguments not found")
-			return 0
-		}
-
-		q := L.Get(1).String()
-
-		//m.logger.Debug("clickhouse onQuery", zap.String("query", q), zap.String("datasource name", m.name))
-
-		T := L.SetFuncs(L.NewTable(), map[string]lua.LGFunction{"response": m.writeResponse(q)})
-
-		L.Push(T)
-
-		return 1
+	if L.GetTop() == 0 {
+		m.logger.Error("arguments not found")
+		return 0
 	}
+
+	q := L.Get(1).String()
+
+	//m.logger.Debug("clickhouse onQuery", zap.String("query", q), zap.String("datasource name", m.name))
+
+	T := L.SetFuncs(L.NewTable(), map[string]lua.LGFunction{"response": m.writeResponse(q)})
+
+	L.Push(T)
+
+	return 1
 }
