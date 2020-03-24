@@ -24,7 +24,7 @@ end
 
 local function printTable(data)
     if type(data) ~= 'table' then
-        error('wrong data type')
+        print(data)
         return
     end
     print(_printTable(data, 1))
