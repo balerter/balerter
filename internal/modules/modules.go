@@ -12,6 +12,13 @@ type Module interface {
 	Stop() error
 }
 
+type ModuleTest interface {
+	Name() string
+	GetLoader(script *script.Script) lua.LGFunction
+	Stop() error
+	Errors() []error
+}
+
 type ModuleMock struct {
 	mock.Mock
 }
