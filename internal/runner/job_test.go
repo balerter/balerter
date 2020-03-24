@@ -34,6 +34,16 @@ type dsManagerMock struct {
 	mock.Mock
 }
 
+func (m *dsManagerMock) Errors() []error {
+	args := m.Called()
+	return args.Get(0).([]error)
+}
+
+func (m *dsManagerMock) GetMocks() []modules.ModuleTest {
+	args := m.Called()
+	return args.Get(0).([]modules.ModuleTest)
+}
+
 func (m *dsManagerMock) Get() []modules.Module {
 	args := m.Called()
 	return args.Get(0).([]modules.Module)

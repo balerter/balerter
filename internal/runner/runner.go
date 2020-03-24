@@ -24,6 +24,8 @@ type scriptsManager interface {
 
 type dsManager interface {
 	Get() []modules.Module
+	GetMocks() []modules.ModuleTest
+	Errors() []error
 }
 
 type Runner struct {
