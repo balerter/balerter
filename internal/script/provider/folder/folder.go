@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 type Provider struct {
@@ -44,7 +45,7 @@ func (p *Provider) Get() ([]*script.Script, error) {
 		}
 
 		s := script.New()
-		s.Name = filename
+		s.Name = strings.TrimSuffix(filename, ".lua")
 		s.Body = body
 
 		if err := s.ParseMeta(); err != nil {
