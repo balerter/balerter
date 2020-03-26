@@ -29,8 +29,9 @@ func outputPlainColored(results []modules.TestResult, w io.Writer) error {
 			line += colorFail.Sprint("[FAIL]")
 		}
 
-		line += " [" + r.Name + "] "
-		line += r.Message
+		line += "\t[" + r.ScriptName + "]"
+		line += "\t[" + r.ModuleName + "]"
+		line += "\t" + r.Message
 
 		_, err := fmt.Fprintf(w, "%s\n", line)
 		if err != nil {
