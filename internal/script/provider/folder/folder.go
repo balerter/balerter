@@ -44,8 +44,10 @@ func (p *Provider) Get() ([]*script.Script, error) {
 			return nil, err
 		}
 
+		_, fn := path.Split(filename)
+
 		s := script.New()
-		s.Name = strings.TrimSuffix(filename, ".lua")
+		s.Name = strings.TrimSuffix(fn, ".lua")
 		s.Body = body
 
 		if err := s.ParseMeta(); err != nil {
