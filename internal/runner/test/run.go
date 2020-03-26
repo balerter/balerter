@@ -80,9 +80,13 @@ func (rnr *Runner) Run() ([]modules.TestResult, bool, error) {
 			return nil, false, fmt.Errorf("error run main job, %w", err)
 		}
 		LMain.Close()
-	}
 
-	result = append(result, rnr.dsManager.Result()...)
+		for _, r := range rnr.dsManager.Result() {
+			r.ScriptName = pair.test.Name
+			result = append(result, r)
+		}
+		rnr.dsManager.Clean()
+	}
 
 	for _, r := range result {
 		if !r.Ok {

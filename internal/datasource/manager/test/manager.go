@@ -21,11 +21,19 @@ func New(logger *zap.Logger) *Manager {
 	return m
 }
 
+func (m *Manager) Clean() {
+	for _, m := range m.modules {
+		m.Clean()
+	}
+}
+
 func (m *Manager) Result() []modules.TestResult {
 	var result []modules.TestResult
 	for _, m := range m.modules {
-		m.Result()
-		result = append(result, m.Result()...)
+		for _, r := range m.Result() {
+			r.ModuleName = "datasource." + r.ModuleName
+			result = append(result, r)
+		}
 	}
 	return result
 }

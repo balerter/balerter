@@ -18,16 +18,16 @@ func (m *Mock) Result() []modules.TestResult {
 
 	for q, cnt := range m.asserts.callQuery {
 		c, ok := m.queryLog[q]
-		message := fmt.Sprintf("assertCalledQuery: the query '%s' has been called %d times", q, c)
+		message := fmt.Sprintf("assertCalledQuery: the query has been called %d times: %s", c, q)
 		pass := true
 
 		if !ok {
-			message = fmt.Sprintf("assertCalledQuery: the query '%s' has not been called", q)
+			message = fmt.Sprintf("assertCalledQuery: the query has not been called: %s", q)
 			pass = false
 		}
 
 		if ok && c < cnt {
-			message = fmt.Sprintf("assertCalledQuery: the query '%s' has been called %d times, expected %d", q, c, cnt)
+			message = fmt.Sprintf("assertCalledQuery: the query has been called %d times, expected %d: %s", c, cnt, q)
 			pass = false
 		}
 

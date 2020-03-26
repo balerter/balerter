@@ -7,6 +7,10 @@ import (
 	"go.uber.org/zap"
 )
 
+type asserts struct {
+	callQuery map[string]int
+}
+
 type Mock struct {
 	name   string
 	logger *zap.Logger
@@ -15,9 +19,7 @@ type Mock struct {
 	responses map[string][]lua.LValue
 	errors    []string
 
-	asserts struct {
-		callQuery map[string]int
-	}
+	asserts asserts
 }
 
 func New(cfg config.DataSourceClickhouse, logger *zap.Logger) (*Mock, error) {
@@ -26,9 +28,7 @@ func New(cfg config.DataSourceClickhouse, logger *zap.Logger) (*Mock, error) {
 		logger:    logger,
 		queryLog:  make(map[string]int),
 		responses: make(map[string][]lua.LValue),
-		asserts: struct {
-			callQuery map[string]int
-		}{
+		asserts: asserts{
 			callQuery: make(map[string]int),
 		},
 	}
@@ -40,7 +40,7 @@ func (m *Mock) Name() string {
 	return m.name
 }
 
-func (m *Mock) GetLoader(_ *script.Script) lua.LGFunction {
+func (m *Mock) GetLoader(s *script.Script) lua.LGFunction {
 	return func(L *lua.LState) int {
 		var exports = map[string]lua.LGFunction{
 			"query":             m.query,
@@ -52,5 +52,18 @@ func (m *Mock) GetLoader(_ *script.Script) lua.LGFunction {
 
 		L.Push(mod)
 		return 1
+	}
+}
+
+func (m *Mock) Clean() {
+	for key := range m.queryLog {
+		delete(m.queryLog, key)
+	}
+	for key := range m.responses {
+		delete(m.responses, key)
+	}
+	m.errors = m.errors[:0]
+	for key := range m.asserts.callQuery {
+		delete(m.asserts.callQuery, key)
 	}
 }

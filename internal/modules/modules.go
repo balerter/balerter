@@ -23,6 +23,7 @@ type ModuleTest interface {
 	Name() string
 	GetLoader(script *script.Script) lua.LGFunction
 	Result() []TestResult
+	Clean()
 }
 
 type ModuleMock struct {

@@ -17,6 +17,7 @@ type scriptsManager interface {
 type dsManager interface {
 	Get() []modules.ModuleTest
 	Result() []modules.TestResult
+	Clean()
 }
 
 type Runner struct {
