@@ -8,14 +8,14 @@ import (
 )
 
 type dsManager interface {
-	GetMocks() []modules.ModuleTest
+	Get() []modules.ModuleTest
 }
 
 type Test struct {
 	dsManager dsManager
 	logger    *zap.Logger
 
-	datasource map[string]modules.Module
+	datasource map[string]modules.ModuleTest
 }
 
 func New(dsManager dsManager, logger *zap.Logger) *Test {
@@ -23,7 +23,7 @@ func New(dsManager dsManager, logger *zap.Logger) *Test {
 		dsManager: dsManager,
 		logger:    logger,
 
-		datasource: make(map[string]modules.Module),
+		datasource: make(map[string]modules.ModuleTest),
 	}
 
 	return t
@@ -60,7 +60,7 @@ func (t *Test) GetLoader(script *script.Script) lua.LGFunction {
 			"datasource": t.getDatasource(script),
 		}
 
-		for _, module := range t.dsManager.GetMocks() {
+		for _, module := range t.dsManager.Get() {
 			t.datasource[module.Name()] = module
 		}
 

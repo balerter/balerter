@@ -6,6 +6,7 @@ require (
 	github.com/ClickHouse/clickhouse-go v1.3.13
 	github.com/aws/aws-sdk-go v1.29.4
 	github.com/deckarep/gosx-notifier v0.0.0-20180201035817-e127226297fb // indirect
+	github.com/fatih/color v1.7.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/gorilla/websocket v1.4.1 // indirect

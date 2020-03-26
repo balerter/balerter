@@ -12,39 +12,17 @@ import (
 )
 
 type Manager struct {
-	logger      *zap.Logger
-	modules     map[string]modules.Module
-	modulesMock map[string]modules.ModuleTest
+	logger  *zap.Logger
+	modules map[string]modules.Module
 }
 
 func New(logger *zap.Logger) *Manager {
 	m := &Manager{
-		logger:      logger,
-		modules:     make(map[string]modules.Module),
-		modulesMock: make(map[string]modules.ModuleTest),
+		logger:  logger,
+		modules: make(map[string]modules.Module),
 	}
 
 	return m
-}
-
-func (m *Manager) InitMocks(cfg config.DataSources) error {
-	for _, clickhouseCfg := range cfg.Clickhouse {
-		module, err := clickhouse.NewMock(clickhouseCfg, m.logger)
-		if err != nil {
-			return err
-		}
-		m.modulesMock[module.Name()] = module
-	}
-
-	return nil
-}
-
-func (m *Manager) Errors() []error {
-	var errors []error
-	for _, m := range m.modulesMock {
-		errors = append(errors, m.Errors()...)
-	}
-	return errors
 }
 
 func (m *Manager) Init(cfg config.DataSources) error {
@@ -99,16 +77,6 @@ func (m *Manager) Stop() {
 			m.logger.Error("error stop module", zap.String("name", module.Name()), zap.Error(err))
 		}
 	}
-}
-
-func (m *Manager) GetMocks() []modules.ModuleTest {
-	mm := make([]modules.ModuleTest, 0)
-
-	for _, module := range m.modulesMock {
-		mm = append(mm, module)
-	}
-
-	return mm
 }
 
 func (m *Manager) Get() []modules.Module {

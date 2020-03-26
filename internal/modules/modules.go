@@ -6,6 +6,13 @@ import (
 	lua "github.com/yuin/gopher-lua"
 )
 
+type TestResult struct {
+	ScriptName string `json:"script"`
+	ModuleName string `json:"module"`
+	Message    string `json:"message"`
+	Ok         bool   `json:"ok"`
+}
+
 type Module interface {
 	Name() string
 	GetLoader(script *script.Script) lua.LGFunction
@@ -15,8 +22,7 @@ type Module interface {
 type ModuleTest interface {
 	Name() string
 	GetLoader(script *script.Script) lua.LGFunction
-	Stop() error
-	Errors() []error
+	Result() []TestResult
 }
 
 type ModuleMock struct {

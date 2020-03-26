@@ -1,0 +1,49 @@
+package manager
+
+import (
+	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/modules"
+	"go.uber.org/zap"
+)
+
+type Provider interface {
+}
+
+type Manager struct {
+	logger *zap.Logger
+
+	modules map[string]modules.ModuleTest
+}
+
+func New(logger *zap.Logger) *Manager {
+	m := &Manager{
+		logger:  logger,
+		modules: make(map[string]modules.ModuleTest),
+	}
+
+	return m
+}
+
+func (m *Manager) Init(cfg config.StoragesUpload) error {
+	// todo: implement it
+	//for _, c := range cfg.S3 {
+	//	module, err := s3.New(c, m.logger)
+	//	if err != nil {
+	//		return fmt.Errorf("error init storage provider s3, %w", err)
+	//	}
+	//
+	//	m.modules[module.Name()] = module
+	//}
+
+	return nil
+}
+
+func (m *Manager) Get() []modules.ModuleTest {
+	mm := make([]modules.ModuleTest, 0)
+
+	for _, module := range m.modules {
+		mm = append(mm, module)
+	}
+
+	return mm
+}

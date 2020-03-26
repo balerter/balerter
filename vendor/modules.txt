@@ -81,6 +81,9 @@ github.com/davecgh/go-spew/spew
 github.com/deckarep/gosx-notifier
 # github.com/edsrzf/mmap-go v1.0.0
 github.com/edsrzf/mmap-go
+# github.com/fatih/color v1.7.0
+## explicit
+github.com/fatih/color
 # github.com/fogleman/gg v1.3.0
 github.com/fogleman/gg
 # github.com/go-kit/kit v0.9.0
@@ -152,6 +155,10 @@ github.com/lib/pq/oid
 # github.com/martinlindhe/notify v0.0.0-20181008203735-20632c9a275a
 ## explicit
 github.com/martinlindhe/notify
+# github.com/mattn/go-colorable v0.0.9
+github.com/mattn/go-colorable
+# github.com/mattn/go-isatty v0.0.4
+github.com/mattn/go-isatty
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
 # github.com/mitchellh/mapstructure v1.1.2

@@ -1,7 +1,8 @@
-package runner
+package test
 
 import (
 	"fmt"
+	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -41,60 +42,65 @@ func splitScripts(scripts []*script.Script) (map[string]pair, error) {
 	return pairs, nil
 }
 
-func (rnr *Runner) RunTests() []error {
-	var errors []error
+type Result struct {
+	Name string `json:"name"`
+	Text string `json:"text"`
+	Ok   bool   `json:"ok"`
+}
+
+func (rnr *Runner) Run() ([]modules.TestResult, bool, error) {
+	var result []modules.TestResult
+	ok := true
 
 	ss, err := rnr.scriptsManager.Get()
 	if err != nil {
-		errors = append(errors, fmt.Errorf("error get scripts, %w", err))
-		return errors
+		return nil, false, fmt.Errorf("error get scripts, %w", err)
 	}
 
 	pairs, err := splitScripts(ss)
 	if err != nil {
-		errors = append(errors, fmt.Errorf("error select tests, %w", err))
-		return errors
+		return nil, false, fmt.Errorf("error select tests, %w", err)
 	}
 
 	for name, pair := range pairs {
 		rnr.logger.Debug("run test", zap.String("name", name))
 
-		jTest := newJob(pair.test, rnr.logger)
-		LTest := rnr.createLuaTestingState(jTest)
-		err := LTest.DoString(string(jTest.script.Body))
+		LTest := rnr.createLuaState(pair.test)
+		err := LTest.DoString(string(pair.test.Body))
 		if err != nil {
-			errors = append(errors, fmt.Errorf("error run test job, %w", err))
 			LTest.Close()
-			continue
+			return nil, false, fmt.Errorf("error select tests, %w", err)
 		}
 		LTest.Close()
 
-		jMain := newJob(pair.main, rnr.logger)
-		LMain := rnr.createLuaTestingState(jMain)
-		err = LMain.DoString(string(jMain.script.Body))
+		LMain := rnr.createLuaState(pair.main)
+		err = LMain.DoString(string(pair.main.Body))
 		if err != nil {
-			errors = append(errors, fmt.Errorf("error run main job, %w", err))
 			LMain.Close()
-			continue
+			return nil, false, fmt.Errorf("error run main job, %w", err)
 		}
 		LMain.Close()
-
-		// todo check test expectations
 	}
 
-	errors = append(errors, rnr.dsManager.Errors()...)
+	result = append(result, rnr.dsManager.Result()...)
 
-	return errors
+	for _, r := range result {
+		if !r.Ok {
+			ok = false
+			break
+		}
+	}
+
+	return result, ok, nil
 }
 
-// todo refactoring duplicated code
-func (rnr *Runner) createLuaTestingState(j *Job) *lua.LState {
-	rnr.logger.Debug("create job", zap.String("name", j.name))
+func (rnr *Runner) createLuaState(s *script.Script) *lua.LState {
+	rnr.logger.Debug("create job", zap.String("name", s.Name))
 
 	L := lua.NewState()
 
 	for _, m := range rnr.coreModules {
-		L.PreloadModule(m.Name(), m.GetLoader(j.script))
+		L.PreloadModule(m.Name(), m.GetLoader(s))
 	}
 
 	// Init storages
@@ -102,16 +108,16 @@ func (rnr *Runner) createLuaTestingState(j *Job) *lua.LState {
 		moduleName := "storage." + module.Name()
 		rnr.logger.Debug("add storage module", zap.String("name", moduleName))
 
-		loader := module.GetLoader(j.script)
+		loader := module.GetLoader(s)
 		L.PreloadModule(moduleName, loader)
 	}
 
 	// Init datasources
-	for _, module := range rnr.dsManager.GetMocks() {
+	for _, module := range rnr.dsManager.Get() {
 		moduleName := "datasource." + module.Name()
 		rnr.logger.Debug("add datasource module", zap.String("name", moduleName))
 
-		loader := module.GetLoader(j.script)
+		loader := module.GetLoader(s)
 		L.PreloadModule(moduleName, loader)
 	}
 

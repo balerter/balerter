@@ -6,7 +6,7 @@ import (
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"github.com/balerter/balerter/internal/config"
 	coreStorageManager "github.com/balerter/balerter/internal/core_storage/manager"
-	dsManager "github.com/balerter/balerter/internal/datasource/manager"
+	dsManagerTest "github.com/balerter/balerter/internal/datasource/manager/test"
 	"github.com/balerter/balerter/internal/logger"
 	"github.com/balerter/balerter/internal/metrics"
 	"github.com/balerter/balerter/internal/modules"
@@ -15,11 +15,12 @@ import (
 	"github.com/balerter/balerter/internal/modules/kv"
 	logModule "github.com/balerter/balerter/internal/modules/log"
 	testModule "github.com/balerter/balerter/internal/modules/test"
-	"github.com/balerter/balerter/internal/runner"
+	runnerTest "github.com/balerter/balerter/internal/runner/test"
 	scriptsManager "github.com/balerter/balerter/internal/script/manager"
-	uploadStorageManager "github.com/balerter/balerter/internal/upload_storage/manager"
+	uploadStorageManagerTest "github.com/balerter/balerter/internal/upload_storage/manager/test"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+	"io"
 	"log"
 	"os"
 )
@@ -30,13 +31,18 @@ var (
 
 var (
 	configSource = flag.String("config", "config.yml", "Configuration source. Currently supports only path to yaml file.")
-	logLevel     = flag.String("logLevel", "INFO", "Log level. ERROR, WARN, INFO or DEBUG")
+	logLevel     = flag.String("logLevel", "ERROR", "Log level. ERROR, WARN, INFO or DEBUG")
 	debug        = flag.Bool("debug", false, "debug mode")
+	asJson       = flag.Bool("json", false, "output json format")
 
 	defaultLuaModulesPath = "./?.lua;./modules/?.lua;./modules/?/init.lua"
 )
 
 func main() {
+	var resultsOutput io.Writer
+
+	resultsOutput = os.Stdout
+
 	lua.LuaPathDefault = defaultLuaModulesPath
 
 	coreModules := make([]modules.Module, 0)
@@ -82,15 +88,15 @@ func main() {
 
 	// datasources
 	lgr.Logger().Info("init datasources manager")
-	dsMgr := dsManager.New(lgr.Logger())
-	if err := dsMgr.InitMocks(cfg.DataSources); err != nil {
+	dsMgr := dsManagerTest.New(lgr.Logger())
+	if err := dsMgr.Init(cfg.DataSources); err != nil {
 		lgr.Logger().Error("error init datasources manager", zap.Error(err))
 		os.Exit(1)
 	}
 
 	// upload storages
 	lgr.Logger().Info("init upload storages manager")
-	uploadStoragesMgr := uploadStorageManager.New(lgr.Logger())
+	uploadStoragesMgr := uploadStorageManagerTest.New(lgr.Logger())
 	if err := uploadStoragesMgr.Init(cfg.Storages.Upload); err != nil {
 		lgr.Logger().Error("error init upload storages manager", zap.Error(err))
 		os.Exit(1)
@@ -188,18 +194,27 @@ func main() {
 	// | Runner
 	// |
 	lgr.Logger().Info("init runner")
-	rnr := runner.New(cfg.Scripts.UpdateInterval, scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
+	rnr := runnerTest.New(scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
 
 	lgr.Logger().Info("run runner: tests")
-	errs := rnr.RunTests()
-	if len(errs) != 0 {
-		lgr.Logger().Error("tests failed", zap.Errors("errors", errs))
+	results, ok, err := rnr.Run()
+	if err != nil {
+		lgr.Logger().Error("error run tests", zap.Error(err))
 		os.Exit(1)
 	}
 
-	dsMgr.Stop()
+	if err := output(results, resultsOutput, *asJson); err != nil {
+		lgr.Logger().Error("error output results", zap.Error(err))
+		os.Exit(1)
+	}
 
 	lgr.Logger().Info("terminate")
+
+	if !ok {
+		os.Exit(2)
+		return
+	}
+
 	os.Exit(0)
 }
 
