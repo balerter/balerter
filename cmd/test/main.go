@@ -118,16 +118,6 @@ func main() {
 	// |
 	lgr.Logger().Info("init alert manager")
 
-	//alertManagerStorageEngine, err := coreStoragesMgr.Get("memory")
-	//if err != nil {
-	//	lgr.Logger().Error("error get core storages engine for alert", zap.String("name", cfg.Global.Storages.Alert), zap.Error(err))
-	//	os.Exit(1)
-	//}
-	//alertMgr := alertManagerTest.New(alertManagerStorageEngine, lgr.Logger())
-	//if err := alertMgr.Init(cfg.Channels); err != nil {
-	//	lgr.Logger().Error("error init alert manager", zap.Error(err))
-	//	os.Exit(1)
-	//}
 	alertMgr := mock.New("alert", []string{"error"}, lgr.Logger())
 	coreModules = append(coreModules, alertMgr)
 
