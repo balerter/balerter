@@ -78,11 +78,15 @@ func (m *Manager) Init(cfg config.Channels) error {
 }
 
 func (m *Manager) Name() string {
-	return "alert"
+	return ModuleName()
 }
 
 func (m *Manager) Stop() error {
 	return nil
+}
+
+func ModuleName() string {
+	return "alert"
 }
 
 func Methods() []string {

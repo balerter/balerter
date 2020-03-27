@@ -119,7 +119,7 @@ func main() {
 	// |
 	lgr.Logger().Info("init alert manager")
 
-	alertMgr := mock.New("alert", alertManager.Methods(), lgr.Logger())
+	alertMgr := mock.New(alertManager.ModuleName(), alertManager.Methods(), lgr.Logger())
 	coreModules = append(coreModules, alertMgr)
 
 	// ---------------------
