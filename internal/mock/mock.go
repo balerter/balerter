@@ -41,6 +41,10 @@ func New(name string, methods []string, logger *zap.Logger) *ModuleMock {
 	return m
 }
 
+func (m *ModuleMock) Stop() error {
+	return nil
+}
+
 func (m *ModuleMock) GetLoader(_ *script.Script) lua.LGFunction {
 	return func(L *lua.LState) int {
 		exports := map[string]lua.LGFunction{

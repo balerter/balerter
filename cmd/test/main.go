@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"github.com/balerter/balerter/internal/config"
 	coreStorageManager "github.com/balerter/balerter/internal/core_storage/manager"
 	dsManagerTest "github.com/balerter/balerter/internal/datasource/manager/test"
 	"github.com/balerter/balerter/internal/logger"
 	"github.com/balerter/balerter/internal/metrics"
+	"github.com/balerter/balerter/internal/mock"
 	"github.com/balerter/balerter/internal/modules"
 	chartModule "github.com/balerter/balerter/internal/modules/chart"
 	httpModule "github.com/balerter/balerter/internal/modules/http"
@@ -118,16 +118,17 @@ func main() {
 	// |
 	lgr.Logger().Info("init alert manager")
 
-	alertManagerStorageEngine, err := coreStoragesMgr.Get(cfg.Global.Storages.Alert)
-	if err != nil {
-		lgr.Logger().Error("error get core storages engine for alert", zap.String("name", cfg.Global.Storages.Alert), zap.Error(err))
-		os.Exit(1)
-	}
-	alertMgr := alertManager.New(alertManagerStorageEngine, lgr.Logger())
-	if err := alertMgr.Init(cfg.Channels); err != nil {
-		lgr.Logger().Error("error init alert manager", zap.Error(err))
-		os.Exit(1)
-	}
+	//alertManagerStorageEngine, err := coreStoragesMgr.Get("memory")
+	//if err != nil {
+	//	lgr.Logger().Error("error get core storages engine for alert", zap.String("name", cfg.Global.Storages.Alert), zap.Error(err))
+	//	os.Exit(1)
+	//}
+	//alertMgr := alertManagerTest.New(alertManagerStorageEngine, lgr.Logger())
+	//if err := alertMgr.Init(cfg.Channels); err != nil {
+	//	lgr.Logger().Error("error init alert manager", zap.Error(err))
+	//	os.Exit(1)
+	//}
+	alertMgr := mock.New("alert", []string{"error"}, lgr.Logger())
 	coreModules = append(coreModules, alertMgr)
 
 	// ---------------------
@@ -136,7 +137,7 @@ func main() {
 	// |
 	// | KV
 	// |
-	kvEngine, err := coreStoragesMgr.Get(cfg.Global.Storages.KV)
+	kvEngine, err := coreStoragesMgr.Get("memory")
 	if err != nil {
 		lgr.Logger().Error("error get kv storage engine", zap.String("name", cfg.Global.Storages.KV), zap.Error(err))
 		os.Exit(1)
@@ -159,7 +160,7 @@ func main() {
 	// |
 	// | Log
 	// |
-	logMod := logModule.New(lgr.Logger())
+	logMod := logModule.New(lgr.Logger()) // todo: mock it
 	coreModules = append(coreModules, logMod)
 
 	// ---------------------
@@ -168,7 +169,7 @@ func main() {
 	// |
 	// | Chart
 	// |
-	chartMod := chartModule.New(lgr.Logger())
+	chartMod := chartModule.New(lgr.Logger()) // todo: mock it?
 	coreModules = append(coreModules, chartMod)
 
 	// ---------------------
@@ -177,7 +178,7 @@ func main() {
 	// |
 	// | http
 	// |
-	httpMod := httpModule.New(lgr.Logger())
+	httpMod := httpModule.New(lgr.Logger()) // todo: mock it
 	coreModules = append(coreModules, httpMod)
 
 	// ---------------------
@@ -186,7 +187,7 @@ func main() {
 	// |
 	// | test
 	// |
-	testMod := testModule.New(dsMgr, uploadStoragesMgr, lgr.Logger())
+	testMod := testModule.New(dsMgr, uploadStoragesMgr, alertMgr, lgr.Logger())
 	coreModules = append(coreModules, testMod)
 
 	// ---------------------
@@ -194,7 +195,7 @@ func main() {
 	// | Runner
 	// |
 	lgr.Logger().Info("init runner")
-	rnr := runnerTest.New(scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
+	rnr := runnerTest.New(scriptsMgr, dsMgr, uploadStoragesMgr, alertMgr, coreModules, lgr.Logger())
 
 	lgr.Logger().Info("run runner: tests")
 	results, ok, err := rnr.Run()

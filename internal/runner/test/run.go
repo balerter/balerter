@@ -103,6 +103,17 @@ func (rnr *Runner) Run() ([]modules.TestResult, bool, error) {
 		}
 		rnr.storagesManager.Clean()
 
+		// collect alert results
+		results, err = rnr.alertManager.Result()
+		if err != nil {
+			return nil, false, fmt.Errorf("error get results from alert manager, %w", err)
+		}
+		for _, r := range results {
+			r.ScriptName = pair.test.Name
+			result = append(result, r)
+		}
+		rnr.storagesManager.Clean()
+
 		scriptResult := modules.TestResult{
 			ScriptName: pair.test.Name,
 			ModuleName: "result",

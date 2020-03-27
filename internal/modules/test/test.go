@@ -1,6 +1,7 @@
 package test
 
 import (
+	"github.com/balerter/balerter/internal/mock"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
@@ -15,16 +16,18 @@ type modulesManager interface {
 type Test struct {
 	dsManager      modulesManager
 	storageManager modulesManager
+	alertMgr       *mock.ModuleMock
 	logger         *zap.Logger
 
 	datasource map[string]modules.ModuleTest
 	storage    map[string]modules.ModuleTest
 }
 
-func New(dsManager modulesManager, storageManager modulesManager, logger *zap.Logger) *Test {
+func New(dsManager modulesManager, storageManager modulesManager, alertMgr *mock.ModuleMock, logger *zap.Logger) *Test {
 	t := &Test{
 		dsManager:      dsManager,
 		storageManager: storageManager,
+		alertMgr:       alertMgr,
 		logger:         logger,
 
 		datasource: make(map[string]modules.ModuleTest),
@@ -76,6 +79,12 @@ func (t *Test) getStorage(s *script.Script) lua.LGFunction {
 	}
 }
 
+func (t *Test) getAlertMgr(s *script.Script) lua.LGFunction {
+	return func(L *lua.LState) int {
+		return t.alertMgr.GetLoader(s)(L)
+	}
+}
+
 func (t *Test) getDatasource(s *script.Script) lua.LGFunction {
 	return func(L *lua.LState) int {
 		nameL := L.Get(1)
@@ -107,6 +116,7 @@ func (t *Test) GetLoader(script *script.Script) lua.LGFunction {
 		var exports = map[string]lua.LGFunction{
 			"datasource": t.getDatasource(script),
 			"storage":    t.getStorage(script),
+			"alert":      t.getAlertMgr(script),
 			//	"run": t.run(script.Name),
 		}
 
