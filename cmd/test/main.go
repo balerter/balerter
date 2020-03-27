@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"github.com/balerter/balerter/internal/config"
 	coreStorageManager "github.com/balerter/balerter/internal/core_storage/manager"
 	dsManagerTest "github.com/balerter/balerter/internal/datasource/manager/test"
@@ -118,7 +119,7 @@ func main() {
 	// |
 	lgr.Logger().Info("init alert manager")
 
-	alertMgr := mock.New("alert", []string{"error"}, lgr.Logger())
+	alertMgr := mock.New("alert", alertManager.Methods(), lgr.Logger())
 	coreModules = append(coreModules, alertMgr)
 
 	// ---------------------

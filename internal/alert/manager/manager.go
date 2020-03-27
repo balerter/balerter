@@ -85,6 +85,23 @@ func (m *Manager) Stop() error {
 	return nil
 }
 
+func Methods() []string {
+	return []string{
+		"warn",
+		"warning",
+
+		"error",
+		"on",
+		"fail",
+
+		"success",
+		"off",
+		"ok",
+
+		"get",
+	}
+}
+
 func (m *Manager) GetLoader(script *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(L *lua.LState) int {
