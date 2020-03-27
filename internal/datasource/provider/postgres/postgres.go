@@ -15,6 +15,16 @@ var (
 	defaultTimeout = time.Second * 5
 )
 
+func ModuleName(name string) string {
+	return "postgres." + name
+}
+
+func Methods() []string {
+	return []string{
+		"query",
+	}
+}
+
 type Postgres struct {
 	name    string
 	logger  *zap.Logger
@@ -24,7 +34,7 @@ type Postgres struct {
 
 func New(cfg config.DataSourcePostgres, logger *zap.Logger) (*Postgres, error) {
 	p := &Postgres{
-		name:    "postgres." + cfg.Name,
+		name:    ModuleName(cfg.Name),
 		logger:  logger,
 		timeout: cfg.Timeout,
 	}

@@ -14,6 +14,17 @@ var (
 	defaultTimeout = time.Second * 5
 )
 
+func ModuleName(name string) string {
+	return "prometheus." + name
+}
+
+func Methods() []string {
+	return []string{
+		"query",
+		"range",
+	}
+}
+
 type Prometheus struct {
 	logger            *zap.Logger
 	name              string
@@ -27,7 +38,7 @@ type Prometheus struct {
 func New(cfg config.DataSourcePrometheus, logger *zap.Logger) (*Prometheus, error) {
 	m := &Prometheus{
 		logger:            logger,
-		name:              "prometheus." + cfg.Name,
+		name:              ModuleName(cfg.Name),
 		basicAuthUsername: cfg.BasicAuth.Username,
 		basicAuthPassword: cfg.BasicAuth.Password,
 		timeout:           cfg.Timeout,
@@ -45,7 +56,7 @@ func New(cfg config.DataSourcePrometheus, logger *zap.Logger) (*Prometheus, erro
 	}
 
 	m.client = http.Client{
-		Timeout: time.Second * 30,
+		Timeout: m.timeout,
 	}
 
 	return m, nil

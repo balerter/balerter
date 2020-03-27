@@ -22,7 +22,7 @@ type Module interface {
 type ModuleTest interface {
 	Name() string
 	GetLoader(script *script.Script) lua.LGFunction
-	Result() []TestResult
+	Result() ([]TestResult, error)
 	Clean()
 }
 

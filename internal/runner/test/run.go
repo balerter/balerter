@@ -81,11 +81,44 @@ func (rnr *Runner) Run() ([]modules.TestResult, bool, error) {
 		}
 		LMain.Close()
 
-		for _, r := range rnr.dsManager.Result() {
+		// collect datasources results
+		results, err := rnr.dsManager.Result()
+		if err != nil {
+			return nil, false, fmt.Errorf("error get results from datasource manager, %w", err)
+		}
+		for _, r := range results {
 			r.ScriptName = pair.test.Name
 			result = append(result, r)
 		}
 		rnr.dsManager.Clean()
+
+		// collect storages results
+		results, err = rnr.storagesManager.Result()
+		if err != nil {
+			return nil, false, fmt.Errorf("error get results from storage manager, %w", err)
+		}
+		for _, r := range results {
+			r.ScriptName = pair.test.Name
+			result = append(result, r)
+		}
+		rnr.storagesManager.Clean()
+
+		scriptResult := modules.TestResult{
+			ScriptName: pair.test.Name,
+			ModuleName: "result",
+			Message:    "PASS",
+			Ok:         true,
+		}
+
+		for _, r := range result {
+			if !r.Ok {
+				scriptResult.Ok = false
+				scriptResult.Message = "FAIL"
+				break
+			}
+		}
+
+		result = append(result, scriptResult)
 	}
 
 	for _, r := range result {

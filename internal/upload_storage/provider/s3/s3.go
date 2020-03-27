@@ -17,9 +17,19 @@ type Provider struct {
 	logger   *zap.Logger
 }
 
+func Methods() []string {
+	return []string{
+		"uploadPNG",
+	}
+}
+
+func ModuleName(name string) string {
+	return "s3." + name
+}
+
 func New(cfg config.StorageUploadS3, logger *zap.Logger) (*Provider, error) {
 	p := &Provider{
-		name:     "s3." + cfg.Name,
+		name:     ModuleName(cfg.Name),
 		region:   cfg.Region,
 		endpoint: cfg.Endpoint,
 		key:      cfg.Key,

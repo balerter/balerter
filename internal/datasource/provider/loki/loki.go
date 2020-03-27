@@ -14,6 +14,17 @@ var (
 	defaultTimeout = time.Second * 5
 )
 
+func ModuleName(name string) string {
+	return "loki." + name
+}
+
+func Methods() []string {
+	return []string{
+		"query",
+		"range",
+	}
+}
+
 type Loki struct {
 	logger            *zap.Logger
 	name              string
@@ -27,7 +38,7 @@ type Loki struct {
 func New(cfg config.DataSourceLoki, logger *zap.Logger) (*Loki, error) {
 	m := &Loki{
 		logger:            logger,
-		name:              "loki." + cfg.Name,
+		name:              ModuleName(cfg.Name),
 		basicAuthUsername: cfg.BasicAuth.Username,
 		basicAuthPassword: cfg.BasicAuth.Password,
 		timeout:           cfg.Timeout,

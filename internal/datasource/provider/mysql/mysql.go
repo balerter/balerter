@@ -14,6 +14,16 @@ var (
 	defaultTimeout = time.Second * 5
 )
 
+func ModuleName(name string) string {
+	return "mysql." + name
+}
+
+func Methods() []string {
+	return []string{
+		"query",
+	}
+}
+
 type MySQL struct {
 	name    string
 	logger  *zap.Logger
@@ -23,7 +33,7 @@ type MySQL struct {
 
 func New(cfg config.DataSourceMysql, logger *zap.Logger) (*MySQL, error) {
 	p := &MySQL{
-		name:    "mysql." + cfg.Name,
+		name:    ModuleName(cfg.Name),
 		logger:  logger,
 		timeout: cfg.Timeout,
 	}

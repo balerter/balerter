@@ -5,25 +5,38 @@ import (
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+	"strings"
 )
 
-type dsManager interface {
+type modulesManager interface {
 	Get() []modules.ModuleTest
 }
 
 type Test struct {
-	dsManager dsManager
-	logger    *zap.Logger
+	dsManager      modulesManager
+	storageManager modulesManager
+	logger         *zap.Logger
 
 	datasource map[string]modules.ModuleTest
+	storage    map[string]modules.ModuleTest
 }
 
-func New(dsManager dsManager, logger *zap.Logger) *Test {
+func New(dsManager modulesManager, storageManager modulesManager, logger *zap.Logger) *Test {
 	t := &Test{
-		dsManager: dsManager,
-		logger:    logger,
+		dsManager:      dsManager,
+		storageManager: storageManager,
+		logger:         logger,
 
 		datasource: make(map[string]modules.ModuleTest),
+		storage:    make(map[string]modules.ModuleTest),
+	}
+
+	for _, module := range t.dsManager.Get() {
+		t.datasource[module.Name()] = module
+	}
+
+	for _, module := range t.storageManager.Get() {
+		t.storage[module.Name()] = module
 	}
 
 	return t
@@ -37,9 +50,45 @@ func (t *Test) Stop() error {
 	return nil
 }
 
+func (t *Test) getStorage(s *script.Script) lua.LGFunction {
+	return func(L *lua.LState) int {
+		nameL := L.Get(1)
+		if nameL.Type() == lua.LTNil {
+			t.logger.Error("module test.storage should have 1 argument")
+			return 0
+		}
+
+		name := strings.TrimSpace(nameL.String())
+		if name == "" {
+			t.logger.Error("module test.storage should have 1 not empty argument")
+			return 0
+		}
+
+		m, ok := t.storage[name]
+		if !ok {
+			t.logger.Error("storage not found", zap.String("name", name))
+			return 0
+		}
+
+		m.GetLoader(s)(L)
+
+		return 1
+	}
+}
+
 func (t *Test) getDatasource(s *script.Script) lua.LGFunction {
 	return func(L *lua.LState) int {
-		name := L.Get(1).String()
+		nameL := L.Get(1)
+		if nameL.Type() == lua.LTNil {
+			t.logger.Error("module test.datasource should have 1 argument")
+			return 0
+		}
+
+		name := strings.TrimSpace(nameL.String())
+		if name == "" {
+			t.logger.Error("module test.datasource should have 1 not empty argument")
+			return 0
+		}
 
 		m, ok := t.datasource[name]
 		if !ok {
@@ -56,12 +105,9 @@ func (t *Test) getDatasource(s *script.Script) lua.LGFunction {
 func (t *Test) GetLoader(script *script.Script) lua.LGFunction {
 	return func(L *lua.LState) int {
 		var exports = map[string]lua.LGFunction{
-			//	"run": t.run(script.Name),
 			"datasource": t.getDatasource(script),
-		}
-
-		for _, module := range t.dsManager.Get() {
-			t.datasource[module.Name()] = module
+			"storage":    t.getStorage(script),
+			//	"run": t.run(script.Name),
 		}
 
 		mod := L.SetFuncs(L.NewTable(), exports)

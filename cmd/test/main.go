@@ -186,7 +186,7 @@ func main() {
 	// |
 	// | test
 	// |
-	testMod := testModule.New(dsMgr, lgr.Logger())
+	testMod := testModule.New(dsMgr, uploadStoragesMgr, lgr.Logger())
 	coreModules = append(coreModules, testMod)
 
 	// ---------------------
