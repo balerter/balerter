@@ -22,17 +22,19 @@ type Runner struct {
 	dsManager       manager
 	storagesManager manager
 	alertManager    *mock.ModuleMock
+	logModule       *mock.ModuleMock
 	logger          *zap.Logger
 
 	coreModules []modules.Module
 }
 
-func New(scriptsManager scriptsManager, dsManager, storagesManager manager, alertManager *mock.ModuleMock, coreModules []modules.Module, logger *zap.Logger) *Runner {
+func New(scriptsManager scriptsManager, dsManager, storagesManager manager, alertManager, logModule *mock.ModuleMock, coreModules []modules.Module, logger *zap.Logger) *Runner {
 	r := &Runner{
 		scriptsManager:  scriptsManager,
 		dsManager:       dsManager,
 		storagesManager: storagesManager,
 		alertManager:    alertManager,
+		logModule:       logModule,
 		logger:          logger,
 		coreModules:     coreModules,
 	}

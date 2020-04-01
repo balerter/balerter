@@ -112,8 +112,20 @@ func (rnr *Runner) Run() ([]modules.TestResult, bool, error) {
 			r.ScriptName = pair.test.Name
 			result = append(result, r)
 		}
-		rnr.storagesManager.Clean()
+		rnr.alertManager.Clean()
 
+		// collect log results
+		results, err = rnr.logModule.Result()
+		if err != nil {
+			return nil, false, fmt.Errorf("error get results from log module, %w", err)
+		}
+		for _, r := range results {
+			r.ScriptName = pair.test.Name
+			result = append(result, r)
+		}
+		rnr.logModule.Clean()
+
+		// total script result
 		scriptResult := modules.TestResult{
 			ScriptName: pair.test.Name,
 			ModuleName: "result",
