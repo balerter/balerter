@@ -58,6 +58,8 @@ func (r *Registry) getAssert(call call) (*assertEntry, bool) {
 	return e, true
 }
 
+// check all assets
+// if 'wants called' is true, return Fail result, else return Success result
 func (r *Registry) getAssertsOrphans() []modules.TestResult {
 	result := make([]modules.TestResult, 0)
 
