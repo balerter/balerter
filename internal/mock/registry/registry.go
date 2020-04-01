@@ -62,4 +62,5 @@ func (r *Registry) Clean() {
 	for key := range r.assertEntries {
 		delete(r.assertEntries, key)
 	}
+	r.calls = r.calls[:0]
 }
