@@ -15,6 +15,24 @@ var (
 	ErrUnexpectedDuplicatedKey = errors.New("unexpected duplicated key")
 )
 
+func ValuesToStringNoErr(values []lua.LValue) string {
+	v, err := ValuesToString(values)
+	if err != nil {
+		return "__ERROR_MARSHALING__"
+	}
+
+	return v
+}
+
+func ValueToStringNoErr(value lua.LValue) string {
+	v, err := ValueToString(value)
+	if err != nil {
+		return "__ERROR_MARSHALING__"
+	}
+
+	return v
+}
+
 func ValuesToString(values []lua.LValue) (string, error) {
 	s := "["
 	for _, v := range values {
