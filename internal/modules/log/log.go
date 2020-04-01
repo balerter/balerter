@@ -19,11 +19,24 @@ func New(logger *zap.Logger) *Log {
 }
 
 func (l *Log) Name() string {
-	return "log"
+	return ModuleName()
 }
 
 func (l *Log) Stop() error {
 	return nil
+}
+
+func ModuleName() string {
+	return "log"
+}
+
+func Methods() []string {
+	return []string{
+		"error",
+		"warn",
+		"info",
+		"debug",
+	}
 }
 
 func (l *Log) GetLoader(script *script.Script) lua.LGFunction {

@@ -17,17 +17,19 @@ type Test struct {
 	dsManager      modulesManager
 	storageManager modulesManager
 	alertMgr       *mock.ModuleMock
+	logModule      *mock.ModuleMock
 	logger         *zap.Logger
 
 	datasource map[string]modules.ModuleTest
 	storage    map[string]modules.ModuleTest
 }
 
-func New(dsManager modulesManager, storageManager modulesManager, alertMgr *mock.ModuleMock, logger *zap.Logger) *Test {
+func New(dsManager modulesManager, storageManager modulesManager, alertMgr, logModule *mock.ModuleMock, logger *zap.Logger) *Test {
 	t := &Test{
 		dsManager:      dsManager,
 		storageManager: storageManager,
 		alertMgr:       alertMgr,
+		logModule:      logModule,
 		logger:         logger,
 
 		datasource: make(map[string]modules.ModuleTest),
@@ -85,6 +87,12 @@ func (t *Test) getAlertMgr(s *script.Script) lua.LGFunction {
 	}
 }
 
+func (t *Test) getLogModule(s *script.Script) lua.LGFunction {
+	return func(L *lua.LState) int {
+		return t.logModule.GetLoader(s)(L)
+	}
+}
+
 func (t *Test) getDatasource(s *script.Script) lua.LGFunction {
 	return func(L *lua.LState) int {
 		nameL := L.Get(1)
@@ -117,10 +125,13 @@ func (t *Test) GetLoader(script *script.Script) lua.LGFunction {
 			"datasource": t.getDatasource(script),
 			"storage":    t.getStorage(script),
 			"alert":      t.getAlertMgr(script),
+			"log":        t.getLogModule(script),
 			//	"run": t.run(script.Name),
 		}
 
 		mod := L.SetFuncs(L.NewTable(), exports)
+
+		mod.RawSetString("AnyValue", lua.LString(mock.AnyValue))
 
 		L.Push(mod)
 		return 1
