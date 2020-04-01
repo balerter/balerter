@@ -16,7 +16,10 @@ func (m *ModuleMock) Result() ([]modules.TestResult, error) {
 		})
 	}
 
-	result = append(result, m.registry.Result()...)
+	for _, res := range m.registry.Result() {
+		res.ModuleName = m.name
+		result = append(result, res)
+	}
 
 	return result, nil
 }
