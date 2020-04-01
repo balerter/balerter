@@ -1,10 +1,7 @@
 package mock
 
 import (
-	"fmt"
-	"github.com/balerter/balerter/internal/lua_formatter"
 	lua "github.com/yuin/gopher-lua"
-	"go.uber.org/zap"
 )
 
 func (m *ModuleMock) call(method string) lua.LGFunction {
@@ -16,23 +13,18 @@ func (m *ModuleMock) call(method string) lua.LGFunction {
 			args = append(args, L.Get(i+1))
 		}
 
-		responseArgs, ok := m.responses[m.buildHash(method, args)]
-		if !ok {
-			m.logger.Error("unexpected call", zap.String("method name", method), zap.Any("args", args))
-			s, e := lua_formatter.ValuesToString(args)
-			if e != nil {
-				s = "![ERROR:" + e.Error() + "]"
-			}
-			m.errors = append(m.errors, fmt.Sprintf("unexpected method call '%s' with args %s", method, s))
+		m.registry.AddQuery(method, args) // todo: check error
+
+		resp, err := m.registry.Response(AnyValue, method, args)
+		if err != nil {
+			m.errors = append(m.errors, "error get response: "+err.Error())
 			return 0
 		}
 
-		for _, a := range responseArgs {
+		for _, a := range resp {
 			L.Push(a)
 		}
 
-		m.queryLog[m.buildHash(method, args)]++
-
-		return len(responseArgs)
+		return len(resp)
 	}
 }

@@ -2,7 +2,6 @@ package mock
 
 import (
 	lua "github.com/yuin/gopher-lua"
-	"go.uber.org/zap"
 	"strings"
 )
 
@@ -51,13 +50,10 @@ func (m *ModuleMock) saveResponse(methodName string, callArgs []lua.LValue) lua.
 			retArgs[i] = L.Get(i + 1) // lua indexing starts with 1
 		}
 
-		if _, ok := m.responses[m.buildHash(methodName, callArgs)]; ok {
-			m.logger.Error("response value already defined for this request", zap.String("method name", methodName), zap.Any("values", callArgs))
-			m.errors = append(m.errors, "response value already defined for this request, method "+methodName)
-			return 0
+		err := m.registry.Register(AnyValue, methodName, callArgs, retArgs)
+		if err != nil {
+			m.errors = append(m.errors, "error register response: "+err.Error())
 		}
-
-		m.responses[m.buildHash(methodName, callArgs)] = retArgs
 
 		return 0
 	}

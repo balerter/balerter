@@ -1,12 +1,14 @@
 package mock
 
 import (
-	"crypto/md5"
-	"fmt"
-	"github.com/balerter/balerter/internal/lua_formatter"
+	"github.com/balerter/balerter/internal/mock/registry"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+)
+
+const (
+	AnyValue = "__TEST_ANY_VALUE__"
 )
 
 type ModuleMock struct {
@@ -14,28 +16,17 @@ type ModuleMock struct {
 	methods []string
 	logger  *zap.Logger
 
-	responses        map[string][]lua.LValue
-	assertsCalled    map[string]*assert
-	assertsNotCalled map[string]*assert
-	queryLog         map[string]int
-	errors           []string
-}
+	registry *registry.Registry
 
-type assert struct {
-	method string
-	args   []lua.LValue
-	count  int
+	errors []string
 }
 
 func New(name string, methods []string, logger *zap.Logger) *ModuleMock {
 	m := &ModuleMock{
-		name:             name,
-		methods:          methods,
-		logger:           logger,
-		responses:        make(map[string][]lua.LValue),
-		assertsCalled:    make(map[string]*assert),
-		assertsNotCalled: make(map[string]*assert),
-		queryLog:         make(map[string]int),
+		name:     name,
+		methods:  methods,
+		logger:   logger,
+		registry: registry.New(),
 	}
 
 	return m
@@ -65,35 +56,11 @@ func (m *ModuleMock) GetLoader(_ *script.Script) lua.LGFunction {
 	}
 }
 
-func (m *ModuleMock) buildHash(methodName string, values []lua.LValue) string {
-	s := methodName + ":"
-	for _, v := range values {
-		sv, err := lua_formatter.ValueToString(v)
-		if err != nil {
-			m.logger.Error("error marshal lua.Value to string", zap.Error(err))
-			sv = "![ERROR:" + err.Error() + "]" // todo: return an error and doesn't build a hash?
-		}
-		s += v.Type().String() + ":" + sv
-	}
-
-	return fmt.Sprintf("%x", md5.Sum([]byte(s)))
-}
-
 func (m *ModuleMock) Name() string {
 	return m.name
 }
 
 func (m *ModuleMock) Clean() {
-	for key := range m.responses {
-		delete(m.responses, key)
-	}
-	for key := range m.assertsCalled {
-		delete(m.assertsCalled, key)
-	}
-	for key := range m.assertsNotCalled {
-		delete(m.assertsNotCalled, key)
-	}
-	for key := range m.queryLog {
-		delete(m.queryLog, key)
-	}
+	m.registry.Clean()
+	m.errors = m.errors[:0]
 }
