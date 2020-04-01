@@ -35,7 +35,12 @@ func (m *ModuleMock) assert(called bool) lua.LGFunction {
 			args = append(args, L.Get(i+1))
 		}
 
-		m.registry.AddAssert(name, args, called) // todo: check error
+		err := m.registry.AddAssert(name, args, called)
+		if err != nil {
+			err := "error register assert: " + err.Error()
+			m.logger.Error(err)
+			m.errors = append(m.errors, err)
+		}
 
 		return 0
 	}
