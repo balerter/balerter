@@ -16,27 +16,7 @@ func (m *ModuleMock) Result() ([]modules.TestResult, error) {
 		})
 	}
 
-	// todo: fetch asserts errors from the registry
-	//for _, res := range m.queryLog.Asserts {
-	//
-	//	mes := fmt.Sprintf(
-	//		"assert: method '%s' with args '%s'. want called: %t, assert %d times, called %d times",
-	//		res.Method,
-	//		lua_formatter.ValuesToStringNoErr(res.Args),
-	//		res.WantCalled,
-	//		res.AssertsCount,
-	//		res.CallsCount,
-	//	)
-	//
-	//	r := modules.TestResult{
-	//		ModuleName: m.name,
-	//		Message:    mes,
-	//	}
-	//
-	//	//if res.WantCalled && res.
-	//
-	//	result = append(result, r)
-	//}
+	result = append(result, m.registry.Result()...)
 
 	return result, nil
 }
