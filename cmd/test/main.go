@@ -151,7 +151,7 @@ func main() {
 	// |
 	// | Log
 	// |
-	logMod := logModule.New(lgr.Logger()) // todo: mock it
+	logMod := mock.New("log", logModule.Methods(), lgr.Logger())
 	coreModules = append(coreModules, logMod)
 
 	// ---------------------
@@ -178,7 +178,7 @@ func main() {
 	// |
 	// | test
 	// |
-	testMod := testModule.New(dsMgr, uploadStoragesMgr, alertMgr, lgr.Logger())
+	testMod := testModule.New(dsMgr, uploadStoragesMgr, alertMgr, logMod, lgr.Logger())
 	coreModules = append(coreModules, testMod)
 
 	// ---------------------
@@ -186,7 +186,7 @@ func main() {
 	// | Runner
 	// |
 	lgr.Logger().Info("init runner")
-	rnr := runnerTest.New(scriptsMgr, dsMgr, uploadStoragesMgr, alertMgr, coreModules, lgr.Logger())
+	rnr := runnerTest.New(scriptsMgr, dsMgr, uploadStoragesMgr, alertMgr, logMod, coreModules, lgr.Logger())
 
 	lgr.Logger().Info("run runner: tests")
 	results, ok, err := rnr.Run()
