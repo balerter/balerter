@@ -9,37 +9,33 @@ import (
 func (r *Registry) Result() []modules.TestResult {
 	results := make([]modules.TestResult, 0)
 
-	// iterate over calls and pick asserts
+	// iterate over calls
 	for _, call := range r.calls {
-		// an assert for this key is not registered
+		// an assert for this call is not registered
 		e, ok := r.getAssert(call)
 		if !ok {
 			continue
 		}
-		// all asserts already processed
+		// all asserts for this call already processed
 		if len(e.asserts) == 0 {
 			continue
 		}
 
-		assertShouldBeCalled := e.asserts[0]
+		shouldBeCalled := e.asserts[0]
 		e.asserts = e.asserts[1:]
 
-		if !assertShouldBeCalled {
-			res := modules.TestResult{
-				Message: fmt.Sprintf("method '%s' with args %s was called, but should not", call.method, lua_formatter.ValuesToStringNoErr(call.args)),
-				Ok:      false,
-			}
-			results = append(results, res)
-		}
-	}
-
-	for _, a := range r.getAssertsOrphans() {
-		res := modules.TestResult{
-			Message: fmt.Sprintf("method '%s' with args %v was not called, but should", a[0], a[1:]),
-			Ok:      false,
+		res := modules.TestResult{}
+		if shouldBeCalled {
+			res.Message = fmt.Sprintf("method '%s' with args %s was called", call.method, lua_formatter.ValuesToStringNoErr(call.args))
+			res.Ok = true
+		} else {
+			res.Message = fmt.Sprintf("method '%s' with args %s was called, but should not", call.method, lua_formatter.ValuesToStringNoErr(call.args))
+			res.Ok = false
 		}
 		results = append(results, res)
 	}
+
+	results = append(results, r.getAssertsOrphans()...)
 
 	return results
 }
@@ -62,33 +58,34 @@ func (r *Registry) getAssert(call call) (*assertEntry, bool) {
 	return e, true
 }
 
-// first element is a method name, next elements is args
-func (r *Registry) getAssertsOrphans() [][]string {
-	result := make([][]string, 0)
+func (r *Registry) getAssertsOrphans() []modules.TestResult {
+	result := make([]modules.TestResult, 0)
 
 	for method, e := range r.assertEntries {
-		for _, res := range r.getAssertsOrphansChain(e) {
-			result = append(result, append([]string{method}, res...))
-		}
+		result = append(result, r.getAssertsOrphansChain(e, method)...)
 	}
 
 	return result
 }
 
-func (r *Registry) getAssertsOrphansChain(entry *assertEntry, args ...string) [][]string {
-	result := make([][]string, 0)
+func (r *Registry) getAssertsOrphansChain(entry *assertEntry, method string, args ...string) []modules.TestResult {
+	result := make([]modules.TestResult, 0)
 
-	if len(entry.asserts) > 0 {
-		for _, v := range entry.asserts {
-			if v {
-				result = append(result, args)
-			}
+	for _, v := range entry.asserts {
+		res := modules.TestResult{}
+		if v {
+			res.Message = fmt.Sprintf("method '%s' with args %v was not called, but should", method, args)
+			res.Ok = false
+		} else {
+			res.Message = fmt.Sprintf("method '%s' with args %v was not called", method, args)
+			res.Ok = true
 		}
+		result = append(result, res)
 	}
 
 	for arg, e := range entry.entries {
-		res := r.getAssertsOrphansChain(e, append(args, arg)...)
-		result = append(result, res...)
+		results := r.getAssertsOrphansChain(e, method, append(args, arg)...)
+		result = append(result, results...)
 	}
 
 	return result
