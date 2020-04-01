@@ -1,6 +1,8 @@
 package mock
 
 import (
+	"fmt"
+	"github.com/balerter/balerter/internal/lua_formatter"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -22,7 +24,7 @@ func (m *ModuleMock) call(method string) lua.LGFunction {
 
 		resp, err := m.registry.Response(AnyValue, method, args)
 		if err != nil {
-			m.errors = append(m.errors, "error get response: "+err.Error())
+			m.errors = append(m.errors, fmt.Sprintf("error get response for method '%s' with args '%s', %s", method, lua_formatter.ValuesToStringNoErr(args), err.Error()))
 			return 0
 		}
 
