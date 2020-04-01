@@ -13,11 +13,30 @@ var (
 // and asserts with calls
 type Registry struct {
 	responseEntries map[string]*responseEntry
+	assertEntries   map[string]*assertEntry
+	calls           []call
+}
+
+type call struct {
+	method string
+	args   []lua.LValue
+}
+
+type assertEntry struct {
+	entries map[string]*assertEntry
+	asserts []bool
 }
 
 type responseEntry struct {
 	entries   map[string]*responseEntry
 	responses [][]lua.LValue
+}
+
+func newAssertEntry() *assertEntry {
+	e := &assertEntry{
+		entries: make(map[string]*assertEntry),
+	}
+	return e
 }
 
 func newResponseEntry() *responseEntry {
@@ -30,6 +49,7 @@ func newResponseEntry() *responseEntry {
 func New() *Registry {
 	r := &Registry{
 		responseEntries: map[string]*responseEntry{},
+		assertEntries:   map[string]*assertEntry{},
 	}
 
 	return r
@@ -38,5 +58,8 @@ func New() *Registry {
 func (r *Registry) Clean() {
 	for key := range r.responseEntries {
 		delete(r.responseEntries, key)
+	}
+	for key := range r.assertEntries {
+		delete(r.assertEntries, key)
 	}
 }
