@@ -13,7 +13,12 @@ func (m *ModuleMock) call(method string) lua.LGFunction {
 			args = append(args, L.Get(i+1))
 		}
 
-		m.registry.AddQuery(method, args) // todo: check error
+		err := m.registry.AddQuery(method, args)
+		if err != nil {
+			err := "error add query: " + err.Error()
+			m.logger.Error(err)
+			m.errors = append(m.errors, err)
+		}
 
 		resp, err := m.registry.Response(AnyValue, method, args)
 		if err != nil {
