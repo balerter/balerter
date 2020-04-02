@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"github.com/prometheus/common/model"
 	"io/ioutil"
 	"net/http"
@@ -75,6 +76,10 @@ func (m *Prometheus) send(u *url.URL) (model.Value, error) {
 	}
 
 	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected response code %d", res.StatusCode)
+	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
