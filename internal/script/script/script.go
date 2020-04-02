@@ -20,11 +20,13 @@ func New() *Script {
 }
 
 type Script struct {
-	Name     string
-	Body     []byte
-	Interval time.Duration
-	Ignore   bool
-	Channels []string
+	Name       string
+	Body       []byte
+	Interval   time.Duration
+	Ignore     bool
+	Channels   []string
+	IsTest     bool
+	TestTarget string
 }
 
 func (s *Script) Hash() string {
@@ -37,6 +39,7 @@ var (
 		"@ignore":   parseMetaIgnore,
 		"@name":     parseMetaName,
 		"@channels": parseMetaChannels,
+		"@test":     parseMetaTest,
 	}
 )
 
@@ -90,6 +93,17 @@ func parseMetaName(l string, s *Script) error {
 	}
 
 	s.Name = l
+
+	return nil
+}
+
+func parseMetaTest(l string, s *Script) error {
+	if l == "" {
+		return fmt.Errorf("test must be not empty")
+	}
+
+	s.TestTarget = l
+	s.IsTest = true
 
 	return nil
 }

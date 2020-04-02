@@ -6,7 +6,6 @@ import (
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"strings"
 )
 
 type pair struct {
@@ -18,7 +17,7 @@ func splitScripts(scripts []*script.Script) (map[string]pair, error) {
 	_scripts := make(map[string]*script.Script)
 	_tests := make(map[string]*script.Script)
 	for _, s := range scripts {
-		if strings.HasSuffix(s.Name, "_test") {
+		if s.IsTest {
 			_tests[s.Name] = s
 		} else {
 			_scripts[s.Name] = s
@@ -28,7 +27,7 @@ func splitScripts(scripts []*script.Script) (map[string]pair, error) {
 	pairs := make(map[string]pair)
 
 	for name, t := range _tests {
-		s, ok := _scripts[strings.TrimSuffix(name, "_test")]
+		s, ok := _scripts[t.TestTarget]
 		if !ok {
 			return nil, fmt.Errorf("main script for test '%s' not found", name)
 		}
