@@ -23,7 +23,6 @@ func TestResource(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, 200, rw.StatusCode)
-	assert.Equal(t, `[{"name":"f1","value":"v1"},{"name":"f2","value":"v2"}]`, rw.Output)
 	assert.Contains(t, rw.Output, `{"name":"f1","value":"v1"}`)
 	assert.Contains(t, rw.Output, `{"name":"f2","value":"v2"}`)
 }
