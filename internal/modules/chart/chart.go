@@ -8,6 +8,16 @@ import (
 	"go.uber.org/zap"
 )
 
+func ModuleName() string {
+	return "chart"
+}
+
+func Methods() []string {
+	return []string{
+		"render",
+	}
+}
+
 type DataItem struct {
 	Timestamp float64
 	Value     float64
@@ -38,7 +48,7 @@ func New(logger *zap.Logger) *Chart {
 }
 
 func (ch *Chart) Name() string {
-	return "chart"
+	return ModuleName()
 }
 
 func (ch *Chart) Stop() error {

@@ -1,7 +1,6 @@
 package test
 
 import (
-	"github.com/balerter/balerter/internal/mock"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
 	"go.uber.org/zap"
@@ -21,20 +20,24 @@ type Runner struct {
 	scriptsManager  scriptsManager
 	dsManager       manager
 	storagesManager manager
-	alertManager    *mock.ModuleMock
-	logModule       *mock.ModuleMock
+	testModule      modules.Module
 	logger          *zap.Logger
 
-	coreModules []modules.Module
+	coreModules []modules.ModuleTest
 }
 
-func New(scriptsManager scriptsManager, dsManager, storagesManager manager, alertManager, logModule *mock.ModuleMock, coreModules []modules.Module, logger *zap.Logger) *Runner {
+func New(scriptsManager scriptsManager,
+	dsManager,
+	storagesManager manager,
+	testModule modules.Module,
+	coreModules []modules.ModuleTest,
+	logger *zap.Logger,
+) *Runner {
 	r := &Runner{
 		scriptsManager:  scriptsManager,
 		dsManager:       dsManager,
 		storagesManager: storagesManager,
-		alertManager:    alertManager,
-		logModule:       logModule,
+		testModule:      testModule,
 		logger:          logger,
 		coreModules:     coreModules,
 	}

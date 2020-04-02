@@ -12,6 +12,20 @@ const (
 	defaultTimeout = time.Second * 30
 )
 
+func ModuleName() string {
+	return "http"
+}
+
+func Methods() []string {
+	return []string{
+		"request",
+		"post",
+		"get",
+		"put",
+		"delete",
+	}
+}
+
 type HTTP struct {
 	logger *zap.Logger
 	client *http.Client
@@ -30,7 +44,7 @@ func New(logger *zap.Logger) *HTTP {
 }
 
 func (h *HTTP) Name() string {
-	return "http"
+	return ModuleName()
 }
 
 func (h *HTTP) GetLoader(_ *script.Script) lua.LGFunction {

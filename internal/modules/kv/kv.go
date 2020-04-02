@@ -6,6 +6,19 @@ import (
 	lua "github.com/yuin/gopher-lua"
 )
 
+func ModuleName() string {
+	return "kv"
+}
+
+func Methods() []string {
+	return []string{
+		"get",
+		"put",
+		"delete",
+		"upsert",
+	}
+}
+
 type KV struct {
 	engine coreStorage.CoreStorage
 }
@@ -19,7 +32,7 @@ func New(engine coreStorage.CoreStorage) *KV {
 }
 
 func (kv *KV) Name() string {
-	return "kv"
+	return ModuleName()
 }
 
 func (kv *KV) GetLoader(_ *script.Script) lua.LGFunction {

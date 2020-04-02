@@ -65,6 +65,7 @@ func (rnr *Runner) Run() ([]modules.TestResult, bool, error) {
 	for name, pair := range pairs {
 		rnr.logger.Debug("run test", zap.String("name", name))
 
+		// run test file
 		LTest := rnr.createLuaState(pair.test)
 		err := LTest.DoString(string(pair.test.Body))
 		if err != nil {
@@ -73,6 +74,7 @@ func (rnr *Runner) Run() ([]modules.TestResult, bool, error) {
 		}
 		LTest.Close()
 
+		// run main file
 		LMain := rnr.createLuaState(pair.main)
 		err = LMain.DoString(string(pair.main.Body))
 		if err != nil {
@@ -103,27 +105,18 @@ func (rnr *Runner) Run() ([]modules.TestResult, bool, error) {
 		}
 		rnr.storagesManager.Clean()
 
-		// collect alert results
-		results, err = rnr.alertManager.Result()
-		if err != nil {
-			return nil, false, fmt.Errorf("error get results from alert manager, %w", err)
+		// collect errors from coreModules
+		for _, mod := range rnr.coreModules {
+			results, err = mod.Result()
+			if err != nil {
+				return nil, false, fmt.Errorf("error get results from '%s' module, %w", mod.Name(), err)
+			}
+			for _, r := range results {
+				r.ScriptName = pair.test.Name
+				result = append(result, r)
+			}
+			mod.Clean()
 		}
-		for _, r := range results {
-			r.ScriptName = pair.test.Name
-			result = append(result, r)
-		}
-		rnr.alertManager.Clean()
-
-		// collect log results
-		results, err = rnr.logModule.Result()
-		if err != nil {
-			return nil, false, fmt.Errorf("error get results from log module, %w", err)
-		}
-		for _, r := range results {
-			r.ScriptName = pair.test.Name
-			result = append(result, r)
-		}
-		rnr.logModule.Clean()
 
 		// total script result
 		scriptResult := modules.TestResult{
@@ -158,6 +151,8 @@ func (rnr *Runner) createLuaState(s *script.Script) *lua.LState {
 	rnr.logger.Debug("create job", zap.String("name", s.Name))
 
 	L := lua.NewState()
+
+	L.PreloadModule(rnr.testModule.Name(), rnr.testModule.GetLoader(s))
 
 	for _, m := range rnr.coreModules {
 		L.PreloadModule(m.Name(), m.GetLoader(s))

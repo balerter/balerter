@@ -5,7 +5,6 @@ import (
 	"fmt"
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"github.com/balerter/balerter/internal/config"
-	coreStorageManager "github.com/balerter/balerter/internal/core_storage/manager"
 	dsManagerTest "github.com/balerter/balerter/internal/datasource/manager/test"
 	"github.com/balerter/balerter/internal/logger"
 	"github.com/balerter/balerter/internal/metrics"
@@ -46,7 +45,7 @@ func main() {
 
 	lua.LuaPathDefault = defaultLuaModulesPath
 
-	coreModules := make([]modules.Module, 0)
+	coreModules := make([]modules.ModuleTest, 0)
 
 	flag.Parse()
 
@@ -103,22 +102,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	// core storages
-	lgr.Logger().Info("init core storages manager")
-	coreStoragesMgr, err := coreStorageManager.New(cfg.Storages.Core, lgr.Logger())
-	if err != nil {
-		lgr.Logger().Error("error create core storages manager", zap.Error(err))
-		os.Exit(1)
-	}
-
 	// ---------------------
 	// |
 	// | Core Modules
 	// |
 	// | AlertManager
 	// |
-	lgr.Logger().Info("init alert manager")
-
 	alertMgr := mock.New(alertManager.ModuleName(), alertManager.Methods(), lgr.Logger())
 	coreModules = append(coreModules, alertMgr)
 
@@ -128,22 +117,14 @@ func main() {
 	// |
 	// | KV
 	// |
-	kvEngine, err := coreStoragesMgr.Get("memory")
-	if err != nil {
-		lgr.Logger().Error("error get kv storage engine", zap.String("name", cfg.Global.Storages.KV), zap.Error(err))
-		os.Exit(1)
-	}
-	lgr.Logger().Info("init kv storage", zap.String("engine", cfg.Global.Storages.KV))
-	kvModule := kv.New(kvEngine)
+	kvModule := mock.New(kv.ModuleName(), kv.Methods(), lgr.Logger())
 	coreModules = append(coreModules, kvModule)
 
 	// ---------------------
 	// |
 	// | API
 	// |
-	//wg.Add(1)
-	//apis := apiManager.New(cfg.Global.API, alertManagerStorageEngine, kvEngine, lgr.Logger())
-	//go apis.Run(ctx, ctxCancel, wg)
+	// module is not used in the test environment
 
 	// ---------------------
 	// |
@@ -151,7 +132,7 @@ func main() {
 	// |
 	// | Log
 	// |
-	logMod := mock.New("log", logModule.Methods(), lgr.Logger())
+	logMod := mock.New(logModule.ModuleName(), logModule.Methods(), lgr.Logger())
 	coreModules = append(coreModules, logMod)
 
 	// ---------------------
@@ -160,7 +141,7 @@ func main() {
 	// |
 	// | Chart
 	// |
-	chartMod := chartModule.New(lgr.Logger()) // todo: mock it?
+	chartMod := mock.New(chartModule.ModuleName(), chartModule.Methods(), lgr.Logger())
 	coreModules = append(coreModules, chartMod)
 
 	// ---------------------
@@ -169,7 +150,7 @@ func main() {
 	// |
 	// | http
 	// |
-	httpMod := httpModule.New(lgr.Logger()) // todo: mock it
+	httpMod := mock.New(httpModule.ModuleName(), httpModule.Methods(), lgr.Logger())
 	coreModules = append(coreModules, httpMod)
 
 	// ---------------------
@@ -178,15 +159,14 @@ func main() {
 	// |
 	// | test
 	// |
-	testMod := testModule.New(dsMgr, uploadStoragesMgr, alertMgr, logMod, lgr.Logger())
-	coreModules = append(coreModules, testMod)
+	testMod := testModule.New(dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
 
 	// ---------------------
 	// |
 	// | Runner
 	// |
 	lgr.Logger().Info("init runner")
-	rnr := runnerTest.New(scriptsMgr, dsMgr, uploadStoragesMgr, alertMgr, logMod, coreModules, lgr.Logger())
+	rnr := runnerTest.New(scriptsMgr, dsMgr, uploadStoragesMgr, testMod, coreModules, lgr.Logger())
 
 	lgr.Logger().Info("run runner: tests")
 	results, ok, err := rnr.Run()
