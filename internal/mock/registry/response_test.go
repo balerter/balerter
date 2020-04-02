@@ -146,7 +146,7 @@ func Test_registry_response_error1(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, ret1, resp)
 
-	resp, err = reg.Response("AnyValue", "foo", []lua.LValue{arg1})
+	_, err = reg.Response("AnyValue", "foo", []lua.LValue{arg1})
 	require.Error(t, err)
 }
 

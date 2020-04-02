@@ -24,6 +24,7 @@ func TestRegistry_AddAssert1(t *testing.T) {
 	assert.Equal(t, 0, len(e1.asserts))
 	assert.Equal(t, 1, len(e1.entries))
 	e2, ok := e1.entries["42"]
+	require.True(t, ok)
 	assert.Equal(t, 2, len(e2.asserts))
 	assert.Equal(t, 0, len(e2.entries))
 	assert.Equal(t, true, e2.asserts[0])

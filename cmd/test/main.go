@@ -39,9 +39,7 @@ var (
 )
 
 func main() {
-	var resultsOutput io.Writer
-
-	resultsOutput = os.Stdout
+	var resultsOutput io.Writer = os.Stdout
 
 	lua.LuaPathDefault = defaultLuaModulesPath
 

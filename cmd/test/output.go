@@ -48,6 +48,6 @@ func outputJson(results []modules.TestResult, w io.Writer) error {
 		return nil
 	}
 
-	_, err = fmt.Fprintf(w, string(e))
+	_, err = fmt.Fprint(w, string(e))
 	return err
 }
