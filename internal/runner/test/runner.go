@@ -13,7 +13,7 @@ type manager interface {
 }
 
 type scriptsManager interface {
-	Get() ([]*script.Script, error)
+	GetWithTests() ([]*script.Script, error)
 }
 
 type Runner struct {

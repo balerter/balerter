@@ -43,5 +43,36 @@ func (m *Manager) Get() ([]*script.Script, error) {
 		ss = append(ss, s...)
 	}
 
+	ss = removeTests(ss)
+
+	return ss, nil
+}
+
+func removeTests(ss []*script.Script) []*script.Script {
+	var i int
+	for idx, s := range ss {
+		if s.IsTest {
+			continue
+		}
+		ss[i] = ss[idx]
+		i++
+	}
+	ss = ss[:i]
+
+	return ss
+}
+
+func (m *Manager) GetWithTests() ([]*script.Script, error) {
+	ss := make([]*script.Script, 0)
+
+	for _, p := range m.providers {
+		s, err := p.Get()
+		if err != nil {
+			return nil, err
+		}
+
+		ss = append(ss, s...)
+	}
+
 	return ss, nil
 }

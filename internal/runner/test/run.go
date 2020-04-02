@@ -51,7 +51,7 @@ func (rnr *Runner) Run() ([]modules.TestResult, bool, error) {
 	var result []modules.TestResult
 	ok := true
 
-	ss, err := rnr.scriptsManager.Get()
+	ss, err := rnr.scriptsManager.GetWithTests()
 	if err != nil {
 		return nil, false, fmt.Errorf("error get scripts, %w", err)
 	}

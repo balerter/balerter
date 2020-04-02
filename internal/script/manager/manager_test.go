@@ -89,3 +89,48 @@ func TestManager_Get_Fail(t *testing.T) {
 	assert.Equal(t, "errorGet", err.Error())
 	assert.Nil(t, ss)
 }
+
+func Test_removeTests(t *testing.T) {
+	ss := []*script.Script{{Name: "1", IsTest: true}, {Name: "2", IsTest: false}, {Name: "3", IsTest: true}, {Name: "4", IsTest: false}}
+	res := removeTests(ss)
+	require.Equal(t, 2, len(res))
+	assert.Equal(t, "2", res[0].Name)
+	assert.Equal(t, "4", res[1].Name)
+
+	// only tests
+	ss = []*script.Script{{Name: "1", IsTest: true}, {Name: "2", IsTest: true}, {Name: "3", IsTest: true}, {Name: "4", IsTest: true}}
+	res = removeTests(ss)
+	require.Equal(t, 0, len(res))
+
+	// empty
+	ss = []*script.Script{}
+	res = removeTests(ss)
+	require.Equal(t, 0, len(res))
+
+	// first test
+	ss = []*script.Script{{Name: "1", IsTest: true}, {Name: "2", IsTest: false}, {Name: "3", IsTest: false}, {Name: "4", IsTest: false}}
+	res = removeTests(ss)
+	require.Equal(t, 3, len(res))
+	assert.Equal(t, "2", res[0].Name)
+	assert.Equal(t, "3", res[1].Name)
+	assert.Equal(t, "4", res[2].Name)
+
+	// last test
+	ss = []*script.Script{{Name: "1", IsTest: false}, {Name: "2", IsTest: false}, {Name: "3", IsTest: false}, {Name: "4", IsTest: true}}
+	res = removeTests(ss)
+	require.Equal(t, 3, len(res))
+	assert.Equal(t, "1", res[0].Name)
+	assert.Equal(t, "2", res[1].Name)
+	assert.Equal(t, "3", res[2].Name)
+
+	// one test
+	ss = []*script.Script{{Name: "1", IsTest: true}}
+	res = removeTests(ss)
+	require.Equal(t, 0, len(res))
+
+	// one not test
+	ss = []*script.Script{{Name: "1", IsTest: false}}
+	res = removeTests(ss)
+	require.Equal(t, 1, len(res))
+	assert.Equal(t, "1", res[0].Name)
+}
