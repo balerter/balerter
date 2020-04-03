@@ -1,22 +1,10 @@
 package syslog
 
 import (
-	"github.com/balerter/balerter/internal/config"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"log/syslog"
 	"testing"
 )
-
-func TestNew(t *testing.T) {
-	s, err := New(config.ChannelSyslog{
-		Name: "foo",
-	}, nil)
-
-	require.NoError(t, err)
-	assert.IsType(t, &Syslog{}, s)
-	assert.Equal(t, "foo", s.name)
-}
 
 func TestName(t *testing.T) {
 	s := &Syslog{name: "foo"}
