@@ -46,11 +46,9 @@ func TestManager_Loader(t *testing.T) {
 	assert.IsType(t, &lua.LNilType{}, v.RawGet(lua.LString("wrong-name")))
 
 	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("warn")))
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("on")))
 	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("error")))
 	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("fail")))
 	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("success")))
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("off")))
 	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("ok")))
 }
 

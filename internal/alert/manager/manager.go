@@ -95,11 +95,9 @@ func Methods() []string {
 		"warning",
 
 		"error",
-		"on",
 		"fail",
 
 		"success",
-		"off",
 		"ok",
 
 		"get",
@@ -114,11 +112,9 @@ func (m *Manager) GetLoader(script *script.Script) lua.LGFunction {
 				"warning": m.luaCall(script, alert.LevelWarn),
 
 				"error": m.luaCall(script, alert.LevelError),
-				"on":    m.luaCall(script, alert.LevelError),
 				"fail":  m.luaCall(script, alert.LevelError),
 
 				"success": m.luaCall(script, alert.LevelSuccess),
-				"off":     m.luaCall(script, alert.LevelSuccess),
 				"ok":      m.luaCall(script, alert.LevelSuccess),
 
 				"get": m.get(script),
