@@ -22,7 +22,7 @@ local function _printTable(data, tab)
     return result
 end
 
-local function printTable(data)
+local function printValue(data)
     if type(data) ~= 'table' then
         print(data)
         return
@@ -61,7 +61,7 @@ rawset(M, 'tableToMap', tableToMap)
 -- Pretty print tables
 --
 -- Usage:
--- printTable(variable)
-rawset(M, 'printTable', printTable)
+-- print(variable)
+rawset(M, 'print', printValue)
 
 return M
