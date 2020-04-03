@@ -64,6 +64,7 @@ channels:
 Sample script `rps.lua`
 ```
 -- @interval 10s
+-- @name script1
 
 local minRequestsRPS = 100
 
@@ -81,9 +82,33 @@ local resultRPS = res[1].rps
 if resultRPS < minResultRPS then
     alert.error("rps-min-limit", "Requests RPS are very small: " .. tostring(resultRPS))
 else
-    alert.success("rps-min-limit", "Requests RPS ok"")
+    alert.success("rps-min-limit", "Requests RPS ok")
 end 
 ```
+
+Also you can to write tests!
+
+An example:
+
+```
+-- @test script1
+-- @name script1-test
+
+test = require('test')
+
+local resp = {
+    {
+        rps = 10
+    }
+} 
+
+test.datasource('clickhouse.ch1').on('query', 'SELECT sum(requests) AS rps FROM some_table WHERE date = now()').response(resp)
+
+test.alert().assertCalled('error', 'rps-min-limit', 'Requests RPS are very small: 10')
+test.alert().assertNotCalled('success', 'rps-min-limit', 'Requests RPS ok')
+```
+
+See a documentation on [https://balerter.com](https://balerter.com)
 
 ## Roadmap
 
