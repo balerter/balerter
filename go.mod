@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/ClickHouse/clickhouse-go v1.3.13
+	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/aws/aws-sdk-go v1.29.4
 	github.com/deckarep/gosx-notifier v0.0.0-20180201035817-e127226297fb // indirect
 	github.com/fatih/color v1.7.0

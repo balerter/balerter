@@ -12,6 +12,9 @@ github.com/ClickHouse/clickhouse-go/lib/lz4
 github.com/ClickHouse/clickhouse-go/lib/protocol
 github.com/ClickHouse/clickhouse-go/lib/types
 github.com/ClickHouse/clickhouse-go/lib/writebuffer
+# github.com/DATA-DOG/go-sqlmock v1.4.1
+## explicit
+github.com/DATA-DOG/go-sqlmock
 # github.com/ajstarks/svgo v0.0.0-20180226025133-644b8db467af
 github.com/ajstarks/svgo
 # github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4

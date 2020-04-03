@@ -110,10 +110,7 @@ func (m *Clickhouse) loader(L *lua.LState) int {
 	}
 
 	mod := L.SetFuncs(L.NewTable(), exports)
-	// register other stuff
-	//L.SetField(mod, "name", lua.LString("value"))
 
-	// returns the module
 	L.Push(mod)
 	return 1
 }

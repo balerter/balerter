@@ -3,6 +3,7 @@ package syslog
 import (
 	"github.com/balerter/balerter/internal/config"
 	"go.uber.org/zap"
+	"io"
 	"log/syslog"
 	"strings"
 )
@@ -10,7 +11,7 @@ import (
 type Syslog struct {
 	name   string
 	logger *zap.Logger
-	w      *syslog.Writer
+	w      io.Writer
 }
 
 func New(cfg config.ChannelSyslog, logger *zap.Logger) (*Syslog, error) {

@@ -7,11 +7,16 @@ import (
 	"go.uber.org/zap"
 )
 
+type APIer interface {
+	SendTextMessage(*api.TextMessage) error
+	SendPhotoMessage(*api.PhotoMessage) error
+}
+
 type Telegram struct {
 	name   string
 	chatID int64
 	logger *zap.Logger
-	api    *api.API
+	api    APIer
 }
 
 func New(cfg config.ChannelTelegram, logger *zap.Logger) (*Telegram, error) {
