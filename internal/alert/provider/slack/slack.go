@@ -6,11 +6,15 @@ import (
 	"go.uber.org/zap"
 )
 
+type API interface {
+	SendMessage(channel string, options ...slack.MsgOption) (string, string, string, error)
+}
+
 type Slack struct {
 	logger  *zap.Logger
 	name    string
 	channel string
-	api     *slack.Client
+	api     API
 }
 
 func New(cfg config.ChannelSlack, logger *zap.Logger) (*Slack, error) {

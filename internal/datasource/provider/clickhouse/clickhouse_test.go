@@ -22,5 +22,7 @@ func TestLoader(t *testing.T) {
 
 	v := L.Get(1).(*lua.LTable)
 
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("query")))
+	for _, method := range Methods() {
+		assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString(method)))
+	}
 }

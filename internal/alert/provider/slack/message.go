@@ -46,7 +46,7 @@ func createSlackMessageOptions(alertText, imageURL string, fields ...string) []s
 	opts = append(opts, slack.MsgOptionBlocks(blocks...))
 
 	if alertText != "" {
-		opts = append(opts, slack.MsgOptionText(alertText, true), slack.MsgOptionAsUser(true))
+		opts = append(opts, slack.MsgOptionAsUser(true))
 	}
 
 	return opts
