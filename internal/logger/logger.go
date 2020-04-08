@@ -54,6 +54,7 @@ func New(level string, debugMode bool) (*Logger, error) {
 		config.EncoderConfig.EncodeDuration = zapcore.StringDurationEncoder
 		config.Encoding = "console"
 		config.Development = true
+		config.Sampling = nil
 	}
 
 	lg.logger, err = config.Build()
