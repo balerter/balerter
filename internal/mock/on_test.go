@@ -1,6 +1,7 @@
 package mock
 
 import (
+	"fmt"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -138,4 +139,42 @@ func TestOn(t *testing.T) {
 	require.Equal(t, 0, n)
 
 	reg.AssertCalled(t, "Register", AnyValue, "foo", []lua.LValue{lua.LNumber(42)}, []lua.LValue{lua.LString("bar"), lua.LNumber(50)})
+}
+
+func TestOn_FailRegister(t *testing.T) {
+
+	// Testing: mock.on("foo", 42).response("bar", 50)
+
+	core, _ := observer.New(zap.DebugLevel)
+	logger := zap.New(core)
+
+	reg := &registryMock{}
+	reg.On("Register", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(fmt.Errorf("error1"))
+
+	m := &ModuleMock{
+		logger:   logger,
+		registry: reg,
+	}
+
+	L := lua.NewState()
+	L.Push(lua.LString("foo"))
+	L.Push(lua.LNumber(42))
+
+	n := m.on(L)
+	require.Equal(t, 1, n)
+
+	t1 := L.Get(3).(*lua.LTable)
+
+	L2 := lua.NewState()
+	L2.Push(lua.LString("bar"))
+	L2.Push(lua.LNumber(50))
+
+	f := t1.RawGet(lua.LString("response")).(*lua.LFunction)
+	n = f.GFunction(L2)
+
+	require.Equal(t, 0, n)
+
+	reg.AssertCalled(t, "Register", AnyValue, "foo", []lua.LValue{lua.LNumber(42)}, []lua.LValue{lua.LString("bar"), lua.LNumber(50)})
+	require.Equal(t, 1, len(m.errors))
+	assert.Equal(t, "error register response: error1", m.errors[0])
 }
