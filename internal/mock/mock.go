@@ -2,6 +2,7 @@ package mock
 
 import (
 	"github.com/balerter/balerter/internal/mock/registry"
+	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -11,12 +12,21 @@ const (
 	AnyValue = "__TEST_ANY_VALUE__"
 )
 
+type Registry interface {
+	Clean()
+	Register(AnyValue, method string, callArgs, retArgs []lua.LValue) error
+	Response(AnyValue, method string, args []lua.LValue) ([]lua.LValue, error)
+	AddAssert(method string, args []lua.LValue, called bool) error
+	AddCall(method string, args []lua.LValue) error
+	Result() []modules.TestResult
+}
+
 type ModuleMock struct {
 	name    string
 	methods []string
 	logger  *zap.Logger
 
-	registry *registry.Registry
+	registry Registry
 
 	errors []string
 }
