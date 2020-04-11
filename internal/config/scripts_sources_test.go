@@ -37,7 +37,7 @@ func TestScriptsSources_Validate(t *testing.T) {
 				},
 			},
 			wantErr: true,
-			errText: "found duplicated name: n1",
+			errText: "found duplicated name for scritsource 'folder': n1",
 		},
 		{
 			name: "ok",

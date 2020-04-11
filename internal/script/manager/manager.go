@@ -2,6 +2,7 @@ package manager
 
 import (
 	"github.com/balerter/balerter/internal/config"
+	fileProvider "github.com/balerter/balerter/internal/script/provider/file"
 	folderProvider "github.com/balerter/balerter/internal/script/provider/folder"
 	"github.com/balerter/balerter/internal/script/script"
 )
@@ -26,6 +27,10 @@ func (m *Manager) Init(cfg config.ScriptsSources) error {
 
 	for _, folderConfig := range cfg.Folder {
 		m.providers[folderConfig.Name] = folderProvider.New(folderConfig)
+	}
+
+	for _, c := range cfg.File {
+		m.providers[c.Name] = fileProvider.New(c)
 	}
 
 	return nil
