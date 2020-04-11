@@ -37,6 +37,7 @@ var (
 	logLevel     = flag.String("logLevel", "INFO", "Log level. ERROR, WARN, INFO or DEBUG")
 	debug        = flag.Bool("debug", false, "debug mode")
 	once         = flag.Bool("once", false, "once run scripts and exit")
+	withScript   = flag.String("script", "", "ignore all script sources and runs only one script. Meta-tag @ignore will be ignored")
 
 	defaultLuaModulesPath = "./?.lua;./modules/?.lua;./modules/?/init.lua"
 )
@@ -83,6 +84,20 @@ func main() {
 	// Scripts sources
 	lgr.Logger().Info("init scripts manager")
 	scriptsMgr := scriptsManager.New()
+
+	if *withScript != "" {
+		lgr.Logger().Info("rewrite script sources configuration", zap.String("filename", *withScript))
+		cfg.Scripts.Sources = config.ScriptsSources{
+			File: []config.ScriptSourceFile{
+				{
+					Name:          "cli-script",
+					Filename:      *withScript,
+					DisableIgnore: true,
+				},
+			},
+		}
+	}
+
 	if err := scriptsMgr.Init(cfg.Scripts.Sources); err != nil {
 		lgr.Logger().Error("error init scripts manager", zap.Error(err))
 		os.Exit(1)
