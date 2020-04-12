@@ -4,6 +4,7 @@ import (
 	"github.com/balerter/balerter/internal/alert/alert"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
+	"strings"
 )
 
 func (m *Manager) get(_ *script.Script) lua.LGFunction {
@@ -16,13 +17,15 @@ func (m *Manager) get(_ *script.Script) lua.LGFunction {
 			return 2
 		}
 
-		if name.String() == "" {
+		nameStr := strings.TrimSpace(name.String())
+
+		if nameStr == "" {
 			L.Push(lua.LNil)
 			L.Push(lua.LString("alert name must be not empty"))
 			return 2
 		}
 
-		a, err := m.engine.Alert().Get(name.String())
+		a, err := m.engine.Alert().Get(nameStr)
 		if err != nil {
 			L.Push(lua.LNil)
 			L.Push(lua.LString("error get alert: " + err.Error()))
