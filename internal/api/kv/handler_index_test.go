@@ -5,58 +5,11 @@ import (
 	coreStorage "github.com/balerter/balerter/internal/core_storage"
 	"github.com/stretchr/testify/assert"
 	httpTestify "github.com/stretchr/testify/http"
-	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 	"net/http"
 	"net/url"
 	"testing"
 )
-
-type coreStorageMock struct {
-	mock.Mock
-	kv *coreStorageKVMock
-}
-
-func (m *coreStorageMock) KV() coreStorage.CoreStorageKV {
-	return m.kv
-}
-
-func (m *coreStorageMock) Stop() error {
-	return nil
-}
-
-func (m *coreStorageMock) Name() string {
-	return ""
-}
-
-func (m *coreStorageMock) Alert() coreStorage.CoreStorageAlert {
-	return nil
-}
-
-type coreStorageKVMock struct {
-	mock.Mock
-}
-
-func (m *coreStorageKVMock) All() (map[string]string, error) {
-	args := m.Called()
-	return args.Get(0).(map[string]string), args.Error(1)
-}
-
-func (m *coreStorageKVMock) Get(_ string) (string, error) {
-	return "", nil
-}
-
-func (m *coreStorageKVMock) Delete(_ string) error {
-	return nil
-}
-
-func (m *coreStorageKVMock) Put(_, _ string) error {
-	return nil
-}
-
-func (m *coreStorageKVMock) Upsert(_, _ string) error {
-	return nil
-}
 
 func TestHandlerIndex(t *testing.T) {
 	resultData := map[string]string{
@@ -64,10 +17,8 @@ func TestHandlerIndex(t *testing.T) {
 		"f2": "v2",
 	}
 
-	am := &coreStorageMock{
-		kv: &coreStorageKVMock{},
-	}
-	am.kv.On("All").Return(resultData, nil)
+	am := coreStorage.NewMock("")
+	am.KVMock().On("All").Return(resultData, nil)
 
 	f := HandlerIndex(am, zap.NewNop())
 
@@ -84,10 +35,8 @@ func TestHandlerIndex(t *testing.T) {
 func TestHandlerIndex_ErrorGetFromStorage(t *testing.T) {
 	resultData := map[string]string{}
 
-	am := &coreStorageMock{
-		kv: &coreStorageKVMock{},
-	}
-	am.kv.On("All").Return(resultData, fmt.Errorf("error1"))
+	am := coreStorage.NewMock("")
+	am.KVMock().On("All").Return(resultData, fmt.Errorf("error1"))
 
 	f := HandlerIndex(am, zap.NewNop())
 
