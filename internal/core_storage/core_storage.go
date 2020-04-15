@@ -15,7 +15,7 @@ type CoreStorageKV interface {
 type CoreStorageAlert interface {
 	GetOrNew(string) (*alert.Alert, error)
 	All() ([]*alert.Alert, error)
-	Release(a *alert.Alert)
+	Release(a *alert.Alert) error
 	Get(string) (*alert.Alert, error)
 }
 

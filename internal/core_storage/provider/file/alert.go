@@ -83,8 +83,28 @@ func (s *storageAlert) All() ([]*alert.Alert, error) {
 	return res, nil
 }
 
-func (s *storageAlert) Release(a *alert.Alert) {
-	alert.ReleaseAlert(a)
+func (s *storageAlert) Release(a *alert.Alert) error {
+	defer alert.ReleaseAlert(a)
+
+	data, err := a.Marshal()
+	if err != nil {
+		return fmt.Errorf("error marshal alert, %w", err)
+	}
+
+	err = s.db.Update(func(tx *bbolt.Tx) error {
+		b := tx.Bucket(bucketAlert)
+		if b == nil {
+			return errBucketNotFound
+		}
+		return b.Put([]byte(a.Name()), data)
+	})
+
+	if err != nil {
+		s.logger.Error("bbolt: error store item", zap.ByteString("bucket", bucketAlert), zap.Error(err))
+		return fmt.Errorf("error store item, %w", err)
+	}
+
+	return nil
 }
 
 func (s *storageAlert) Get(name string) (*alert.Alert, error) {

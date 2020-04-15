@@ -108,7 +108,9 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 			m.Send(alertLevel.String(), alertName, alertText, alertOptions.Channels, alertOptions.Fields, alertOptions.Image)
 		}
 
-		m.engine.Alert().Release(a)
+		if err := m.engine.Alert().Release(a); err != nil {
+			m.logger.Error("error release alert", zap.Error(err))
+		}
 
 		return 0
 	}

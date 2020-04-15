@@ -61,9 +61,9 @@ func (m *CoreStorageAlertMock) All() ([]*alert.Alert, error) {
 	return args.Get(0).([]*alert.Alert), args.Error(1)
 }
 
-func (m *CoreStorageAlertMock) Release(a *alert.Alert) {
+func (m *CoreStorageAlertMock) Release(a *alert.Alert) error {
 	args := m.Called(a)
-	_ = args
+	return args.Error(0)
 }
 
 func (m *CoreStorageAlertMock) Get(s string) (*alert.Alert, error) {

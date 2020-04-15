@@ -39,7 +39,9 @@ func (m *storageAlert) All() ([]*alert.Alert, error) {
 	return result, nil
 }
 
-func (m *storageAlert) Release(_ *alert.Alert) {}
+func (m *storageAlert) Release(_ *alert.Alert) error {
+	return nil
+}
 
 func (m *storageAlert) Get(name string) (*alert.Alert, error) {
 	m.mxAlerts.RLock()
