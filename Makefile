@@ -1,3 +1,4 @@
+SHELL       =   /bin/sh
 PKG_PREFIX  :=  github.com/balerter/balerter
 TAG         ?=  latest
 
