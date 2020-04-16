@@ -2,6 +2,7 @@ SHELL       =   /bin/sh
 PKG_PREFIX  :=  github.com/balerter/balerter
 TAG         ?=  latest
 
+.SUFFIXES:
 .PHONY: help\
 	build-balerter push-balerter gobuild-balerter\
 	build-tgtool push-tgtool\
