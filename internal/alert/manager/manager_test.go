@@ -14,22 +14,31 @@ func TestManager_Init(t *testing.T) {
 	m := New(nil, zap.NewNop())
 
 	cfg := config.Channels{
-		Slack: []config.ChannelSlack{
-			{
-				Name:    "slack1",
-				Token:   "token",
-				Channel: "channel",
-			},
-		},
+		Slack:    []config.ChannelSlack{{Name: "slack1"}},
+		Telegram: []config.ChannelTelegram{{Name: "tg1"}},
+		Syslog:   []config.ChannelSyslog{{Name: "sl1"}},
+		Notify:   []config.ChannelNotify{{Name: "n1"}},
 	}
 
 	err := m.Init(cfg)
 	require.NoError(t, err)
-	require.Equal(t, 1, len(m.channels))
+	require.Equal(t, 4, len(m.channels))
 
 	c, ok := m.channels["slack1"]
 	require.True(t, ok)
 	assert.Equal(t, "slack1", c.Name())
+
+	c, ok = m.channels["tg1"]
+	require.True(t, ok)
+	assert.Equal(t, "tg1", c.Name())
+
+	c, ok = m.channels["sl1"]
+	require.True(t, ok)
+	assert.Equal(t, "sl1", c.Name())
+
+	c, ok = m.channels["n1"]
+	require.True(t, ok)
+	assert.Equal(t, "n1", c.Name())
 }
 
 func TestManager_Loader(t *testing.T) {
@@ -45,11 +54,9 @@ func TestManager_Loader(t *testing.T) {
 
 	assert.IsType(t, &lua.LNilType{}, v.RawGet(lua.LString("wrong-name")))
 
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("warn")))
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("error")))
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("fail")))
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("success")))
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("ok")))
+	for _, method := range Methods() {
+		assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString(method)))
+	}
 }
 
 func TestManager_Name(t *testing.T) {

@@ -1,13 +1,16 @@
 package manager
 
 import (
+	"fmt"
 	"github.com/balerter/balerter/internal/alert/alert"
 	"github.com/balerter/balerter/internal/alert/message"
+	coreStorage "github.com/balerter/balerter/internal/core_storage"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest/observer"
 	"reflect"
 	"testing"
 )
@@ -225,4 +228,134 @@ func TestManager_luaCall_errorGetAlertData(t *testing.T) {
 	v := L.Get(4).String()
 
 	assert.Equal(t, "error get arguments: wrong options format: 1 error(s) decoding:\n\n* cannot parse 'Repeat' as int: strconv.ParseInt: parsing \"wrong value\": invalid syntax", v)
+}
+
+func TestManager_luaCall_error_get_alert(t *testing.T) {
+	chan1 := &alertChannelMock{}
+	eng := coreStorage.NewMock("")
+
+	eng.AlertMock().On("GetOrNew", mock.Anything).Return(nil, fmt.Errorf("error1"))
+
+	m := &Manager{
+		logger:   zap.NewNop(),
+		engine:   eng,
+		channels: map[string]alertChannel{"chan1": chan1},
+	}
+
+	L := lua.NewState()
+	L.Push(lua.LString("alertName"))
+	L.Push(lua.LString("alertText1"))
+	n := m.luaCall(script.New(), alert.LevelError)(L)
+	assert.Equal(t, 1, n)
+
+	v := L.Get(3).String()
+
+	assert.Equal(t, "internal error get alert from storage: error1", v)
+}
+
+func TestManager_luaCall_change_level(t *testing.T) {
+	chan1 := &alertChannelMock{}
+	eng := coreStorage.NewMock("")
+
+	a := alert.AcquireAlert()
+
+	chan1.On("Send", mock.Anything).Run(func(args mock.Arguments) {
+		m := args.Get(0).(*message.Message)
+
+		assert.Equal(t, "alertName", m.AlertName)
+		assert.Equal(t, "alertText1", m.Text)
+		assert.Equal(t, alert.LevelError.String(), m.Level)
+
+	}).Return(nil)
+
+	eng.AlertMock().On("GetOrNew", mock.Anything).Return(a, nil)
+	eng.AlertMock().On("Release", mock.Anything).Return(nil)
+
+	m := &Manager{
+		logger:   zap.NewNop(),
+		engine:   eng,
+		channels: map[string]alertChannel{"chan1": chan1},
+	}
+
+	L := lua.NewState()
+	L.Push(lua.LString("alertName"))
+	L.Push(lua.LString("alertText1"))
+	n := m.luaCall(script.New(), alert.LevelError)(L)
+	assert.Equal(t, 0, n)
+
+	assert.Equal(t, alert.LevelError, a.Level())
+
+	chan1.AssertCalled(t, "Send", mock.Anything)
+	chan1.AssertExpectations(t)
+}
+
+func TestManager_luaCall_same_level(t *testing.T) {
+	chan1 := &alertChannelMock{}
+	eng := coreStorage.NewMock("")
+
+	a := alert.AcquireAlert()
+	a.UpdateLevel(alert.LevelError)
+
+	eng.AlertMock().On("GetOrNew", mock.Anything).Return(a, nil)
+	eng.AlertMock().On("Release", mock.Anything).Return(nil)
+	chan1.On("Send", mock.Anything).Run(func(args mock.Arguments) {
+		m := args.Get(0).(*message.Message)
+
+		assert.Equal(t, "alertName", m.AlertName)
+		assert.Equal(t, "alertText1", m.Text)
+		assert.Equal(t, alert.LevelError.String(), m.Level)
+
+	}).Return(nil)
+
+	m := &Manager{
+		logger:   zap.NewNop(),
+		engine:   eng,
+		channels: map[string]alertChannel{"chan1": chan1},
+	}
+
+	opts := &lua.LTable{}
+	opts.RawSet(lua.LString("repeat"), lua.LNumber(1))
+
+	L := lua.NewState()
+	L.Push(lua.LString("alertName"))
+	L.Push(lua.LString("alertText1"))
+	L.Push(opts)
+	n := m.luaCall(script.New(), alert.LevelError)(L)
+	assert.Equal(t, 0, n)
+
+	assert.Equal(t, alert.LevelError, a.Level())
+	assert.Equal(t, 1, a.Count())
+
+	chan1.AssertCalled(t, "Send", mock.Anything)
+	chan1.AssertExpectations(t)
+}
+
+func TestManager_luaCall_error_release(t *testing.T) {
+	chan1 := &alertChannelMock{}
+	eng := coreStorage.NewMock("")
+
+	a := alert.AcquireAlert()
+
+	chan1.On("Send", mock.Anything).Return(nil)
+	eng.AlertMock().On("GetOrNew", mock.Anything).Return(a, nil)
+	eng.AlertMock().On("Release", mock.Anything).Return(fmt.Errorf("error1"))
+
+	core, logs := observer.New(zap.ErrorLevel)
+
+	m := &Manager{
+		logger:   zap.New(core),
+		engine:   eng,
+		channels: map[string]alertChannel{"chan1": chan1},
+	}
+
+	L := lua.NewState()
+	L.Push(lua.LString("alertName"))
+	L.Push(lua.LString("alertText1"))
+	n := m.luaCall(script.New(), alert.LevelError)(L)
+	assert.Equal(t, 0, n)
+
+	assert.Equal(t, alert.LevelError, a.Level())
+
+	assert.Equal(t, 1, logs.Len())
+	assert.Equal(t, 1, logs.FilterField(zap.Error(fmt.Errorf("error1"))).FilterMessage("error release alert").Len())
 }

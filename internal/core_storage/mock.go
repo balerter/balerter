@@ -53,7 +53,12 @@ type CoreStorageAlertMock struct {
 
 func (m *CoreStorageAlertMock) GetOrNew(string) (*alert.Alert, error) {
 	args := m.Called()
-	return args.Get(0).(*alert.Alert), args.Error(1)
+	a := args.Get(0)
+	if a == nil {
+		return nil, args.Error(1)
+
+	}
+	return a.(*alert.Alert), args.Error(1)
 }
 
 func (m *CoreStorageAlertMock) All() ([]*alert.Alert, error) {
