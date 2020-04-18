@@ -44,3 +44,16 @@ func (m *ModuleMock) Stop() error {
 	args := m.Called()
 	return args.Error(0)
 }
+
+func (m *ModuleMock) Result() ([]TestResult, error) {
+	args := m.Called()
+	res := args.Get(0)
+	if res != nil {
+		return res.([]TestResult), args.Error(1)
+	}
+	return nil, args.Error(1)
+}
+
+func (m *ModuleMock) Clean() {
+	m.Called()
+}
