@@ -10,4 +10,4 @@ if err ~= nil then
     return
 end
 
-h.printTable(res)
+h.print(res)
