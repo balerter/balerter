@@ -52,3 +52,16 @@ func TestManager_Stop_Error(t *testing.T) {
 
 	m1.AssertExpectations(t)
 }
+
+func TestGet(t *testing.T) {
+	m := &Manager{
+		modules: map[string]modules.Module{
+			"m1": &modules.ModuleMock{},
+			"m2": &modules.ModuleMock{},
+		},
+	}
+
+	mods := m.Get()
+
+	assert.Equal(t, 2, len(mods))
+}
