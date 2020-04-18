@@ -110,29 +110,4 @@ See a documentation on [https://balerter.com](https://balerter.com)
 
 ## Roadmap
 
-- core modules enhancements
-    - [ ] add prometheus methods for querying metadata
-        - [ ] series
-        - [ ] labels
-        - [ ] label values
-    - [ ] add loki methods for querying metadata
-        - [ ] series
-        - [ ] labels
-        - [ ] label values
-- [ ] official grafana dashboard
-- New script sources
-    - [ ] Postgres - select scripts from Postgres table
-    - [ ] ...
-- engines for external KV storage
-    - [x] file
-    - [ ] consul
-    - [ ] postgres
-- New datasources
-    - [ ] MongoDB
-    - [ ] ...
-- New channels
-    - [ ] email
-    - [ ] webhook
-    - [ ] rocketchat
-    - [ ] ...
-- [ ] chart module enhancement
+See in https://github.com/balerter/balerter/projects/1
