@@ -36,7 +36,7 @@ Config file `config.yml`
 ```yaml
 scripts:
   sources:
-    update_interval: 5s
+    updateInterval: 5s
     folder:
       - name: debug-folder
         path: /opt/scripts
@@ -50,15 +50,13 @@ datasources:
       username: default
       password: secret
       database: default
-      ssl_mode: verified_full
-      ssl_cert_path: /home/user/db.crt
+      sslMode: verified_full
+      sslCertPath: /home/user/db.crt
 
 channels:
   slack:
     - name: slack1
       url: https://hooks.slack.com/services/hash
-      message_prefix_success: ':eight_spoked_asterisk: '
-      message_prefix_error: ':sos: '
 ```
 
 Sample script `rps.lua`
@@ -86,7 +84,7 @@ else
 end 
 ```
 
-Also you can to write tests!
+Also, you can to write tests!
 
 An example:
 
