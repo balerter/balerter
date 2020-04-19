@@ -16,7 +16,7 @@ func TestManager_Init(t *testing.T) {
 	cfg := config.Channels{
 		Slack:    []config.ChannelSlack{{Name: "slack1"}},
 		Telegram: []config.ChannelTelegram{{Name: "tg1"}},
-		Syslog:   []config.ChannelSyslog{{Name: "sl1"}},
+		Syslog:   []config.ChannelSyslog{{Name: "sl1", Network: "UDP", Address: "127.0.0.1"}},
 		Notify:   []config.ChannelNotify{{Name: "n1"}},
 	}
 
