@@ -16,8 +16,8 @@ func TestAcquireAlert(t *testing.T) {
 	a2 := AcquireAlert()
 
 	assert.Equal(t, fmt.Sprintf("%p", a1), fmt.Sprintf("%p", a2))
-	assert.Greater(t, a2.lastChange.UnixNano(), now.UnixNano())
-	assert.Greater(t, a2.GetStartTime().UnixNano(), now.UnixNano())
+	assert.GreaterOrEqual(t, a2.lastChange.UnixNano(), now.UnixNano())
+	assert.GreaterOrEqual(t, a2.GetStartTime().UnixNano(), now.UnixNano())
 	assert.Equal(t, LevelSuccess, a2.level)
 	assert.Equal(t, 0, a2.count)
 }
