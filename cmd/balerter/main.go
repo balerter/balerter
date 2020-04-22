@@ -16,6 +16,7 @@ import (
 	httpModule "github.com/balerter/balerter/internal/modules/http"
 	"github.com/balerter/balerter/internal/modules/kv"
 	logModule "github.com/balerter/balerter/internal/modules/log"
+	runtimeModule "github.com/balerter/balerter/internal/modules/runtime"
 	"github.com/balerter/balerter/internal/runner"
 	scriptsManager "github.com/balerter/balerter/internal/script/manager"
 	uploadStorageManager "github.com/balerter/balerter/internal/upload_storage/manager"
@@ -200,6 +201,15 @@ func main() {
 	// |
 	httpMod := httpModule.New(lgr.Logger())
 	coreModules = append(coreModules, httpMod)
+
+	// ---------------------
+	// |
+	// | Core Modules
+	// |
+	// | runtime
+	// |
+	runtimeMod := runtimeModule.New(*logLevel, *debug, *once, *withScript, *configSource, lgr.Logger())
+	coreModules = append(coreModules, runtimeMod)
 
 	// ---------------------
 	// |

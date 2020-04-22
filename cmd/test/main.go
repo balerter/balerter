@@ -14,6 +14,7 @@ import (
 	httpModule "github.com/balerter/balerter/internal/modules/http"
 	"github.com/balerter/balerter/internal/modules/kv"
 	logModule "github.com/balerter/balerter/internal/modules/log"
+	runtimeModule "github.com/balerter/balerter/internal/modules/runtime"
 	testModule "github.com/balerter/balerter/internal/modules/test"
 	runnerTest "github.com/balerter/balerter/internal/runner/test"
 	scriptsManager "github.com/balerter/balerter/internal/script/manager"
@@ -150,6 +151,15 @@ func main() {
 	// |
 	httpMod := mock.New(httpModule.ModuleName(), httpModule.Methods(), lgr.Logger())
 	coreModules = append(coreModules, httpMod)
+
+	// ---------------------
+	// |
+	// | Core Modules
+	// |
+	// | runtime
+	// |
+	runtimeMod := mock.New(runtimeModule.ModuleName(), runtimeModule.Methods(), lgr.Logger())
+	coreModules = append(coreModules, runtimeMod)
 
 	// ---------------------
 	// |
