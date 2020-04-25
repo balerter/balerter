@@ -7,15 +7,22 @@ import (
 
 // ChannelEmail configures notifications via email.
 type ChannelEmail struct {
-	From         string `json:"from,omitempty" yaml:"from,omitempty"`
-	To           string `json:"to,omitempty" yaml:"to,omitempty"`
-	ServerName   string `json:"server_name,omitempty" yaml:"server_name,omitempty"`
-	AuthUsername string `json:"auth_username,omitempty" yaml:"auth_username,omitempty"`
-	AuthPassword string `json:"auth_password,omitempty" yaml:"auth_password,omitempty"`
+	Name         string `json:"name" yaml:"name"`
+	From         string `json:"from" yaml:"from"`
+	To           string `json:"to" yaml:"to"`
+	ServerName   string `json:"server_name" yaml:"server_name"`
+	AuthUsername string `json:"auth_username" yaml:"auth_username"`
+	AuthPassword string `json:"auth_password" yaml:"auth_password"`
+	AuthIdentity string `json:"auth_identity" yaml:"auth_identity"`
+	AuthSecret   string `json:"auth_secret" yaml:"auth_secret"`
 }
 
 // Validate checks the email configuration.
 func (cfg ChannelEmail) Validate() error {
+	if strings.TrimSpace(cfg.Name) == "" {
+		return fmt.Errorf("name must be not empty")
+	}
+
 	if strings.TrimSpace(cfg.From) == "" {
 		return fmt.Errorf("from must be not empty")
 	}
