@@ -1,7 +1,9 @@
 package email
 
 import (
+	"net"
 	"testing"
+	"time"
 
 	"github.com/balerter/balerter/internal/alert/message"
 	"github.com/balerter/balerter/internal/config"
@@ -24,6 +26,15 @@ func TestSend(t *testing.T) {
 		logger: zap.NewNop(),
 	}
 
+	timeout := time.Second
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(e.conf.ServerName, e.conf.ServerPort), timeout)
+	if err != nil {
+		return
+	}
+	if conn != nil {
+		defer conn.Close()
+	}
+
 	msg := &message.Message{
 		Level:     "error",
 		AlertName: "alert-id",
@@ -32,6 +43,6 @@ func TestSend(t *testing.T) {
 		Image:     "alert image",
 	}
 
-	err := e.Send(msg)
+	err = e.Send(msg)
 	require.NoError(t, err)
 }
