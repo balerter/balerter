@@ -16,3 +16,8 @@ services:
     - ./assets/clickhouse.sh:/docker-entrypoint-initdb.d/init-db.sh
     ports:
     - 9000:9000
+  maildev:
+    image: maildev/maildev
+    ports:
+      - "1025:25"
+      - "1080:80"

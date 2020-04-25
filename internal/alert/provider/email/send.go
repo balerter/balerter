@@ -39,7 +39,7 @@ func (e *Email) Send(message *message.Message) error {
 			d   = net.Dialer{}
 			err error
 		)
-		conn, err = d.Dial("tcp", e.conf.ServerName)
+		conn, err = d.Dial("tcp", e.conf.ServerName+":"+e.conf.ServerPort)
 		if err != nil {
 			return errors.Wrap(err, "establish connection to server")
 		}
