@@ -11,6 +11,7 @@ type ChannelEmail struct {
 	From         string `json:"from" yaml:"from"`
 	To           string `json:"to" yaml:"to"`
 	ServerName   string `json:"server_name" yaml:"server_name"`
+	ServerPort   string `json:"server_port" yaml:"server_port"`
 	AuthUsername string `json:"auth_username" yaml:"auth_username"`
 	AuthPassword string `json:"auth_password" yaml:"auth_password"`
 	AuthIdentity string `json:"auth_identity" yaml:"auth_identity"`
