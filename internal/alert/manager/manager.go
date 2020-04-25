@@ -2,8 +2,10 @@ package manager
 
 import (
 	"fmt"
+
 	"github.com/balerter/balerter/internal/alert/alert"
 	"github.com/balerter/balerter/internal/alert/message"
+	"github.com/balerter/balerter/internal/alert/provider/email"
 	"github.com/balerter/balerter/internal/alert/provider/notify"
 	"github.com/balerter/balerter/internal/alert/provider/slack"
 	"github.com/balerter/balerter/internal/alert/provider/syslog"
@@ -38,10 +40,19 @@ func New(engine coreStorage.CoreStorage, logger *zap.Logger) *Manager {
 }
 
 func (m *Manager) Init(cfg config.Channels) error {
-	for _, configWebHook := range cfg.Slack {
-		module, err := slack.New(configWebHook, m.logger)
+	for _, cfg := range cfg.Email {
+		module, err := email.New(cfg, m.logger)
 		if err != nil {
-			return fmt.Errorf("error init slack channel %s, %w", configWebHook.Name, err)
+			return fmt.Errorf("error init email channel %s, %w", cfg.Name, err)
+		}
+
+		m.channels[module.Name()] = module
+	}
+
+	for _, cfg := range cfg.Slack {
+		module, err := slack.New(cfg, m.logger)
+		if err != nil {
+			return fmt.Errorf("error init slack channel %s, %w", cfg.Name, err)
 		}
 
 		m.channels[module.Name()] = module

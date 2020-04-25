@@ -1,4 +1,4 @@
-package syslog
+package email
 
 import (
 	"testing"

@@ -1,11 +1,10 @@
-package syslog
+package email
 
 import (
 	"errors"
 	"net/smtp"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/types"
@@ -18,21 +17,6 @@ type Email struct {
 	hostname string
 	logger   *zap.Logger
 	name     string
-}
-
-// MultiError contains multiple errors and implements the error interface. Its
-// zero value is ready to use. All its methods are goroutine safe.
-type MultiError struct {
-	mtx    sync.Mutex
-	errors []error
-}
-
-// Add adds an error to the MultiError.
-func (e *MultiError) Add(err error) {
-	e.mtx.Lock()
-	defer e.mtx.Unlock()
-
-	e.errors = append(e.errors, err)
 }
 
 func New(cfg config.ChannelEmail, logger *zap.Logger) (*Email, error) {
