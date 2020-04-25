@@ -25,7 +25,7 @@ func New(cfg config.ChannelEmail, logger *zap.Logger) (*Email, error) {
 	if err != nil {
 		h = "localhost.localdomain"
 	}
-	return &Email{conf: &cfg, logger: logger, hostname: h}, nil
+	return &Email{conf: &cfg, hostname: h, logger: logger, name: cfg.Name}, nil
 }
 
 func (e *Email) Name() string {

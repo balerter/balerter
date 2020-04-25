@@ -1,19 +1,21 @@
 package manager
 
 import (
+	"testing"
+
 	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"testing"
 )
 
 func TestManager_Init(t *testing.T) {
 	m := New(nil, zap.NewNop())
 
 	cfg := config.Channels{
+		Email:    []config.ChannelEmail{{Name: "email1"}},
 		Slack:    []config.ChannelSlack{{Name: "slack1"}},
 		Telegram: []config.ChannelTelegram{{Name: "tg1"}},
 		Syslog:   []config.ChannelSyslog{{Name: "sl1", Network: "udp", Address: "127.0.0.1:2000"}},
@@ -22,9 +24,13 @@ func TestManager_Init(t *testing.T) {
 
 	err := m.Init(cfg)
 	require.NoError(t, err)
-	require.Equal(t, 4, len(m.channels))
+	require.Equal(t, 5, len(m.channels))
 
-	c, ok := m.channels["slack1"]
+	c, ok := m.channels["email1"]
+	require.True(t, ok)
+	assert.Equal(t, "email1", c.Name())
+
+	c, ok = m.channels["slack1"]
 	require.True(t, ok)
 	assert.Equal(t, "slack1", c.Name())
 
