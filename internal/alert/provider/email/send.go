@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"crypto/tls"
 	"fmt"
+	"math/rand"
+	"mime"
 	"mime/multipart"
 	"mime/quotedprintable"
 	"net"
 	"net/mail"
 	"net/smtp"
 	"net/textproto"
+	"strings"
 	"time"
 
 	"github.com/balerter/balerter/internal/alert/message"
@@ -97,6 +100,14 @@ func (e *Email) Send(message *message.Message) error {
 	multipartBuffer := &bytes.Buffer{}
 	multipartWriter := multipart.NewWriter(multipartBuffer)
 
+	fmt.Fprintf(buffer, "%s: %s\r\n", "From", mime.QEncoding.Encode("utf-8", e.conf.From))
+	fmt.Fprintf(buffer, "%s: %s\r\n", "To", mime.QEncoding.Encode("utf-8", e.conf.To))
+	fmt.Fprintf(buffer, "%s: [%s/%s] %s\r\n", "Subject",
+		mime.QEncoding.Encode("utf-8", message.AlertName),
+		mime.QEncoding.Encode("utf-8", message.Level),
+		mime.QEncoding.Encode("utf-8", strings.Join(message.Fields, ",")))
+
+	fmt.Fprintf(buffer, "Message-Id: %s\r\n", fmt.Sprintf("<%d.%d@%s>", time.Now().UnixNano(), rand.Uint64(), e.hostname))
 	fmt.Fprintf(buffer, "Date: %s\r\n", time.Now().Format(time.RFC1123Z))
 	fmt.Fprintf(buffer, "Content-Type: multipart/alternative;  boundary=%s\r\n", multipartWriter.Boundary())
 	fmt.Fprintf(buffer, "MIME-Version: 1.0\r\n\r\n")

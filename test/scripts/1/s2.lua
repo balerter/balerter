@@ -13,6 +13,6 @@ if err ~= nil then
     return
 end
 
-alert.warn('alert-id', 'An test warning occured!')
-alert.success('alert-id', 'Test warning is gone!')
+alert.warn('alert-id', 'An test warning from clickhouse query occured!')
+alert.success('alert-id', 'Test warning from clickhouse query is gone!')
 h.print(res)
