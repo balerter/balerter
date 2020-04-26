@@ -1,8 +1,11 @@
 -- @interval 5s
 
+local alert = require('alert')
 local db = require('datasource.clickhouse.ch1')
 local log = require('log')
 local h = require('h')
+
+log.info('clickhouse query: SELECT * FROM users')
 
 res, err = db.query('SELECT * FROM users')
 if err ~= nil then
@@ -10,4 +13,6 @@ if err ~= nil then
     return
 end
 
+alert.warn('alert-id', 'An test warning occured!')
+alert.success('alert-id', 'Test warning is gone!')
 h.print(res)
