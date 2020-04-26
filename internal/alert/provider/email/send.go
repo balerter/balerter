@@ -59,7 +59,7 @@ func (e *Email) Send(message *message.Message) error {
 
 	if e.conf.RequireTLS {
 		if ok, _ := c.Extension("STARTTLS"); !ok {
-			return fmt.Errorf("'requireTLS' is true (default) but %q does not advertise the STARTTLS extension",
+			return fmt.Errorf("'requireTLS' is true but %q does not advertise the STARTTLS extension",
 				net.JoinHostPort(e.conf.ServerName, e.conf.ServerPort))
 		}
 
@@ -139,7 +139,7 @@ func (e *Email) Send(message *message.Message) error {
 			"Content-Type":              {"text/plain; charset=UTF-8"},
 		})
 		if err != nil {
-			return fmt.Errorf("create part for text template: %w", err)
+			return fmt.Errorf("create part for text body: %w", err)
 		}
 
 		qw := quotedprintable.NewWriter(w)
