@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/balerter/balerter/internal/alert/message"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -35,7 +34,7 @@ func (e *Email) Send(message *message.Message) error {
 
 		conn, err = tls.Dial("tcp", e.conf.ServerName, tlsConfig)
 		if err != nil {
-			return errors.Wrap(err, "establish TLS connection to server")
+			return fmt.Errorf("establish TLS connection to server: %w", err)
 		}
 	} else {
 		var (
@@ -44,13 +43,13 @@ func (e *Email) Send(message *message.Message) error {
 		)
 		conn, err = d.Dial("tcp", net.JoinHostPort(e.conf.ServerName, e.conf.ServerPort))
 		if err != nil {
-			return errors.Wrap(err, "establish connection to server")
+			return fmt.Errorf("establish connection to server: %w", err)
 		}
 	}
 	c, err = smtp.NewClient(conn, e.conf.ServerName)
 	if err != nil {
 		conn.Close()
-		return errors.Wrap(err, "create SMTP client")
+		return fmt.Errorf("create SMTP client: %w", err)
 	}
 	defer func() {
 		if err := c.Quit(); err != nil {
@@ -58,41 +57,58 @@ func (e *Email) Send(message *message.Message) error {
 		}
 	}()
 
+	if e.conf.RequireTLS {
+		if ok, _ := c.Extension("STARTTLS"); !ok {
+			return fmt.Errorf("'requireTLS' is true (default) but %q does not advertise the STARTTLS extension",
+				net.JoinHostPort(e.conf.ServerName, e.conf.ServerPort))
+		}
+
+		tlsConf := &tls.Config{InsecureSkipVerify: true}
+
+		if tlsConf.ServerName == "" {
+			tlsConf.ServerName = e.conf.ServerName
+		}
+
+		if err := c.StartTLS(tlsConf); err != nil {
+			return fmt.Errorf("send STARTTLS command: %w", err)
+		}
+	}
+
 	if ok, mech := c.Extension("AUTH"); ok {
 		auth, err := e.auth(mech)
 		if err != nil {
-			return errors.Wrap(err, "find auth mechanism")
+			return fmt.Errorf("find auth mechanism: %w", err)
 		}
 		if auth != nil {
 			if err := c.Auth(auth); err != nil {
-				return errors.Wrapf(err, "%T auth", auth)
+				return fmt.Errorf("%T auth: %w", auth, err)
 			}
 		}
 	}
 
 	addrs, err := mail.ParseAddressList(e.conf.From)
 	if err != nil {
-		return errors.Wrap(err, "parse 'from' addresses")
+		return fmt.Errorf("parse 'from' addresses: %w", err)
 	}
 	if len(addrs) != 1 {
-		return errors.Errorf("must be exactly one 'from' address (got: %d)", len(addrs))
+		return fmt.Errorf("must be exactly one 'from' address (got: %d)", len(addrs))
 	}
 	if err = c.Mail(addrs[0].Address); err != nil {
-		return errors.Wrap(err, "send MAIL command")
+		return fmt.Errorf("send MAIL command: %w", err)
 	}
 	addrs, err = mail.ParseAddressList(e.conf.To)
 	if err != nil {
-		return errors.Wrapf(err, "parse 'to' addresses")
+		return fmt.Errorf("parse 'to' addresses: %w", err)
 	}
 	for _, addr := range addrs {
 		if err = c.Rcpt(addr.Address); err != nil {
-			return errors.Wrapf(err, "send RCPT command")
+			return fmt.Errorf("send RCPT command: %w", err)
 		}
 	}
 
 	msg, err := c.Data()
 	if err != nil {
-		return errors.Wrapf(err, "send DATA command")
+		return fmt.Errorf("send DATA command: %w", err)
 	}
 	defer msg.Close()
 
@@ -114,7 +130,7 @@ func (e *Email) Send(message *message.Message) error {
 
 	_, err = msg.Write(buffer.Bytes())
 	if err != nil {
-		return errors.Wrap(err, "write headers")
+		return fmt.Errorf("write headers: %w", err)
 	}
 
 	if len(message.Text) > 0 {
@@ -123,28 +139,28 @@ func (e *Email) Send(message *message.Message) error {
 			"Content-Type":              {"text/plain; charset=UTF-8"},
 		})
 		if err != nil {
-			return errors.Wrap(err, "create part for text template")
+			return fmt.Errorf("create part for text template: %w", err)
 		}
 
 		qw := quotedprintable.NewWriter(w)
 		_, err = qw.Write([]byte(message.Text))
 		if err != nil {
-			return errors.Wrap(err, "write text part")
+			return fmt.Errorf("write text part: %w", err)
 		}
 		err = qw.Close()
 		if err != nil {
-			return errors.Wrap(err, "close text part")
+			return fmt.Errorf("close text part: %w", err)
 		}
 	}
 
 	err = multipartWriter.Close()
 	if err != nil {
-		return errors.Wrap(err, "close multipartWriter")
+		return fmt.Errorf("close multipartWriter: %w", err)
 	}
 
 	_, err = msg.Write(multipartBuffer.Bytes())
 	if err != nil {
-		return errors.Wrap(err, "write body buffer")
+		return fmt.Errorf("write body buffer: %w", err)
 	}
 
 	return nil

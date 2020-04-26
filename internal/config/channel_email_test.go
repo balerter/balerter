@@ -35,16 +35,16 @@ func TestChannelEmail_Validate(t *testing.T) {
 			errText: "to must be not empty",
 		},
 		{
-			name:    "empty server_name",
+			name:    "empty serverName",
 			fields:  fields{Name: "foo", From: "gopher@example.net", To: "foo@example.com", ServerName: "", ServerPort: ""},
 			wantErr: true,
-			errText: "server_name must be not empty",
+			errText: "serverName must be not empty",
 		},
 		{
-			name:    "empty server_port",
+			name:    "empty serverPort",
 			fields:  fields{Name: "foo", From: "gopher@example.net", To: "foo@example.com", ServerName: "mail.example.com", ServerPort: ""},
 			wantErr: true,
-			errText: "server_port must be not empty",
+			errText: "serverPort must be not empty",
 		},
 		{
 			name:    "ok",

@@ -35,8 +35,8 @@ channels:
     - name: maildev
       from: gopher@example.net
       to: foo@example.com
-      server_name: 127.0.0.1
-      server_port: 1025
+      serverName: 127.0.0.1
+      serverPort: 1025
 
 global:
   api:
