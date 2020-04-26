@@ -38,7 +38,7 @@ func (e *Email) auth(mechs string) (smtp.Auth, error) {
 
 	// If no username is set, keep going without authentication.
 	if e.conf.AuthUsername == "" {
-		e.logger.Debug("email", zap.String("auth", "auth_username is not configured. Attempting to send email without authenticating"))
+		e.logger.Debug("email", zap.String("auth", "authUsername is not configured. Attempting to send email without authenticating"))
 		return nil, nil
 	}
 
