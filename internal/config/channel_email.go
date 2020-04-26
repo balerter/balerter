@@ -36,5 +36,9 @@ func (cfg ChannelEmail) Validate() error {
 		return fmt.Errorf("server_name must be not empty")
 	}
 
+	if strings.TrimSpace(cfg.ServerPort) == "" {
+		return fmt.Errorf("server_port must be not empty")
+	}
+
 	return nil
 }

@@ -19,7 +19,7 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated email",
 			fields: fields{
-				Email: []ChannelEmail{{Name: "foo", From: "gopher@example.net", To: "foo@example.com", ServerName: "mail.example.com"}, {Name: "foo", From: "gopher@example.net", To: "foo@example.com", ServerName: "mail.example.com"}},
+				Email: []ChannelEmail{{Name: "foo", From: "gopher@example.net", To: "foo@example.com", ServerName: "mail.example.com", ServerPort: "25"}, {Name: "foo", From: "gopher@example.net", To: "foo@example.com", ServerName: "mail.example.com", ServerPort: "25"}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for channels 'email': foo",
@@ -59,7 +59,7 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "ok",
 			fields: fields{
-				Email:    []ChannelEmail{{Name: "foo", From: "gopher@example.net", To: "foo@example.com", ServerName: "mail.example.com"}, {Name: "foo2", From: "gopher@example.net", To: "foo@example.com", ServerName: "mail.example.com"}},
+				Email:    []ChannelEmail{{Name: "foo", From: "gopher@example.net", To: "foo@example.com", ServerName: "mail.example.com", ServerPort: "25"}, {Name: "foo2", From: "gopher@example.net", To: "foo@example.com", ServerName: "mail.example.com", ServerPort: "25"}},
 				Slack:    []ChannelSlack{{Name: "foo", Token: "a", Channel: "a"}, {Name: "foo2", Token: "a", Channel: "a"}},
 				Telegram: []ChannelTelegram{{Name: "foo", Token: "a", ChatID: 1}, {Name: "foo2", Token: "a", ChatID: 1}},
 				Syslog:   []ChannelSyslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"}, {Name: "foo2", Network: "tcp", Address: "a", Priority: "EMERG"}},
