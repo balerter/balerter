@@ -31,6 +31,12 @@ channels:
       network: udp
       address: 127.0.0.1:10514
       priority: 'EMERG|DAEMON'
+  email:
+    - name: maildev
+      from: gopher@example.net
+      to: foo@example.com
+      serverName: 127.0.0.1
+      serverPort: 1025
 
 global:
   api:
