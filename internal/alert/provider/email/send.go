@@ -26,10 +26,9 @@ func (e *Email) Send(message *message.Message) error {
 		err  error
 	)
 	if e.conf.ServerPort == "465" {
-		tlsConfig := &tls.Config{InsecureSkipVerify: true}
-
-		if tlsConfig.ServerName == "" {
-			tlsConfig.ServerName = e.conf.ServerName
+		tlsConfig := &tls.Config{
+			InsecureSkipVerify: true,
+			ServerName:         e.conf.ServerName,
 		}
 
 		conn, err = tls.Dial("tcp", net.JoinHostPort(e.conf.ServerName, e.conf.ServerPort), tlsConfig)
