@@ -32,7 +32,7 @@ func (e *Email) Send(message *message.Message) error {
 			tlsConfig.ServerName = e.conf.ServerName
 		}
 
-		conn, err = tls.Dial("tcp", e.conf.ServerName, tlsConfig)
+		conn, err = tls.Dial("tcp", net.JoinHostPort(e.conf.ServerName, e.conf.ServerPort), tlsConfig)
 		if err != nil {
 			return fmt.Errorf("establish TLS connection to server: %w", err)
 		}
