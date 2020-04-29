@@ -1,18 +1,23 @@
 package script
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/robfig/cron/v3"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestScript_ParseMeta_without_meta(t *testing.T) {
+	everySecondSched := cron.ConstantDelaySchedule{
+		Delay: time.Second,
+	}
 	s := &Script{
-		Interval: time.Second,
+		Schedule: everySecondSched,
 		Body: []byte(`
 print
--- @interval 10m
+-- @schedule every 1s
 -- @ignore
 `),
 	}
@@ -22,10 +27,10 @@ print
 	require.NoError(t, err)
 
 	assert.False(t, s.Ignore)
-	assert.Equal(t, time.Second, s.Interval)
+	assert.Equal(t, everySecondSched, s.Schedule)
 
 	s = &Script{
-		Interval: time.Second,
+		Schedule: everySecondSched,
 		Body: []byte(`
 -- hello 
 `),
@@ -36,22 +41,22 @@ print
 	require.NoError(t, err)
 
 	assert.False(t, s.Ignore)
-	assert.Equal(t, time.Second, s.Interval)
+	assert.Equal(t, everySecondSched, s.Schedule)
 }
 
 func TestScript_ParseMeta(t *testing.T) {
 	s := &Script{
 		Body: []byte(`
 -- header
--- @interval 5m
+-- @schedule @every 5m
 -- foo
 -- @name newname
 --
 -- @ignore
--- @interval 6m
+-- @schedule @every 6m
 --
 print
--- @interval 10m
+-- @schedule @every 10m
 `),
 	}
 
@@ -60,19 +65,19 @@ print
 	require.NoError(t, err)
 
 	assert.True(t, s.Ignore)
-	assert.Equal(t, time.Minute*6, s.Interval)
+	assert.Equal(t, cron.ConstantDelaySchedule{Delay: time.Minute * 6}, s.Schedule)
 	assert.Equal(t, "newname", s.Name)
 }
 
 func TestScript_ParseMeta_WrongDuration(t *testing.T) {
 	s := &Script{
-		Body: []byte(`-- @interval 5sm`),
+		Body: []byte(`-- @schedule @every 5sm`),
 	}
 
 	err := s.ParseMeta()
 
 	require.Error(t, err)
-	assert.Equal(t, "time: unknown unit sm in duration 5sm", err.Error())
+	assert.Equal(t, "failed to parse duration @every 5sm: time: unknown unit sm in duration 5sm", err.Error())
 }
 
 func TestScript_ParseMeta_EmptyName(t *testing.T) {

@@ -5,28 +5,31 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/robfig/cron/v3"
 )
 
-const (
-	DefaultInterval = time.Second * 60
+var (
+	DefaultSchedule = cron.Every(time.Second * 60)
 )
 
 func New() *Script {
 	s := &Script{
-		Interval: DefaultInterval,
+		Schedule: DefaultSchedule,
 	}
 
 	return s
 }
 
 type Script struct {
-	Name       string
-	Body       []byte
-	Interval   time.Duration
-	Ignore     bool
-	Channels   []string
-	IsTest     bool
-	TestTarget string
+	Name           string
+	Body           []byte
+	Schedule       cron.Schedule
+	ScheduleString string
+	Ignore         bool
+	Channels       []string
+	IsTest         bool
+	TestTarget     string
 }
 
 func (s *Script) Hash() string {
@@ -35,7 +38,7 @@ func (s *Script) Hash() string {
 
 var (
 	metas = map[string]func(l string, s *Script) error{
-		"@interval": parseMetaInterval,
+		"@schedule": parseMetaSchedule,
 		"@ignore":   parseMetaIgnore,
 		"@name":     parseMetaName,
 		"@channels": parseMetaChannels,
@@ -70,13 +73,14 @@ func (s *Script) ParseMeta() error {
 	return nil
 }
 
-func parseMetaInterval(l string, s *Script) error {
-	d, err := time.ParseDuration(strings.TrimSpace(l))
+func parseMetaSchedule(l string, s *Script) error {
+	sched, err := cron.ParseStandard(l)
 	if err != nil {
 		return err
 	}
 
-	s.Interval = d
+	s.Schedule = sched
+	s.ScheduleString = l
 
 	return nil
 }

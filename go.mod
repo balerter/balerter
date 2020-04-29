@@ -19,6 +19,7 @@ require (
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/prometheus/client_golang v1.4.1
 	github.com/prometheus/common v0.9.1
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.4.0
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7

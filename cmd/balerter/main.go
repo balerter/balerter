@@ -4,6 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	apiManager "github.com/balerter/balerter/internal/api/manager"
 	"github.com/balerter/balerter/internal/config"
@@ -22,11 +28,6 @@ import (
 	uploadStorageManager "github.com/balerter/balerter/internal/upload_storage/manager"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"log"
-	"os"
-	"os/signal"
-	"sync"
-	"syscall"
 )
 
 var (
@@ -237,8 +238,6 @@ func main() {
 		ctxCancel()
 	case <-ctx.Done():
 	}
-
-	rnr.Stop()
 
 	wg.Wait()
 

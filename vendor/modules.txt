@@ -235,6 +235,9 @@ github.com/prometheus/prometheus/util/stats
 github.com/prometheus/prometheus/util/strutil
 github.com/prometheus/prometheus/util/teststorage
 github.com/prometheus/prometheus/util/testutil
+# github.com/robfig/cron/v3 v3.0.1
+## explicit
+github.com/robfig/cron/v3
 # github.com/sercand/kuberesolver v2.1.0+incompatible
 github.com/sercand/kuberesolver
 # github.com/sirupsen/logrus v1.4.2

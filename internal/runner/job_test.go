@@ -1,14 +1,14 @@
 package runner
 
 import (
+	"testing"
+
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"testing"
-	"time"
 )
 
 type alertManagerMock struct {
@@ -116,18 +116,4 @@ func TestRunner_createLuaState(t *testing.T) {
 	require.NotNil(t, L)
 	m1.AssertExpectations(t)
 	dsManager.AssertExpectations(t)
-}
-
-func TestJob_Stop(t *testing.T) {
-	j := &Job{
-		stop: make(chan struct{}),
-	}
-
-	j.Stop()
-
-	select {
-	case <-j.stop:
-	case <-time.After(time.Millisecond * 100):
-		t.Fatal("wrong wait close a channel")
-	}
 }
