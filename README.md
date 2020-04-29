@@ -62,7 +62,7 @@ channels:
 
 Sample script `rps.lua`
 ```
--- @interval 10s
+-- @schedule @every 10s
 -- @name script1
 
 local minRequestsRPS = 100
