@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/balerter/balerter/internal/script/script"
+	"github.com/robfig/cron/v3"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
@@ -20,12 +21,13 @@ func TestRunner_Watch(t *testing.T) {
 	scriptsMgr.On("Get").Return(scripts, nil)
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
-	var wg *sync.WaitGroup
+	wg := &sync.WaitGroup{}
 
 	rnr := &Runner{
 		pool:           make(map[string]*runningJob),
 		scriptsManager: scriptsMgr,
 		logger:         zap.NewNop(),
+		cron:           cron.New(),
 	}
 
 	time.AfterFunc(time.Millisecond*200, func() {
@@ -55,7 +57,7 @@ func TestRunner_Watch_Error(t *testing.T) {
 	scriptsMgr.On("Get").Return(scripts, e)
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
-	var wg *sync.WaitGroup
+	wg := &sync.WaitGroup{}
 
 	core, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(core)
@@ -65,6 +67,7 @@ func TestRunner_Watch_Error(t *testing.T) {
 		pool:           make(map[string]*runningJob),
 		scriptsManager: scriptsMgr,
 		logger:         logger,
+		cron:           cron.New(),
 	}
 
 	time.AfterFunc(time.Millisecond*200, func() {
