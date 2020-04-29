@@ -3,6 +3,7 @@ package email
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/base64"
 	"fmt"
 	"math/rand"
 	"mime"
@@ -150,6 +151,27 @@ func (e *Email) Send(message *message.Message) error {
 		err = qw.Close()
 		if err != nil {
 			return fmt.Errorf("close text part: %w", err)
+		}
+	}
+
+	if len(message.Image) > 0 {
+		w, err := multipartWriter.CreatePart(textproto.MIMEHeader{
+			"Content-Transfer-Encoding": {"base64"},
+			"Content-Type":              {"application/octet-stream"},
+			"Content-Disposition":       {"attachment; " + "filename=" + message.AlertName},
+		})
+		if err != nil {
+			return fmt.Errorf("create part for image body: %w", err)
+		}
+
+		iw := base64.NewEncoder(base64.StdEncoding, w)
+		_, err = iw.Write([]byte(message.Image))
+		if err != nil {
+			return fmt.Errorf("write image part: %w", err)
+		}
+		err = iw.Close()
+		if err != nil {
+			return fmt.Errorf("close image part: %w", err)
 		}
 	}
 
