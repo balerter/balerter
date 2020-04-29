@@ -131,7 +131,7 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script) 
 			continue
 		}
 
-		rnr.logger.Debug("run script job", zap.String("hash", s.Hash()), zap.String("script name", s.Name), zap.String("schedule", s.ScheduleString))
+		rnr.logger.Debug("run script job", zap.String("hash", s.Hash()), zap.String("script name", s.Name), zap.String("schedule", s.Schedule.String()))
 		job := newJob(s, rnr.logger, rnr.createLuaState)
 		id := rnr.cron.Schedule(s.Schedule, job)
 		rnr.pool[s.Hash()] = &runningJob{

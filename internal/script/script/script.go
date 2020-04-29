@@ -4,14 +4,19 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/robfig/cron/v3"
 )
 
-var (
-	DefaultSchedule = cron.Every(time.Second * 60)
-)
+var DefaultSchedule Schedule
+
+func init() {
+	var err error
+	DefaultSchedule, err = NewSchedule("@every 60s")
+	if err != nil {
+		panic(err)
+	}
+}
 
 func New() *Script {
 	s := &Script{
@@ -21,15 +26,35 @@ func New() *Script {
 	return s
 }
 
+type Schedule struct {
+	cron.Schedule
+	spec string
+}
+
+func NewSchedule(spec string) (Schedule, error) {
+	sc, err := cron.ParseStandard(spec)
+	if err != nil {
+		return Schedule{}, err
+	}
+
+	return Schedule{
+		Schedule: sc,
+		spec:     spec,
+	}, nil
+}
+
+func (sc Schedule) String() string {
+	return sc.spec
+}
+
 type Script struct {
-	Name           string
-	Body           []byte
-	Schedule       cron.Schedule
-	ScheduleString string
-	Ignore         bool
-	Channels       []string
-	IsTest         bool
-	TestTarget     string
+	Name       string
+	Body       []byte
+	Schedule   Schedule
+	Ignore     bool
+	Channels   []string
+	IsTest     bool
+	TestTarget string
 }
 
 func (s *Script) Hash() string {
@@ -74,13 +99,12 @@ func (s *Script) ParseMeta() error {
 }
 
 func parseMetaSchedule(l string, s *Script) error {
-	sched, err := cron.ParseStandard(l)
+	sc, err := NewSchedule(l)
 	if err != nil {
 		return err
 	}
 
-	s.Schedule = sched
-	s.ScheduleString = l
+	s.Schedule = sc
 
 	return nil
 }

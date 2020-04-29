@@ -2,27 +2,24 @@ package script
 
 import (
 	"testing"
-	"time"
 
-	"github.com/robfig/cron/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestScript_ParseMeta_without_meta(t *testing.T) {
-	everySecondSched := cron.ConstantDelaySchedule{
-		Delay: time.Second,
-	}
+	everySecondSched, err := NewSchedule("@every 1s")
+	require.NoError(t, err)
 	s := &Script{
 		Schedule: everySecondSched,
 		Body: []byte(`
 print
--- @schedule every 1s
+-- @schedule @every 1s
 -- @ignore
 `),
 	}
 
-	err := s.ParseMeta()
+	err = s.ParseMeta()
 
 	require.NoError(t, err)
 
@@ -65,7 +62,11 @@ print
 	require.NoError(t, err)
 
 	assert.True(t, s.Ignore)
-	assert.Equal(t, cron.ConstantDelaySchedule{Delay: time.Minute * 6}, s.Schedule)
+
+	everySixMinutesSched, err := NewSchedule("@every 6m")
+	require.NoError(t, err)
+
+	assert.Equal(t, everySixMinutesSched, s.Schedule)
 	assert.Equal(t, "newname", s.Name)
 }
 
