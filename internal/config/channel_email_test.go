@@ -4,11 +4,11 @@ import "testing"
 
 func TestChannelEmail_Validate(t *testing.T) {
 	type fields struct {
-		Name       string
-		From       string
-		To         string
-		ServerName string
-		ServerPort string
+		Name string
+		From string
+		To   string
+		Host string
+		Port string
 	}
 	tests := []struct {
 		name    string
@@ -18,37 +18,37 @@ func TestChannelEmail_Validate(t *testing.T) {
 	}{
 		{
 			name:    "empty name",
-			fields:  fields{Name: "", From: "", To: "", ServerName: "", ServerPort: ""},
+			fields:  fields{Name: "", From: "", To: "", Host: "", Port: ""},
 			wantErr: true,
 			errText: "name must be not empty",
 		},
 		{
 			name:    "empty from",
-			fields:  fields{Name: "foo", From: "", To: "", ServerName: "", ServerPort: ""},
+			fields:  fields{Name: "foo", From: "", To: "", Host: "", Port: ""},
 			wantErr: true,
 			errText: "from must be not empty",
 		},
 		{
 			name:    "empty to",
-			fields:  fields{Name: "foo", From: "gopher@example.net", To: "", ServerName: "", ServerPort: ""},
+			fields:  fields{Name: "foo", From: "gopher@example.net", To: "", Host: "", Port: ""},
 			wantErr: true,
 			errText: "to must be not empty",
 		},
 		{
-			name:    "empty serverName",
-			fields:  fields{Name: "foo", From: "gopher@example.net", To: "foo@example.com", ServerName: "", ServerPort: ""},
+			name:    "empty host",
+			fields:  fields{Name: "foo", From: "gopher@example.net", To: "foo@example.com", Host: "", Port: ""},
 			wantErr: true,
-			errText: "serverName must be not empty",
+			errText: "host must be not empty",
 		},
 		{
-			name:    "empty serverPort",
-			fields:  fields{Name: "foo", From: "gopher@example.net", To: "foo@example.com", ServerName: "mail.example.com", ServerPort: ""},
+			name:    "empty port",
+			fields:  fields{Name: "foo", From: "gopher@example.net", To: "foo@example.com", Host: "mail.example.com", Port: ""},
 			wantErr: true,
-			errText: "serverPort must be not empty",
+			errText: "port must be not empty",
 		},
 		{
 			name:    "ok",
-			fields:  fields{Name: "foo", From: "gopher@example.net", To: "foo@example.com", ServerName: "mail.example.com", ServerPort: "25"},
+			fields:  fields{Name: "foo", From: "gopher@example.net", To: "foo@example.com", Host: "mail.example.com", Port: "25"},
 			wantErr: false,
 			errText: "",
 		},
@@ -56,11 +56,11 @@ func TestChannelEmail_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := ChannelEmail{
-				Name:       tt.fields.Name,
-				From:       tt.fields.From,
-				To:         tt.fields.To,
-				ServerName: tt.fields.ServerName,
-				ServerPort: tt.fields.ServerPort,
+				Name: tt.fields.Name,
+				From: tt.fields.From,
+				To:   tt.fields.To,
+				Host: tt.fields.Host,
+				Port: tt.fields.Port,
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {

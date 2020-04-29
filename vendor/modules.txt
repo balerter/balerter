@@ -276,6 +276,9 @@ github.com/weaveworks/common/signals
 github.com/weaveworks/common/user
 # github.com/weaveworks/promrus v1.2.0
 github.com/weaveworks/promrus
+# github.com/xhit/go-simple-mail/v2 v2.3.1
+## explicit
+github.com/xhit/go-simple-mail/v2
 # github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7
 ## explicit
 github.com/yuin/gluamapper
