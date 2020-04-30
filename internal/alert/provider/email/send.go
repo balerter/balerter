@@ -48,11 +48,13 @@ func (e *Email) Send(message *message.Message) error {
 	}
 
 	email := mail.NewMSG()
-	subject := fmt.Sprintf("[%s/%s] %s\r\n", message.AlertName, message.Level, strings.Join(message.Fields, ","))
-	email.SetFrom(e.conf.From).AddTo(e.conf.To).SetSubject(subject)
+	to := strings.Split(e.conf.To, ";")
+	subject := fmt.Sprintf("[%s/%s] %s", message.AlertName, message.Level, strings.Join(message.Fields, ","))
+	email.SetFrom(e.conf.From).AddTo(to...).SetSubject(subject)
 
 	if len(e.conf.Cc) > 0 {
-		email.AddCc(e.conf.Cc)
+		cc := strings.Split(e.conf.Cc, ";")
+		email.AddCc(cc...)
 	}
 
 	email.SetBody(mail.TextHTML, message.Text)

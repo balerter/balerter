@@ -15,11 +15,12 @@ func TestSend(t *testing.T) {
 
 	e := &Email{
 		conf: &config.ChannelEmail{
-			Name: "foo",
-			From: "gopher@example.net",
-			To:   "foo@example.com",
-			Host: "localhost",
-			Port: "1025",
+			Name:   "foo",
+			From:   "gopher@example.net",
+			To:     "foo1@example.com;foo2@example.com",
+			Host:   "localhost",
+			Port:   "1025",
+			Secure: "none",
 		},
 
 		name:   "email_test",
