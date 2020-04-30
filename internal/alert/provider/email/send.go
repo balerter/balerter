@@ -41,9 +41,7 @@ func (e *Email) Send(message *message.Message) error {
 
 	email := mail.NewMSG()
 	subject := fmt.Sprintf("[%s/%s] %s\r\n", message.AlertName, message.Level, strings.Join(message.Fields, ","))
-	email.SetFrom(e.conf.From).
-		AddTo(e.conf.To).
-		SetSubject(subject)
+	email.SetFrom(e.conf.From).AddTo(e.conf.To).SetSubject(subject)
 
 	if len(e.conf.Cc) > 0 {
 		email.AddCc(e.conf.Cc)
