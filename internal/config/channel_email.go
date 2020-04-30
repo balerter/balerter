@@ -7,16 +7,16 @@ import (
 
 // ChannelEmail configures notifications via email.
 type ChannelEmail struct {
-	Name         string `json:"name" yaml:"name"`
-	From         string `json:"from" yaml:"from"`
-	To           string `json:"to" yaml:"to"`
-	ServerName   string `json:"serverName" yaml:"serverName"`
-	ServerPort   string `json:"serverPort" yaml:"serverPort"`
-	AuthUsername string `json:"authUsername" yaml:"authUsername"`
-	AuthPassword string `json:"authPassword" yaml:"authPassword"`
-	AuthIdentity string `json:"authIdentity" yaml:"authIdentity"`
-	AuthSecret   string `json:"authSecret" yaml:"authSecret"`
-	RequireTLS   bool   `json:"requireTLS" yaml:"requireTLS"`
+	Name     string `json:"name" yaml:"name"`
+	From     string `json:"from" yaml:"from"`
+	To       string `json:"to" yaml:"to"`
+	Cc       string `json:"cc" yaml:"cc"`
+	Host     string `json:"host" yaml:"host"`
+	Port     string `json:"port" yaml:"port"`
+	Username string `json:"username" yaml:"username"`
+	Password string `json:"password" yaml:"password"`
+	Secure   string `json:"secure" yaml:"secure"`
+	Timeout  int    `json:"timeout" yaml:"timeout"`
 }
 
 // Validate checks the email configuration.
@@ -33,12 +33,17 @@ func (cfg ChannelEmail) Validate() error {
 		return fmt.Errorf("to must be not empty")
 	}
 
-	if strings.TrimSpace(cfg.ServerName) == "" {
-		return fmt.Errorf("serverName must be not empty")
+	if strings.TrimSpace(cfg.Host) == "" {
+		return fmt.Errorf("host must be not empty")
 	}
 
-	if strings.TrimSpace(cfg.ServerPort) == "" {
-		return fmt.Errorf("serverPort must be not empty")
+	if strings.TrimSpace(cfg.Port) == "" {
+		return fmt.Errorf("port must be not empty")
+	}
+
+	s := strings.TrimSpace(strings.ToLower(cfg.Secure))
+	if s != "none" && s != "ssl" && s != "tls" && s != "" {
+		return fmt.Errorf("secure must be set to none, ssl or tls")
 	}
 
 	return nil

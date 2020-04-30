@@ -3,6 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
+	"log"
+	"os"
+
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"github.com/balerter/balerter/internal/config"
 	dsManagerTest "github.com/balerter/balerter/internal/datasource/manager/test"
@@ -21,9 +25,6 @@ import (
 	uploadStorageManagerTest "github.com/balerter/balerter/internal/upload_storage/manager/test"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"io"
-	"log"
-	"os"
 )
 
 var (

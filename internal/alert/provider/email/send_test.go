@@ -15,11 +15,11 @@ func TestSend(t *testing.T) {
 
 	e := &Email{
 		conf: &config.ChannelEmail{
-			Name:       "foo",
-			From:       "gopher@example.net",
-			To:         "foo@example.com",
-			ServerName: "localhost",
-			ServerPort: "1025",
+			Name: "foo",
+			From: "gopher@example.net",
+			To:   "foo@example.com",
+			Host: "localhost",
+			Port: "1025",
 		},
 
 		name:   "email_test",
@@ -27,7 +27,7 @@ func TestSend(t *testing.T) {
 	}
 
 	timeout := time.Second
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort(e.conf.ServerName, e.conf.ServerPort), timeout)
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(e.conf.Host, e.conf.Port), timeout)
 	if err != nil {
 		return
 	}
