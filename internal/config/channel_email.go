@@ -10,6 +10,7 @@ type ChannelEmail struct {
 	Name       string `json:"name" yaml:"name"`
 	From       string `json:"from" yaml:"from"`
 	To         string `json:"to" yaml:"to"`
+	Cc         string `json:"cc" yaml:"cc"`
 	Host       string `json:"host" yaml:"host"`
 	Port       string `json:"port" yaml:"port"`
 	Username   string `json:"username" yaml:"username"`
