@@ -38,6 +38,10 @@ func (e *Email) Send(message *message.Message) error {
 		server.Encryption = mail.EncryptionTLS
 	}
 
+	if server.Port == 465 && e.conf.Secure == "" {
+		server.Encryption = mail.EncryptionSSL
+	}
+
 	smtpClient, err := server.Connect()
 	if err != nil {
 		return err
