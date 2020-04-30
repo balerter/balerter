@@ -41,5 +41,10 @@ func (cfg ChannelEmail) Validate() error {
 		return fmt.Errorf("port must be not empty")
 	}
 
+	s := strings.TrimSpace(strings.ToLower(cfg.Secure))
+	if s != "none" && s != "ssl" && s != "tls" && s != "" {
+		return fmt.Errorf("secure must be set to none, ssl or tls")
+	}
+
 	return nil
 }
