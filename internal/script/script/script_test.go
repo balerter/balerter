@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestScript_ParseMeta_without_meta(t *testing.T) {
+func TestScript_ParseMeta_Without_Meta(t *testing.T) {
 	everySecondSched, err := NewSchedule("@every 1s")
 	require.NoError(t, err)
 	s := &Script{
@@ -19,8 +19,7 @@ print
 `),
 	}
 
-	err = s.ParseMeta()
-
+	err = s.parseMeta()
 	require.NoError(t, err)
 
 	assert.False(t, s.Ignore)
@@ -33,7 +32,7 @@ print
 `),
 	}
 
-	err = s.ParseMeta()
+	err = s.parseMeta()
 
 	require.NoError(t, err)
 
@@ -41,41 +40,37 @@ print
 	assert.Equal(t, everySecondSched, s.Schedule)
 }
 
-func TestScript_ParseMeta(t *testing.T) {
+func TestScript_ParseMeta_Multiple_Crons(t *testing.T) {
 	s := &Script{
 		Body: []byte(`
 -- header
--- @schedule @every 5m
+-- @every 5m
 -- foo
 -- @name newname
 --
 -- @ignore
--- @schedule @every 6m
+-- @every 6m
 --
 print
--- @schedule @every 10m
+-- @every 10m
 `),
 	}
 
-	err := s.ParseMeta()
+	err := s.parseMeta()
+	cronErr, ok := err.(CronAlreadyDefinedError)
+	if !ok {
+		t.Error("unexpected error:", err)
+	}
 
-	require.NoError(t, err)
-
-	assert.True(t, s.Ignore)
-
-	everySixMinutesSched, err := NewSchedule("@every 6m")
-	require.NoError(t, err)
-
-	assert.Equal(t, everySixMinutesSched, s.Schedule)
-	assert.Equal(t, "newname", s.Name)
+	assert.Equal(t, cronErr.prevSpec, "@every 5m")
 }
 
 func TestScript_ParseMeta_WrongDuration(t *testing.T) {
 	s := &Script{
-		Body: []byte(`-- @schedule @every 5sm`),
+		Body: []byte(`-- @every 5sm`),
 	}
 
-	err := s.ParseMeta()
+	err := s.parseMeta()
 
 	require.Error(t, err)
 	assert.Equal(t, "failed to parse duration @every 5sm: time: unknown unit sm in duration 5sm", err.Error())
@@ -86,7 +81,7 @@ func TestScript_ParseMeta_EmptyName(t *testing.T) {
 		Body: []byte(`-- @name  `),
 	}
 
-	err := s.ParseMeta()
+	err := s.parseMeta()
 
 	require.Error(t, err)
 	assert.Equal(t, "name must be not empty", err.Error())
@@ -106,7 +101,7 @@ func TestScript_ParseMeta_EmptyChannels(t *testing.T) {
 		Body: []byte(`-- @channels `),
 	}
 
-	err := s.ParseMeta()
+	err := s.parseMeta()
 
 	require.Error(t, err)
 	assert.Equal(t, "channels must be not empty", err.Error())
@@ -114,30 +109,30 @@ func TestScript_ParseMeta_EmptyChannels(t *testing.T) {
 
 func TestScript_ParseMeta_EmptyChannel(t *testing.T) {
 	s := &Script{Body: []byte(`-- @channels foo,`)}
-	err := s.ParseMeta()
+	err := s.parseMeta()
 	require.Error(t, err)
 	assert.Equal(t, "channel name must be not empty", err.Error())
 
 	s = &Script{Body: []byte(`-- @channels ,foo`)}
-	err = s.ParseMeta()
+	err = s.parseMeta()
 	require.Error(t, err)
 	assert.Equal(t, "channel name must be not empty", err.Error())
 
 	s = &Script{Body: []byte(`-- @channels bar,,foo`)}
-	err = s.ParseMeta()
+	err = s.parseMeta()
 	require.Error(t, err)
 	assert.Equal(t, "channel name must be not empty", err.Error())
 }
 
 func TestScript_ParseMeta_Channels(t *testing.T) {
 	s := &Script{Body: []byte(`-- @channels foo`)}
-	err := s.ParseMeta()
+	err := s.parseMeta()
 	require.NoError(t, err)
 	assert.Equal(t, 1, len(s.Channels))
 	assert.Contains(t, s.Channels, "foo")
 
 	s = &Script{Body: []byte(`-- @channels foo, bar`)}
-	err = s.ParseMeta()
+	err = s.parseMeta()
 	require.NoError(t, err)
 	assert.Equal(t, 2, len(s.Channels))
 	assert.Contains(t, s.Channels, "foo")

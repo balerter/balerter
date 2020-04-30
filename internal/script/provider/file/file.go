@@ -1,42 +1,32 @@
 package folder
 
 import (
+	"path"
+
 	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/script/script"
-	"io/ioutil"
-	"path"
-	"strings"
 )
 
 type Provider struct {
 	filename      string
 	disableIgnore bool
+	parser        *script.Parser
 }
 
-func New(cfg config.ScriptSourceFile) *Provider {
+func New(parser *script.Parser, cfg config.ScriptSourceFile) *Provider {
 	p := &Provider{
 		filename:      cfg.Filename,
 		disableIgnore: cfg.DisableIgnore,
+		parser:        parser,
 	}
 
 	return p
 }
 
 func (p *Provider) Get() ([]*script.Script, error) {
-	ss := make([]*script.Script, 0)
-
-	body, err := ioutil.ReadFile(path.Join(p.filename))
+	var ss []*script.Script
+	s, err := p.parser.ParseFile(path.Join(p.filename))
 	if err != nil {
-		return nil, err
-	}
-
-	_, fn := path.Split(p.filename)
-
-	s := script.New()
-	s.Name = strings.TrimSuffix(fn, ".lua")
-	s.Body = body
-
-	if err := s.ParseMeta(); err != nil {
 		return nil, err
 	}
 

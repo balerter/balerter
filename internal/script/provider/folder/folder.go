@@ -1,23 +1,24 @@
 package folder
 
 import (
-	"github.com/balerter/balerter/internal/config"
-	"github.com/balerter/balerter/internal/script/script"
-	"io/ioutil"
 	"path"
 	"path/filepath"
-	"strings"
+
+	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/script/script"
 )
 
 type Provider struct {
-	path string
-	mask string
+	path   string
+	mask   string
+	parser *script.Parser
 }
 
-func New(cfg config.ScriptSourceFolder) *Provider {
+func New(parser *script.Parser, cfg config.ScriptSourceFolder) *Provider {
 	p := &Provider{
-		path: cfg.Path,
-		mask: cfg.Mask,
+		path:   cfg.Path,
+		mask:   cfg.Mask,
+		parser: parser,
 	}
 
 	if p.mask == "" {
@@ -38,19 +39,8 @@ func (p *Provider) Get() ([]*script.Script, error) {
 	}
 
 	for _, filename := range matches {
-
-		body, err := ioutil.ReadFile(path.Join(filename))
+		s, err := p.parser.ParseFile(path.Join(filename))
 		if err != nil {
-			return nil, err
-		}
-
-		_, fn := path.Split(filename)
-
-		s := script.New()
-		s.Name = strings.TrimSuffix(fn, ".lua")
-		s.Body = body
-
-		if err := s.ParseMeta(); err != nil {
 			return nil, err
 		}
 

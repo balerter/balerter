@@ -25,6 +25,7 @@ import (
 	runtimeModule "github.com/balerter/balerter/internal/modules/runtime"
 	"github.com/balerter/balerter/internal/runner"
 	scriptsManager "github.com/balerter/balerter/internal/script/manager"
+	"github.com/balerter/balerter/internal/script/script"
 	uploadStorageManager "github.com/balerter/balerter/internal/upload_storage/manager"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -85,7 +86,10 @@ func main() {
 
 	// Scripts sources
 	lgr.Logger().Info("init scripts manager")
-	scriptsMgr := scriptsManager.New()
+	scriptsMgr := scriptsManager.New(
+		script.NewParser(lgr.Logger()),
+		cfg.Scripts.Sources,
+	)
 
 	if *withScript != "" {
 		lgr.Logger().Info("rewrite script sources configuration", zap.String("filename", *withScript))
@@ -98,11 +102,6 @@ func main() {
 				},
 			},
 		}
-	}
-
-	if err := scriptsMgr.Init(cfg.Scripts.Sources); err != nil {
-		lgr.Logger().Error("error init scripts manager", zap.Error(err))
-		os.Exit(1)
 	}
 
 	// datasources

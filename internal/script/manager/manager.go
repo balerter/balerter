@@ -15,25 +15,20 @@ type Manager struct {
 	providers map[string]Provider
 }
 
-func New() *Manager {
+func New(parser *script.Parser, cfg config.ScriptsSources) *Manager {
 	m := &Manager{
 		providers: make(map[string]Provider),
 	}
 
-	return m
-}
-
-func (m *Manager) Init(cfg config.ScriptsSources) error {
-
 	for _, folderConfig := range cfg.Folder {
-		m.providers[folderConfig.Name] = folderProvider.New(folderConfig)
+		m.providers[folderConfig.Name] = folderProvider.New(parser, folderConfig)
 	}
 
 	for _, c := range cfg.File {
-		m.providers[c.Name] = fileProvider.New(c)
+		m.providers[c.Name] = fileProvider.New(parser, c)
 	}
 
-	return nil
+	return m
 }
 
 func (m *Manager) Get() ([]*script.Script, error) {
