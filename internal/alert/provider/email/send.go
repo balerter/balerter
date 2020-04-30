@@ -24,13 +24,14 @@ func (e *Email) Send(message *message.Message) error {
 	server.Password = e.conf.Password
 	server.ConnectTimeout = 10 * time.Second
 	server.SendTimeout = 10 * time.Second
-	server.Encryption = mail.EncryptionTLS
 
-	if e.conf.Port == "465" {
-		server.Encryption = mail.EncryptionSSL
-	}
-	if e.conf.WithoutTLS {
+	switch strings.ToLower(e.conf.Secure) {
+	case "none":
 		server.Encryption = mail.EncryptionNone
+	case "ssl":
+		server.Encryption = mail.EncryptionSSL
+	default:
+		server.Encryption = mail.EncryptionTLS
 	}
 
 	smtpClient, err := server.Connect()
@@ -42,8 +43,11 @@ func (e *Email) Send(message *message.Message) error {
 	subject := fmt.Sprintf("[%s/%s] %s\r\n", message.AlertName, message.Level, strings.Join(message.Fields, ","))
 	email.SetFrom(e.conf.From).
 		AddTo(e.conf.To).
-		AddCc(e.conf.Cc).
 		SetSubject(subject)
+
+	if len(e.conf.Cc) > 0 {
+		email.AddCc(e.conf.Cc)
+	}
 
 	email.SetBody(mail.TextHTML, message.Text)
 
