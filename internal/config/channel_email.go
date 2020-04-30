@@ -14,7 +14,7 @@ type ChannelEmail struct {
 	Port       string `json:"port" yaml:"port"`
 	Username   string `json:"username" yaml:"username"`
 	Password   string `json:"password" yaml:"password"`
-	RequireTLS bool   `json:"requireTLS" yaml:"requireTLS"`
+	WithoutTLS bool   `json:"withoutTLS" yaml:"withoutTLS"`
 }
 
 // Validate checks the email configuration.

@@ -24,12 +24,13 @@ func (e *Email) Send(message *message.Message) error {
 	server.Password = e.conf.Password
 	server.ConnectTimeout = 10 * time.Second
 	server.SendTimeout = 10 * time.Second
+	server.Encryption = mail.EncryptionTLS
 
 	if e.conf.Port == "465" {
 		server.Encryption = mail.EncryptionSSL
 	}
-	if e.conf.RequireTLS {
-		server.Encryption = mail.EncryptionTLS
+	if e.conf.WithoutTLS {
+		server.Encryption = mail.EncryptionNone
 	}
 
 	smtpClient, err := server.Connect()
@@ -47,7 +48,7 @@ func (e *Email) Send(message *message.Message) error {
 
 	if len(message.Image) > 0 {
 		img := base64.StdEncoding.EncodeToString([]byte(message.Image))
-		email.AddAttachmentBase64(img, message.AlertName)
+		email.AddAttachmentBase64(img, message.AlertName+".png")
 	}
 
 	return email.Send(smtpClient)
