@@ -178,9 +178,11 @@ func main() {
 	// |
 	// | API
 	// |
-	wg.Add(1)
-	apis := apiManager.New(cfg.Global.API, alertManagerStorageEngine, kvEngine, lgr.Logger())
-	go apis.Run(ctx, ctxCancel, wg)
+	if cfg.Global.API.Address != "" {
+		wg.Add(1)
+		apis := apiManager.New(cfg.Global.API, alertManagerStorageEngine, kvEngine, lgr.Logger())
+		go apis.Run(ctx, ctxCancel, wg)
+	}
 
 	// ---------------------
 	// |
