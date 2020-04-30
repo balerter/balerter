@@ -22,8 +22,12 @@ func (e *Email) Send(message *message.Message) error {
 	}
 	server.Username = e.conf.Username
 	server.Password = e.conf.Password
-	server.ConnectTimeout = 10 * time.Second
-	server.SendTimeout = 10 * time.Second
+	timeout := e.conf.Timeout
+	if timeout < 1 {
+		timeout = 10
+	}
+	server.ConnectTimeout = time.Duration(timeout) * time.Second
+	server.SendTimeout = time.Duration(timeout) * time.Second
 
 	switch strings.ToLower(e.conf.Secure) {
 	case "none":

@@ -16,6 +16,7 @@ type ChannelEmail struct {
 	Username string `json:"username" yaml:"username"`
 	Password string `json:"password" yaml:"password"`
 	Secure   string `json:"secure" yaml:"secure"`
+	Timeout  int    `json:"timeout" yaml:"timeout"`
 }
 
 // Validate checks the email configuration.
