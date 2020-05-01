@@ -62,7 +62,7 @@ print
 		t.Error("unexpected error:", err)
 	}
 
-	assert.Equal(t, cronErr.prevSpec, "@every 5m")
+	assert.Equal(t, cronErr.PrevSpec, "@every 5m")
 }
 
 func TestScript_ParseMeta_WrongDuration(t *testing.T) {

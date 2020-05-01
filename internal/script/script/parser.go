@@ -24,6 +24,7 @@ func (p *Parser) ParseFile(filepath string) (*Script, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
 	name := strings.TrimSuffix(file.Name(), ".lua")
 	body, err := ioutil.ReadAll(file)
@@ -84,7 +85,7 @@ func (s *Script) parseMeta() error {
 				if err := f(prefix, strings.TrimSpace(l), s); err != nil {
 					return err
 				}
-				//break
+				break
 			}
 		}
 	}
