@@ -23,6 +23,7 @@ type Script struct {
 	Name       string
 	Body       []byte
 	Interval   time.Duration
+	Timeout    time.Duration
 	Ignore     bool
 	Channels   []string
 	IsTest     bool
@@ -40,6 +41,7 @@ var (
 		"@name":     parseMetaName,
 		"@channels": parseMetaChannels,
 		"@test":     parseMetaTest,
+		"@timeout":  parseMetaTimeout,
 	}
 )
 
@@ -77,6 +79,17 @@ func parseMetaInterval(l string, s *Script) error {
 	}
 
 	s.Interval = d
+
+	return nil
+}
+
+func parseMetaTimeout(l string, s *Script) error {
+	d, err := time.ParseDuration(strings.TrimSpace(l))
+	if err != nil {
+		return err
+	}
+
+	s.Timeout = d
 
 	return nil
 }

@@ -1,11 +1,13 @@
 package runner
 
 import (
+	"context"
+	"sync"
+	"time"
+
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"sync"
-	"time"
 )
 
 type Job struct {
@@ -37,11 +39,27 @@ func (rnr *Runner) runJob(j *Job, wg *sync.WaitGroup) {
 	L := rnr.createLuaState(j)
 	defer L.Close()
 
+	withTimeout := j.script.Timeout != 0
+	var (
+		ctx    context.Context
+		cancel context.CancelFunc
+	)
+
 	for {
+		if withTimeout {
+			ctx, cancel = context.WithTimeout(context.Background(), j.script.Timeout)
+			defer cancel()
+			L.SetContext(ctx)
+		}
+
 		rnr.logger.Debug("run job", zap.String("name", j.name))
 		err := L.DoString(string(j.script.Body))
 		if err != nil {
 			j.logger.Error("error run job", zap.String("script name", j.script.Name), zap.Error(err))
+		}
+
+		if withTimeout {
+			cancel()
 		}
 
 		select {
