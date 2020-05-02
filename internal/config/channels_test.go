@@ -9,6 +9,7 @@ func TestChannels_Validate(t *testing.T) {
 		Telegram []ChannelTelegram
 		Syslog   []ChannelSyslog
 		Notify   []ChannelNotify
+		Webhook  []ChannelWebhook
 	}
 	tests := []struct {
 		name    string
@@ -57,6 +58,14 @@ func TestChannels_Validate(t *testing.T) {
 			errText: "found duplicated name for channels 'notify': foo",
 		},
 		{
+			name: "duplicated webhook",
+			fields: fields{
+				Webhook: []ChannelWebhook{{Name: "foo", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}}, Payload: PayloadConfig{Body: `{}`}}, {Name: "foo", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}}, Payload: PayloadConfig{Body: `{}`}}},
+			},
+			wantErr: true,
+			errText: "found duplicated name for channels 'webhook': foo",
+		},
+		{
 			name: "ok",
 			fields: fields{
 				Email:    []ChannelEmail{{Name: "foo", From: "gopher@example.net", To: "foo@example.com", Host: "mail.example.com", Port: "25"}, {Name: "foo2", From: "gopher@example.net", To: "foo@example.com", Host: "mail.example.com", Port: "25"}},
@@ -64,6 +73,7 @@ func TestChannels_Validate(t *testing.T) {
 				Telegram: []ChannelTelegram{{Name: "foo", Token: "a", ChatID: 1}, {Name: "foo2", Token: "a", ChatID: 1}},
 				Syslog:   []ChannelSyslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"}, {Name: "foo2", Network: "tcp", Address: "a", Priority: "EMERG"}},
 				Notify:   []ChannelNotify{{Name: "foo"}, {Name: "foo2"}},
+				Webhook:  []ChannelWebhook{{Name: "foo", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}}, Payload: PayloadConfig{Body: `{}`}}, {Name: "foo2", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}}, Payload: PayloadConfig{Body: `{}`}}},
 			},
 			wantErr: false,
 			errText: "",
@@ -77,6 +87,7 @@ func TestChannels_Validate(t *testing.T) {
 				Telegram: tt.fields.Telegram,
 				Syslog:   tt.fields.Syslog,
 				Notify:   tt.fields.Notify,
+				Webhook:  tt.fields.Webhook,
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {
