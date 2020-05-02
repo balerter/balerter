@@ -9,6 +9,7 @@ type Channels struct {
 	Syslog   []*ChannelSyslog   `json:"syslog" yaml:"syslog"`
 	Notify   []*ChannelNotify   `json:"notify" yaml:"notify"`
 	Discord  []*ChannelDiscord  `json:"discord" yaml:"discord"`
+	Webhook  []*ChannelWebhook  `json:"webhook" yaml:"webhook"`
 }
 
 func (cfg *Channels) Validate() error { //nolint:gocyclo // Validate calls only once on application start
@@ -77,6 +78,17 @@ func (cfg *Channels) Validate() error { //nolint:gocyclo // Validate calls only 
 	}
 	if name := checkUnique(names); name != "" {
 		return fmt.Errorf("found duplicated name for channels 'discord': %s", name)
+	}
+
+	names = names[:0]
+	for _, c := range cfg.Webhook {
+		names = append(names, c.Name)
+		if err := c.Validate(); err != nil {
+			return fmt.Errorf("validate channel webhook: %w", err)
+		}
+	}
+	if name := checkUnique(names); name != "" {
+		return fmt.Errorf("found duplicated name for channels 'webhook': %s", name)
 	}
 
 	return nil

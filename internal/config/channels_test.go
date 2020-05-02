@@ -10,6 +10,7 @@ func TestChannels_Validate(t *testing.T) {
 		Syslog   []*ChannelSyslog
 		Notify   []*ChannelNotify
 		Discord  []*ChannelDiscord
+		Webhook  []*ChannelWebhook
 	}
 	tests := []struct {
 		name    string
@@ -69,6 +70,14 @@ func TestChannels_Validate(t *testing.T) {
 			errText: "found duplicated name for channels 'discord': foo",
 		},
 		{
+			name: "duplicated webhook",
+			fields: fields{
+				Webhook: []ChannelWebhook{{Name: "foo", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}}, Payload: PayloadConfig{Body: `{}`}}, {Name: "foo", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}}, Payload: PayloadConfig{Body: `{}`}}},
+			},
+			wantErr: true,
+			errText: "found duplicated name for channels 'webhook': foo",
+		},
+		{
 			name: "ok",
 			fields: fields{
 				Email: []*ChannelEmail{{Name: "foo", From: "gopher@example.net", To: "foo@example.com",
@@ -83,6 +92,7 @@ func TestChannels_Validate(t *testing.T) {
 				Notify: []*ChannelNotify{{Name: "foo"}, {Name: "foo2"}},
 				Discord: []*ChannelDiscord{{Name: "foo", Token: "a", ChannelID: 1},
 					{Name: "foo2", Token: "a", ChannelID: 1}},
+				Webhook: []*ChannelWebhook{{Name: "foo", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}}, Payload: PayloadConfig{Body: `{}`}}, {Name: "foo2", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}}, Payload: PayloadConfig{Body: `{}`}}},
 			},
 			wantErr: false,
 			errText: "",
@@ -97,6 +107,7 @@ func TestChannels_Validate(t *testing.T) {
 				Syslog:   tt.fields.Syslog,
 				Notify:   tt.fields.Notify,
 				Discord:  tt.fields.Discord,
+				Webhook:  tt.fields.Webhook,
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {
