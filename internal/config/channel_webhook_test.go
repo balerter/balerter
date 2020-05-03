@@ -2,6 +2,7 @@ package config
 
 import (
 	"testing"
+	"time"
 )
 
 func TestChannelWebhook_Validate(t *testing.T) {
@@ -11,6 +12,7 @@ func TestChannelWebhook_Validate(t *testing.T) {
 		Method  string
 		Auth    AuthConfig
 		Payload PayloadConfig
+		Timeout time.Duration
 	}
 	tests := []struct {
 		name    string
@@ -35,6 +37,12 @@ func TestChannelWebhook_Validate(t *testing.T) {
 			fields:  fields{Name: "foo", URL: "https://foo.bar/baz", Method: "patch"},
 			wantErr: true,
 			errText: "method must be set to post or get",
+		},
+		{
+			name:    "low timeout",
+			fields:  fields{Name: "foo", URL: "https://foo.bar/baz", Timeout: -1},
+			wantErr: true,
+			errText: "timeout must be greater than 0",
 		},
 		{
 			name:    "incorrect auth type",
@@ -140,6 +148,7 @@ func TestChannelWebhook_Validate(t *testing.T) {
 				Method:  tt.fields.Method,
 				Auth:    tt.fields.Auth,
 				Payload: tt.fields.Payload,
+				Timeout: tt.fields.Timeout,
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {
