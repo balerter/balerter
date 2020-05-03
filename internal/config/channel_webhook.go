@@ -2,8 +2,10 @@ package config
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 type AuthBasicConfig struct {
@@ -28,12 +30,23 @@ type AuthConfig struct {
 	Type string `json:"type" yaml:"type"`
 }
 
+// consts
+const (
+	AuthTypeNone   = "none"
+	AuthTypeBasic  = "basic"
+	AuthTypeBearer = "bearer"
+	AuthTypeCustom = "custom"
+)
+
 // Validate checks the authorization configuration.
-func (cfg AuthConfig) Validate() error {
+func (cfg *AuthConfig) Validate() error {
 	switch authType := strings.ToLower(strings.TrimSpace(cfg.Type)); authType {
-	case "", "none":
+	case "":
+		cfg.Type = AuthTypeNone
 		return nil
-	case "basic":
+	case AuthTypeNone:
+		return nil
+	case AuthTypeBasic:
 		if strings.TrimSpace(cfg.AuthBasicConfig.Login) == "" {
 			return fmt.Errorf("login must be not empty")
 		}
@@ -41,12 +54,12 @@ func (cfg AuthConfig) Validate() error {
 			return fmt.Errorf("password must be not empty")
 		}
 		return nil
-	case "bearer":
+	case AuthTypeBearer:
 		if strings.TrimSpace(cfg.AuthBearerConfig.Token) == "" {
 			return fmt.Errorf("token must be not empty")
 		}
 		return nil
-	case "custom":
+	case AuthTypeCustom:
 		if len(cfg.AuthCustomConfig.Headers)+len(cfg.AuthCustomConfig.QueryParams) == 0 {
 			return fmt.Errorf("headers and query_params must be not empty")
 		}
@@ -64,12 +77,12 @@ type PayloadConfig struct {
 // Validate checks the payload configuration.
 func (cfg PayloadConfig) Validate(method string) error {
 	switch method {
-	case "post":
+	case http.MethodPost:
 		if strings.TrimSpace(cfg.Body) == "" {
 			return fmt.Errorf("body must be not empty")
 		}
 		return nil
-	case "get":
+	case http.MethodGet:
 		if len(cfg.QueryParams) == 0 {
 			return fmt.Errorf("query_params must be not empty")
 		}
@@ -87,10 +100,11 @@ type ChannelWebhook struct {
 	Method  string        `json:"method" yaml:"method"`
 	Auth    AuthConfig    `json:"auth" yaml:"auth"`
 	Payload PayloadConfig `json:"payload" yaml:"payload"`
+	Timeout time.Duration `json:"timeout" yaml:"timeout"`
 }
 
 // Validate checks the webhool configuration.
-func (cfg ChannelWebhook) Validate() error {
+func (cfg *ChannelWebhook) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}
@@ -103,17 +117,22 @@ func (cfg ChannelWebhook) Validate() error {
 		return fmt.Errorf("error validate url: %w", err)
 	}
 
-	method := strings.ToLower(strings.TrimSpace(cfg.Method))
-	if method == "" {
-		method = "post"
+	cfg.Method = strings.ToUpper(strings.TrimSpace(cfg.Method))
+	if cfg.Method == "" {
+		cfg.Method = http.MethodPost
 	}
-	if method != "post" && method != "get" {
+	if cfg.Method != http.MethodPost && cfg.Method != http.MethodGet {
 		return fmt.Errorf("method must be set to post or get")
 	}
+
+	if cfg.Timeout < 0 {
+		return fmt.Errorf("timeout must be greater than 0")
+	}
+
 	if err := cfg.Auth.Validate(); err != nil {
 		return fmt.Errorf("error validate auth: %w", err)
 	}
-	if err := cfg.Payload.Validate(method); err != nil {
+	if err := cfg.Payload.Validate(cfg.Method); err != nil {
 		return fmt.Errorf("error validate payload: %w", err)
 	}
 	return nil
