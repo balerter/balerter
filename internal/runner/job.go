@@ -48,7 +48,6 @@ func (rnr *Runner) runJob(j *Job, wg *sync.WaitGroup) {
 	for {
 		if withTimeout {
 			ctx, cancel = context.WithTimeout(context.Background(), j.script.Timeout)
-			defer cancel()
 			L.SetContext(ctx)
 		}
 
