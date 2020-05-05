@@ -14,7 +14,6 @@ import (
 	"os/exec"
 	"path"
 	"strings"
-	"testing"
 )
 
 type PostgresTestSuite struct {
@@ -41,7 +40,7 @@ func (suite *PostgresTestSuite) SetupSuite() {
 		ExposedPorts: []string{"5432/tcp"},
 		WaitingFor:   wait.ForLog("listening on IPv4 address \"0.0.0.0\", port 5432"),
 		BindMounts: map[string]string{
-			path.Join(wd, "assets/postgres-get-data/data.sql"): "/docker-entrypoint-initdb.d/data.sql",
+			path.Join(wd, "assets/postgres/data.sql"): "/docker-entrypoint-initdb.d/data.sql",
 		},
 		Env: map[string]string{
 			"POSTGRES_PASSWORD": "secret",
@@ -94,7 +93,7 @@ global:
 	cfg = strings.Replace(cfg, "{HOST}", suite.postgresIP, 1)
 	cfg = strings.Replace(cfg, "{PORT}", suite.postgresPort.Port(), 1)
 
-	cmd := exec.Command("./balerter", "-config=stdin", "-once", "-script=./assets/postgres-get-data/script.lua")
+	cmd := exec.Command("./balerter", "-config=stdin", "-once", "-script=./assets/postgres/script.lua")
 
 	bufOut := bytes.NewBuffer([]byte{})
 	cmd.Stdout = bufOut
@@ -124,8 +123,4 @@ global:
 
 	require.NoError(suite.T(), err)
 	assert.Equal(suite.T(), expectedOut, bufOut.String())
-}
-
-func TestPostgresSuite(t *testing.T) {
-	suite.Run(t, new(PostgresTestSuite))
 }
