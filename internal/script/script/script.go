@@ -9,11 +9,13 @@ import (
 
 const (
 	DefaultInterval = time.Second * 60
+	DefaultTimeout  = time.Hour
 )
 
 func New() *Script {
 	s := &Script{
 		Interval: DefaultInterval,
+		Timeout:  DefaultTimeout,
 	}
 
 	return s
@@ -86,7 +88,7 @@ func parseMetaInterval(l string, s *Script) error {
 func parseMetaTimeout(l string, s *Script) error {
 	d, err := time.ParseDuration(strings.TrimSpace(l))
 	if err != nil {
-		return err
+		return fmt.Errorf("error parse '%s' to time duration, %w", strings.TrimSpace(l), err)
 	}
 
 	s.Timeout = d

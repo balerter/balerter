@@ -49,6 +49,7 @@ func TestScript_ParseMeta(t *testing.T) {
 --
 -- @ignore
 -- @interval 6m
+-- @timeout 10s
 --
 print
 -- @interval 10m
@@ -62,6 +63,7 @@ print
 	assert.True(t, s.Ignore)
 	assert.Equal(t, time.Minute*6, s.Interval)
 	assert.Equal(t, "newname", s.Name)
+	assert.Equal(t, time.Second*10, s.Timeout)
 }
 
 func TestScript_ParseMeta_WrongDuration(t *testing.T) {
