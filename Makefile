@@ -32,13 +32,8 @@ test-full: ## Run full tests
 	GO111MODULE=on go test -mod=vendor -coverprofile=coverage.txt -covermode=atomic ./internal/... ./cmd/...
 
 test-integration: ## Run integration tests
-	go build -race -o ./balerter ./cmd/balerter
-	docker-compose -f ./test/docker-compose.yml up -d
-	sleep 5
-	./balerter -config ./test/config.yml -once > out.txt
-	diff out.txt ./test/out.etalon.txt
-	docker-compose -f ./test/docker-compose.yml down -v
-
+	go build -race -o ./integration/balerter ./cmd/balerter
+	go test ./integration
 
 # Absolutely awesome: http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 help:
