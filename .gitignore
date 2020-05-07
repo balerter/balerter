@@ -3,3 +3,5 @@ go.sum
 .debug
 balerter
 out.txt
+coverage.txt
+main
