@@ -40,7 +40,7 @@ func Methods() []string {
 }
 
 func (l *Log) GetLoader(script *script.Script) lua.LGFunction {
-	return func(L *lua.LState) int {
+	return func(luaState *lua.LState) int {
 		var exports = map[string]lua.LGFunction{
 			"error": l.error(script.Name),
 			"warn":  l.warn(script.Name),
@@ -48,38 +48,38 @@ func (l *Log) GetLoader(script *script.Script) lua.LGFunction {
 			"debug": l.debug(script.Name),
 		}
 
-		mod := L.SetFuncs(L.NewTable(), exports)
+		mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
-		L.Push(mod)
+		luaState.Push(mod)
 		return 1
 
 	}
 }
 
 func (l *Log) error(scriptName string) lua.LGFunction {
-	return func(L *lua.LState) int {
-		l.logger.Error(L.Get(1).String(), zap.String("scriptName", scriptName))
+	return func(luaState *lua.LState) int {
+		l.logger.Error(luaState.Get(1).String(), zap.String("scriptName", scriptName))
 		return 0
 	}
 }
 
 func (l *Log) warn(scriptName string) lua.LGFunction {
-	return func(L *lua.LState) int {
-		l.logger.Warn(L.Get(1).String(), zap.String("scriptName", scriptName))
+	return func(luaState *lua.LState) int {
+		l.logger.Warn(luaState.Get(1).String(), zap.String("scriptName", scriptName))
 		return 0
 	}
 }
 
 func (l *Log) info(scriptName string) lua.LGFunction {
-	return func(L *lua.LState) int {
-		l.logger.Info(L.Get(1).String(), zap.String("scriptName", scriptName))
+	return func(luaState *lua.LState) int {
+		l.logger.Info(luaState.Get(1).String(), zap.String("scriptName", scriptName))
 		return 0
 	}
 }
 
 func (l *Log) debug(scriptName string) lua.LGFunction {
-	return func(L *lua.LState) int {
-		l.logger.Debug(L.Get(1).String(), zap.String("scriptName", scriptName))
+	return func(luaState *lua.LState) int {
+		l.logger.Debug(luaState.Get(1).String(), zap.String("scriptName", scriptName))
 		return 0
 	}
 }

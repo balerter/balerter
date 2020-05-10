@@ -37,7 +37,7 @@ func (kv *KV) Name() string {
 
 func (kv *KV) GetLoader(_ *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
-		return func(L *lua.LState) int {
+		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
 				"get":    kv.get,
 				"put":    kv.put,
@@ -45,9 +45,9 @@ func (kv *KV) GetLoader(_ *script.Script) lua.LGFunction {
 				"upsert": kv.upsert,
 			}
 
-			mod := L.SetFuncs(L.NewTable(), exports)
+			mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
-			L.Push(mod)
+			luaState.Push(mod)
 			return 1
 		}
 	}()
@@ -57,54 +57,54 @@ func (kv *KV) Stop() error {
 	return nil
 }
 
-func (kv *KV) get(L *lua.LState) int {
-	varName := L.Get(1).String()
+func (kv *KV) get(luaState *lua.LState) int {
+	varName := luaState.Get(1).String()
 
 	val, err := kv.engine.KV().Get(varName)
 	if err != nil {
-		L.Push(lua.LString(""))
-		L.Push(lua.LString(err.Error()))
+		luaState.Push(lua.LString(""))
+		luaState.Push(lua.LString(err.Error()))
 		return 2
 	}
 
-	L.Push(lua.LString(val))
-	L.Push(lua.LNil)
+	luaState.Push(lua.LString(val))
+	luaState.Push(lua.LNil)
 
 	return 2
 }
 
-func (kv *KV) put(L *lua.LState) int {
-	varName := L.Get(1).String()
-	varVal := L.Get(2).String()
+func (kv *KV) put(luaState *lua.LState) int {
+	varName := luaState.Get(1).String()
+	varVal := luaState.Get(2).String()
 
 	err := kv.engine.KV().Put(varName, varVal)
 	if err != nil {
-		L.Push(lua.LString(err.Error()))
+		luaState.Push(lua.LString(err.Error()))
 		return 1
 	}
 
 	return 0
 }
 
-func (kv *KV) upsert(L *lua.LState) int {
-	varName := L.Get(1).String()
-	varVal := L.Get(2).String()
+func (kv *KV) upsert(luaState *lua.LState) int {
+	varName := luaState.Get(1).String()
+	varVal := luaState.Get(2).String()
 
 	err := kv.engine.KV().Upsert(varName, varVal)
 	if err != nil {
-		L.Push(lua.LString(err.Error()))
+		luaState.Push(lua.LString(err.Error()))
 		return 1
 	}
 
 	return 0
 }
 
-func (kv *KV) delete(L *lua.LState) int {
-	varName := L.Get(1).String()
+func (kv *KV) delete(luaState *lua.LState) int {
+	varName := luaState.Get(1).String()
 
 	err := kv.engine.KV().Delete(varName)
 	if err != nil {
-		L.Push(lua.LString(err.Error()))
+		luaState.Push(lua.LString(err.Error()))
 		return 1
 	}
 

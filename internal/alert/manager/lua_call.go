@@ -27,10 +27,10 @@ func defaultOptions() options {
 	}
 }
 
-func (m *Manager) getAlertData(L *lua.LState) (alertName string, alertText string, alertOptions options, err error) {
+func (m *Manager) getAlertData(luaState *lua.LState) (alertName string, alertText string, alertOptions options, err error) {
 	alertOptions = defaultOptions()
 
-	alertNameLua := L.Get(1)
+	alertNameLua := luaState.Get(1)
 	if alertNameLua.Type() == lua.LTNil {
 		err = fmt.Errorf("alert name must be provided")
 		return
@@ -42,14 +42,14 @@ func (m *Manager) getAlertData(L *lua.LState) (alertName string, alertText strin
 		return
 	}
 
-	alertTextLua := L.Get(2)
+	alertTextLua := luaState.Get(2)
 	if alertTextLua.Type() == lua.LTNil {
 		return
 	}
 
 	alertText = alertTextLua.String()
 
-	alertOptionsLua := L.Get(3)
+	alertOptionsLua := luaState.Get(3)
 	if alertOptionsLua.Type() == lua.LTNil {
 		return
 	}
@@ -65,15 +65,15 @@ func (m *Manager) getAlertData(L *lua.LState) (alertName string, alertText strin
 		return
 	}
 
-	return
+	return alertName, alertText, alertOptions, nil
 }
 
 func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFunction {
-	return func(L *lua.LState) int {
-		alertName, alertText, alertOptions, err := m.getAlertData(L)
+	return func(luaState *lua.LState) int {
+		alertName, alertText, alertOptions, err := m.getAlertData(luaState)
 		if err != nil {
 			m.logger.Error("error get args", zap.Error(err))
-			L.Push(lua.LString("error get arguments: " + err.Error()))
+			luaState.Push(lua.LString("error get arguments: " + err.Error()))
 			return 1
 		}
 
@@ -88,7 +88,7 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 		a, err := m.engine.Alert().GetOrNew(alertName)
 		if err != nil {
 			m.logger.Error("error get alert from storage", zap.Error(err))
-			L.Push(lua.LString("internal error get alert from storage: " + err.Error()))
+			luaState.Push(lua.LString("internal error get alert from storage: " + err.Error()))
 			return 1
 		}
 

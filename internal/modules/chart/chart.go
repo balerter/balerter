@@ -56,34 +56,34 @@ func (ch *Chart) Stop() error {
 }
 
 func (ch *Chart) GetLoader(script *script.Script) lua.LGFunction {
-	return func(L *lua.LState) int {
+	return func(luaState *lua.LState) int {
 		var exports = map[string]lua.LGFunction{
 			"render": ch.render(script),
 		}
 
-		mod := L.SetFuncs(L.NewTable(), exports)
+		mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
-		L.Push(mod)
+		luaState.Push(mod)
 		return 1
 
 	}
 }
 
 func (ch *Chart) render(_ *script.Script) lua.LGFunction {
-	return func(L *lua.LState) int {
+	return func(luaState *lua.LState) int {
 		ch.logger.Debug("Chart.Render")
 
-		chartTitle := L.Get(1)
+		chartTitle := luaState.Get(1)
 		if chartTitle.Type() == lua.LTNil {
-			L.Push(lua.LNil)
-			L.Push(lua.LString("title must be defined"))
+			luaState.Push(lua.LNil)
+			luaState.Push(lua.LString("title must be defined"))
 			return 2
 		}
 
-		chartData := L.Get(2)
+		chartData := luaState.Get(2)
 		if chartData.Type() != lua.LTTable {
-			L.Push(lua.LNil)
-			L.Push(lua.LString("chart data table must be defined"))
+			luaState.Push(lua.LNil)
+			luaState.Push(lua.LString("chart data table must be defined"))
 			return 2
 		}
 
@@ -91,8 +91,8 @@ func (ch *Chart) render(_ *script.Script) lua.LGFunction {
 
 		err := gluamapper.Map(chartData.(*lua.LTable), data)
 		if err != nil {
-			L.Push(lua.LNil)
-			L.Push(lua.LString("wrong chart data format, " + err.Error()))
+			luaState.Push(lua.LNil)
+			luaState.Push(lua.LString("wrong chart data format, " + err.Error()))
 			return 2
 		}
 
@@ -100,12 +100,12 @@ func (ch *Chart) render(_ *script.Script) lua.LGFunction {
 
 		err = ch.Render(chartTitle.String(), data, buf)
 		if err != nil {
-			L.Push(lua.LNil)
-			L.Push(lua.LString("error render chart, " + err.Error()))
+			luaState.Push(lua.LNil)
+			luaState.Push(lua.LString("error render chart, " + err.Error()))
 			return 2
 		}
 
-		L.Push(lua.LString(buf.String()))
+		luaState.Push(lua.LString(buf.String()))
 
 		return 1
 	}

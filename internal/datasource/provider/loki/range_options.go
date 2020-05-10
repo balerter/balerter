@@ -21,10 +21,10 @@ func (q *rangeOptions) validate() error {
 	return nil
 }
 
-func (m *Loki) parseRangeOptions(L *lua.LState) (*rangeOptions, error) {
+func (m *Loki) parseRangeOptions(luaState *lua.LState) (*rangeOptions, error) {
 	queryOptions := &rangeOptions{}
 
-	options := L.Get(2)
+	options := luaState.Get(2)
 	if options.Type() == lua.LTNil {
 		return queryOptions, nil
 	}

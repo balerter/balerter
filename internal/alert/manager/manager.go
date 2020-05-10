@@ -125,7 +125,7 @@ func Methods() []string {
 // GetLoader implements Modules/Module.GetLoader
 func (m *Manager) GetLoader(script *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
-		return func(L *lua.LState) int {
+		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
 				"warn":    m.luaCall(script, alert.LevelWarn),
 				"warning": m.luaCall(script, alert.LevelWarn),
@@ -139,9 +139,9 @@ func (m *Manager) GetLoader(script *script.Script) lua.LGFunction {
 				"get": m.get(script),
 			}
 
-			mod := L.SetFuncs(L.NewTable(), exports)
+			mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
-			L.Push(mod)
+			luaState.Push(mod)
 			return 1
 		}
 	}()

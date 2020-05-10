@@ -69,13 +69,13 @@ func (m *MySQL) GetLoader(_ *script.Script) lua.LGFunction {
 	return m.loader
 }
 
-func (m *MySQL) loader(L *lua.LState) int {
+func (m *MySQL) loader(luaState *lua.LState) int {
 	var exports = map[string]lua.LGFunction{
 		"query": m.query,
 	}
 
-	mod := L.SetFuncs(L.NewTable(), exports)
+	mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
-	L.Push(mod)
+	luaState.Push(mod)
 	return 1
 }

@@ -19,10 +19,10 @@ func (q *queryOptions) validate() error {
 	return nil
 }
 
-func (m *Loki) parseQueryOptions(L *lua.LState) (*queryOptions, error) {
+func (m *Loki) parseQueryOptions(luaState *lua.LState) (*queryOptions, error) {
 	queryOptions := &queryOptions{}
 
-	options := L.Get(2)
+	options := luaState.Get(2)
 	if options.Type() == lua.LTNil {
 		return queryOptions, nil
 	}

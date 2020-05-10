@@ -53,16 +53,13 @@ func (p *Provider) GetLoader(_ *script.Script) lua.LGFunction {
 	return p.loader
 }
 
-func (p *Provider) loader(L *lua.LState) int {
+func (p *Provider) loader(luaState *lua.LState) int {
 	var exports = map[string]lua.LGFunction{
 		"uploadPNG": p.uploadPNG,
 	}
 
-	mod := L.SetFuncs(L.NewTable(), exports)
-	// register other stuff
-	//L.SetField(mod, "name", lua.LString("value"))
+	mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
-	// returns the module
-	L.Push(mod)
+	luaState.Push(mod)
 	return 1
 }

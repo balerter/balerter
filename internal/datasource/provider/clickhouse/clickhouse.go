@@ -104,13 +104,13 @@ func (m *Clickhouse) GetLoader(_ *script.Script) lua.LGFunction {
 	return m.loader
 }
 
-func (m *Clickhouse) loader(L *lua.LState) int {
+func (m *Clickhouse) loader(luaState *lua.LState) int {
 	var exports = map[string]lua.LGFunction{
 		"query": m.query,
 	}
 
-	mod := L.SetFuncs(L.NewTable(), exports)
+	mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
-	L.Push(mod)
+	luaState.Push(mod)
 	return 1
 }

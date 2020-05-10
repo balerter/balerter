@@ -36,7 +36,7 @@ func TestManager_getAlertData(t *testing.T) {
 	}
 
 	type args struct {
-		L *lua.LState
+		luaState *lua.LState
 	}
 
 	defaultFields := fields{
@@ -57,7 +57,7 @@ func TestManager_getAlertData(t *testing.T) {
 			name:   "empty args",
 			fields: defaultFields,
 			args: args{
-				L: func() *lua.LState {
+				luaState: func() *lua.LState {
 					L := lua.NewState()
 					return L
 				}(),
@@ -71,7 +71,7 @@ func TestManager_getAlertData(t *testing.T) {
 			name:   "only alert name",
 			fields: defaultFields,
 			args: args{
-				L: func() *lua.LState {
+				luaState: func() *lua.LState {
 					L := lua.NewState()
 					L.Push(lua.LString("alertName1"))
 					return L
@@ -86,7 +86,7 @@ func TestManager_getAlertData(t *testing.T) {
 			name:   "empty (only space) alert name",
 			fields: defaultFields,
 			args: args{
-				L: func() *lua.LState {
+				luaState: func() *lua.LState {
 					L := lua.NewState()
 					L.Push(lua.LString(" "))
 					return L
@@ -101,7 +101,7 @@ func TestManager_getAlertData(t *testing.T) {
 			name:   "alert name and text",
 			fields: defaultFields,
 			args: args{
-				L: func() *lua.LState {
+				luaState: func() *lua.LState {
 					L := lua.NewState()
 					L.Push(lua.LString("alertName1"))
 					L.Push(lua.LString("alertText1"))
@@ -117,7 +117,7 @@ func TestManager_getAlertData(t *testing.T) {
 			name:   "with options NOT table",
 			fields: defaultFields,
 			args: args{
-				L: func() *lua.LState {
+				luaState: func() *lua.LState {
 					L := lua.NewState()
 					L.Push(lua.LString("alertName1"))
 					L.Push(lua.LString("alertText1"))
@@ -134,7 +134,7 @@ func TestManager_getAlertData(t *testing.T) {
 			name:   "with options",
 			fields: defaultFields,
 			args: args{
-				L: func() *lua.LState {
+				luaState: func() *lua.LState {
 					L := lua.NewState()
 					L.Push(lua.LString("alertName1"))
 					L.Push(lua.LString("alertText1"))
@@ -160,7 +160,7 @@ func TestManager_getAlertData(t *testing.T) {
 			name:   "with wrong options",
 			fields: defaultFields,
 			args: args{
-				L: func() *lua.LState {
+				luaState: func() *lua.LState {
 					L := lua.NewState()
 					L.Push(lua.LString("alertName1"))
 					L.Push(lua.LString("alertText1"))
@@ -189,7 +189,7 @@ func TestManager_getAlertData(t *testing.T) {
 				logger:   tt.fields.logger,
 				channels: tt.fields.channels,
 			}
-			gotAlertName, gotAlertText, gotAlertOptions, err := m.getAlertData(tt.args.L)
+			gotAlertName, gotAlertText, gotAlertOptions, err := m.getAlertData(tt.args.luaState)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getAlertData() error = %v, wantErr %v", err, tt.wantErr)
 				return

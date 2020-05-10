@@ -7,9 +7,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func (m *MySQL) query(L *lua.LState) int {
+func (m *MySQL) query(luaState *lua.LState) int {
 
-	q := L.Get(1).String()
+	q := luaState.Get(1).String()
 
 	m.logger.Debug("call mysql query", zap.String("query", q))
 
@@ -19,8 +19,8 @@ func (m *MySQL) query(L *lua.LState) int {
 	rows, err := m.db.QueryContext(ctx, q)
 	if err != nil {
 		m.logger.Error("error mysql query", zap.String("query", q), zap.Error(err))
-		L.Push(lua.LNil)
-		L.Push(lua.LString(err.Error()))
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString(err.Error()))
 		return 2
 	}
 	defer rows.Close()
@@ -40,8 +40,8 @@ func (m *MySQL) query(L *lua.LState) int {
 	for rows.Next() {
 		if err := rows.Scan(dest...); err != nil {
 			m.logger.Error("error scan", zap.Error(err))
-			L.Push(lua.LNil)
-			L.Push(lua.LString("error scan: " + err.Error()))
+			luaState.Push(lua.LNil)
+			luaState.Push(lua.LString("error scan: " + err.Error()))
 			return 2
 		}
 
@@ -55,7 +55,7 @@ func (m *MySQL) query(L *lua.LState) int {
 		result.Append(row)
 	}
 
-	L.Push(result)
-	L.Push(lua.LNil)
+	luaState.Push(result)
+	luaState.Push(lua.LNil)
 	return 2
 }

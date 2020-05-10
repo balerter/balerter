@@ -23,8 +23,8 @@ var (
 	crcTable = crc32.MakeTable(crc32.Castagnoli)
 )
 
-func (p *Provider) getArgs(L *lua.LState) ([]byte, string, error) {
-	dataValue := L.Get(1)
+func (p *Provider) getArgs(luaState *lua.LState) ([]byte, string, error) {
+	dataValue := luaState.Get(1)
 	if dataValue.Type() != lua.LTString {
 		return nil, "", fmt.Errorf("upload data must be a string")
 	}
@@ -33,7 +33,7 @@ func (p *Provider) getArgs(L *lua.LState) ([]byte, string, error) {
 
 	var filename string
 
-	filenameValue := L.Get(2)
+	filenameValue := luaState.Get(2)
 	switch filenameValue.Type() {
 	case lua.LTNil:
 		filename = strconv.Itoa(int(time.Now().UnixNano())) + "-" + strconv.Itoa(int(crc32.Checksum(data, crcTable)))
@@ -48,16 +48,16 @@ func (p *Provider) getArgs(L *lua.LState) ([]byte, string, error) {
 	return data, filename, nil
 }
 
-func (p *Provider) uploadPNG(L *lua.LState) int {
-	return p.upload(L, "png")
+func (p *Provider) uploadPNG(luaState *lua.LState) int {
+	return p.upload(luaState, "png")
 }
 
-func (p *Provider) upload(L *lua.LState, extension string) int {
+func (p *Provider) upload(luaState *lua.LState, extension string) int {
 
-	data, filename, err := p.getArgs(L)
+	data, filename, err := p.getArgs(luaState)
 	if err != nil {
-		L.Push(lua.LNil)
-		L.Push(lua.LString("wrong arguments: " + err.Error()))
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("wrong arguments: " + err.Error()))
 		return 2
 	}
 
@@ -89,14 +89,14 @@ func (p *Provider) upload(L *lua.LState, extension string) int {
 
 	_, err = svc.PutObjectWithContext(ctx, obj)
 	if err != nil {
-		L.Push(lua.LNil)
-		L.Push(lua.LString("error upload object: " + err.Error()))
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("error upload object: " + err.Error()))
 		return 2
 	}
 
 	resultFilename := fmt.Sprintf("https://%s.%s/%s", p.bucket, p.endpoint, filename)
 
-	L.Push(lua.LString(resultFilename))
+	luaState.Push(lua.LString(resultFilename))
 
 	return 1
 }

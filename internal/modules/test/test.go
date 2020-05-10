@@ -54,8 +54,8 @@ func (t *Test) Stop() error {
 }
 
 func (t *Test) getStorage(s *script.Script) lua.LGFunction {
-	return func(L *lua.LState) int {
-		nameL := L.Get(1)
+	return func(luaState *lua.LState) int {
+		nameL := luaState.Get(1)
 		if nameL.Type() == lua.LTNil {
 			t.logger.Error("module test.storage should have 1 argument")
 			return 0
@@ -73,15 +73,15 @@ func (t *Test) getStorage(s *script.Script) lua.LGFunction {
 			return 0
 		}
 
-		m.GetLoader(s)(L)
+		m.GetLoader(s)(luaState)
 
 		return 1
 	}
 }
 
 func (t *Test) getDatasource(s *script.Script) lua.LGFunction {
-	return func(L *lua.LState) int {
-		nameL := L.Get(1)
+	return func(luaState *lua.LState) int {
+		nameL := luaState.Get(1)
 		if nameL.Type() == lua.LTNil {
 			t.logger.Error("module test.datasource should have 1 argument")
 			return 0
@@ -99,14 +99,14 @@ func (t *Test) getDatasource(s *script.Script) lua.LGFunction {
 			return 0
 		}
 
-		m.GetLoader(s)(L)
+		m.GetLoader(s)(luaState)
 
 		return 1
 	}
 }
 
 func (t *Test) GetLoader(script *script.Script) lua.LGFunction {
-	return func(L *lua.LState) int {
+	return func(luaState *lua.LState) int {
 		var exports = map[string]lua.LGFunction{
 			"datasource": t.getDatasource(script),
 			"storage":    t.getStorage(script),
@@ -117,52 +117,12 @@ func (t *Test) GetLoader(script *script.Script) lua.LGFunction {
 			exports[mod.Name()] = mod.GetLoader(script)
 		}
 
-		mod := L.SetFuncs(L.NewTable(), exports)
+		mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
 		mod.RawSetString("AnyValue", lua.LString(mock.AnyValue))
 
-		L.Push(mod)
+		luaState.Push(mod)
 		return 1
 
 	}
 }
-
-//func (t *Test) run(_ string) lua.LGFunction {
-//	return func(L *lua.LState) int {
-//
-//		name := L.Get(1)
-//		if name.Type() == lua.LTNil {
-//			t.logger.Error("error get test name")
-//			L.Push(lua.LString("error get test name"))
-//			return 1
-//		}
-//
-//		lFunc := L.Get(2)
-//		if lFunc.Type() != lua.LTFunction {
-//			t.logger.Error("error get test function")
-//			L.Push(lua.LString("error get test function"))
-//			return 1
-//		}
-//
-//		//t.logger.Debug()
-//
-//		f := lFunc.(*lua.LFunction)
-//
-//		fState := lua.NewState()
-//		fState.Push(f)
-//
-//		inTst := &lua.LTable{}
-//		inTst.RawSet(lua.LString("assert"), fState.NewFunction(t.aa))
-//
-//		fState.Push(inTst)
-//
-//		err := fState.PCall(1, lua.MultRet, nil)
-//		if err != nil {
-//			t.logger.Error("error run test function", zap.Error(err))
-//			L.Push(lua.LString("error run test function: " + err.Error()))
-//			return 1
-//		}
-//
-//		return 0
-//	}
-//}

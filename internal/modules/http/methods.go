@@ -7,11 +7,11 @@ import (
 )
 
 func (h *HTTP) send(method string) lua.LGFunction {
-	return func(L *lua.LState) int {
-		args, err := h.parseRequestArgs(L)
+	return func(luaState *lua.LState) int {
+		args, err := h.parseRequestArgs(luaState)
 		if err != nil {
-			L.Push(lua.LNil)
-			L.Push(lua.LString("error parse args, " + err.Error()))
+			luaState.Push(lua.LNil)
+			luaState.Push(lua.LString("error parse args, " + err.Error()))
 			return 2
 		}
 
@@ -21,22 +21,22 @@ func (h *HTTP) send(method string) lua.LGFunction {
 
 		response, err := h.sendRequest(args)
 		if err != nil {
-			L.Push(lua.LNil)
-			L.Push(lua.LString("error send request, " + err.Error()))
+			luaState.Push(lua.LNil)
+			luaState.Push(lua.LString("error send request, " + err.Error()))
 			return 2
 		}
 
-		L.Push(response.toLuaTable())
+		luaState.Push(response.toLuaTable())
 
 		return 1
 	}
 }
 
-func (h *HTTP) request(L *lua.LState) int {
-	opts := L.Get(1)
+func (h *HTTP) request(luaState *lua.LState) int {
+	opts := luaState.Get(1)
 	if opts.Type() != lua.LTTable {
-		L.Push(lua.LNil)
-		L.Push(lua.LString("argument must be a table"))
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("argument must be a table"))
 		return 2
 	}
 
@@ -44,8 +44,8 @@ func (h *HTTP) request(L *lua.LState) int {
 
 	err := gluamapper.Map(opts.(*lua.LTable), args)
 	if err != nil {
-		L.Push(lua.LNil)
-		L.Push(lua.LString("error parse arguments, " + err.Error()))
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("error parse arguments, " + err.Error()))
 		return 2
 	}
 
@@ -53,12 +53,12 @@ func (h *HTTP) request(L *lua.LState) int {
 
 	response, err := h.sendRequest(args)
 	if err != nil {
-		L.Push(lua.LNil)
-		L.Push(lua.LString("error send request, " + err.Error()))
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("error send request, " + err.Error()))
 		return 2
 	}
 
-	L.Push(response.toLuaTable())
+	luaState.Push(response.toLuaTable())
 
 	return 1
 }

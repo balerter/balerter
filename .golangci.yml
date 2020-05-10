@@ -197,6 +197,8 @@ issues:
     - path: _test\.go
       linters:
         - gomnd
+        - funlen
+        - goimports
 #        - gocyclo
 #        - errcheck
 #        - dupl

@@ -49,7 +49,7 @@ func (h *HTTP) Name() string {
 
 func (h *HTTP) GetLoader(_ *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
-		return func(L *lua.LState) int {
+		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
 				"request": h.request,
 				"post":    h.send(http.MethodPost),
@@ -58,7 +58,7 @@ func (h *HTTP) GetLoader(_ *script.Script) lua.LGFunction {
 				"delete":  h.send(http.MethodDelete),
 			}
 
-			mod := L.SetFuncs(L.NewTable(), exports)
+			mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
 			mod.RawSetString("methodGet", lua.LString(http.MethodGet))
 			mod.RawSetString("methodHead", lua.LString(http.MethodHead))
@@ -70,7 +70,7 @@ func (h *HTTP) GetLoader(_ *script.Script) lua.LGFunction {
 			mod.RawSetString("methodOptions", lua.LString(http.MethodOptions))
 			mod.RawSetString("methodTrace", lua.LString(http.MethodTrace))
 
-			L.Push(mod)
+			luaState.Push(mod)
 			return 1
 		}
 	}()
