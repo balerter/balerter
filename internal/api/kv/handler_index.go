@@ -15,7 +15,7 @@ func HandlerIndex(coreStorage coreStorage.CoreStorage, logger *zap.Logger) http.
 		if err != nil {
 			logger.Error("error get kv data", zap.Error(err))
 			rw.Header().Add("X-Error", err.Error())
-			rw.WriteHeader(500)
+			rw.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -23,7 +23,7 @@ func HandlerIndex(coreStorage coreStorage.CoreStorage, logger *zap.Logger) http.
 		if err != nil {
 			logger.Error("error write response", zap.Error(err))
 			rw.Header().Add("X-Error", "error write response")
-			rw.WriteHeader(500)
+			rw.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	}
