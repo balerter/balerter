@@ -106,7 +106,7 @@ linters-settings:
   gocyclo:
     min-complexity: 15
   goimports:
-    local-prefixes: github.com/golangci/golangci-lint
+    local-prefixes: github.com/balerter/balerter
   golint:
     min-confidence: 0
   gomnd:
@@ -149,7 +149,7 @@ linters:
     - gocritic
     - gocyclo
     - gofmt
-    - goimports
+#    - goimports
     - golint
     - gomnd
     - goprintffuncname
