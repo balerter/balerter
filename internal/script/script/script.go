@@ -1,7 +1,7 @@
 package script
 
 import (
-	"crypto/sha1"
+	"crypto/sha1" //nolint:gosec // sha1 uses not for security
 	"fmt"
 	"strings"
 	"time"
@@ -33,11 +33,13 @@ type Script struct {
 }
 
 func (s *Script) Hash() string {
-	return fmt.Sprintf("%x", sha1.Sum(append([]byte(s.Name+"@"), s.Body...)))
+	return fmt.Sprintf("%x", sha1.Sum(append([]byte(s.Name+"@"), s.Body...))) //nolint:gosec // sha1 uses not for security
 }
 
+type parseMetaFunc func(l string, s *Script) error
+
 var (
-	metas = map[string]func(l string, s *Script) error{
+	metas = map[string]parseMetaFunc{
 		"@interval": parseMetaInterval,
 		"@ignore":   parseMetaIgnore,
 		"@name":     parseMetaName,

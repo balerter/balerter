@@ -45,7 +45,8 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated syslog",
 			fields: fields{
-				Syslog: []ChannelSyslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"}, {Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"}},
+				Syslog: []ChannelSyslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"},
+					{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for channels 'syslog': foo",
@@ -61,11 +62,16 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "ok",
 			fields: fields{
-				Email:    []ChannelEmail{{Name: "foo", From: "gopher@example.net", To: "foo@example.com", Host: "mail.example.com", Port: "25"}, {Name: "foo2", From: "gopher@example.net", To: "foo@example.com", Host: "mail.example.com", Port: "25"}},
-				Slack:    []ChannelSlack{{Name: "foo", Token: "a", Channel: "a"}, {Name: "foo2", Token: "a", Channel: "a"}},
-				Telegram: []ChannelTelegram{{Name: "foo", Token: "a", ChatID: 1}, {Name: "foo2", Token: "a", ChatID: 1}},
-				Syslog:   []ChannelSyslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"}, {Name: "foo2", Network: "tcp", Address: "a", Priority: "EMERG"}},
-				Notify:   []ChannelNotify{{Name: "foo"}, {Name: "foo2"}},
+				Email: []ChannelEmail{{Name: "foo", From: "gopher@example.net", To: "foo@example.com",
+					Host: "mail.example.com", Port: "25"},
+					{Name: "foo2", From: "gopher@example.net", To: "foo@example.com", Host: "mail.example.com", Port: "25"}},
+				Slack: []ChannelSlack{{Name: "foo", Token: "a", Channel: "a"},
+					{Name: "foo2", Token: "a", Channel: "a"}},
+				Telegram: []ChannelTelegram{{Name: "foo", Token: "a", ChatID: 1},
+					{Name: "foo2", Token: "a", ChatID: 1}},
+				Syslog: []ChannelSyslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"},
+					{Name: "foo2", Network: "tcp", Address: "a", Priority: "EMERG"}},
+				Notify: []ChannelNotify{{Name: "foo"}, {Name: "foo2"}},
 			},
 			wantErr: false,
 			errText: "",

@@ -25,7 +25,7 @@ func (cfg ChannelSyslog) Validate() error {
 		return fmt.Errorf("name must be not empty")
 	}
 
-	if strings.ToLower(cfg.Network) != "tcp" && strings.ToLower(cfg.Network) != "udp" && cfg.Network != "" {
+	if !strings.EqualFold(cfg.Network, "tcp") && !strings.EqualFold(cfg.Network, "udp") && cfg.Network != "" {
 		return fmt.Errorf("corrent values for 'network': 'tcp', 'udp' or empty value")
 	}
 
