@@ -19,7 +19,9 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated email",
 			fields: fields{
-				Email: []ChannelEmail{{Name: "foo", From: "gopher@example.net", To: "foo@example.com", Host: "mail.example.com", Port: "25"}, {Name: "foo", From: "gopher@example.net", To: "foo@example.com", Host: "mail.example.com", Port: "25"}},
+				Email: []ChannelEmail{{Name: "foo", From: "gopher@example.net", To: "foo@example.com",
+					Host: "mail.example.com", Port: "25"}, {Name: "foo", From: "gopher@example.net",
+					To: "foo@example.com", Host: "mail.example.com", Port: "25"}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for channels 'email': foo",

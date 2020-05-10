@@ -7,7 +7,9 @@ import (
 
 var (
 	syslogSeverity = []string{"EMERG", "ALERT", "CRIT", "ERR", "WARNING", "NOTICE", "INFO", "DEBUG"}
-	syslogFacility = []string{"KERN", "USER", "MAIL", "DAEMON", "AUTH", "SYSLOG", "LPR", "NEWS", "UUCP", "CRON", "AUTHPRIV", "FTP", "LOCAL0", "LOCAL1", "LOCAL2", "LOCAL3", "LOCAL4", "LOCAL5", "LOCAL6", "LOCAL7"}
+	syslogFacility = []string{"KERN", "USER", "MAIL", "DAEMON", "AUTH", "SYSLOG",
+		"LPR", "NEWS", "UUCP", "CRON", "AUTHPRIV", "FTP", "LOCAL0", "LOCAL1",
+		"LOCAL2", "LOCAL3", "LOCAL4", "LOCAL5", "LOCAL6", "LOCAL7"}
 )
 
 type ChannelSyslog struct {
@@ -40,7 +42,7 @@ func validatePriority(p string) error {
 	}
 
 	parts := strings.Split(p, "|")
-	if len(parts) > 2 {
+	if len(parts) > 2 { // nolint:mnd
 		return fmt.Errorf("bad priority format")
 	}
 
