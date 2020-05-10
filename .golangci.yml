@@ -201,6 +201,7 @@ issues:
         - goimports
         - scopelint
         - dupl
+        - goconst
 #        - gocyclo
 #        - errcheck
 #        - dupl
