@@ -199,6 +199,8 @@ issues:
         - gomnd
         - funlen
         - goimports
+        - scopelint
+        - dupl
 #        - gocyclo
 #        - errcheck
 #        - dupl
