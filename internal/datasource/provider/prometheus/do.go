@@ -54,7 +54,7 @@ func (m *Prometheus) sendQuery(query string, opts queryQueryOptions) (model.Valu
 	return m.send(&u)
 }
 
-func (m *Prometheus) send(u *url.URL) (model.Value, error) {
+func (m *Prometheus) send(u fmt.Stringer) (model.Value, error) {
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, err
