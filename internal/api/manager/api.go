@@ -12,7 +12,12 @@ import (
 	"go.uber.org/zap"
 	"net"
 	"net/http"
+	"net/http/pprof"
 	"sync"
+)
+
+const (
+	pprofPrefix = "/debug/pprof"
 )
 
 type API struct {
@@ -33,6 +38,12 @@ func New(cfg config.API, coreStorageAlert, coreStorageKV coreStorage.CoreStorage
 	m.HandleFunc("/liveness", api.handlerLiveness)
 	m.HandleFunc("/api/v1/alerts", alerts.HandlerIndex(coreStorageAlert, logger))
 	m.HandleFunc("/api/v1/kv", kv.HandlerIndex(coreStorageKV, logger))
+
+	m.HandleFunc(pprofPrefix+"/profile", pprof.Profile)
+	m.HandleFunc(pprofPrefix+"/trace", pprof.Trace)
+	m.HandleFunc(pprofPrefix+"/heap", pprof.Handler("heap").ServeHTTP)
+	m.HandleFunc(pprofPrefix+"/goroutine", pprof.Handler("goroutine").ServeHTTP)
+	m.HandleFunc(pprofPrefix+"/allocs", pprof.Handler("allocs").ServeHTTP)
 
 	if cfg.Metrics {
 		api.logger.Info("enable exposing prometheus metrics")
