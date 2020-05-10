@@ -10,7 +10,7 @@ ARG version="undefined"
 WORKDIR /build/balerter
 
 ADD . /build/balerter
-RUN go test ./...
+
 RUN go build -o /balerter -ldflags "-X main.version=${version} -s -w"  ./cmd/balerter
 
 # -----
