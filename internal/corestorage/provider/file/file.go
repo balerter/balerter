@@ -42,9 +42,9 @@ func (s *Storage) Alert() coreStorage.Alert {
 	return s.alert
 }
 
-func New(config config.StorageCoreFile, logger *zap.Logger) (*Storage, error) {
+func New(cfg config.StorageCoreFile, logger *zap.Logger) (*Storage, error) {
 	s := &Storage{
-		name:   "file." + config.Name,
+		name:   "file." + cfg.Name,
 		logger: logger,
 		kv: &storageKV{
 			logger: logger,
@@ -57,14 +57,14 @@ func New(config config.StorageCoreFile, logger *zap.Logger) (*Storage, error) {
 	var err error
 
 	options := &bbolt.Options{
-		Timeout: config.Timeout,
+		Timeout: cfg.Timeout,
 	}
 
 	if options.Timeout == 0 {
 		options.Timeout = defaultTimeout
 	}
 
-	s.db, err = bbolt.Open(config.Path, 0666, options)
+	s.db, err = bbolt.Open(cfg.Path, 0666, options)
 	if err != nil {
 		return nil, fmt.Errorf("error open db file, %w", err)
 	}

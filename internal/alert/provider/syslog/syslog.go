@@ -14,7 +14,11 @@ type Syslog struct {
 	w      io.Writer
 }
 
-func New(cfg config.ChannelSyslog, logger *zap.Logger) (*Syslog, error) {
+var (
+	defaultPriority = "EMERG"
+)
+
+func New(cfg *config.ChannelSyslog, logger *zap.Logger) (*Syslog, error) {
 	sl := &Syslog{
 		name:   cfg.Name,
 		logger: logger,
@@ -23,7 +27,7 @@ func New(cfg config.ChannelSyslog, logger *zap.Logger) (*Syslog, error) {
 	var err error
 
 	if cfg.Priority == "" {
-		cfg.Priority = "EMERG"
+		cfg.Priority = defaultPriority
 	}
 
 	sl.w, err = syslog.Dial(cfg.Network, cfg.Address, parsePriority(cfg.Priority), cfg.Tag)
@@ -47,14 +51,14 @@ func parsePriority(s string) syslog.Priority {
 
 	priority := getSeverity(parts[0])
 
-	if len(parts) == 2 {
-		priority = priority | getFacility(parts[1])
+	if len(parts) == 2 { //nolint:mnd
+		priority |= getFacility(parts[1])
 	}
 
 	return priority
 }
 
-func getFacility(s string) syslog.Priority {
+func getFacility(s string) syslog.Priority { //nolint:cocyclo
 	switch s {
 	case "KERN":
 		return syslog.LOG_KERN

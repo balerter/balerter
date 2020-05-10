@@ -71,7 +71,7 @@ func (m *Manager) Init(cfg config.Channels) error {
 	}
 
 	for _, cfg := range cfg.Syslog {
-		module, err := syslog.New(cfg, m.logger)
+		module, err := syslog.New(&cfg, m.logger)
 		if err != nil {
 			return fmt.Errorf("error init syslog channel %s, %w", cfg.Name, err)
 		}

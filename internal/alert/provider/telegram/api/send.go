@@ -26,7 +26,6 @@ func (api *API) SendTextMessage(mes *TextMessage) error {
 }
 
 func (api *API) sendMessage(body []byte, method string) error {
-
 	req, err := http.NewRequest(http.MethodPost, api.endpoint+method, bytes.NewReader(body))
 	if err != nil {
 		return fmt.Errorf("error generate request to telegram, %w", err)

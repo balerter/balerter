@@ -5,13 +5,17 @@ import (
 	"go.uber.org/zap"
 )
 
-func (m *Slack) Send(message *message.Message) error {
-
-	opts := createSlackMessageOptions(message.Text, message.Image, message.Fields...)
+func (m *Slack) Send(mes *message.Message) error {
+	opts := createSlackMessageOptions(mes.Text, mes.Image, mes.Fields...)
 
 	_channel, _timestamp, _text, err := m.api.SendMessage(m.channel, opts...)
 
-	m.logger.Debug("send slack message", zap.String("channel", _channel), zap.String("timestamp", _timestamp), zap.String("text", _text), zap.Error(err))
+	m.logger.Debug("send slack message",
+		zap.String("channel", _channel),
+		zap.String("timestamp", _timestamp),
+		zap.String("text", _text),
+		zap.Error(err),
+	)
 
 	return err
 }

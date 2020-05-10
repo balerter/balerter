@@ -5,7 +5,6 @@ import (
 )
 
 func createSlackMessageOptions(alertText, imageURL string, fields ...string) []slack.MsgOption {
-
 	blocks := make([]slack.Block, 0)
 
 	if imageURL != "" {

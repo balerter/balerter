@@ -86,6 +86,6 @@ func (api *API) Run(ctx context.Context, ctxCancel context.CancelFunc, wg *sync.
 func (api *API) handlerLiveness(rw http.ResponseWriter, _ *http.Request) {
 	if _, err := fmt.Fprint(rw, "ok"); err != nil {
 		api.logger.Error("error write response", zap.Error(err))
-		rw.WriteHeader(500)
+		rw.WriteHeader(http.StatusInternalServerError)
 	}
 }

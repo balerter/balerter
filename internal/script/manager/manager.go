@@ -24,7 +24,6 @@ func New() *Manager {
 }
 
 func (m *Manager) Init(cfg config.ScriptsSources) error {
-
 	for _, folderConfig := range cfg.Folder {
 		m.providers[folderConfig.Name] = folderProvider.New(folderConfig)
 	}
