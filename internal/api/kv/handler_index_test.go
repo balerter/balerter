@@ -2,7 +2,7 @@ package kv
 
 import (
 	"fmt"
-	coreStorage "github.com/balerter/balerter/internal/core_storage"
+	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/stretchr/testify/assert"
 	httpTestify "github.com/stretchr/testify/http"
 	"go.uber.org/zap"

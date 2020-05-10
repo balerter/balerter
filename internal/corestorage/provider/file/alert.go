@@ -39,7 +39,6 @@ func (s *storageAlert) GetOrNew(name string) (*alert.Alert, error) {
 	}
 
 	return a, nil
-
 }
 
 func (s *storageAlert) All() ([]*alert.Alert, error) {

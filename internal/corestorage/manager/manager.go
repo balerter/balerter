@@ -3,9 +3,9 @@ package manager
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/config"
-	coreStorage "github.com/balerter/balerter/internal/core_storage"
-	"github.com/balerter/balerter/internal/core_storage/provider/file"
-	"github.com/balerter/balerter/internal/core_storage/provider/memory"
+	coreStorage "github.com/balerter/balerter/internal/corestorage"
+	"github.com/balerter/balerter/internal/corestorage/provider/file"
+	"github.com/balerter/balerter/internal/corestorage/provider/memory"
 	"go.uber.org/zap"
 )
 

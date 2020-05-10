@@ -1,10 +1,10 @@
-package core_storage
+package corestorage
 
 import (
 	"github.com/balerter/balerter/internal/alert/alert"
 )
 
-type CoreStorageKV interface {
+type KV interface {
 	Put(string, string) error
 	Get(string) (string, error)
 	Upsert(string, string) error
@@ -12,7 +12,7 @@ type CoreStorageKV interface {
 	All() (map[string]string, error)
 }
 
-type CoreStorageAlert interface {
+type Alert interface {
 	GetOrNew(string) (*alert.Alert, error)
 	All() ([]*alert.Alert, error)
 	Release(a *alert.Alert) error
@@ -21,7 +21,7 @@ type CoreStorageAlert interface {
 
 type CoreStorage interface {
 	Name() string
-	KV() CoreStorageKV
-	Alert() CoreStorageAlert
+	KV() KV
+	Alert() Alert
 	Stop() error
 }

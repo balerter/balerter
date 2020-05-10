@@ -6,7 +6,7 @@ import (
 	"github.com/balerter/balerter/internal/api/alerts"
 	"github.com/balerter/balerter/internal/api/kv"
 	"github.com/balerter/balerter/internal/config"
-	coreStorage "github.com/balerter/balerter/internal/core_storage"
+	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/balerter/balerter/internal/metrics"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"

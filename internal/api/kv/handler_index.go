@@ -1,7 +1,7 @@
 package kv
 
 import (
-	coreStorage "github.com/balerter/balerter/internal/core_storage"
+	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"go.uber.org/zap"
 	"net/http"
 )

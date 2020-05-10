@@ -2,7 +2,7 @@ package memory
 
 import (
 	"github.com/balerter/balerter/internal/alert/alert"
-	coreStorage "github.com/balerter/balerter/internal/core_storage"
+	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"sync"
 )
 
@@ -38,11 +38,11 @@ func (m *Memory) Name() string {
 	return "memory"
 }
 
-func (m *Memory) KV() coreStorage.CoreStorageKV {
+func (m *Memory) KV() coreStorage.KV {
 	return m.kv
 }
 
-func (m *Memory) Alert() coreStorage.CoreStorageAlert {
+func (m *Memory) Alert() coreStorage.Alert {
 	return m.alert
 }
 

@@ -1,14 +1,14 @@
 package manager
 
 import (
-	"github.com/balerter/balerter/internal/core_storage"
+	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestManager_Get(t *testing.T) {
-	m := &Manager{map[string]core_storage.CoreStorage{
+	m := &Manager{map[string]coreStorage.CoreStorage{
 		"foo": nil,
 	}}
 

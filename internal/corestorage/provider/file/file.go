@@ -3,7 +3,7 @@ package file
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/config"
-	coreStorage "github.com/balerter/balerter/internal/core_storage"
+	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"go.etcd.io/bbolt"
 	"go.uber.org/zap"
 	"time"
@@ -34,11 +34,11 @@ type Storage struct {
 	alert  *storageAlert
 }
 
-func (s *Storage) KV() coreStorage.CoreStorageKV {
+func (s *Storage) KV() coreStorage.KV {
 	return s.kv
 }
 
-func (s *Storage) Alert() coreStorage.CoreStorageAlert {
+func (s *Storage) Alert() coreStorage.Alert {
 	return s.alert
 }
 

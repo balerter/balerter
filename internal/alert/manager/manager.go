@@ -11,7 +11,7 @@ import (
 	"github.com/balerter/balerter/internal/alert/provider/syslog"
 	"github.com/balerter/balerter/internal/alert/provider/telegram"
 	"github.com/balerter/balerter/internal/config"
-	coreStorage "github.com/balerter/balerter/internal/core_storage"
+	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"

@@ -13,7 +13,7 @@ import (
 	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	apiManager "github.com/balerter/balerter/internal/api/manager"
 	"github.com/balerter/balerter/internal/config"
-	coreStorageManager "github.com/balerter/balerter/internal/core_storage/manager"
+	coreStorageManager "github.com/balerter/balerter/internal/corestorage/manager"
 	dsManager "github.com/balerter/balerter/internal/datasource/manager"
 	"github.com/balerter/balerter/internal/logger"
 	"github.com/balerter/balerter/internal/metrics"
