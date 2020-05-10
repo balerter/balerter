@@ -98,10 +98,12 @@ func TestRegistry_getAssert(t *testing.T) {
 func TestResult(t *testing.T) {
 	r := New()
 
-	r.calls = append(r.calls, call{method: "f1", args: []lua.LValue{lua.LString("foo")}}) // no asserts
-	r.calls = append(r.calls, call{method: "f11", args: nil})                             // no asserts
-	r.calls = append(r.calls, call{method: "f2", args: []lua.LValue{lua.LString("foo")}}) // assert called
-	r.calls = append(r.calls, call{method: "f3", args: []lua.LValue{lua.LString("foo")}}) // assert not called
+	r.calls = append(r.calls,
+		call{method: "f1", args: []lua.LValue{lua.LString("foo")}}, // no asserts
+		call{method: "f11", args: nil},                             // no asserts
+		call{method: "f2", args: []lua.LValue{lua.LString("foo")}}, // assert called
+		call{method: "f3", args: []lua.LValue{lua.LString("foo")}}, // assert not called
+	)
 
 	// assert called for 'f2'
 	e2 := newAssertEntry()

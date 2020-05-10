@@ -8,7 +8,6 @@ import (
 )
 
 func (m *Clickhouse) query(luaState *lua.LState) int {
-
 	q := luaState.Get(1).String()
 
 	m.logger.Debug("call clickhouse query", zap.String("query", q))
@@ -21,7 +20,7 @@ func (m *Clickhouse) query(luaState *lua.LState) int {
 		m.logger.Error("error clickhouse query", zap.String("query", q), zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString(err.Error()))
-		return 2
+		return 2 //nolint:mnd
 	}
 	defer rows.Close()
 
@@ -42,7 +41,7 @@ func (m *Clickhouse) query(luaState *lua.LState) int {
 			m.logger.Error("error scan", zap.Error(err))
 			luaState.Push(lua.LNil)
 			luaState.Push(lua.LString("error scan: " + err.Error()))
-			return 2
+			return 2 //nolint:mnd
 		}
 
 		row := &lua.LTable{}
@@ -57,5 +56,5 @@ func (m *Clickhouse) query(luaState *lua.LState) int {
 
 	luaState.Push(result)
 	luaState.Push(lua.LNil)
-	return 2
+	return 2 //nolint:mnd
 }

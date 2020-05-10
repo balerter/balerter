@@ -1,11 +1,11 @@
 package registry
 
 import (
-	"github.com/balerter/balerter/internal/lua_formatter"
+	"github.com/balerter/balerter/internal/luaformatter"
 	lua "github.com/yuin/gopher-lua"
 )
 
-func (r *Registry) Register(AnyValue, method string, callArgs, retArgs []lua.LValue) error {
+func (r *Registry) Register(anyValue, method string, callArgs, retArgs []lua.LValue) error {
 	e, ok := r.responseEntries[method]
 	if !ok {
 		e = newResponseEntry()
@@ -13,13 +13,13 @@ func (r *Registry) Register(AnyValue, method string, callArgs, retArgs []lua.LVa
 	}
 
 	for _, a := range callArgs {
-		s, err := lua_formatter.ValueToString(a)
+		s, err := luaformatter.ValueToString(a)
 		if err != nil {
 			return err
 		}
 		key := a.Type().String() + "@" + s
-		if a.String() == AnyValue {
-			key = AnyValue
+		if a.String() == anyValue {
+			key = anyValue
 		}
 
 		nextEntry, ok := e.entries[key]

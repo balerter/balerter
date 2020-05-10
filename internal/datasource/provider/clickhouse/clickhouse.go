@@ -36,7 +36,7 @@ type Clickhouse struct {
 	timeout time.Duration
 }
 
-func New(cfg config.DataSourceClickhouse, logger *zap.Logger) (*Clickhouse, error) {
+func New(cfg *config.DataSourceClickhouse, logger *zap.Logger) (*Clickhouse, error) {
 	c := &Clickhouse{
 		name:    ModuleName(cfg.Name),
 		logger:  logger,

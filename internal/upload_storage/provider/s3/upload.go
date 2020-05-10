@@ -23,17 +23,15 @@ var (
 	crcTable = crc32.MakeTable(crc32.Castagnoli)
 )
 
-func (p *Provider) getArgs(luaState *lua.LState) ([]byte, string, error) {
+func (p *Provider) getArgs(luaState *lua.LState) (data []byte, filename string, err error) {
 	dataValue := luaState.Get(1)
 	if dataValue.Type() != lua.LTString {
 		return nil, "", fmt.Errorf("upload data must be a string")
 	}
 
-	data := []byte(dataValue.String())
+	data = []byte(dataValue.String())
 
-	var filename string
-
-	filenameValue := luaState.Get(2)
+	filenameValue := luaState.Get(2) //nolint:mnd
 	switch filenameValue.Type() {
 	case lua.LTNil:
 		filename = strconv.Itoa(int(time.Now().UnixNano())) + "-" + strconv.Itoa(int(crc32.Checksum(data, crcTable)))
@@ -53,12 +51,11 @@ func (p *Provider) uploadPNG(luaState *lua.LState) int {
 }
 
 func (p *Provider) upload(luaState *lua.LState, extension string) int {
-
 	data, filename, err := p.getArgs(luaState)
 	if err != nil {
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("wrong arguments: " + err.Error()))
-		return 2
+		return 2 //nolint:mnd
 	}
 
 	filename = filename + "." + extension
@@ -91,12 +88,12 @@ func (p *Provider) upload(luaState *lua.LState, extension string) int {
 	if err != nil {
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error upload object: " + err.Error()))
-		return 2
+		return 2 //nolint:mnd
 	}
 
 	resultFilename := fmt.Sprintf("https://%s.%s/%s", p.bucket, p.endpoint, filename)
 
 	luaState.Push(lua.LString(resultFilename))
 
-	return 1
+	return 1 //nolint:mnd
 }

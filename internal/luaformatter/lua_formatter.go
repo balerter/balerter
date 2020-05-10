@@ -1,4 +1,4 @@
-package lua_formatter
+package luaformatter
 
 import (
 	"errors"

@@ -1,7 +1,7 @@
 package registry
 
 import (
-	"github.com/balerter/balerter/internal/lua_formatter"
+	"github.com/balerter/balerter/internal/luaformatter"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -13,7 +13,7 @@ func (r *Registry) AddAssert(method string, args []lua.LValue, called bool) erro
 	}
 
 	for _, a := range args {
-		key := lua_formatter.ValueToStringNoErr(a)
+		key := luaformatter.ValueToStringNoErr(a)
 		e1, ok := e.entries[key]
 		if !ok {
 			e1 = newAssertEntry()

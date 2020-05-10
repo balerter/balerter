@@ -2,7 +2,7 @@ package registry
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/lua_formatter"
+	"github.com/balerter/balerter/internal/luaformatter"
 	"github.com/balerter/balerter/internal/modules"
 )
 
@@ -26,10 +26,12 @@ func (r *Registry) Result() []modules.TestResult {
 
 		res := modules.TestResult{}
 		if shouldBeCalled {
-			res.Message = fmt.Sprintf("method '%s' with args %s was called", call.method, lua_formatter.ValuesToStringNoErr(call.args))
+			res.Message = fmt.Sprintf("method '%s' with args %s was called",
+				call.method, luaformatter.ValuesToStringNoErr(call.args))
 			res.Ok = true
 		} else {
-			res.Message = fmt.Sprintf("method '%s' with args %s was called, but should not", call.method, lua_formatter.ValuesToStringNoErr(call.args))
+			res.Message = fmt.Sprintf("method '%s' with args %s was called, but should not",
+				call.method, luaformatter.ValuesToStringNoErr(call.args))
 			res.Ok = false
 		}
 		results = append(results, res)
@@ -47,7 +49,7 @@ func (r *Registry) getAssert(call call) (*assertEntry, bool) {
 	}
 
 	for _, a := range call.args {
-		key := lua_formatter.ValueToStringNoErr(a)
+		key := luaformatter.ValueToStringNoErr(a)
 		e1, ok := e.entries[key]
 		if !ok {
 			return nil, false

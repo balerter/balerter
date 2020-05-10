@@ -13,9 +13,14 @@ type mockAPI struct {
 	mock.Mock
 }
 
-func (m *mockAPI) SendMessage(channel string, options ...slack.MsgOption) (string, string, string, error) {
+func (m *mockAPI) SendMessage(channel string, options ...slack.MsgOption) (ch, timestamp, text string, err error) {
 	args := m.Called(channel, options)
-	return args.String(0), args.String(1), args.String(2), args.Error(3)
+
+	ch = args.String(0)
+	timestamp = args.String(1)
+	text = args.String(2)
+	err = args.Error(3)
+	return
 }
 
 func TestSend(t *testing.T) {
