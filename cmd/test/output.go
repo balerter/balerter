@@ -8,16 +8,15 @@ import (
 	"io"
 )
 
-func output(results []modules.TestResult, w io.Writer, asJson bool) error {
-	if asJson {
-		return outputJson(results, w)
+func output(results []modules.TestResult, w io.Writer, asJSON bool) error {
+	if asJSON {
+		return outputJSON(results, w)
 	}
 
 	return outputPlainColored(results, w)
 }
 
 func outputPlainColored(results []modules.TestResult, w io.Writer) error {
-
 	colorOk := color.New(color.FgGreen)
 	colorFail := color.New(color.FgRed)
 
@@ -42,7 +41,7 @@ func outputPlainColored(results []modules.TestResult, w io.Writer) error {
 	return nil
 }
 
-func outputJson(results []modules.TestResult, w io.Writer) error {
+func outputJSON(results []modules.TestResult, w io.Writer) error {
 	e, err := json.Marshal(results)
 	if err != nil {
 		return nil

@@ -100,7 +100,7 @@ func main() {
 		}
 	}
 
-	if err := scriptsMgr.Init(cfg.Scripts.Sources); err != nil {
+	if err = scriptsMgr.Init(cfg.Scripts.Sources); err != nil {
 		lgr.Logger().Error("error init scripts manager", zap.Error(err))
 		os.Exit(1)
 	}
@@ -108,7 +108,7 @@ func main() {
 	// datasources
 	lgr.Logger().Info("init datasources manager")
 	dsMgr := dsManager.New(lgr.Logger())
-	if err := dsMgr.Init(cfg.DataSources); err != nil {
+	if err = dsMgr.Init(&cfg.DataSources); err != nil {
 		lgr.Logger().Error("error init datasources manager", zap.Error(err))
 		os.Exit(1)
 	}
@@ -116,7 +116,7 @@ func main() {
 	// upload storages
 	lgr.Logger().Info("init upload storages manager")
 	uploadStoragesMgr := uploadStorageManager.New(lgr.Logger())
-	if err := uploadStoragesMgr.Init(cfg.Storages.Upload); err != nil {
+	if err = uploadStoragesMgr.Init(cfg.Storages.Upload); err != nil {
 		lgr.Logger().Error("error init upload storages manager", zap.Error(err))
 		os.Exit(1)
 	}
@@ -143,7 +143,7 @@ func main() {
 		os.Exit(1)
 	}
 	alertMgr := alertManager.New(alertManagerStorageEngine, lgr.Logger())
-	if err := alertMgr.Init(cfg.Channels); err != nil {
+	if err = alertMgr.Init(cfg.Channels); err != nil {
 		lgr.Logger().Error("error init alert manager", zap.Error(err))
 		os.Exit(1)
 	}

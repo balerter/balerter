@@ -35,9 +35,13 @@ var (
 	configSource = flag.String("config", "config.yml", "Configuration source. Currently supports only path to yaml file.")
 	logLevel     = flag.String("logLevel", "ERROR", "Log level. ERROR, WARN, INFO or DEBUG")
 	debug        = flag.Bool("debug", false, "debug mode")
-	asJson       = flag.Bool("json", false, "output json format")
+	asJSON       = flag.Bool("json", false, "output json format")
 
 	defaultLuaModulesPath = "./?.lua;./modules/?.lua;./modules/?/init.lua"
+)
+
+var (
+	errorOSReturnCode = 1
 )
 
 func main() {
@@ -49,15 +53,17 @@ func main() {
 
 	flag.Parse()
 
-	if err := validateLogLevel(*logLevel); err != nil {
+	var err error
+
+	if err = validateLogLevel(*logLevel); err != nil {
 		log.Print(err)
-		os.Exit(1)
+		os.Exit(errorOSReturnCode)
 	}
 
 	lgr, err := logger.New(*logLevel, *debug)
 	if err != nil {
 		log.Printf("error init zap logger, %v", err)
-		os.Exit(1)
+		os.Exit(errorOSReturnCode)
 	}
 
 	metrics.SetVersion(version)
@@ -68,7 +74,7 @@ func main() {
 	cfg, err := config.New(*configSource)
 	if err != nil {
 		lgr.Logger().Error("error init config", zap.Error(err))
-		os.Exit(1)
+		os.Exit(errorOSReturnCode)
 	}
 	lgr.Logger().Debug("loaded configuration", zap.Any("config", cfg))
 
@@ -81,25 +87,25 @@ func main() {
 	// Scripts sources
 	lgr.Logger().Info("init scripts manager")
 	scriptsMgr := scriptsManager.New()
-	if err := scriptsMgr.Init(cfg.Scripts.Sources); err != nil {
+	if err = scriptsMgr.Init(cfg.Scripts.Sources); err != nil {
 		lgr.Logger().Error("error init scripts manager", zap.Error(err))
-		os.Exit(1)
+		os.Exit(errorOSReturnCode)
 	}
 
 	// datasources
 	lgr.Logger().Info("init datasources manager")
 	dsMgr := dsManagerTest.New(lgr.Logger())
-	if err := dsMgr.Init(&cfg.DataSources); err != nil {
+	if err = dsMgr.Init(&cfg.DataSources); err != nil {
 		lgr.Logger().Error("error init datasources manager", zap.Error(err))
-		os.Exit(1)
+		os.Exit(errorOSReturnCode)
 	}
 
 	// upload storages
 	lgr.Logger().Info("init upload storages manager")
 	uploadStoragesMgr := uploadStorageManagerTest.New(lgr.Logger())
-	if err := uploadStoragesMgr.Init(cfg.Storages.Upload); err != nil {
+	if err = uploadStoragesMgr.Init(cfg.Storages.Upload); err != nil {
 		lgr.Logger().Error("error init upload storages manager", zap.Error(err))
-		os.Exit(1)
+		os.Exit(errorOSReturnCode)
 	}
 
 	// ---------------------
@@ -184,15 +190,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := output(results, resultsOutput, *asJson); err != nil {
+	if err := output(results, resultsOutput, *asJSON); err != nil {
 		lgr.Logger().Error("error output results", zap.Error(err))
-		os.Exit(1)
+		os.Exit(errorOSReturnCode)
 	}
 
 	lgr.Logger().Info("terminate")
 
 	if !ok {
-		os.Exit(2)
+		os.Exit(errorOSReturnCode)
 		return
 	}
 

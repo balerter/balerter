@@ -60,7 +60,7 @@ func TestHTTP_parseRequestArgs(t *testing.T) {
 			}(),
 			want: &requestArgs{
 				Method:  "",
-				Uri:     "foo",
+				URI:     "foo",
 				Body:    nil,
 				Headers: map[string]string{},
 			},
@@ -93,7 +93,7 @@ func TestHTTP_parseRequestArgs(t *testing.T) {
 			}(),
 			want: &requestArgs{
 				Method:  "",
-				Uri:     "foo",
+				URI:     "foo",
 				Body:    []byte("bar"),
 				Headers: map[string]string{},
 			},
@@ -130,7 +130,7 @@ func TestHTTP_parseRequestArgs(t *testing.T) {
 			}(),
 			want: &requestArgs{
 				Method:  "",
-				Uri:     "foo",
+				URI:     "foo",
 				Body:    []byte("bar"),
 				Headers: map[string]string{"Baz": "Bar"},
 			},

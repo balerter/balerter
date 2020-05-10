@@ -72,13 +72,12 @@ func (m *moduleMock) Name() string {
 	return args.String(0)
 }
 
-func (m *moduleMock) GetLoader(script *script.Script) lua.LGFunction {
-	args := m.Called(script)
+func (m *moduleMock) GetLoader(s *script.Script) lua.LGFunction {
+	args := m.Called(s)
 	return args.Get(0).(lua.LGFunction)
 }
 
 func TestRunner_createLuaState(t *testing.T) {
-
 	m1 := &moduleMock{}
 	m1.On("Name").Return("module1")
 	m1.On("GetLoader", mock.Anything).Return(func() lua.LGFunction {

@@ -7,7 +7,7 @@ import (
 
 type requestArgs struct {
 	Method  string            `json:"method"`
-	Uri     string            `json:"uri"`
+	URI     string            `json:"uri"`
 	Body    []byte            `json:"body"`
 	Headers map[string]string `json:"headers"`
 }
@@ -25,13 +25,13 @@ func newRequestArgs() *requestArgs {
 func (h *HTTP) parseRequestArgs(luaState *lua.LState) (*requestArgs, error) {
 	args := newRequestArgs()
 
-	argURI := luaState.Get(1)
+	argURI := luaState.Get(1) //nolint:mnd
 	if argURI.Type() != lua.LTString {
 		return nil, fmt.Errorf("uri argument must be a string")
 	}
-	args.Uri = argURI.(lua.LString).String()
+	args.URI = argURI.(lua.LString).String()
 
-	argBody := luaState.Get(2)
+	argBody := luaState.Get(2) //nolint:mnd
 	switch argBody.Type() {
 	case lua.LTString:
 		args.Body = []byte(argBody.(lua.LString).String())
@@ -43,7 +43,7 @@ func (h *HTTP) parseRequestArgs(luaState *lua.LState) (*requestArgs, error) {
 		return nil, fmt.Errorf("first argument must be a string")
 	}
 
-	argHeaders := luaState.Get(3)
+	argHeaders := luaState.Get(3) //nolint:mnd
 	switch argHeaders.Type() {
 	case lua.LTTable:
 		argHeaders.(*lua.LTable).ForEach(func(value lua.LValue, value2 lua.LValue) {
