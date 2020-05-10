@@ -41,7 +41,6 @@ func parseLevels(argValue string) (map[alert.Level]struct{}, error) {
 }
 
 func filter(req *http.Request, data []*alert.Alert) ([]*alert.Alert, error) {
-
 	levelsMap, err := parseLevels(req.URL.Query().Get("level"))
 	if err != nil {
 		return nil, err
