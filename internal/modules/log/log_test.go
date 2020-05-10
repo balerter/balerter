@@ -29,7 +29,6 @@ func TestLog_Loader(t *testing.T) {
 }
 
 func TestLog_levels(t *testing.T) {
-
 	core, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(core)
 	lg := &Log{
