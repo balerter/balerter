@@ -15,6 +15,7 @@ type Email struct {
 	name     string
 }
 
+// New returns the new Email instance
 func New(cfg config.ChannelEmail, logger *zap.Logger) (*Email, error) {
 	h, err := os.Hostname()
 	// Use localhost if os.Hostname() fails
@@ -24,6 +25,7 @@ func New(cfg config.ChannelEmail, logger *zap.Logger) (*Email, error) {
 	return &Email{conf: &cfg, hostname: h, logger: logger, name: cfg.Name}, nil
 }
 
+// Name returns the Email channel name
 func (e *Email) Name() string {
 	return e.name
 }

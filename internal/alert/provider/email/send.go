@@ -11,6 +11,7 @@ import (
 	mail "github.com/xhit/go-simple-mail/v2"
 )
 
+// Send implements
 func (e *Email) Send(message *message.Message) error {
 	var err error
 	server := mail.NewSMTPClient()

@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// Marshal an Alert to the byte slice
 func (a *Alert) Marshal() ([]byte, error) {
 	res := make([]byte, 0)
 
@@ -41,6 +42,7 @@ func (a *Alert) Marshal() ([]byte, error) {
 	return res, nil
 }
 
+// Unmarshal the byte slice to an Alert
 func (a *Alert) Unmarshal(src []byte) error {
 
 	// Name length

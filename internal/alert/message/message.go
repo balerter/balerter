@@ -1,5 +1,6 @@
 package message
 
+// Message represents a Message struct
 type Message struct {
 	Level     string   `json:"level"`
 	AlertName string   `json:"alert_name"`
@@ -8,6 +9,7 @@ type Message struct {
 	Image     string   `json:"image,omitempty"`
 }
 
+// New returns new Message instance
 func New(level, alertName, text string, fields []string, image string) *Message {
 	m := &Message{
 		Level:     level,

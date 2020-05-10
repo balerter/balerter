@@ -22,6 +22,7 @@ type alertChannel interface {
 	Send(*message.Message) error
 }
 
+// Manager represents the Alert manager struct
 type Manager struct {
 	logger   *zap.Logger
 	channels map[string]alertChannel
@@ -29,6 +30,7 @@ type Manager struct {
 	engine coreStorage.CoreStorage
 }
 
+// New returns new Alert manager instance
 func New(engine coreStorage.CoreStorage, logger *zap.Logger) *Manager {
 	m := &Manager{
 		logger:   logger,
@@ -39,6 +41,7 @@ func New(engine coreStorage.CoreStorage, logger *zap.Logger) *Manager {
 	return m
 }
 
+// Init the Alert manager
 func (m *Manager) Init(cfg config.Channels) error {
 	for _, cfg := range cfg.Email {
 		module, err := email.New(cfg, m.logger)
@@ -88,18 +91,22 @@ func (m *Manager) Init(cfg config.Channels) error {
 	return nil
 }
 
+// Name returns the alert manager name
 func (m *Manager) Name() string {
 	return ModuleName()
 }
 
+// Stop the alert manager
 func (m *Manager) Stop() error {
 	return nil
 }
 
+// ModuleName returns a lua module name for the alert manager
 func ModuleName() string {
 	return "alert"
 }
 
+// Methods returns the list of methods of the alert manager
 func Methods() []string {
 	return []string{
 		"warn",
@@ -115,6 +122,7 @@ func Methods() []string {
 	}
 }
 
+// GetLoader implements Modules/Module.GetLoader
 func (m *Manager) GetLoader(script *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(L *lua.LState) int {

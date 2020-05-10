@@ -5,6 +5,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Send a message
 func (m *Manager) Send(level, alertName, text string, channels []string, fields []string, image string) {
 	chs := make(map[string]alertChannel)
 
