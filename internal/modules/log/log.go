@@ -39,20 +39,19 @@ func Methods() []string {
 	}
 }
 
-func (l *Log) GetLoader(script *script.Script) lua.LGFunction {
+func (l *Log) GetLoader(s *script.Script) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		var exports = map[string]lua.LGFunction{
-			"error": l.error(script.Name),
-			"warn":  l.warn(script.Name),
-			"info":  l.info(script.Name),
-			"debug": l.debug(script.Name),
+			"error": l.error(s.Name),
+			"warn":  l.warn(s.Name),
+			"info":  l.info(s.Name),
+			"debug": l.debug(s.Name),
 		}
 
 		mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
 		luaState.Push(mod)
 		return 1
-
 	}
 }
 
