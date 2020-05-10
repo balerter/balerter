@@ -123,20 +123,20 @@ func Methods() []string {
 }
 
 // GetLoader implements Modules/Module.GetLoader
-func (m *Manager) GetLoader(script *script.Script) lua.LGFunction {
+func (m *Manager) GetLoader(s *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
-				"warn":    m.luaCall(script, alert.LevelWarn),
-				"warning": m.luaCall(script, alert.LevelWarn),
+				"warn":    m.luaCall(s, alert.LevelWarn),
+				"warning": m.luaCall(s, alert.LevelWarn),
 
-				"error": m.luaCall(script, alert.LevelError),
-				"fail":  m.luaCall(script, alert.LevelError),
+				"error": m.luaCall(s, alert.LevelError),
+				"fail":  m.luaCall(s, alert.LevelError),
 
-				"success": m.luaCall(script, alert.LevelSuccess),
-				"ok":      m.luaCall(script, alert.LevelSuccess),
+				"success": m.luaCall(s, alert.LevelSuccess),
+				"ok":      m.luaCall(s, alert.LevelSuccess),
 
-				"get": m.get(script),
+				"get": m.get(s),
 			}
 
 			mod := luaState.SetFuncs(luaState.NewTable(), exports)

@@ -24,8 +24,8 @@ func (m *alertChannelMock) Name() string {
 	return args.String(0)
 }
 
-func (m *alertChannelMock) Send(message *message.Message) error {
-	args := m.Called(message)
+func (m *alertChannelMock) Send(mes *message.Message) error {
+	args := m.Called(mes)
 	return args.Error(0)
 }
 
@@ -227,7 +227,8 @@ func TestManager_luaCall_errorGetAlertData(t *testing.T) {
 
 	v := L.Get(4).String()
 
-	assert.Equal(t, "error get arguments: wrong options format: 1 error(s) decoding:\n\n* cannot parse 'Repeat' as int: strconv.ParseInt: parsing \"wrong value\": invalid syntax", v)
+	assert.Equal(t, "error get arguments: wrong options format: 1 error(s) decoding:\n\n* cannot "+
+		"parse 'Repeat' as int: strconv.ParseInt: parsing \"wrong value\": invalid syntax", v)
 }
 
 func TestManager_luaCall_error_get_alert(t *testing.T) {
@@ -265,7 +266,6 @@ func TestManager_luaCall_change_level(t *testing.T) {
 		assert.Equal(t, "alertName", m.AlertName)
 		assert.Equal(t, "alertText1", m.Text)
 		assert.Equal(t, alert.LevelError.String(), m.Level)
-
 	}).Return(nil)
 
 	eng.AlertMock().On("GetOrNew", mock.Anything).Return(a, nil)
@@ -304,7 +304,6 @@ func TestManager_luaCall_same_level(t *testing.T) {
 		assert.Equal(t, "alertName", m.AlertName)
 		assert.Equal(t, "alertText1", m.Text)
 		assert.Equal(t, alert.LevelError.String(), m.Level)
-
 	}).Return(nil)
 
 	m := &Manager{

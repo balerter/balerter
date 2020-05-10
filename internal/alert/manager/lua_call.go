@@ -27,10 +27,10 @@ func defaultOptions() options {
 	}
 }
 
-func (m *Manager) getAlertData(luaState *lua.LState) (alertName string, alertText string, alertOptions options, err error) {
+func (m *Manager) getAlertData(luaState *lua.LState) (alertName, alertText string, alertOptions options, err error) {
 	alertOptions = defaultOptions()
 
-	alertNameLua := luaState.Get(1)
+	alertNameLua := luaState.Get(1) //nolint:mnd
 	if alertNameLua.Type() == lua.LTNil {
 		err = fmt.Errorf("alert name must be provided")
 		return
@@ -42,14 +42,14 @@ func (m *Manager) getAlertData(luaState *lua.LState) (alertName string, alertTex
 		return
 	}
 
-	alertTextLua := luaState.Get(2)
+	alertTextLua := luaState.Get(2) //nolint:mnd
 	if alertTextLua.Type() == lua.LTNil {
 		return
 	}
 
 	alertText = alertTextLua.String()
 
-	alertOptionsLua := luaState.Get(3)
+	alertOptionsLua := luaState.Get(3) //nolint:mnd
 	if alertOptionsLua.Type() == lua.LTNil {
 		return
 	}
@@ -83,7 +83,9 @@ func (m *Manager) luaCall(s *script.Script, alertLevel alert.Level) lua.LGFuncti
 			alertOptions.Channels = s.Channels
 		}
 
-		m.logger.Debug("call alert luaCall", zap.String("alertName", alertName), zap.String("scriptName", s.Name), zap.String("alertText", alertText), zap.Int("alertLevel", int(alertLevel)), zap.Any("alertOptions", alertOptions))
+		m.logger.Debug("call alert luaCall", zap.String("alertName", alertName),
+			zap.String("scriptName", s.Name), zap.String("alertText", alertText),
+			zap.Int("alertLevel", int(alertLevel)), zap.Any("alertOptions", alertOptions))
 
 		a, err := m.engine.Alert().GetOrNew(alertName)
 		if err != nil {
