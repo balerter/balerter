@@ -7,7 +7,6 @@ import (
 )
 
 func TestMarshalLua(t *testing.T) {
-
 	a := &Alert{
 		name:       "foo",
 		level:      LevelSuccess,
