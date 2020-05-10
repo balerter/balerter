@@ -23,7 +23,7 @@ type Test struct {
 	storage    map[string]modules.ModuleTest
 }
 
-func New(dsManager modulesManager, storageManager modulesManager, mods []modules.ModuleTest, logger *zap.Logger) *Test {
+func New(dsManager, storageManager modulesManager, mods []modules.ModuleTest, logger *zap.Logger) *Test {
 	t := &Test{
 		dsManager:      dsManager,
 		storageManager: storageManager,
@@ -53,7 +53,7 @@ func (t *Test) Stop() error {
 	return nil
 }
 
-func (t *Test) getStorage(s *script.Script) lua.LGFunction {
+func (t *Test) getStorage(s *script.Script) lua.LGFunction { //nolint:dupl // partially duplicated test
 	return func(luaState *lua.LState) int {
 		nameL := luaState.Get(1)
 		if nameL.Type() == lua.LTNil {
@@ -79,7 +79,7 @@ func (t *Test) getStorage(s *script.Script) lua.LGFunction {
 	}
 }
 
-func (t *Test) getDatasource(s *script.Script) lua.LGFunction {
+func (t *Test) getDatasource(s *script.Script) lua.LGFunction { //nolint:dupl // partially duplicated test
 	return func(luaState *lua.LState) int {
 		nameL := luaState.Get(1)
 		if nameL.Type() == lua.LTNil {
@@ -105,16 +105,16 @@ func (t *Test) getDatasource(s *script.Script) lua.LGFunction {
 	}
 }
 
-func (t *Test) GetLoader(script *script.Script) lua.LGFunction {
+func (t *Test) GetLoader(s *script.Script) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		var exports = map[string]lua.LGFunction{
-			"datasource": t.getDatasource(script),
-			"storage":    t.getStorage(script),
+			"datasource": t.getDatasource(s),
+			"storage":    t.getStorage(s),
 			//	"run": t.run(script.Name),
 		}
 
 		for _, mod := range t.mods {
-			exports[mod.Name()] = mod.GetLoader(script)
+			exports[mod.Name()] = mod.GetLoader(s)
 		}
 
 		mod := luaState.SetFuncs(luaState.NewTable(), exports)
@@ -123,6 +123,5 @@ func (t *Test) GetLoader(script *script.Script) lua.LGFunction {
 
 		luaState.Push(mod)
 		return 1
-
 	}
 }

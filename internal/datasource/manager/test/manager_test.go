@@ -90,7 +90,7 @@ func TestInit(t *testing.T) {
 		Loki:       []config.DataSourceLoki{{Name: "loki1"}},
 	}
 
-	err := m.Init(cfg)
+	err := m.Init(&cfg)
 	require.NoError(t, err)
 
 	assert.Equal(t, 5, len(m.modules))

@@ -89,7 +89,7 @@ func main() {
 	// datasources
 	lgr.Logger().Info("init datasources manager")
 	dsMgr := dsManagerTest.New(lgr.Logger())
-	if err := dsMgr.Init(cfg.DataSources); err != nil {
+	if err := dsMgr.Init(&cfg.DataSources); err != nil {
 		lgr.Logger().Error("error init datasources manager", zap.Error(err))
 		os.Exit(1)
 	}

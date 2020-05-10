@@ -17,9 +17,7 @@ type apiResponse struct {
 
 type queryResult struct {
 	Type model.ValueType `json:"resultType"`
-	//Result interface{}     `json:"result"`
-
-	v model.Value
+	v    model.Value
 }
 
 func (qr *queryResult) UnmarshalJSON(b []byte) error {
