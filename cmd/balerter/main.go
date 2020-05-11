@@ -90,7 +90,7 @@ func main() {
 	if *withScript != "" {
 		lgr.Logger().Info("rewrite script sources configuration", zap.String("filename", *withScript))
 		cfg.Scripts.Sources = config.ScriptsSources{
-			File: []config.ScriptSourceFile{
+			File: []*config.ScriptSourceFile{
 				{
 					Name:          "cli-script",
 					Filename:      *withScript,
