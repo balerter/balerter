@@ -25,13 +25,13 @@ type PostgresTestSuite struct {
 	ctx          context.Context
 }
 
-func (suite *PostgresTestSuite) SetupSuite() {
+func (s *PostgresTestSuite) SetupSuite() {
 	var err error
-	suite.ctx = context.Background()
+	s.ctx = context.Background()
 
 	wd, err := os.Getwd()
 	if err != nil {
-		suite.Failf("error get workdir, %s", err.Error())
+		s.Failf("error get workdir, %s", err.Error())
 		return
 	}
 
@@ -48,34 +48,34 @@ func (suite *PostgresTestSuite) SetupSuite() {
 			"POSTGRES_DB":       "db",
 		},
 	}
-	suite.postgresC, err = testcontainers.GenericContainer(suite.ctx, testcontainers.GenericContainerRequest{
+	s.postgresC, err = testcontainers.GenericContainer(s.ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
 		Started:          true,
 	})
 	if err != nil {
-		suite.T().Fatalf("error start continer, %v", err)
+		s.T().Fatalf("error start continer, %v", err)
 	}
 
-	suite.postgresIP, err = suite.postgresC.Host(suite.ctx)
+	s.postgresIP, err = s.postgresC.Host(s.ctx)
 	if err != nil {
-		suite.T().Fatalf("error get host, %v", err)
+		s.T().Fatalf("error get host, %v", err)
 		return
 	}
 
-	suite.postgresPort, err = suite.postgresC.MappedPort(suite.ctx, "5432")
+	s.postgresPort, err = s.postgresC.MappedPort(s.ctx, "5432")
 	if err != nil {
-		suite.T().Fatalf("error get port, %v", err)
+		s.T().Fatalf("error get port, %v", err)
 		return
 	}
 }
 
-func (suite *PostgresTestSuite) TearDownSuite() {
-	if err := suite.postgresC.Terminate(suite.ctx); err != nil {
-		suite.T().Fatalf("error terminate container, %v", err)
+func (s *PostgresTestSuite) TearDownSuite() {
+	if err := s.postgresC.Terminate(s.ctx); err != nil {
+		s.T().Fatalf("error terminate container, %v", err)
 	}
 }
 
-func (suite *PostgresTestSuite) TestGetData() {
+func (s *PostgresTestSuite) TestGetData() {
 	cfg := `datasources:
   postgres:
     - name: pg1
@@ -89,8 +89,8 @@ global:
   luaModulesPath: ../modules/?/init.lua
 `
 
-	cfg = strings.Replace(cfg, "{HOST}", suite.postgresIP, 1)
-	cfg = strings.Replace(cfg, "{PORT}", suite.postgresPort.Port(), 1)
+	cfg = strings.Replace(cfg, "{HOST}", s.postgresIP, 1)
+	cfg = strings.Replace(cfg, "{PORT}", s.postgresPort.Port(), 1)
 
 	cmd := exec.Command("./balerter", "-config=stdin", "-once", "-script=./assets/postgres/script.lua")
 
@@ -120,6 +120,6 @@ global:
 
 `
 
-	require.NoError(suite.T(), err)
-	assert.Equal(suite.T(), expectedOut, bufOut.String())
+	require.NoError(s.T(), err)
+	assert.Equal(s.T(), expectedOut, bufOut.String())
 }

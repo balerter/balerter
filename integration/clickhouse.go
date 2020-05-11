@@ -27,13 +27,13 @@ type ClickhouseTestSuite struct {
 	ctx       context.Context
 }
 
-func (suite *ClickhouseTestSuite) SetupSuite() {
+func (s *ClickhouseTestSuite) SetupSuite() {
 	var err error
-	suite.ctx = context.Background()
+	s.ctx = context.Background()
 
 	wd, err := os.Getwd()
 	if err != nil {
-		suite.Failf("error get workdir, %s", err.Error())
+		s.Failf("error get workdir, %s", err.Error())
 		return
 	}
 
@@ -46,34 +46,34 @@ func (suite *ClickhouseTestSuite) SetupSuite() {
 			path.Join(wd, "assets/clickhouse/data.sql"): "/docker-entrypoint-initdb.d/data.sql",
 		},
 	}
-	suite.container, err = testcontainers.GenericContainer(suite.ctx, testcontainers.GenericContainerRequest{
+	s.container, err = testcontainers.GenericContainer(s.ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
 		Started:          true,
 	})
 	if err != nil {
-		suite.T().Fatalf("error start continer, %v", err)
+		s.T().Fatalf("error start continer, %v", err)
 	}
 
-	suite.IP, err = suite.container.Host(suite.ctx)
+	s.IP, err = s.container.Host(s.ctx)
 	if err != nil {
-		suite.T().Fatalf("error get host, %v", err)
+		s.T().Fatalf("error get host, %v", err)
 		return
 	}
 
-	suite.Port, err = suite.container.MappedPort(suite.ctx, "9000")
+	s.Port, err = s.container.MappedPort(s.ctx, "9000")
 	if err != nil {
-		suite.T().Fatalf("error get port, %v", err)
+		s.T().Fatalf("error get port, %v", err)
 		return
 	}
 }
 
-func (suite *ClickhouseTestSuite) TearDownSuite() {
-	if err := suite.container.Terminate(suite.ctx); err != nil {
-		suite.T().Fatalf("error terminate container, %v", err)
+func (s *ClickhouseTestSuite) TearDownSuite() {
+	if err := s.container.Terminate(s.ctx); err != nil {
+		s.T().Fatalf("error terminate container, %v", err)
 	}
 }
 
-func (suite *ClickhouseTestSuite) TestGetData() {
+func (s *ClickhouseTestSuite) TestGetData() {
 	cfg := `datasources:
   clickhouse:
     - name: ch1
@@ -86,8 +86,8 @@ global:
   luaModulesPath: ../modules/?/init.lua
 `
 
-	cfg = strings.Replace(cfg, "{HOST}", suite.IP, 1)
-	cfg = strings.Replace(cfg, "{PORT}", suite.Port.Port(), 1)
+	cfg = strings.Replace(cfg, "{HOST}", s.IP, 1)
+	cfg = strings.Replace(cfg, "{PORT}", s.Port.Port(), 1)
 
 	cmd := exec.Command("./balerter", "-config=stdin", "-once", "-script=./assets/clickhouse/script.lua")
 
@@ -120,6 +120,6 @@ global:
 
 `
 
-	require.NoError(suite.T(), err)
-	assert.Equal(suite.T(), expectedOut, bufOut.String())
+	require.NoError(s.T(), err)
+	assert.Equal(s.T(), expectedOut, bufOut.String())
 }
