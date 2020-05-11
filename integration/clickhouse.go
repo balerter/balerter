@@ -95,8 +95,10 @@ global:
 	cmd.Stdout = bufOut
 	cmd.Stdin = bytes.NewBuffer([]byte(cfg))
 
-	log.Printf("sleep 5")
-	time.Sleep(time.Second * 5) // nolint:gocritic // empirically defined value
+	var dataTimeout = time.Second * 5
+
+	log.Printf("sleep %v", dataTimeout)
+	time.Sleep(dataTimeout)
 
 	err := cmd.Run()
 

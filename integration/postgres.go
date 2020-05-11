@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"github.com/docker/go-connections/nat"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // DB driver
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
