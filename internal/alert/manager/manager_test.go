@@ -22,7 +22,7 @@ func TestManager_Init(t *testing.T) {
 		Notify:   []config.ChannelNotify{{Name: "n1"}},
 	}
 
-	err := m.Init(cfg)
+	err := m.Init(&cfg)
 	require.NoError(t, err)
 	require.Equal(t, 5, len(m.channels))
 

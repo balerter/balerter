@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"github.com/docker/go-connections/nat"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // DB driver
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -74,7 +74,6 @@ func (suite *ClickhouseTestSuite) TearDownSuite() {
 }
 
 func (suite *ClickhouseTestSuite) TestGetData() {
-
 	cfg := `datasources:
   clickhouse:
     - name: ch1
@@ -97,7 +96,7 @@ global:
 	cmd.Stdin = bytes.NewBuffer([]byte(cfg))
 
 	log.Printf("sleep 5")
-	time.Sleep(time.Second * 5)
+	time.Sleep(time.Second * 5) // nolint:gocritic // empirically defined value
 
 	err := cmd.Run()
 

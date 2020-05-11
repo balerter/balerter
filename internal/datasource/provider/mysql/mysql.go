@@ -31,7 +31,7 @@ type MySQL struct {
 	timeout time.Duration
 }
 
-func New(cfg config.DataSourceMysql, logger *zap.Logger) (*MySQL, error) {
+func New(cfg *config.DataSourceMysql, logger *zap.Logger) (*MySQL, error) {
 	p := &MySQL{
 		name:    ModuleName(cfg.Name),
 		logger:  logger,

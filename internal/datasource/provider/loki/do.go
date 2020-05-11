@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	lokihttp "github.com/grafana/loki/pkg/loghttp"
 	"go.uber.org/zap"
 	"io/ioutil"
@@ -65,7 +66,7 @@ func (m *Loki) sendQuery(query string, opts *queryOptions) (*lokihttp.QueryRespo
 	return m.send(&u)
 }
 
-func (m *Loki) send(u *url.URL) (*lokihttp.QueryResponse, error) {
+func (m *Loki) send(u fmt.Stringer) (*lokihttp.QueryResponse, error) {
 	m.logger.Debug("request to loki", zap.String("url", u.String()))
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)

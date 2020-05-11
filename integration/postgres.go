@@ -76,7 +76,6 @@ func (suite *PostgresTestSuite) TearDownSuite() {
 }
 
 func (suite *PostgresTestSuite) TestGetData() {
-
 	cfg := `datasources:
   postgres:
     - name: pg1

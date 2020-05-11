@@ -7,12 +7,12 @@ import (
 	"strings"
 )
 
-func (m *Loki) doQuery(luaState *lua.LState) int {
+func (m *Loki) doQuery(luaState *lua.LState) int { //nolint:dupl // some code duplicated with doRange
 	query := strings.TrimSpace(luaState.Get(1).String())
 	if query == "" {
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("query must be not empty"))
-		return 2
+		return 2 //nolint:mnd
 	}
 
 	queryOptions, err := m.parseQueryOptions(luaState)
@@ -20,7 +20,7 @@ func (m *Loki) doQuery(luaState *lua.LState) int {
 		m.logger.Error("error parse query options", zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error parse query options"))
-		return 2
+		return 2 //nolint:mnd
 	}
 
 	m.logger.Debug("call loki query", zap.String("name", m.name), zap.String("query", query), zap.Any("options", queryOptions))
@@ -30,7 +30,7 @@ func (m *Loki) doQuery(luaState *lua.LState) int {
 		m.logger.Error("error send query to loki", zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error send query to loki: " + err.Error()))
-		return 2
+		return 2 //nolint:mnd
 	}
 
 	switch v.Data.Result.Type() {
@@ -62,20 +62,20 @@ func (m *Loki) doQuery(luaState *lua.LState) int {
 		m.logger.Error("query error: unexpected loki model type")
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("query error: unexpected loki model type"))
-		return 2
+		return 2 //nolint:mnd
 	}
 
 	luaState.Push(lua.LNil)
 
-	return 2
+	return 2 //nolint:mnd
 }
 
-func (m *Loki) doRange(luaState *lua.LState) int {
+func (m *Loki) doRange(luaState *lua.LState) int { //nolint:dupl // some code duplicated with doQuery
 	query := strings.TrimSpace(luaState.Get(1).String())
 	if query == "" {
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("query must be not empty"))
-		return 2
+		return 2 //nolint:mnd
 	}
 
 	rangeOptions, err := m.parseRangeOptions(luaState)
@@ -83,7 +83,7 @@ func (m *Loki) doRange(luaState *lua.LState) int {
 		m.logger.Error("error parse range options", zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error parse range options"))
-		return 2
+		return 2 //nolint:mnd
 	}
 
 	m.logger.Debug("call loki query range", zap.String("name", m.name), zap.String("query", query), zap.Any("options", rangeOptions))
@@ -93,7 +93,7 @@ func (m *Loki) doRange(luaState *lua.LState) int {
 		m.logger.Error("error send query to loki", zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error send query to loki: " + err.Error()))
-		return 2
+		return 2 //nolint:mnd
 	}
 
 	switch v.Data.Result.Type() {
@@ -125,10 +125,10 @@ func (m *Loki) doRange(luaState *lua.LState) int {
 		m.logger.Error("query error: unexpected loki model type")
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("query error: unexpected loki model type"))
-		return 2
+		return 2 //nolint:mnd
 	}
 
 	luaState.Push(lua.LNil)
 
-	return 2
+	return 2 //nolint:mnd
 }

@@ -21,7 +21,7 @@ type API struct {
 	httpClient *http.Client
 }
 
-func New(cfg config.ChannelTelegram) (*API, error) {
+func New(cfg *config.ChannelTelegram) (*API, error) {
 	a := &API{
 		endpoint: apiEndpoint + cfg.Token + "/",
 	}

@@ -2,7 +2,7 @@ package memory
 
 import "fmt"
 
-func (m *storageKV) Put(name string, val string) error {
+func (m *storageKV) Put(name, val string) error {
 	m.mxKV.Lock()
 	defer m.mxKV.Unlock()
 
@@ -15,7 +15,7 @@ func (m *storageKV) Put(name string, val string) error {
 	return nil
 }
 
-func (m *storageKV) Upsert(name string, val string) error {
+func (m *storageKV) Upsert(name, val string) error {
 	m.mxKV.Lock()
 	defer m.mxKV.Unlock()
 

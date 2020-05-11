@@ -11,7 +11,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	l, err := New(config.DataSourceLoki{
+	l, err := New(&config.DataSourceLoki{
 		Name: "foo",
 		URL:  "http://domain.com",
 		BasicAuth: config.BasicAuth{
@@ -29,7 +29,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestNewDefaultTimeout(t *testing.T) {
-	l, err := New(config.DataSourceLoki{}, zap.NewNop())
+	l, err := New(&config.DataSourceLoki{}, zap.NewNop())
 
 	require.NoError(t, err)
 	assert.IsType(t, &Loki{}, l)
@@ -37,7 +37,7 @@ func TestNewDefaultTimeout(t *testing.T) {
 }
 
 func TestNewWrongURL(t *testing.T) {
-	_, err := New(config.DataSourceLoki{URL: "foobar\ncom"}, zap.NewNop())
+	_, err := New(&config.DataSourceLoki{URL: "foobar\ncom"}, zap.NewNop())
 	require.Error(t, err)
 	require.Equal(t, "parse \"foobar\\ncom\": net/url: invalid control character in URL", err.Error())
 }

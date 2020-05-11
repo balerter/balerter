@@ -26,40 +26,40 @@ func New(logger *zap.Logger) *Manager {
 }
 
 func (m *Manager) Init(cfg *config.DataSources) error {
-	for _, clickhouseCfg := range cfg.Clickhouse {
-		module, err := clickhouse.New(&clickhouseCfg, m.logger)
+	for idx := range cfg.Clickhouse {
+		module, err := clickhouse.New(&cfg.Clickhouse[idx], m.logger)
 		if err != nil {
 			return err
 		}
 		m.modules[module.Name()] = module
 	}
 
-	for _, prometheusCfg := range cfg.Prometheus {
-		module, err := prometheus.New(prometheusCfg, m.logger)
+	for idx := range cfg.Prometheus {
+		module, err := prometheus.New(&cfg.Prometheus[idx], m.logger)
 		if err != nil {
 			return err
 		}
 		m.modules[module.Name()] = module
 	}
 
-	for _, postgresCfg := range cfg.Postgres {
-		module, err := postgres.New(postgresCfg, m.logger)
+	for idx := range cfg.Postgres {
+		module, err := postgres.New(&cfg.Postgres[idx], m.logger)
 		if err != nil {
 			return err
 		}
 		m.modules[module.Name()] = module
 	}
 
-	for _, c := range cfg.MySQL {
-		module, err := mysql.New(c, m.logger)
+	for idx := range cfg.MySQL {
+		module, err := mysql.New(&cfg.MySQL[idx], m.logger)
 		if err != nil {
 			return err
 		}
 		m.modules[module.Name()] = module
 	}
 
-	for _, c := range cfg.Loki {
-		module, err := loki.New(c, m.logger)
+	for idx := range cfg.Loki {
+		module, err := loki.New(&cfg.Loki[idx], m.logger)
 		if err != nil {
 			return err
 		}

@@ -12,7 +12,7 @@ import (
 )
 
 // Send implements
-func (e *Email) Send(message *message.Message) error {
+func (e *Email) Send(mes *message.Message) error {
 	var err error
 	server := mail.NewSMTPClient()
 
@@ -50,7 +50,7 @@ func (e *Email) Send(message *message.Message) error {
 
 	email := mail.NewMSG()
 	to := strings.Split(e.conf.To, ";")
-	subject := fmt.Sprintf("[%s/%s] %s", message.AlertName, message.Level, strings.Join(message.Fields, ","))
+	subject := fmt.Sprintf("[%s/%s] %s", mes.AlertName, mes.Level, strings.Join(mes.Fields, ","))
 	email.SetFrom(e.conf.From).AddTo(to...).SetSubject(subject)
 
 	if len(e.conf.Cc) > 0 {
@@ -58,11 +58,11 @@ func (e *Email) Send(message *message.Message) error {
 		email.AddCc(cc...)
 	}
 
-	email.SetBody(mail.TextHTML, message.Text)
+	email.SetBody(mail.TextHTML, mes.Text)
 
-	if len(message.Image) > 0 {
-		img := base64.StdEncoding.EncodeToString([]byte(message.Image))
-		email.AddAttachmentBase64(img, message.AlertName+".png")
+	if len(mes.Image) > 0 {
+		img := base64.StdEncoding.EncodeToString([]byte(mes.Image))
+		email.AddAttachmentBase64(img, mes.AlertName+".png")
 	}
 
 	return email.Send(smtpClient)

@@ -35,7 +35,7 @@ type Prometheus struct {
 	timeout           time.Duration
 }
 
-func New(cfg config.DataSourcePrometheus, logger *zap.Logger) (*Prometheus, error) {
+func New(cfg *config.DataSourcePrometheus, logger *zap.Logger) (*Prometheus, error) {
 	m := &Prometheus{
 		logger:            logger,
 		name:              ModuleName(cfg.Name),

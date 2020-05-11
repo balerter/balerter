@@ -143,7 +143,7 @@ func main() {
 		os.Exit(1)
 	}
 	alertMgr := alertManager.New(alertManagerStorageEngine, lgr.Logger())
-	if err = alertMgr.Init(cfg.Channels); err != nil {
+	if err = alertMgr.Init(&cfg.Channels); err != nil {
 		lgr.Logger().Error("error init alert manager", zap.Error(err))
 		os.Exit(1)
 	}
@@ -153,9 +153,9 @@ func main() {
 		alertMgr.Send("", "", "Balerter Start", cfg.Global.SendStartNotification, nil, "")
 	}
 
-	for _, v := range cfg.Channels.Email {
-		if v.Port == "465" && v.Secure == "" {
-			lgr.Logger().Info("secure port 465 with ssl for email channel " + v.Name)
+	for idx := range cfg.Channels.Email {
+		if cfg.Channels.Email[idx].Port == "465" && cfg.Channels.Email[idx].Secure == "" {
+			lgr.Logger().Info("secure port 465 with ssl for email channel " + cfg.Channels.Email[idx].Name)
 		}
 	}
 
