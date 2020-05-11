@@ -35,8 +35,8 @@ func (m *ModuleMock) Name() string {
 	return args.String(0)
 }
 
-func (m *ModuleMock) GetLoader(script *script.Script) lua.LGFunction {
-	args := m.Called(script)
+func (m *ModuleMock) GetLoader(s *script.Script) lua.LGFunction {
+	args := m.Called(s)
 	return args.Get(0).(lua.LGFunction)
 }
 
