@@ -4,7 +4,7 @@ import "testing"
 
 func TestStoragesCore_Validate(t *testing.T) {
 	type fields struct {
-		File []StorageCoreFile
+		File []*StorageCoreFile
 	}
 	tests := []struct {
 		name    string
@@ -15,7 +15,7 @@ func TestStoragesCore_Validate(t *testing.T) {
 		{
 			name: "duplicated file",
 			fields: fields{
-				File: []StorageCoreFile{{Name: "a", Path: "a"}, {Name: "a", Path: "a"}},
+				File: []*StorageCoreFile{{Name: "a", Path: "a"}, {Name: "a", Path: "a"}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for core storages 'file': a",
@@ -23,7 +23,7 @@ func TestStoragesCore_Validate(t *testing.T) {
 		{
 			name: "ok",
 			fields: fields{
-				File: []StorageCoreFile{{Name: "a", Path: "a"}, {Name: "a2", Path: "a"}},
+				File: []*StorageCoreFile{{Name: "a", Path: "a"}, {Name: "a2", Path: "a"}},
 			},
 			wantErr: false,
 			errText: "",

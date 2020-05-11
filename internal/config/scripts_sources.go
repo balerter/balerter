@@ -3,8 +3,8 @@ package config
 import "fmt"
 
 type ScriptsSources struct {
-	Folder []ScriptSourceFolder `json:"folder" yaml:"folder"`
-	File   []ScriptSourceFile   `json:"file" yaml:"file"`
+	Folder []*ScriptSourceFolder `json:"folder" yaml:"folder"`
+	File   []*ScriptSourceFile   `json:"file" yaml:"file"`
 }
 
 func (cfg ScriptsSources) Validate() error {

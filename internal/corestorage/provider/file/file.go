@@ -42,7 +42,7 @@ func (s *Storage) Alert() coreStorage.Alert {
 	return s.alert
 }
 
-func New(cfg config.StorageCoreFile, logger *zap.Logger) (*Storage, error) {
+func New(cfg *config.StorageCoreFile, logger *zap.Logger) (*Storage, error) {
 	s := &Storage{
 		name:   "file." + cfg.Name,
 		logger: logger,

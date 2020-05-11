@@ -27,7 +27,7 @@ func New(logger *zap.Logger) *Manager {
 
 func (m *Manager) Init(cfg *config.DataSources) error {
 	for idx := range cfg.Clickhouse {
-		module, err := clickhouse.New(&cfg.Clickhouse[idx], m.logger)
+		module, err := clickhouse.New(cfg.Clickhouse[idx], m.logger)
 		if err != nil {
 			return err
 		}
@@ -35,7 +35,7 @@ func (m *Manager) Init(cfg *config.DataSources) error {
 	}
 
 	for idx := range cfg.Prometheus {
-		module, err := prometheus.New(&cfg.Prometheus[idx], m.logger)
+		module, err := prometheus.New(cfg.Prometheus[idx], m.logger)
 		if err != nil {
 			return err
 		}
@@ -43,7 +43,7 @@ func (m *Manager) Init(cfg *config.DataSources) error {
 	}
 
 	for idx := range cfg.Postgres {
-		module, err := postgres.New(&cfg.Postgres[idx], m.logger)
+		module, err := postgres.New(cfg.Postgres[idx], m.logger)
 		if err != nil {
 			return err
 		}
@@ -51,7 +51,7 @@ func (m *Manager) Init(cfg *config.DataSources) error {
 	}
 
 	for idx := range cfg.MySQL {
-		module, err := mysql.New(&cfg.MySQL[idx], m.logger)
+		module, err := mysql.New(cfg.MySQL[idx], m.logger)
 		if err != nil {
 			return err
 		}
@@ -59,7 +59,7 @@ func (m *Manager) Init(cfg *config.DataSources) error {
 	}
 
 	for idx := range cfg.Loki {
-		module, err := loki.New(&cfg.Loki[idx], m.logger)
+		module, err := loki.New(cfg.Loki[idx], m.logger)
 		if err != nil {
 			return err
 		}

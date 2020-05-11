@@ -15,7 +15,7 @@ type Provider struct {
 	mask string
 }
 
-func New(cfg config.ScriptSourceFolder) *Provider {
+func New(cfg *config.ScriptSourceFolder) *Provider {
 	p := &Provider{
 		path: cfg.Path,
 		mask: cfg.Mask,

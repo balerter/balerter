@@ -4,7 +4,7 @@ import "testing"
 
 func TestScriptsSources_Validate(t *testing.T) {
 	type fields struct {
-		Folder []ScriptSourceFolder
+		Folder []*ScriptSourceFolder
 	}
 	tests := []struct {
 		name    string
@@ -15,7 +15,7 @@ func TestScriptsSources_Validate(t *testing.T) {
 		{
 			name: "empty name",
 			fields: fields{
-				Folder: []ScriptSourceFolder{{Name: "", Path: "", Mask: ""}},
+				Folder: []*ScriptSourceFolder{{Name: "", Path: "", Mask: ""}},
 			},
 			wantErr: true,
 			errText: "name must be not empty",
@@ -23,7 +23,7 @@ func TestScriptsSources_Validate(t *testing.T) {
 		{
 			name: "empty path",
 			fields: fields{
-				Folder: []ScriptSourceFolder{{Name: "n1", Path: "", Mask: ""}},
+				Folder: []*ScriptSourceFolder{{Name: "n1", Path: "", Mask: ""}},
 			},
 			wantErr: true,
 			errText: "path must be not empty",
@@ -31,7 +31,7 @@ func TestScriptsSources_Validate(t *testing.T) {
 		{
 			name: "duplicated names",
 			fields: fields{
-				Folder: []ScriptSourceFolder{
+				Folder: []*ScriptSourceFolder{
 					{Name: "n1", Path: ".", Mask: ""},
 					{Name: "n1", Path: ".", Mask: ""},
 				},
@@ -42,7 +42,7 @@ func TestScriptsSources_Validate(t *testing.T) {
 		{
 			name: "ok",
 			fields: fields{
-				Folder: []ScriptSourceFolder{
+				Folder: []*ScriptSourceFolder{
 					{Name: "n1", Path: ".", Mask: ""},
 					{Name: "n2", Path: ".", Mask: ""},
 				},

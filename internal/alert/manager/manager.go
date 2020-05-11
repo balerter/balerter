@@ -44,7 +44,7 @@ func New(engine coreStorage.CoreStorage, logger *zap.Logger) *Manager {
 // Init the Alert manager
 func (m *Manager) Init(cfg *config.Channels) error {
 	for idx := range cfg.Email {
-		module, err := email.New(&cfg.Email[idx], m.logger)
+		module, err := email.New(cfg.Email[idx], m.logger)
 		if err != nil {
 			return fmt.Errorf("error init email channel %s, %w", cfg.Email[idx].Name, err)
 		}
@@ -53,7 +53,7 @@ func (m *Manager) Init(cfg *config.Channels) error {
 	}
 
 	for idx := range cfg.Slack {
-		module, err := slack.New(&cfg.Slack[idx], m.logger)
+		module, err := slack.New(cfg.Slack[idx], m.logger)
 		if err != nil {
 			return fmt.Errorf("error init slack channel %s, %w", cfg.Slack[idx].Name, err)
 		}
@@ -62,7 +62,7 @@ func (m *Manager) Init(cfg *config.Channels) error {
 	}
 
 	for idx := range cfg.Telegram {
-		module, err := telegram.New(&cfg.Telegram[idx], m.logger)
+		module, err := telegram.New(cfg.Telegram[idx], m.logger)
 		if err != nil {
 			return fmt.Errorf("error init telegram channel %s, %w", cfg.Telegram[idx].Name, err)
 		}
@@ -71,7 +71,7 @@ func (m *Manager) Init(cfg *config.Channels) error {
 	}
 
 	for idx := range cfg.Syslog {
-		module, err := syslog.New(&cfg.Syslog[idx], m.logger)
+		module, err := syslog.New(cfg.Syslog[idx], m.logger)
 		if err != nil {
 			return fmt.Errorf("error init syslog channel %s, %w", cfg.Syslog[idx].Name, err)
 		}
@@ -80,7 +80,7 @@ func (m *Manager) Init(cfg *config.Channels) error {
 	}
 
 	for idx := range cfg.Notify {
-		module, err := notify.New(&cfg.Notify[idx], m.logger)
+		module, err := notify.New(cfg.Notify[idx], m.logger)
 		if err != nil {
 			return fmt.Errorf("error init syslog channel %s, %w", cfg.Notify[idx].Name, err)
 		}

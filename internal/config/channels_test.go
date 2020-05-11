@@ -4,11 +4,11 @@ import "testing"
 
 func TestChannels_Validate(t *testing.T) {
 	type fields struct {
-		Email    []ChannelEmail
-		Slack    []ChannelSlack
-		Telegram []ChannelTelegram
-		Syslog   []ChannelSyslog
-		Notify   []ChannelNotify
+		Email    []*ChannelEmail
+		Slack    []*ChannelSlack
+		Telegram []*ChannelTelegram
+		Syslog   []*ChannelSyslog
+		Notify   []*ChannelNotify
 	}
 	tests := []struct {
 		name    string
@@ -19,7 +19,7 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated email",
 			fields: fields{
-				Email: []ChannelEmail{{Name: "foo", From: "gopher@example.net", To: "foo@example.com",
+				Email: []*ChannelEmail{{Name: "foo", From: "gopher@example.net", To: "foo@example.com",
 					Host: "mail.example.com", Port: "25"}, {Name: "foo", From: "gopher@example.net",
 					To: "foo@example.com", Host: "mail.example.com", Port: "25"}},
 			},
@@ -29,7 +29,7 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated slack",
 			fields: fields{
-				Slack: []ChannelSlack{{Name: "foo", Token: "a", Channel: "a"}, {Name: "foo", Token: "a", Channel: "a"}},
+				Slack: []*ChannelSlack{{Name: "foo", Token: "a", Channel: "a"}, {Name: "foo", Token: "a", Channel: "a"}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for channels 'slack': foo",
@@ -37,7 +37,7 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated telegram",
 			fields: fields{
-				Telegram: []ChannelTelegram{{Name: "foo", Token: "a", ChatID: 1}, {Name: "foo", Token: "a", ChatID: 1}},
+				Telegram: []*ChannelTelegram{{Name: "foo", Token: "a", ChatID: 1}, {Name: "foo", Token: "a", ChatID: 1}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for channels 'telegram': foo",
@@ -45,7 +45,7 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated syslog",
 			fields: fields{
-				Syslog: []ChannelSyslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"},
+				Syslog: []*ChannelSyslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"},
 					{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"}},
 			},
 			wantErr: true,
@@ -54,7 +54,7 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated syslog",
 			fields: fields{
-				Notify: []ChannelNotify{{Name: "foo"}, {Name: "foo"}},
+				Notify: []*ChannelNotify{{Name: "foo"}, {Name: "foo"}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for channels 'notify': foo",
@@ -62,16 +62,16 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "ok",
 			fields: fields{
-				Email: []ChannelEmail{{Name: "foo", From: "gopher@example.net", To: "foo@example.com",
+				Email: []*ChannelEmail{{Name: "foo", From: "gopher@example.net", To: "foo@example.com",
 					Host: "mail.example.com", Port: "25"},
 					{Name: "foo2", From: "gopher@example.net", To: "foo@example.com", Host: "mail.example.com", Port: "25"}},
-				Slack: []ChannelSlack{{Name: "foo", Token: "a", Channel: "a"},
+				Slack: []*ChannelSlack{{Name: "foo", Token: "a", Channel: "a"},
 					{Name: "foo2", Token: "a", Channel: "a"}},
-				Telegram: []ChannelTelegram{{Name: "foo", Token: "a", ChatID: 1},
+				Telegram: []*ChannelTelegram{{Name: "foo", Token: "a", ChatID: 1},
 					{Name: "foo2", Token: "a", ChatID: 1}},
-				Syslog: []ChannelSyslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"},
+				Syslog: []*ChannelSyslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"},
 					{Name: "foo2", Network: "tcp", Address: "a", Priority: "EMERG"}},
-				Notify: []ChannelNotify{{Name: "foo"}, {Name: "foo2"}},
+				Notify: []*ChannelNotify{{Name: "foo"}, {Name: "foo2"}},
 			},
 			wantErr: false,
 			errText: "",
