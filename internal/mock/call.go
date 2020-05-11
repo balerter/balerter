@@ -8,7 +8,6 @@ import (
 
 func (m *ModuleMock) call(method string) lua.LGFunction {
 	return func(luaState *lua.LState) int {
-
 		var args []lua.LValue
 
 		for i := 0; i < luaState.GetTop(); i++ {

@@ -33,13 +33,13 @@ func (m *registryMock) AddAssert(method string, args []lua.LValue, called bool) 
 	return ar.Error(0)
 }
 
-func (m *registryMock) Register(AnyValue, method string, callArgs, retArgs []lua.LValue) error {
-	args := m.Called(AnyValue, method, callArgs, retArgs)
+func (m *registryMock) Register(anyValue, method string, callArgs, retArgs []lua.LValue) error {
+	args := m.Called(anyValue, method, callArgs, retArgs)
 	return args.Error(0)
 }
 
-func (m *registryMock) Response(AnyValue, method string, args []lua.LValue) ([]lua.LValue, error) {
-	ar := m.Called(AnyValue, method, args)
+func (m *registryMock) Response(anyValue, method string, args []lua.LValue) ([]lua.LValue, error) {
+	ar := m.Called(anyValue, method, args)
 	return ar.Get(0).([]lua.LValue), ar.Error(1)
 }
 
@@ -106,9 +106,6 @@ func TestOn_first_arg_is_empty(t *testing.T) {
 }
 
 func TestOn(t *testing.T) {
-
-	// Testing: mock.on("foo", 42).response("bar", 50)
-
 	core, _ := observer.New(zap.DebugLevel)
 	logger := zap.New(core)
 
@@ -142,9 +139,6 @@ func TestOn(t *testing.T) {
 }
 
 func TestOn_FailRegister(t *testing.T) {
-
-	// Testing: mock.on("foo", 42).response("bar", 50)
-
 	core, _ := observer.New(zap.DebugLevel)
 	logger := zap.New(core)
 
