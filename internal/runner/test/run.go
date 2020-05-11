@@ -62,88 +62,94 @@ func (rnr *Runner) Run() ([]modules.TestResult, bool, error) {
 	}
 
 	for name, pair := range pairs {
-		rnr.logger.Debug("run test", zap.String("name", name))
-
-		// run test file
-		LTest := rnr.createLuaState(pair.test)
-		err := LTest.DoString(string(pair.test.Body))
+		scriptResult, err := rnr.runPair(result, name, pair)
 		if err != nil {
-			LTest.Close()
-			return nil, false, fmt.Errorf("error select tests, %w", err)
+			return nil, false, err
 		}
+
+		if !scriptResult.Ok {
+			ok = false
+		}
+
+		result = append(result, *scriptResult)
+	}
+
+	return result, ok, nil
+}
+
+func (rnr *Runner) runPair(result []modules.TestResult, name string, pair pair) (*modules.TestResult, error) {
+	rnr.logger.Debug("run test", zap.String("name", name))
+
+	// run test file
+	LTest := rnr.createLuaState(pair.test)
+	err := LTest.DoString(string(pair.test.Body))
+	if err != nil {
 		LTest.Close()
+		return nil, fmt.Errorf("error select tests, %w", err)
+	}
+	LTest.Close()
 
-		// run main file
-		LMain := rnr.createLuaState(pair.main)
-		err = LMain.DoString(string(pair.main.Body))
-		if err != nil {
-			LMain.Close()
-			return nil, false, fmt.Errorf("error run main job, %w", err)
-		}
+	// run main file
+	LMain := rnr.createLuaState(pair.main)
+	err = LMain.DoString(string(pair.main.Body))
+	if err != nil {
 		LMain.Close()
+		return nil, fmt.Errorf("error run main job, %w", err)
+	}
+	LMain.Close()
 
-		// collect datasources results
-		results, err := rnr.dsManager.Result()
+	// collect datasources results
+	results, err := rnr.dsManager.Result()
+	if err != nil {
+		return nil, fmt.Errorf("error get results from datasource manager, %w", err)
+	}
+	for _, r := range results {
+		r.ScriptName = pair.test.Name
+		result = append(result, r)
+	}
+	rnr.dsManager.Clean()
+
+	// collect storages results
+	results, err = rnr.storagesManager.Result()
+	if err != nil {
+		return nil, fmt.Errorf("error get results from storage manager, %w", err)
+	}
+	for _, r := range results {
+		r.ScriptName = pair.test.Name
+		result = append(result, r)
+	}
+	rnr.storagesManager.Clean()
+
+	// collect errors from coreModules
+	for _, mod := range rnr.coreModules {
+		results, err = mod.Result()
 		if err != nil {
-			return nil, false, fmt.Errorf("error get results from datasource manager, %w", err)
+			return nil, fmt.Errorf("error get results from '%s' module, %w", mod.Name(), err)
 		}
 		for _, r := range results {
 			r.ScriptName = pair.test.Name
 			result = append(result, r)
 		}
-		rnr.dsManager.Clean()
+		mod.Clean()
+	}
 
-		// collect storages results
-		results, err = rnr.storagesManager.Result()
-		if err != nil {
-			return nil, false, fmt.Errorf("error get results from storage manager, %w", err)
-		}
-		for _, r := range results {
-			r.ScriptName = pair.test.Name
-			result = append(result, r)
-		}
-		rnr.storagesManager.Clean()
-
-		// collect errors from coreModules
-		for _, mod := range rnr.coreModules {
-			results, err = mod.Result()
-			if err != nil {
-				return nil, false, fmt.Errorf("error get results from '%s' module, %w", mod.Name(), err)
-			}
-			for _, r := range results {
-				r.ScriptName = pair.test.Name
-				result = append(result, r)
-			}
-			mod.Clean()
-		}
-
-		// total script result
-		scriptResult := modules.TestResult{
-			ScriptName: pair.test.Name,
-			ModuleName: "result",
-			Message:    "PASS",
-			Ok:         true,
-		}
-
-		for _, r := range result {
-			if !r.Ok {
-				scriptResult.Ok = false
-				scriptResult.Message = "FAIL"
-				break
-			}
-		}
-
-		result = append(result, scriptResult)
+	// total script result
+	scriptResult := &modules.TestResult{
+		ScriptName: pair.test.Name,
+		ModuleName: "result",
+		Message:    "PASS",
+		Ok:         true,
 	}
 
 	for _, r := range result {
 		if !r.Ok {
-			ok = false
+			scriptResult.Ok = false
+			scriptResult.Message = "FAIL"
 			break
 		}
 	}
 
-	return result, ok, nil
+	return scriptResult, nil
 }
 
 func (rnr *Runner) createLuaState(s *script.Script) *lua.LState {
