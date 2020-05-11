@@ -7,11 +7,11 @@ import (
 )
 
 // HandlerIndex handle API request GET /api/v1/kv
-func HandlerIndex(coreStorage coreStorage.CoreStorage, logger *zap.Logger) http.HandlerFunc {
+func HandlerIndex(storage coreStorage.CoreStorage, logger *zap.Logger) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		var err error
 
-		data, err := coreStorage.KV().All()
+		data, err := storage.KV().All()
 		if err != nil {
 			logger.Error("error get kv data", zap.Error(err))
 			rw.Header().Add("X-Error", err.Error())
