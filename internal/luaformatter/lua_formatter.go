@@ -15,10 +15,14 @@ var (
 	ErrUnexpectedDuplicatedKey = errors.New("unexpected duplicated key")
 )
 
+const (
+	errorMarshalingString = "__ERROR_MARSHALING__"
+)
+
 func ValuesToStringNoErr(values []lua.LValue) string {
 	v, err := ValuesToString(values)
 	if err != nil {
-		return "__ERROR_MARSHALING__"
+		return errorMarshalingString
 	}
 
 	return v
@@ -27,7 +31,7 @@ func ValuesToStringNoErr(values []lua.LValue) string {
 func ValueToStringNoErr(value lua.LValue) string {
 	v, err := ValueToString(value)
 	if err != nil {
-		return "__ERROR_MARSHALING__"
+		return errorMarshalingString
 	}
 
 	return v
