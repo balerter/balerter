@@ -1,12 +1,11 @@
 package folder
 
 import (
-	"io/ioutil"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/script/provider"
 	"github.com/balerter/balerter/internal/script/script"
 )
 
@@ -32,25 +31,14 @@ func (p *Provider) Get() ([]*script.Script, error) {
 	ss := make([]*script.Script, 0)
 
 	mask := path.Join(p.path, p.mask)
-
 	matches, err := filepath.Glob(mask)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, filename := range matches {
-		body, err := ioutil.ReadFile(path.Join(filename))
+		s, err := provider.ReadScript(provider.DefaultFs, path.Join(filename))
 		if err != nil {
-			return nil, err
-		}
-
-		_, fn := path.Split(filename)
-
-		s := script.New()
-		s.Name = strings.TrimSuffix(fn, ".lua")
-		s.Body = body
-
-		if err := s.ParseMeta(); err != nil {
 			return nil, err
 		}
 

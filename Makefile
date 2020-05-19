@@ -16,6 +16,10 @@ push-balerter: ## Build balerter image to docker registry
 	@echo Push Balerter $(TAG)
 	docker push balerter/balerter:$(TAG)
 
+gogenerate: ## Call go generate
+	@echo Calling go generate
+	go generate ./...
+
 gobuild-balerter: ## Build balerter binary file
 	@echo Go Build Balerter
 	go build -o ./.debug/balerter -ldflags "-X main.revision=${TAG} -s -w" ./cmd/balerter

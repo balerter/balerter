@@ -11,6 +11,7 @@ WORKDIR /build/balerter
 
 ADD . /build/balerter
 
+RUN go generate ./...
 RUN go build -o /balerter -ldflags "-X main.version=${version} -s -w"  ./cmd/balerter
 
 # -----

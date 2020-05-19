@@ -1,11 +1,11 @@
 package folder
 
 import (
-	"github.com/balerter/balerter/internal/config"
-	"github.com/balerter/balerter/internal/script/script"
-	"io/ioutil"
 	"path"
-	"strings"
+
+	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/script/provider"
+	"github.com/balerter/balerter/internal/script/script"
 )
 
 type Provider struct {
@@ -25,18 +25,8 @@ func New(cfg *config.ScriptSourceFile) *Provider {
 func (p *Provider) Get() ([]*script.Script, error) {
 	ss := make([]*script.Script, 0)
 
-	body, err := ioutil.ReadFile(path.Join(p.filename))
+	s, err := provider.ReadScript(provider.DefaultFs, path.Join(p.filename))
 	if err != nil {
-		return nil, err
-	}
-
-	_, fn := path.Split(p.filename)
-
-	s := script.New()
-	s.Name = strings.TrimSuffix(fn, ".lua")
-	s.Body = body
-
-	if err := s.ParseMeta(); err != nil {
 		return nil, err
 	}
 
