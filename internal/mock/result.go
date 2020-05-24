@@ -5,7 +5,6 @@ import (
 )
 
 func (m *ModuleMock) Result() ([]modules.TestResult, error) {
-
 	var result []modules.TestResult
 
 	for _, e := range m.errors {

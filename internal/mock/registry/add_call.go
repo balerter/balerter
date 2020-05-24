@@ -5,7 +5,6 @@ import (
 )
 
 func (r *Registry) AddCall(method string, args []lua.LValue) error {
-
 	r.calls = append(r.calls, call{
 		method: method,
 		args:   args,

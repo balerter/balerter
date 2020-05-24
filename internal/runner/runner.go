@@ -39,7 +39,8 @@ type Runner struct {
 	pool   map[string]*Job
 }
 
-func New(updateInterval time.Duration, scriptsManager scriptsManager, dsManager dsManager, storagesManager storagesManager, coreModules []modules.Module, logger *zap.Logger) *Runner {
+func New(updateInterval time.Duration, scriptsManager scriptsManager, dsManager dsManager,
+	storagesManager storagesManager, coreModules []modules.Module, logger *zap.Logger) *Runner {
 	r := &Runner{
 		scriptsManager:  scriptsManager,
 		dsManager:       dsManager,

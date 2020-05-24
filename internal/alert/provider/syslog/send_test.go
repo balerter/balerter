@@ -26,5 +26,5 @@ func TestSend(t *testing.T) {
 	err := s.Send(mes)
 	require.NoError(t, err)
 
-	assert.Equal(t, `{"level":"foo","alert_name":"bar","text":"baz","fields":["f1","f2"],"image":"img"}`, string(buf.Bytes()))
+	assert.Equal(t, `{"level":"foo","alert_name":"bar","text":"baz","fields":["f1","f2"],"image":"img"}`, buf.String())
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert/alert"
 	"github.com/balerter/balerter/internal/alert/message"
-	coreStorage "github.com/balerter/balerter/internal/core_storage"
+	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -24,8 +24,8 @@ func (m *alertChannelMock) Name() string {
 	return args.String(0)
 }
 
-func (m *alertChannelMock) Send(message *message.Message) error {
-	args := m.Called(message)
+func (m *alertChannelMock) Send(mes *message.Message) error {
+	args := m.Called(mes)
 	return args.Error(0)
 }
 
@@ -36,7 +36,7 @@ func TestManager_getAlertData(t *testing.T) {
 	}
 
 	type args struct {
-		L *lua.LState
+		luaState *lua.LState
 	}
 
 	defaultFields := fields{
@@ -57,7 +57,7 @@ func TestManager_getAlertData(t *testing.T) {
 			name:   "empty args",
 			fields: defaultFields,
 			args: args{
-				L: func() *lua.LState {
+				luaState: func() *lua.LState {
 					L := lua.NewState()
 					return L
 				}(),
@@ -71,7 +71,7 @@ func TestManager_getAlertData(t *testing.T) {
 			name:   "only alert name",
 			fields: defaultFields,
 			args: args{
-				L: func() *lua.LState {
+				luaState: func() *lua.LState {
 					L := lua.NewState()
 					L.Push(lua.LString("alertName1"))
 					return L
@@ -86,7 +86,7 @@ func TestManager_getAlertData(t *testing.T) {
 			name:   "empty (only space) alert name",
 			fields: defaultFields,
 			args: args{
-				L: func() *lua.LState {
+				luaState: func() *lua.LState {
 					L := lua.NewState()
 					L.Push(lua.LString(" "))
 					return L
@@ -101,7 +101,7 @@ func TestManager_getAlertData(t *testing.T) {
 			name:   "alert name and text",
 			fields: defaultFields,
 			args: args{
-				L: func() *lua.LState {
+				luaState: func() *lua.LState {
 					L := lua.NewState()
 					L.Push(lua.LString("alertName1"))
 					L.Push(lua.LString("alertText1"))
@@ -117,7 +117,7 @@ func TestManager_getAlertData(t *testing.T) {
 			name:   "with options NOT table",
 			fields: defaultFields,
 			args: args{
-				L: func() *lua.LState {
+				luaState: func() *lua.LState {
 					L := lua.NewState()
 					L.Push(lua.LString("alertName1"))
 					L.Push(lua.LString("alertText1"))
@@ -134,7 +134,7 @@ func TestManager_getAlertData(t *testing.T) {
 			name:   "with options",
 			fields: defaultFields,
 			args: args{
-				L: func() *lua.LState {
+				luaState: func() *lua.LState {
 					L := lua.NewState()
 					L.Push(lua.LString("alertName1"))
 					L.Push(lua.LString("alertText1"))
@@ -160,7 +160,7 @@ func TestManager_getAlertData(t *testing.T) {
 			name:   "with wrong options",
 			fields: defaultFields,
 			args: args{
-				L: func() *lua.LState {
+				luaState: func() *lua.LState {
 					L := lua.NewState()
 					L.Push(lua.LString("alertName1"))
 					L.Push(lua.LString("alertText1"))
@@ -189,7 +189,7 @@ func TestManager_getAlertData(t *testing.T) {
 				logger:   tt.fields.logger,
 				channels: tt.fields.channels,
 			}
-			gotAlertName, gotAlertText, gotAlertOptions, err := m.getAlertData(tt.args.L)
+			gotAlertName, gotAlertText, gotAlertOptions, err := m.getAlertData(tt.args.luaState)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getAlertData() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -227,7 +227,8 @@ func TestManager_luaCall_errorGetAlertData(t *testing.T) {
 
 	v := L.Get(4).String()
 
-	assert.Equal(t, "error get arguments: wrong options format: 1 error(s) decoding:\n\n* cannot parse 'Repeat' as int: strconv.ParseInt: parsing \"wrong value\": invalid syntax", v)
+	assert.Equal(t, "error get arguments: wrong options format: 1 error(s) decoding:\n\n* cannot "+
+		"parse 'Repeat' as int: strconv.ParseInt: parsing \"wrong value\": invalid syntax", v)
 }
 
 func TestManager_luaCall_error_get_alert(t *testing.T) {
@@ -265,7 +266,6 @@ func TestManager_luaCall_change_level(t *testing.T) {
 		assert.Equal(t, "alertName", m.AlertName)
 		assert.Equal(t, "alertText1", m.Text)
 		assert.Equal(t, alert.LevelError.String(), m.Level)
-
 	}).Return(nil)
 
 	eng.AlertMock().On("GetOrNew", mock.Anything).Return(a, nil)
@@ -304,7 +304,6 @@ func TestManager_luaCall_same_level(t *testing.T) {
 		assert.Equal(t, "alertName", m.AlertName)
 		assert.Equal(t, "alertText1", m.Text)
 		assert.Equal(t, alert.LevelError.String(), m.Level)
-
 	}).Return(nil)
 
 	m := &Manager{

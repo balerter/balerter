@@ -12,7 +12,7 @@ type ScriptSourceFolder struct {
 	Mask string `json:"mask" yaml:"mask"`
 }
 
-func (cfg ScriptSourceFolder) Validate() error {
+func (cfg *ScriptSourceFolder) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

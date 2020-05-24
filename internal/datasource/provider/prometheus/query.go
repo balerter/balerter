@@ -12,23 +12,23 @@ type queryQueryOptions struct {
 	Time string
 }
 
-func (m *Prometheus) doQuery(L *lua.LState) int {
-	query := strings.TrimSpace(L.Get(1).String())
+func (m *Prometheus) doQuery(luaState *lua.LState) int {
+	query := strings.TrimSpace(luaState.Get(1).String())
 	if query == "" {
-		L.Push(lua.LNil)
-		L.Push(lua.LString("query must be not empty"))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("query must be not empty"))
+		return 2 //nolint:mnd
 	}
 
-	options := L.Get(2)
+	options := luaState.Get(2) //nolint:mnd
 	queryOptions := queryQueryOptions{}
 	if options.Type() == lua.LTTable {
 		err := gluamapper.Map(options.(*lua.LTable), &queryOptions)
 		if err != nil {
 			m.logger.Error("error decode query query options", zap.Error(err))
-			L.Push(lua.LNil)
-			L.Push(lua.LString("error decode query query options"))
-			return 2
+			luaState.Push(lua.LNil)
+			luaState.Push(lua.LString("error decode query query options"))
+			return 2 //nolint:mnd
 		}
 	}
 
@@ -37,9 +37,9 @@ func (m *Prometheus) doQuery(L *lua.LState) int {
 	v, err := m.sendQuery(query, queryOptions)
 	if err != nil {
 		m.logger.Error("error send query to prometheus", zap.Error(err))
-		L.Push(lua.LNil)
-		L.Push(lua.LString("error send query to prometheus: " + err.Error()))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("error send query to prometheus: " + err.Error()))
+		return 2 //nolint:mnd
 	}
 
 	switch v.Type() {
@@ -63,17 +63,17 @@ func (m *Prometheus) doQuery(L *lua.LState) int {
 			tbl.Append(row)
 		}
 
-		L.Push(tbl)
+		luaState.Push(tbl)
 	default:
 		m.logger.Debug("query error: unexpected prometheus model type")
-		L.Push(lua.LNil)
-		L.Push(lua.LString("query error: unexpected prometheus model type"))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("query error: unexpected prometheus model type"))
+		return 2 //nolint:mnd
 	}
 
-	L.Push(lua.LNil)
+	luaState.Push(lua.LNil)
 
-	return 2
+	return 2 //nolint:mnd
 }
 
 type queryRangeOptions struct {
@@ -82,23 +82,23 @@ type queryRangeOptions struct {
 	Step  string
 }
 
-func (m *Prometheus) doRange(L *lua.LState) int {
-	query := strings.TrimSpace(L.Get(1).String())
+func (m *Prometheus) doRange(luaState *lua.LState) int {
+	query := strings.TrimSpace(luaState.Get(1).String())
 	if query == "" {
-		L.Push(lua.LNil)
-		L.Push(lua.LString("query must be not empty"))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("query must be not empty"))
+		return 2 //nolint:mnd
 	}
 
-	options := L.Get(2)
+	options := luaState.Get(2) //nolint:mnd
 	rangeOptions := queryRangeOptions{}
 	if options.Type() == lua.LTTable {
 		err := gluamapper.Map(options.(*lua.LTable), &rangeOptions)
 		if err != nil {
 			m.logger.Error("error decode query range options", zap.Error(err))
-			L.Push(lua.LNil)
-			L.Push(lua.LString("error decode query range options"))
-			return 2
+			luaState.Push(lua.LNil)
+			luaState.Push(lua.LString("error decode query range options"))
+			return 2 //nolint:mnd
 		}
 	}
 
@@ -107,9 +107,9 @@ func (m *Prometheus) doRange(L *lua.LState) int {
 	v, err := m.sendRange(query, rangeOptions)
 	if err != nil {
 		m.logger.Error("error send query to prometheus", zap.Error(err))
-		L.Push(lua.LNil)
-		L.Push(lua.LString("error send query to prometheus: " + err.Error()))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("error send query to prometheus: " + err.Error()))
+		return 2 //nolint:mnd
 	}
 
 	switch v.Type() {
@@ -139,7 +139,7 @@ func (m *Prometheus) doRange(L *lua.LState) int {
 			tbl.Append(row)
 		}
 
-		L.Push(tbl)
+		luaState.Push(tbl)
 
 	case model.ValVector:
 		vv := v.(model.Vector)
@@ -156,15 +156,15 @@ func (m *Prometheus) doRange(L *lua.LState) int {
 			tbl.Append(row)
 		}
 
-		L.Push(tbl)
+		luaState.Push(tbl)
 	default:
 		m.logger.Debug("query error: unexpected prometheus model type")
-		L.Push(lua.LNil)
-		L.Push(lua.LString("query error: unexpected prometheus model type"))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("query error: unexpected prometheus model type"))
+		return 2 //nolint:mnd
 	}
 
-	L.Push(lua.LNil)
+	luaState.Push(lua.LNil)
 
-	return 2
+	return 2 //nolint:mnd
 }

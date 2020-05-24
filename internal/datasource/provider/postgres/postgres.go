@@ -5,7 +5,7 @@ import (
 	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // DB driver
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"time"
@@ -32,7 +32,7 @@ type Postgres struct {
 	timeout time.Duration
 }
 
-func New(cfg config.DataSourcePostgres, logger *zap.Logger) (*Postgres, error) {
+func New(cfg *config.DataSourcePostgres, logger *zap.Logger) (*Postgres, error) {
 	p := &Postgres{
 		name:    ModuleName(cfg.Name),
 		logger:  logger,
@@ -79,13 +79,13 @@ func (m *Postgres) GetLoader(_ *script.Script) lua.LGFunction {
 	return m.loader
 }
 
-func (m *Postgres) loader(L *lua.LState) int {
+func (m *Postgres) loader(luaState *lua.LState) int {
 	var exports = map[string]lua.LGFunction{
 		"query": m.query,
 	}
 
-	mod := L.SetFuncs(L.NewTable(), exports)
+	mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
-	L.Push(mod)
+	luaState.Push(mod)
 	return 1
 }

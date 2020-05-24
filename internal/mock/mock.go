@@ -47,7 +47,7 @@ func (m *ModuleMock) Stop() error {
 }
 
 func (m *ModuleMock) GetLoader(_ *script.Script) lua.LGFunction {
-	return func(L *lua.LState) int {
+	return func(luaState *lua.LState) int {
 		exports := map[string]lua.LGFunction{
 			"on":              m.on,
 			"assertCalled":    m.assert(true),
@@ -58,9 +58,9 @@ func (m *ModuleMock) GetLoader(_ *script.Script) lua.LGFunction {
 			exports[method] = m.call(method)
 		}
 
-		mod := L.SetFuncs(L.NewTable(), exports)
+		mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
-		L.Push(mod)
+		luaState.Push(mod)
 
 		return 1
 	}

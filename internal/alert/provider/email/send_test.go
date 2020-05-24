@@ -12,7 +12,6 @@ import (
 )
 
 func TestSend(t *testing.T) {
-
 	e := &Email{
 		conf: &config.ChannelEmail{
 			Name:   "foo",

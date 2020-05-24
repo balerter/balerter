@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// Marshal an Alert to the byte slice
 func (a *Alert) Marshal() ([]byte, error) {
 	res := make([]byte, 0)
 
@@ -41,8 +42,8 @@ func (a *Alert) Marshal() ([]byte, error) {
 	return res, nil
 }
 
+// Unmarshal the byte slice to an Alert
 func (a *Alert) Unmarshal(src []byte) error {
-
 	// Name length
 	l, n := binary.Uvarint(src)
 	if n <= 0 {
@@ -69,7 +70,7 @@ func (a *Alert) Unmarshal(src []byte) error {
 	src = src[n:]
 
 	// LastChange
-	if len(src) < 15 {
+	if len(src) < 15 { //nolint:mnd
 		return fmt.Errorf("source too small")
 	}
 	err := a.lastChange.UnmarshalBinary(src[:15])
@@ -79,7 +80,7 @@ func (a *Alert) Unmarshal(src []byte) error {
 	src = src[15:]
 
 	// Start
-	if len(src) < 15 {
+	if len(src) < 15 { //nolint:mnd
 		return fmt.Errorf("source too small")
 	}
 	err = a.start.UnmarshalBinary(src[:15])

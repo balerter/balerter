@@ -7,9 +7,8 @@ import (
 	"go.uber.org/zap"
 )
 
-func (m *Clickhouse) query(L *lua.LState) int {
-
-	q := L.Get(1).String()
+func (m *Clickhouse) query(luaState *lua.LState) int {
+	q := luaState.Get(1).String()
 
 	m.logger.Debug("call clickhouse query", zap.String("query", q))
 
@@ -19,9 +18,9 @@ func (m *Clickhouse) query(L *lua.LState) int {
 	rows, err := m.db.QueryContext(ctx, q)
 	if err != nil {
 		m.logger.Error("error clickhouse query", zap.String("query", q), zap.Error(err))
-		L.Push(lua.LNil)
-		L.Push(lua.LString(err.Error()))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString(err.Error()))
+		return 2 //nolint:mnd
 	}
 	defer rows.Close()
 
@@ -40,9 +39,9 @@ func (m *Clickhouse) query(L *lua.LState) int {
 	for rows.Next() {
 		if err := rows.Scan(dest...); err != nil {
 			m.logger.Error("error scan", zap.Error(err))
-			L.Push(lua.LNil)
-			L.Push(lua.LString("error scan: " + err.Error()))
-			return 2
+			luaState.Push(lua.LNil)
+			luaState.Push(lua.LString("error scan: " + err.Error()))
+			return 2 //nolint:mnd
 		}
 
 		row := &lua.LTable{}
@@ -55,7 +54,7 @@ func (m *Clickhouse) query(L *lua.LState) int {
 		result.Append(row)
 	}
 
-	L.Push(result)
-	L.Push(lua.LNil)
-	return 2
+	luaState.Push(result)
+	luaState.Push(lua.LNil)
+	return 2 //nolint:mnd
 }

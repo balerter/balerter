@@ -35,7 +35,7 @@ type Loki struct {
 	timeout           time.Duration
 }
 
-func New(cfg config.DataSourceLoki, logger *zap.Logger) (*Loki, error) {
+func New(cfg *config.DataSourceLoki, logger *zap.Logger) (*Loki, error) {
 	m := &Loki{
 		logger:            logger,
 		name:              ModuleName(cfg.Name),
@@ -75,14 +75,14 @@ func (m *Loki) GetLoader(_ *script.Script) lua.LGFunction {
 	return m.loader
 }
 
-func (m *Loki) loader(L *lua.LState) int {
+func (m *Loki) loader(luaState *lua.LState) int {
 	var exports = map[string]lua.LGFunction{
 		"query": m.doQuery,
 		"range": m.doRange,
 	}
 
-	mod := L.SetFuncs(L.NewTable(), exports)
+	mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
-	L.Push(mod)
+	luaState.Push(mod)
 	return 1
 }

@@ -3,11 +3,11 @@ package config
 import "fmt"
 
 type Channels struct {
-	Email    []ChannelEmail    `json:"email" yaml:"email"`
-	Slack    []ChannelSlack    `json:"slack" yaml:"slack"`
-	Telegram []ChannelTelegram `json:"telegram" yaml:"telegram"`
-	Syslog   []ChannelSyslog   `json:"syslog" yaml:"syslog"`
-	Notify   []ChannelNotify   `json:"notify" yaml:"notify"`
+	Email    []*ChannelEmail    `json:"email" yaml:"email"`
+	Slack    []*ChannelSlack    `json:"slack" yaml:"slack"`
+	Telegram []*ChannelTelegram `json:"telegram" yaml:"telegram"`
+	Syslog   []*ChannelSyslog   `json:"syslog" yaml:"syslog"`
+	Notify   []*ChannelNotify   `json:"notify" yaml:"notify"`
 }
 
 func (cfg Channels) Validate() error {

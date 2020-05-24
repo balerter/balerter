@@ -3,7 +3,7 @@ package mysql
 import (
 	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/script/script"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" // import DB driver
 	"github.com/jmoiron/sqlx"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -31,7 +31,7 @@ type MySQL struct {
 	timeout time.Duration
 }
 
-func New(cfg config.DataSourceMysql, logger *zap.Logger) (*MySQL, error) {
+func New(cfg *config.DataSourceMysql, logger *zap.Logger) (*MySQL, error) {
 	p := &MySQL{
 		name:    ModuleName(cfg.Name),
 		logger:  logger,
@@ -69,13 +69,13 @@ func (m *MySQL) GetLoader(_ *script.Script) lua.LGFunction {
 	return m.loader
 }
 
-func (m *MySQL) loader(L *lua.LState) int {
+func (m *MySQL) loader(luaState *lua.LState) int {
 	var exports = map[string]lua.LGFunction{
 		"query": m.query,
 	}
 
-	mod := L.SetFuncs(L.NewTable(), exports)
+	mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
-	L.Push(mod)
+	luaState.Push(mod)
 	return 1
 }

@@ -14,7 +14,7 @@ func TestHTTP_parseRequestArgs(t *testing.T) {
 		client *http.Client
 	}
 	type args struct {
-		L *lua.LState
+		luaState *lua.LState
 	}
 	tests := []struct {
 		name      string
@@ -29,7 +29,7 @@ func TestHTTP_parseRequestArgs(t *testing.T) {
 			fields: fields{},
 			args: func() args {
 				a := args{}
-				a.L = lua.NewState()
+				a.luaState = lua.NewState()
 				return a
 			}(),
 			want:      nil,
@@ -41,8 +41,8 @@ func TestHTTP_parseRequestArgs(t *testing.T) {
 			fields: fields{},
 			args: func() args {
 				a := args{}
-				a.L = lua.NewState()
-				a.L.Push(lua.LNumber(10))
+				a.luaState = lua.NewState()
+				a.luaState.Push(lua.LNumber(10))
 				return a
 			}(),
 			want:      nil,
@@ -54,13 +54,13 @@ func TestHTTP_parseRequestArgs(t *testing.T) {
 			fields: fields{},
 			args: func() args {
 				a := args{}
-				a.L = lua.NewState()
-				a.L.Push(lua.LString("foo"))
+				a.luaState = lua.NewState()
+				a.luaState.Push(lua.LString("foo"))
 				return a
 			}(),
 			want: &requestArgs{
 				Method:  "",
-				Uri:     "foo",
+				URI:     "foo",
 				Body:    nil,
 				Headers: map[string]string{},
 			},
@@ -72,9 +72,9 @@ func TestHTTP_parseRequestArgs(t *testing.T) {
 			fields: fields{},
 			args: func() args {
 				a := args{}
-				a.L = lua.NewState()
-				a.L.Push(lua.LString("foo"))
-				a.L.Push(lua.LNumber(42))
+				a.luaState = lua.NewState()
+				a.luaState.Push(lua.LString("foo"))
+				a.luaState.Push(lua.LNumber(42))
 				return a
 			}(),
 			want:      nil,
@@ -86,14 +86,14 @@ func TestHTTP_parseRequestArgs(t *testing.T) {
 			fields: fields{},
 			args: func() args {
 				a := args{}
-				a.L = lua.NewState()
-				a.L.Push(lua.LString("foo"))
-				a.L.Push(lua.LString("bar"))
+				a.luaState = lua.NewState()
+				a.luaState.Push(lua.LString("foo"))
+				a.luaState.Push(lua.LString("bar"))
 				return a
 			}(),
 			want: &requestArgs{
 				Method:  "",
-				Uri:     "foo",
+				URI:     "foo",
 				Body:    []byte("bar"),
 				Headers: map[string]string{},
 			},
@@ -105,10 +105,10 @@ func TestHTTP_parseRequestArgs(t *testing.T) {
 			fields: fields{},
 			args: func() args {
 				a := args{}
-				a.L = lua.NewState()
-				a.L.Push(lua.LString("foo"))
-				a.L.Push(lua.LString("bar"))
-				a.L.Push(lua.LString("baz"))
+				a.luaState = lua.NewState()
+				a.luaState.Push(lua.LString("foo"))
+				a.luaState.Push(lua.LString("bar"))
+				a.luaState.Push(lua.LString("baz"))
 				return a
 			}(),
 			want:      nil,
@@ -120,17 +120,17 @@ func TestHTTP_parseRequestArgs(t *testing.T) {
 			fields: fields{},
 			args: func() args {
 				a := args{}
-				a.L = lua.NewState()
-				a.L.Push(lua.LString("foo"))
-				a.L.Push(lua.LString("bar"))
+				a.luaState = lua.NewState()
+				a.luaState.Push(lua.LString("foo"))
+				a.luaState.Push(lua.LString("bar"))
 				h := &lua.LTable{}
 				h.RawSetString("Baz", lua.LString("Bar"))
-				a.L.Push(h)
+				a.luaState.Push(h)
 				return a
 			}(),
 			want: &requestArgs{
 				Method:  "",
-				Uri:     "foo",
+				URI:     "foo",
 				Body:    []byte("bar"),
 				Headers: map[string]string{"Baz": "Bar"},
 			},
@@ -144,7 +144,7 @@ func TestHTTP_parseRequestArgs(t *testing.T) {
 				logger: tt.fields.logger,
 				client: tt.fields.client,
 			}
-			got, err := h.parseRequestArgs(tt.args.L)
+			got, err := h.parseRequestArgs(tt.args.luaState)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseRequestArgs() error = %v, wantErr %v", err, tt.wantErr)
 				return

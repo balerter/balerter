@@ -54,7 +54,7 @@ func TestManager_Init(t *testing.T) {
 		modules: map[string]modules.Module{},
 	}
 
-	err := m.Init(config.StoragesUpload{S3: []config.StorageUploadS3{{
+	err := m.Init(config.StoragesUpload{S3: []*config.StorageUploadS3{{
 		Name:     "f1",
 		Region:   "f2",
 		Key:      "f3",

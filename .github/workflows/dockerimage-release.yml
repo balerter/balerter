@@ -1,12 +1,29 @@
 name: docker release
-on: [release]
+on:
+  - release
 jobs:
+  test-unit:
+    strategy:
+      matrix:
+        go-version: [1.14]
+        platform: [ubuntu-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Checkout code
+        uses: actions/checkout@v1
+      - name: Build
+        run: |
+          make test-full
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
 
-    - name: Publish Balerter to Registry Release
+    - name: Publish Balerter to Registry - Release
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
         name: balerter/balerter
@@ -15,7 +32,7 @@ jobs:
         tag_semver: true
         dockerfile: ./contrib/balerter.Dockerfile
 
-    - name: Publish BalerterTest to Registry Release
+    - name: Publish BalerterTest to Registry - Release
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
         name: balerter/test
@@ -24,11 +41,20 @@ jobs:
         tag_semver: true
         dockerfile: ./contrib/test.Dockerfile
 
-    - name: Publish tgtool to Registry Release
+    - name: Publish Balerter to Registry - Latest
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
-        name: balerter/tgtool
+        name: balerter/balerter
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        tag_semver: true
-        dockerfile: ./contrib/tgtool.Dockerfile
+        tags: "latest"
+        dockerfile: ./contrib/balerter.Dockerfile
+
+    - name: Publish BalerterTest to Registry - Latest
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: balerter/test
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        tags: "latest"
+        dockerfile: ./contrib/test.Dockerfile

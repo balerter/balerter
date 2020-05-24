@@ -31,15 +31,15 @@ func TestRunner_Watch(t *testing.T) {
 		ctxCancel()
 	})
 
-	var cancelled bool
+	var canceled bool
 
 	go func() {
 		rnr.Watch(ctx, ctxCancel, wg, false)
-		cancelled = true
+		canceled = true
 	}()
 
 	<-time.After(time.Millisecond * 500)
-	assert.True(t, cancelled)
+	assert.True(t, canceled)
 
 	scriptsMgr.AssertCalled(t, "Get")
 	scriptsMgr.AssertExpectations(t)
@@ -70,15 +70,15 @@ func TestRunner_Watch_Error(t *testing.T) {
 		ctxCancel()
 	})
 
-	var cancelled bool
+	var canceled bool
 
 	go func() {
 		rnr.Watch(ctx, ctxCancel, wg, false)
-		cancelled = true
+		canceled = true
 	}()
 
 	<-time.After(time.Millisecond * 500)
-	assert.True(t, cancelled)
+	assert.True(t, canceled)
 
 	scriptsMgr.AssertCalled(t, "Get")
 	scriptsMgr.AssertExpectations(t)

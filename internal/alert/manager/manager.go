@@ -11,7 +11,7 @@ import (
 	"github.com/balerter/balerter/internal/alert/provider/syslog"
 	"github.com/balerter/balerter/internal/alert/provider/telegram"
 	"github.com/balerter/balerter/internal/config"
-	coreStorage "github.com/balerter/balerter/internal/core_storage"
+	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -22,6 +22,7 @@ type alertChannel interface {
 	Send(*message.Message) error
 }
 
+// Manager represents the Alert manager struct
 type Manager struct {
 	logger   *zap.Logger
 	channels map[string]alertChannel
@@ -29,6 +30,7 @@ type Manager struct {
 	engine coreStorage.CoreStorage
 }
 
+// New returns new Alert manager instance
 func New(engine coreStorage.CoreStorage, logger *zap.Logger) *Manager {
 	m := &Manager{
 		logger:   logger,
@@ -39,47 +41,48 @@ func New(engine coreStorage.CoreStorage, logger *zap.Logger) *Manager {
 	return m
 }
 
-func (m *Manager) Init(cfg config.Channels) error {
-	for _, cfg := range cfg.Email {
-		module, err := email.New(cfg, m.logger)
+// Init the Alert manager
+func (m *Manager) Init(cfg *config.Channels) error {
+	for idx := range cfg.Email {
+		module, err := email.New(cfg.Email[idx], m.logger)
 		if err != nil {
-			return fmt.Errorf("error init email channel %s, %w", cfg.Name, err)
+			return fmt.Errorf("error init email channel %s, %w", cfg.Email[idx].Name, err)
 		}
 
 		m.channels[module.Name()] = module
 	}
 
-	for _, cfg := range cfg.Slack {
-		module, err := slack.New(cfg, m.logger)
+	for idx := range cfg.Slack {
+		module, err := slack.New(cfg.Slack[idx], m.logger)
 		if err != nil {
-			return fmt.Errorf("error init slack channel %s, %w", cfg.Name, err)
+			return fmt.Errorf("error init slack channel %s, %w", cfg.Slack[idx].Name, err)
 		}
 
 		m.channels[module.Name()] = module
 	}
 
-	for _, cfg := range cfg.Telegram {
-		module, err := telegram.New(cfg, m.logger)
+	for idx := range cfg.Telegram {
+		module, err := telegram.New(cfg.Telegram[idx], m.logger)
 		if err != nil {
-			return fmt.Errorf("error init telegram channel %s, %w", cfg.Name, err)
+			return fmt.Errorf("error init telegram channel %s, %w", cfg.Telegram[idx].Name, err)
 		}
 
 		m.channels[module.Name()] = module
 	}
 
-	for _, cfg := range cfg.Syslog {
-		module, err := syslog.New(cfg, m.logger)
+	for idx := range cfg.Syslog {
+		module, err := syslog.New(cfg.Syslog[idx], m.logger)
 		if err != nil {
-			return fmt.Errorf("error init syslog channel %s, %w", cfg.Name, err)
+			return fmt.Errorf("error init syslog channel %s, %w", cfg.Syslog[idx].Name, err)
 		}
 
 		m.channels[module.Name()] = module
 	}
 
-	for _, cfg := range cfg.Notify {
-		module, err := notify.New(cfg, m.logger)
+	for idx := range cfg.Notify {
+		module, err := notify.New(cfg.Notify[idx], m.logger)
 		if err != nil {
-			return fmt.Errorf("error init syslog channel %s, %w", cfg.Name, err)
+			return fmt.Errorf("error init syslog channel %s, %w", cfg.Notify[idx].Name, err)
 		}
 
 		m.channels[module.Name()] = module
@@ -88,18 +91,22 @@ func (m *Manager) Init(cfg config.Channels) error {
 	return nil
 }
 
+// Name returns the alert manager name
 func (m *Manager) Name() string {
 	return ModuleName()
 }
 
+// Stop the alert manager
 func (m *Manager) Stop() error {
 	return nil
 }
 
+// ModuleName returns a lua module name for the alert manager
 func ModuleName() string {
 	return "alert"
 }
 
+// Methods returns the list of methods of the alert manager
 func Methods() []string {
 	return []string{
 		"warn",
@@ -115,25 +122,26 @@ func Methods() []string {
 	}
 }
 
-func (m *Manager) GetLoader(script *script.Script) lua.LGFunction {
+// GetLoader implements Modules/Module.GetLoader
+func (m *Manager) GetLoader(s *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
-		return func(L *lua.LState) int {
+		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
-				"warn":    m.luaCall(script, alert.LevelWarn),
-				"warning": m.luaCall(script, alert.LevelWarn),
+				"warn":    m.luaCall(s, alert.LevelWarn),
+				"warning": m.luaCall(s, alert.LevelWarn),
 
-				"error": m.luaCall(script, alert.LevelError),
-				"fail":  m.luaCall(script, alert.LevelError),
+				"error": m.luaCall(s, alert.LevelError),
+				"fail":  m.luaCall(s, alert.LevelError),
 
-				"success": m.luaCall(script, alert.LevelSuccess),
-				"ok":      m.luaCall(script, alert.LevelSuccess),
+				"success": m.luaCall(s, alert.LevelSuccess),
+				"ok":      m.luaCall(s, alert.LevelSuccess),
 
-				"get": m.get(script),
+				"get": m.get(s),
 			}
 
-			mod := L.SetFuncs(L.NewTable(), exports)
+			mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
-			L.Push(mod)
+			luaState.Push(mod)
 			return 1
 		}
 	}()

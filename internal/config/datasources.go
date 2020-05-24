@@ -3,11 +3,11 @@ package config
 import "fmt"
 
 type DataSources struct {
-	Clickhouse []DataSourceClickhouse `json:"clickhouse" yaml:"clickhouse"`
-	Prometheus []DataSourcePrometheus `json:"prometheus" yaml:"prometheus"`
-	Postgres   []DataSourcePostgres   `json:"postgres" yaml:"postgres"`
-	MySQL      []DataSourceMysql      `json:"mysql" yaml:"mysql"`
-	Loki       []DataSourceLoki       `json:"loki" yaml:"loki"`
+	Clickhouse []*DataSourceClickhouse `json:"clickhouse" yaml:"clickhouse"`
+	Prometheus []*DataSourcePrometheus `json:"prometheus" yaml:"prometheus"`
+	Postgres   []*DataSourcePostgres   `json:"postgres" yaml:"postgres"`
+	MySQL      []*DataSourceMysql      `json:"mysql" yaml:"mysql"`
+	Loki       []*DataSourceLoki       `json:"loki" yaml:"loki"`
 }
 
 func (cfg DataSources) Validate() error {

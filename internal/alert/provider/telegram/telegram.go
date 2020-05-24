@@ -19,7 +19,7 @@ type Telegram struct {
 	api    APIer
 }
 
-func New(cfg config.ChannelTelegram, logger *zap.Logger) (*Telegram, error) {
+func New(cfg *config.ChannelTelegram, logger *zap.Logger) (*Telegram, error) {
 	tg := &Telegram{
 		name:   cfg.Name,
 		chatID: cfg.ChatID,

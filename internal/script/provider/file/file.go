@@ -13,7 +13,7 @@ type Provider struct {
 	disableIgnore bool
 }
 
-func New(cfg config.ScriptSourceFile) *Provider {
+func New(cfg *config.ScriptSourceFile) *Provider {
 	p := &Provider{
 		filename:      cfg.Filename,
 		disableIgnore: cfg.DisableIgnore,

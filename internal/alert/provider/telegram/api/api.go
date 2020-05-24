@@ -10,7 +10,7 @@ import (
 
 const (
 	apiEndpoint              = "https://api.telegram.org/bot"
-	defaultHttpClientTimeout = time.Second * 5
+	defaultHTTPClientTimeout = time.Second * 5
 
 	methodSendMessage = "sendMessage"
 	methodSendPhoto   = "sendPhoto"
@@ -21,7 +21,7 @@ type API struct {
 	httpClient *http.Client
 }
 
-func New(cfg config.ChannelTelegram) (*API, error) {
+func New(cfg *config.ChannelTelegram) (*API, error) {
 	a := &API{
 		endpoint: apiEndpoint + cfg.Token + "/",
 	}
@@ -29,7 +29,6 @@ func New(cfg config.ChannelTelegram) (*API, error) {
 	var tr *http.Transport
 
 	if cfg.Proxy != nil {
-
 		var proxyAuth *proxy.Auth
 
 		if cfg.Proxy.Auth != nil {
@@ -59,7 +58,7 @@ func New(cfg config.ChannelTelegram) (*API, error) {
 	}
 
 	if a.httpClient.Timeout == 0 {
-		a.httpClient.Timeout = defaultHttpClientTimeout
+		a.httpClient.Timeout = defaultHTTPClientTimeout
 	}
 
 	return a, nil

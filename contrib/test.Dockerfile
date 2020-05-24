@@ -10,7 +10,7 @@ ARG version="undefined"
 WORKDIR /build/test
 
 ADD . /build/test
-RUN go test ./...
+
 RUN go build -o /test -ldflags "-X main.version=${version} -s -w"  ./cmd/test
 
 # -----

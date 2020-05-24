@@ -3,7 +3,7 @@ package config
 import "fmt"
 
 type StoragesUpload struct {
-	S3 []StorageUploadS3 `json:"s3" yaml:"s3"`
+	S3 []*StorageUploadS3 `json:"s3" yaml:"s3"`
 }
 
 func (cfg StoragesUpload) Validate() error {

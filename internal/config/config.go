@@ -4,13 +4,22 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
 	"strings"
 )
 
 func New(configSource string) (*Config, error) {
 	cfg := &Config{}
 
-	data, err := ioutil.ReadFile(configSource)
+	var data []byte
+	var err error
+
+	if configSource == "stdin" {
+		data, err = ioutil.ReadAll(os.Stdin)
+	} else {
+		data, err = ioutil.ReadFile(configSource)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("error read config file, %w", err)
 	}

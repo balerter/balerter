@@ -89,7 +89,8 @@ func TestManager_Send_error(t *testing.T) {
 
 	chan1.AssertCalled(t, "Send", mock.Anything)
 
-	assert.Equal(t, 1, logs.FilterMessage("error send message to channel").FilterField(zap.String("channel name", "chan1")).FilterField(zap.Error(fmt.Errorf("err1"))).Len())
+	assert.Equal(t, 1, logs.FilterMessage("error send message to channel").
+		FilterField(zap.String("channel name", "chan1")).FilterField(zap.Error(fmt.Errorf("err1"))).Len())
 
 	chan1.AssertExpectations(t)
 }

@@ -3,7 +3,7 @@ package manager
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert/alert"
-	coreStorage "github.com/balerter/balerter/internal/core_storage"
+	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"

@@ -15,16 +15,16 @@ type rangeOptions struct {
 }
 
 func (q *rangeOptions) validate() error {
-	if q.Direction != "" && q.Direction != "forward" && q.Direction != "backward" {
-		return fmt.Errorf("option Direction support only values: 'forward' and 'backward'")
+	if err := directionValidate(q.Direction); err != nil {
+		return err
 	}
 	return nil
 }
 
-func (m *Loki) parseRangeOptions(L *lua.LState) (*rangeOptions, error) {
+func (m *Loki) parseRangeOptions(luaState *lua.LState) (*rangeOptions, error) { //nolint:dupl // some code duplicated with queryOptions
 	queryOptions := &rangeOptions{}
 
-	options := L.Get(2)
+	options := luaState.Get(2) //nolint:mnd
 	if options.Type() == lua.LTNil {
 		return queryOptions, nil
 	}

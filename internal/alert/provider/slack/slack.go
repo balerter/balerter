@@ -17,7 +17,7 @@ type Slack struct {
 	api     API
 }
 
-func New(cfg config.ChannelSlack, logger *zap.Logger) (*Slack, error) {
+func New(cfg *config.ChannelSlack, logger *zap.Logger) (*Slack, error) {
 	m := &Slack{
 		logger:  logger,
 		name:    cfg.Name,

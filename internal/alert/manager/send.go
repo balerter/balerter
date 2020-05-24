@@ -5,7 +5,8 @@ import (
 	"go.uber.org/zap"
 )
 
-func (m *Manager) Send(level, alertName, text string, channels []string, fields []string, image string) {
+// Send a message
+func (m *Manager) Send(level, alertName, text string, channels, fields []string, image string) {
 	chs := make(map[string]alertChannel)
 
 	if len(channels) > 0 {

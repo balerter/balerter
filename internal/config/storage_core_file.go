@@ -12,7 +12,7 @@ type StorageCoreFile struct {
 	Timeout time.Duration `json:"timeout" yaml:"timeout"`
 }
 
-func (cfg StorageCoreFile) Validate() error {
+func (cfg *StorageCoreFile) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

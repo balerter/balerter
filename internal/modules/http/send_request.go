@@ -9,7 +9,7 @@ import (
 )
 
 func (h *HTTP) sendRequest(args *requestArgs) (*response, error) {
-	req, err := http.NewRequest(args.Method, args.Uri, bytes.NewReader(args.Body))
+	req, err := http.NewRequest(args.Method, args.URI, bytes.NewReader(args.Body))
 	if err != nil {
 		return nil, fmt.Errorf("error build request, %w", err)
 	}

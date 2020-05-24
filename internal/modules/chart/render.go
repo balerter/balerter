@@ -28,12 +28,13 @@ var (
 
 func (ch *Chart) parseColor(s string) (color.RGBA, error) {
 	var c color.RGBA
+	var ok bool
 
 	if s == "" {
 		return color.RGBA{A: 255}, nil
 	}
 
-	if c, ok := defaultColors[s]; ok {
+	if c, ok = defaultColors[s]; ok {
 		return c, nil
 	}
 
@@ -44,9 +45,9 @@ func (ch *Chart) parseColor(s string) (color.RGBA, error) {
 	s = s[1:]
 
 	switch len(s) {
-	case 6:
+	case 6: //nolint:mnd
 		return parseColor6(s)
-	case 8:
+	case 8: //nolint:mnd
 		return parseColor8(s)
 	}
 
@@ -54,7 +55,7 @@ func (ch *Chart) parseColor(s string) (color.RGBA, error) {
 }
 
 func parseGroup(s string) (uint8, error) {
-	if len(s) != 2 {
+	if len(s) != 2 { //nolint:mnd
 		return 0, fmt.Errorf("wrong group length")
 	}
 
@@ -106,7 +107,6 @@ func parseColor8(s string) (color.RGBA, error) {
 }
 
 func (ch *Chart) Render(title string, data *Data, w io.Writer) error {
-
 	p, err := plot.New()
 	if err != nil {
 		return fmt.Errorf("error create new plot, %w", err)
@@ -115,12 +115,7 @@ func (ch *Chart) Render(title string, data *Data, w io.Writer) error {
 	xticks := plot.TimeTicks{Format: "2006-01-02\n15:04"}
 
 	p.Title.Text = title
-	//p.X.Label.Text = "X"
-	//p.Y.Label.Text = "Y"
 	p.X.Tick.Marker = xticks
-	//p.Y.Min = 0
-	//p.Y.Max = 1
-	//p.Add(plotter.NewGrid())
 
 	for _, series := range data.Series {
 		data := make(plotter.XYs, 0)
@@ -132,7 +127,10 @@ func (ch *Chart) Render(title string, data *Data, w io.Writer) error {
 			data = append(data, xy)
 		}
 
-		line, points, err := plotter.NewLinePoints(data)
+		var line *plotter.Line
+		var points *plotter.Scatter
+
+		line, points, err = plotter.NewLinePoints(data)
 		if err != nil {
 			return fmt.Errorf("error create line points, %w", err)
 		}

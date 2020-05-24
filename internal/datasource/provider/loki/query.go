@@ -7,20 +7,20 @@ import (
 	"strings"
 )
 
-func (m *Loki) doQuery(L *lua.LState) int {
-	query := strings.TrimSpace(L.Get(1).String())
+func (m *Loki) doQuery(luaState *lua.LState) int { //nolint:dupl // some code duplicated with doRange
+	query := strings.TrimSpace(luaState.Get(1).String())
 	if query == "" {
-		L.Push(lua.LNil)
-		L.Push(lua.LString("query must be not empty"))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("query must be not empty"))
+		return 2 //nolint:mnd
 	}
 
-	queryOptions, err := m.parseQueryOptions(L)
+	queryOptions, err := m.parseQueryOptions(luaState)
 	if err != nil {
 		m.logger.Error("error parse query options", zap.Error(err))
-		L.Push(lua.LNil)
-		L.Push(lua.LString("error parse query options"))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("error parse query options"))
+		return 2 //nolint:mnd
 	}
 
 	m.logger.Debug("call loki query", zap.String("name", m.name), zap.String("query", query), zap.Any("options", queryOptions))
@@ -28,9 +28,9 @@ func (m *Loki) doQuery(L *lua.LState) int {
 	v, err := m.sendQuery(query, queryOptions)
 	if err != nil {
 		m.logger.Error("error send query to loki", zap.Error(err))
-		L.Push(lua.LNil)
-		L.Push(lua.LString("error send query to loki: " + err.Error()))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("error send query to loki: " + err.Error()))
+		return 2 //nolint:mnd
 	}
 
 	switch v.Data.Result.Type() {
@@ -57,33 +57,33 @@ func (m *Loki) doQuery(L *lua.LState) int {
 			tbl.Append(row)
 		}
 
-		L.Push(tbl)
+		luaState.Push(tbl)
 	default:
 		m.logger.Error("query error: unexpected loki model type")
-		L.Push(lua.LNil)
-		L.Push(lua.LString("query error: unexpected loki model type"))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("query error: unexpected loki model type"))
+		return 2 //nolint:mnd
 	}
 
-	L.Push(lua.LNil)
+	luaState.Push(lua.LNil)
 
-	return 2
+	return 2 //nolint:mnd
 }
 
-func (m *Loki) doRange(L *lua.LState) int {
-	query := strings.TrimSpace(L.Get(1).String())
+func (m *Loki) doRange(luaState *lua.LState) int { //nolint:dupl // some code duplicated with doQuery
+	query := strings.TrimSpace(luaState.Get(1).String())
 	if query == "" {
-		L.Push(lua.LNil)
-		L.Push(lua.LString("query must be not empty"))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("query must be not empty"))
+		return 2 //nolint:mnd
 	}
 
-	rangeOptions, err := m.parseRangeOptions(L)
+	rangeOptions, err := m.parseRangeOptions(luaState)
 	if err != nil {
 		m.logger.Error("error parse range options", zap.Error(err))
-		L.Push(lua.LNil)
-		L.Push(lua.LString("error parse range options"))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("error parse range options"))
+		return 2 //nolint:mnd
 	}
 
 	m.logger.Debug("call loki query range", zap.String("name", m.name), zap.String("query", query), zap.Any("options", rangeOptions))
@@ -91,9 +91,9 @@ func (m *Loki) doRange(L *lua.LState) int {
 	v, err := m.sendRange(query, rangeOptions)
 	if err != nil {
 		m.logger.Error("error send query to loki", zap.Error(err))
-		L.Push(lua.LNil)
-		L.Push(lua.LString("error send query to loki: " + err.Error()))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("error send query to loki: " + err.Error()))
+		return 2 //nolint:mnd
 	}
 
 	switch v.Data.Result.Type() {
@@ -120,15 +120,15 @@ func (m *Loki) doRange(L *lua.LState) int {
 			tbl.Append(row)
 		}
 
-		L.Push(tbl)
+		luaState.Push(tbl)
 	default:
 		m.logger.Error("query error: unexpected loki model type")
-		L.Push(lua.LNil)
-		L.Push(lua.LString("query error: unexpected loki model type"))
-		return 2
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("query error: unexpected loki model type"))
+		return 2 //nolint:mnd
 	}
 
-	L.Push(lua.LNil)
+	luaState.Push(lua.LNil)
 
-	return 2
+	return 2 //nolint:mnd
 }

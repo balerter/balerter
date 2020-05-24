@@ -16,5 +16,4 @@ func TestRegistryClean(t *testing.T) {
 	assert.Equal(t, 0, len(r.calls))
 	assert.Equal(t, 0, len(r.assertEntries))
 	assert.Equal(t, 0, len(r.responseEntries))
-
 }

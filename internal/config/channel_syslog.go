@@ -7,7 +7,9 @@ import (
 
 var (
 	syslogSeverity = []string{"EMERG", "ALERT", "CRIT", "ERR", "WARNING", "NOTICE", "INFO", "DEBUG"}
-	syslogFacility = []string{"KERN", "USER", "MAIL", "DAEMON", "AUTH", "SYSLOG", "LPR", "NEWS", "UUCP", "CRON", "AUTHPRIV", "FTP", "LOCAL0", "LOCAL1", "LOCAL2", "LOCAL3", "LOCAL4", "LOCAL5", "LOCAL6", "LOCAL7"}
+	syslogFacility = []string{"KERN", "USER", "MAIL", "DAEMON", "AUTH", "SYSLOG",
+		"LPR", "NEWS", "UUCP", "CRON", "AUTHPRIV", "FTP", "LOCAL0", "LOCAL1",
+		"LOCAL2", "LOCAL3", "LOCAL4", "LOCAL5", "LOCAL6", "LOCAL7"}
 )
 
 type ChannelSyslog struct {
@@ -18,12 +20,12 @@ type ChannelSyslog struct {
 	Priority string `json:"priority" yaml:"priority"`
 }
 
-func (cfg ChannelSyslog) Validate() error {
+func (cfg *ChannelSyslog) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}
 
-	if strings.ToLower(cfg.Network) != "tcp" && strings.ToLower(cfg.Network) != "udp" && cfg.Network != "" {
+	if !strings.EqualFold(cfg.Network, "tcp") && !strings.EqualFold(cfg.Network, "udp") && cfg.Network != "" {
 		return fmt.Errorf("corrent values for 'network': 'tcp', 'udp' or empty value")
 	}
 
@@ -40,7 +42,7 @@ func validatePriority(p string) error {
 	}
 
 	parts := strings.Split(p, "|")
-	if len(parts) > 2 {
+	if len(parts) > 2 { // nolint:mnd
 		return fmt.Errorf("bad priority format")
 	}
 

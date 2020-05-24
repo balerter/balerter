@@ -27,8 +27,8 @@ func New(logger *zap.Logger) *Manager {
 }
 
 func (m *Manager) Init(cfg config.StoragesUpload) error {
-	for _, c := range cfg.S3 {
-		module, err := s3.New(c, m.logger)
+	for idx := range cfg.S3 {
+		module, err := s3.New(cfg.S3[idx], m.logger)
 		if err != nil {
 			return fmt.Errorf("error init storage provider s3, %w", err)
 		}

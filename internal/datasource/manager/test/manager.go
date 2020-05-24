@@ -47,30 +47,29 @@ func (m *Manager) Result() ([]modules.TestResult, error) {
 	return result, nil
 }
 
-func (m *Manager) Init(cfg config.DataSources) error {
-	for _, clickhouseCfg := range cfg.Clickhouse {
-		_ = clickhouseCfg
-		mod := moduleMock.New(clickhouse.ModuleName(clickhouseCfg.Name), clickhouse.Methods(), m.logger)
+func (m *Manager) Init(cfg *config.DataSources) error {
+	for idx := range cfg.Clickhouse {
+		mod := moduleMock.New(clickhouse.ModuleName(cfg.Clickhouse[idx].Name), clickhouse.Methods(), m.logger)
 		m.modules[mod.Name()] = mod
 	}
 
-	for _, prometheusCfg := range cfg.Prometheus {
-		mod := moduleMock.New(prometheus.ModuleName(prometheusCfg.Name), prometheus.Methods(), m.logger)
+	for idx := range cfg.Prometheus {
+		mod := moduleMock.New(prometheus.ModuleName(cfg.Prometheus[idx].Name), prometheus.Methods(), m.logger)
 		m.modules[mod.Name()] = mod
 	}
 
-	for _, postgresCfg := range cfg.Postgres {
-		mod := moduleMock.New(postgres.ModuleName(postgresCfg.Name), postgres.Methods(), m.logger)
+	for idx := range cfg.Postgres {
+		mod := moduleMock.New(postgres.ModuleName(cfg.Postgres[idx].Name), postgres.Methods(), m.logger)
 		m.modules[mod.Name()] = mod
 	}
 
-	for _, c := range cfg.MySQL {
-		mod := moduleMock.New(mysql.ModuleName(c.Name), mysql.Methods(), m.logger)
+	for idx := range cfg.MySQL {
+		mod := moduleMock.New(mysql.ModuleName(cfg.MySQL[idx].Name), mysql.Methods(), m.logger)
 		m.modules[mod.Name()] = mod
 	}
 
-	for _, c := range cfg.Loki {
-		mod := moduleMock.New(loki.ModuleName(c.Name), loki.Methods(), m.logger)
+	for idx := range cfg.Loki {
+		mod := moduleMock.New(loki.ModuleName(cfg.Loki[idx].Name), loki.Methods(), m.logger)
 		m.modules[mod.Name()] = mod
 	}
 

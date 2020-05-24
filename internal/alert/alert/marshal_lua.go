@@ -4,6 +4,7 @@ import (
 	lua "github.com/yuin/gopher-lua"
 )
 
+// MarshalLua marshal an Alert to the Lua table
 func (a *Alert) MarshalLua() *lua.LTable {
 	t := &lua.LTable{}
 

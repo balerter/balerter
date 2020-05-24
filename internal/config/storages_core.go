@@ -3,7 +3,7 @@ package config
 import "fmt"
 
 type StoragesCore struct {
-	File []StorageCoreFile `json:"file" yaml:"file"`
+	File []*StorageCoreFile `json:"file" yaml:"file"`
 }
 
 func (cfg StoragesCore) Validate() error {

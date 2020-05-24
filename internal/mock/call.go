@@ -2,17 +2,16 @@ package mock
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/lua_formatter"
+	"github.com/balerter/balerter/internal/luaformatter"
 	lua "github.com/yuin/gopher-lua"
 )
 
 func (m *ModuleMock) call(method string) lua.LGFunction {
-	return func(L *lua.LState) int {
-
+	return func(luaState *lua.LState) int {
 		var args []lua.LValue
 
-		for i := 0; i < L.GetTop(); i++ {
-			args = append(args, L.Get(i+1))
+		for i := 0; i < luaState.GetTop(); i++ {
+			args = append(args, luaState.Get(i+1))
 		}
 
 		err := m.registry.AddCall(method, args)
@@ -24,12 +23,13 @@ func (m *ModuleMock) call(method string) lua.LGFunction {
 
 		resp, err := m.registry.Response(AnyValue, method, args)
 		if err != nil {
-			m.errors = append(m.errors, fmt.Sprintf("error get response for method '%s' with args '%s', %s", method, lua_formatter.ValuesToStringNoErr(args), err.Error()))
+			m.errors = append(m.errors, fmt.Sprintf("error get response for method '%s' with args '%s', %s",
+				method, luaformatter.ValuesToStringNoErr(args), err.Error()))
 			return 0
 		}
 
 		for _, a := range resp {
-			L.Push(a)
+			luaState.Push(a)
 		}
 
 		return len(resp)

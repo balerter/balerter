@@ -1,7 +1,7 @@
 package script
 
 import (
-	"crypto/sha1"
+	"crypto/sha1" //nolint:gosec // sha1 uses not for security
 	"fmt"
 	"strings"
 	"time"
@@ -9,11 +9,13 @@ import (
 
 const (
 	DefaultInterval = time.Second * 60
+	DefaultTimeout  = time.Hour
 )
 
 func New() *Script {
 	s := &Script{
 		Interval: DefaultInterval,
+		Timeout:  DefaultTimeout,
 	}
 
 	return s
@@ -31,11 +33,13 @@ type Script struct {
 }
 
 func (s *Script) Hash() string {
-	return fmt.Sprintf("%x", sha1.Sum(append([]byte(s.Name+"@"), s.Body...)))
+	return fmt.Sprintf("%x", sha1.Sum(append([]byte(s.Name+"@"), s.Body...))) //nolint:gosec // sha1 uses not for security
 }
 
+type parseMetaFunc func(l string, s *Script) error
+
 var (
-	metas = map[string]func(l string, s *Script) error{
+	metas = map[string]parseMetaFunc{
 		"@interval": parseMetaInterval,
 		"@ignore":   parseMetaIgnore,
 		"@name":     parseMetaName,
@@ -86,7 +90,7 @@ func parseMetaInterval(l string, s *Script) error {
 func parseMetaTimeout(l string, s *Script) error {
 	d, err := time.ParseDuration(strings.TrimSpace(l))
 	if err != nil {
-		return err
+		return fmt.Errorf("error parse '%s' to time duration, %w", strings.TrimSpace(l), err)
 	}
 
 	s.Timeout = d

@@ -39,17 +39,14 @@ func (rnr *Runner) runJob(j *Job, wg *sync.WaitGroup) {
 	L := rnr.createLuaState(j)
 	defer L.Close()
 
-	withTimeout := j.script.Timeout != 0
 	var (
-		ctx    context.Context
-		cancel context.CancelFunc
+		ctx       context.Context
+		ctxCancel context.CancelFunc
 	)
 
 	for {
-		if withTimeout {
-			ctx, cancel = context.WithTimeout(context.Background(), j.script.Timeout)
-			L.SetContext(ctx)
-		}
+		ctx, ctxCancel = context.WithTimeout(context.Background(), j.script.Timeout)
+		L.SetContext(ctx)
 
 		rnr.logger.Debug("run job", zap.String("name", j.name))
 		err := L.DoString(string(j.script.Body))
@@ -57,9 +54,7 @@ func (rnr *Runner) runJob(j *Job, wg *sync.WaitGroup) {
 			j.logger.Error("error run job", zap.String("script name", j.script.Name), zap.Error(err))
 		}
 
-		if withTimeout {
-			cancel()
-		}
+		ctxCancel()
 
 		select {
 		case <-j.stop:

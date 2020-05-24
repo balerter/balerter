@@ -48,7 +48,7 @@ func (m *Runtime) Name() string {
 
 func (m *Runtime) GetLoader(_ *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
-		return func(L *lua.LState) int {
+		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
 				"logLevel":     m.returnString(m.logLevel),
 				"isDebug":      m.returnBool(m.isDebug),
@@ -57,9 +57,9 @@ func (m *Runtime) GetLoader(_ *script.Script) lua.LGFunction {
 				"configSource": m.returnString(m.configSource),
 			}
 
-			mod := L.SetFuncs(L.NewTable(), exports)
+			mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
-			L.Push(mod)
+			luaState.Push(mod)
 			return 1
 		}
 	}()
@@ -70,15 +70,15 @@ func (m *Runtime) Stop() error {
 }
 
 func (m *Runtime) returnBool(v bool) lua.LGFunction {
-	return func(L *lua.LState) int {
-		L.Push(lua.LBool(v))
+	return func(luaState *lua.LState) int {
+		luaState.Push(lua.LBool(v))
 		return 1
 	}
 }
 
 func (m *Runtime) returnString(v string) lua.LGFunction {
-	return func(L *lua.LState) int {
-		L.Push(lua.LString(v))
+	return func(luaState *lua.LState) int {
+		luaState.Push(lua.LString(v))
 		return 1
 	}
 }

@@ -1,12 +1,13 @@
 package folder
 
 import (
-	"github.com/balerter/balerter/internal/config"
-	"github.com/balerter/balerter/internal/script/script"
 	"io/ioutil"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/script/script"
 )
 
 type Provider struct {
@@ -14,7 +15,7 @@ type Provider struct {
 	mask string
 }
 
-func New(cfg config.ScriptSourceFolder) *Provider {
+func New(cfg *config.ScriptSourceFolder) *Provider {
 	p := &Provider{
 		path: cfg.Path,
 		mask: cfg.Mask,
@@ -38,7 +39,6 @@ func (p *Provider) Get() ([]*script.Script, error) {
 	}
 
 	for _, filename := range matches {
-
 		body, err := ioutil.ReadFile(path.Join(filename))
 		if err != nil {
 			return nil, err

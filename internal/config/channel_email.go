@@ -20,7 +20,7 @@ type ChannelEmail struct {
 }
 
 // Validate checks the email configuration.
-func (cfg ChannelEmail) Validate() error {
+func (cfg *ChannelEmail) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

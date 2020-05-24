@@ -15,14 +15,14 @@ func TestManager_Init(t *testing.T) {
 	m := New(nil, zap.NewNop())
 
 	cfg := config.Channels{
-		Email:    []config.ChannelEmail{{Name: "email1"}},
-		Slack:    []config.ChannelSlack{{Name: "slack1"}},
-		Telegram: []config.ChannelTelegram{{Name: "tg1"}},
-		Syslog:   []config.ChannelSyslog{{Name: "sl1", Network: "udp", Address: "127.0.0.1:2000"}},
-		Notify:   []config.ChannelNotify{{Name: "n1"}},
+		Email:    []*config.ChannelEmail{{Name: "email1"}},
+		Slack:    []*config.ChannelSlack{{Name: "slack1"}},
+		Telegram: []*config.ChannelTelegram{{Name: "tg1"}},
+		Syslog:   []*config.ChannelSyslog{{Name: "sl1", Network: "udp", Address: "127.0.0.1:2000"}},
+		Notify:   []*config.ChannelNotify{{Name: "n1"}},
 	}
 
-	err := m.Init(cfg)
+	err := m.Init(&cfg)
 	require.NoError(t, err)
 	require.Equal(t, 5, len(m.channels))
 

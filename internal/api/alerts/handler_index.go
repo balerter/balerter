@@ -1,7 +1,7 @@
 package alerts
 
 import (
-	coreStorage "github.com/balerter/balerter/internal/core_storage"
+	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -24,7 +24,7 @@ func HandlerIndex(coreStorageAlert coreStorage.CoreStorage, logger *zap.Logger) 
 		if err != nil {
 			logger.Error("error get alerts", zap.Error(err))
 			rw.Header().Add("X-Error", err.Error())
-			rw.WriteHeader(500)
+			rw.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -32,7 +32,7 @@ func HandlerIndex(coreStorageAlert coreStorage.CoreStorage, logger *zap.Logger) 
 		if err != nil {
 			logger.Error("error filter alerts", zap.Error(err))
 			rw.Header().Add("X-Error", err.Error())
-			rw.WriteHeader(400)
+			rw.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
@@ -40,7 +40,7 @@ func HandlerIndex(coreStorageAlert coreStorage.CoreStorage, logger *zap.Logger) 
 		if err != nil {
 			logger.Error("error write response", zap.Error(err))
 			rw.Header().Add("X-Error", "error write response")
-			rw.WriteHeader(500)
+			rw.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	}
