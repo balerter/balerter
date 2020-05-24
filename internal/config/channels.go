@@ -8,6 +8,7 @@ type Channels struct {
 	Telegram []*ChannelTelegram `json:"telegram" yaml:"telegram"`
 	Syslog   []*ChannelSyslog   `json:"syslog" yaml:"syslog"`
 	Notify   []*ChannelNotify   `json:"notify" yaml:"notify"`
+	Discord  []*ChannelDiscord  `json:"discord" yaml:"discord"`
 }
 
 func (cfg Channels) Validate() error {
@@ -65,6 +66,17 @@ func (cfg Channels) Validate() error {
 	}
 	if name := checkUnique(names); name != "" {
 		return fmt.Errorf("found duplicated name for channels 'notify': %s", name)
+	}
+
+	names = names[:0]
+	for _, c := range cfg.Discord {
+		names = append(names, c.Name)
+		if err := c.Validate(); err != nil {
+			return fmt.Errorf("validate channel discord: %w", err)
+		}
+	}
+	if name := checkUnique(names); name != "" {
+		return fmt.Errorf("found duplicated name for channels 'discord': %s", name)
 	}
 
 	return nil

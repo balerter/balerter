@@ -5,6 +5,7 @@ import (
 
 	"github.com/balerter/balerter/internal/alert/alert"
 	"github.com/balerter/balerter/internal/alert/message"
+	"github.com/balerter/balerter/internal/alert/provider/discord"
 	"github.com/balerter/balerter/internal/alert/provider/email"
 	"github.com/balerter/balerter/internal/alert/provider/notify"
 	"github.com/balerter/balerter/internal/alert/provider/slack"
@@ -83,6 +84,15 @@ func (m *Manager) Init(cfg *config.Channels) error {
 		module, err := notify.New(cfg.Notify[idx], m.logger)
 		if err != nil {
 			return fmt.Errorf("error init syslog channel %s, %w", cfg.Notify[idx].Name, err)
+		}
+
+		m.channels[module.Name()] = module
+	}
+
+	for idx := range cfg.Discord {
+		module, err := discord.New(cfg.Discord[idx], m.logger)
+		if err != nil {
+			return fmt.Errorf("error init discord channel %s, %w", cfg.Discord[idx].Name, err)
 		}
 
 		m.channels[module.Name()] = module

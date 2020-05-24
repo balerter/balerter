@@ -6,6 +6,7 @@ require (
 	github.com/ClickHouse/clickhouse-go v1.3.13
 	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/aws/aws-sdk-go v1.29.4
+	github.com/bwmarrin/discordgo v0.20.3
 	github.com/deckarep/gosx-notifier v0.0.0-20180201035817-e127226297fb // indirect
 	github.com/docker/go-connections v0.4.0
 	github.com/fatih/color v1.7.0
