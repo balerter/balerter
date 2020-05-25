@@ -16,10 +16,10 @@ func TestSend(t *testing.T) {
 		return
 	}
 
-	d, err := discordgo.New("Bot " + tk)
+	dg, err := discordgo.New("Bot " + tk)
 	require.NoError(t, err)
 
-	_, err = d.ChannelMessageSend(ci, "Ping!")
+	_, err = dg.ChannelMessageSend(ci, "Ping!")
 	require.NoError(t, err)
 
 }
