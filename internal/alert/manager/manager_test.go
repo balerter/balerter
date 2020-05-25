@@ -20,11 +20,12 @@ func TestManager_Init(t *testing.T) {
 		Telegram: []*config.ChannelTelegram{{Name: "tg1"}},
 		Syslog:   []*config.ChannelSyslog{{Name: "sl1", Network: "udp", Address: "127.0.0.1:2000"}},
 		Notify:   []*config.ChannelNotify{{Name: "n1"}},
+		Discord:  []*config.ChannelDiscord{{Name: "discord1"}},
 	}
 
 	err := m.Init(&cfg)
 	require.NoError(t, err)
-	require.Equal(t, 5, len(m.channels))
+	require.Equal(t, 6, len(m.channels))
 
 	c, ok := m.channels["email1"]
 	require.True(t, ok)
@@ -45,6 +46,10 @@ func TestManager_Init(t *testing.T) {
 	c, ok = m.channels["n1"]
 	require.True(t, ok)
 	assert.Equal(t, "n1", c.Name())
+
+	c, ok = m.channels["discord1"]
+	require.True(t, ok)
+	assert.Equal(t, "discord1", c.Name())
 }
 
 func TestManager_Loader(t *testing.T) {

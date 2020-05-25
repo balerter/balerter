@@ -7,20 +7,21 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/aws/aws-sdk-go v1.29.4
 	github.com/deckarep/gosx-notifier v0.0.0-20180201035817-e127226297fb // indirect
+	github.com/diamondburned/arikawa v0.9.2
 	github.com/docker/go-connections v0.4.0
 	github.com/fatih/color v1.7.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
-	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/grafana/loki v1.3.0
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/lib/pq v1.0.0
 	github.com/martinlindhe/notify v0.0.0-20181008203735-20632c9a275a
+	github.com/mavolin/dismock v1.0.0
 	github.com/nlopes/slack v0.6.0
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/prometheus/client_golang v1.4.1
 	github.com/prometheus/common v0.9.1
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.5.1
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/testcontainers/testcontainers-go v0.5.1
 	github.com/xhit/go-simple-mail/v2 v2.3.1
