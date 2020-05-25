@@ -9,6 +9,7 @@ func TestChannels_Validate(t *testing.T) {
 		Telegram []*ChannelTelegram
 		Syslog   []*ChannelSyslog
 		Notify   []*ChannelNotify
+		Discord  []*ChannelDiscord
 	}
 	tests := []struct {
 		name    string
@@ -52,12 +53,20 @@ func TestChannels_Validate(t *testing.T) {
 			errText: "found duplicated name for channels 'syslog': foo",
 		},
 		{
-			name: "duplicated syslog",
+			name: "duplicated notify",
 			fields: fields{
 				Notify: []*ChannelNotify{{Name: "foo"}, {Name: "foo"}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for channels 'notify': foo",
+		},
+		{
+			name: "duplicated discord",
+			fields: fields{
+				Discord: []*ChannelDiscord{{Name: "foo", Token: "a", ChannelID: 1}, {Name: "foo", Token: "a", ChannelID: 1}},
+			},
+			wantErr: true,
+			errText: "found duplicated name for channels 'discord': foo",
 		},
 		{
 			name: "ok",
@@ -72,6 +81,8 @@ func TestChannels_Validate(t *testing.T) {
 				Syslog: []*ChannelSyslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"},
 					{Name: "foo2", Network: "tcp", Address: "a", Priority: "EMERG"}},
 				Notify: []*ChannelNotify{{Name: "foo"}, {Name: "foo2"}},
+				Discord: []*ChannelDiscord{{Name: "foo", Token: "a", ChannelID: 1},
+					{Name: "foo2", Token: "a", ChannelID: 1}},
 			},
 			wantErr: false,
 			errText: "",
@@ -85,6 +96,7 @@ func TestChannels_Validate(t *testing.T) {
 				Telegram: tt.fields.Telegram,
 				Syslog:   tt.fields.Syslog,
 				Notify:   tt.fields.Notify,
+				Discord:  tt.fields.Discord,
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {
