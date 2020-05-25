@@ -8,7 +8,7 @@ import (
 type ChannelDiscord struct {
 	Name      string `json:"name" yaml:"name"`
 	Token     string `json:"token" yaml:"token"`
-	ChannelID string `json:"channelId" yaml:"channelId"`
+	ChannelID int64  `json:"channelId" yaml:"channelId"`
 }
 
 func (cfg *ChannelDiscord) Validate() error {
@@ -20,7 +20,7 @@ func (cfg *ChannelDiscord) Validate() error {
 		return fmt.Errorf("token must be not empty")
 	}
 
-	if strings.TrimSpace(cfg.ChannelID) == "" {
+	if cfg.ChannelID < 1 {
 		return fmt.Errorf("channel id must be not empty")
 	}
 

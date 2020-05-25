@@ -9,11 +9,11 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	d, err := New(&config.ChannelDiscord{Name: "foo", Token: "123"}, nil)
+	d, err := New(&config.ChannelDiscord{Name: "foo", ChannelID: 123}, nil)
 	require.NoError(t, err)
 	assert.IsType(t, &Discord{}, d)
 	assert.Equal(t, "foo", d.name)
-	assert.Equal(t, "123", d.conf.Token)
+	assert.Equal(t, "123", d.chanID.String())
 }
 
 func TestName(t *testing.T) {

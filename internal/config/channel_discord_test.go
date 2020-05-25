@@ -6,7 +6,7 @@ func TestChannelDiscord_Validate(t *testing.T) {
 	type fields struct {
 		Name      string
 		Token     string
-		ChannelID string
+		ChannelID int64
 	}
 	tests := []struct {
 		name    string
@@ -16,25 +16,25 @@ func TestChannelDiscord_Validate(t *testing.T) {
 	}{
 		{
 			name:    "empty name",
-			fields:  fields{Name: "", Token: "", ChannelID: ""},
+			fields:  fields{Name: "", Token: "", ChannelID: 123},
 			wantErr: true,
 			errText: "name must be not empty",
 		},
 		{
 			name:    "empty token",
-			fields:  fields{Name: "foo", Token: "", ChannelID: ""},
+			fields:  fields{Name: "foo", Token: "", ChannelID: 123},
 			wantErr: true,
 			errText: "token must be not empty",
 		},
 		{
 			name:    "empty channel",
-			fields:  fields{Name: "foo", Token: "foo@bar.com", ChannelID: ""},
+			fields:  fields{Name: "foo", Token: "foo@bar.com", ChannelID: 0},
 			wantErr: true,
 			errText: "channel id must be not empty",
 		},
 		{
 			name:    "ok",
-			fields:  fields{Name: "foo", Token: "foo@bar.com", ChannelID: "foobar"},
+			fields:  fields{Name: "foo", Token: "foo@bar.com", ChannelID: 123},
 			wantErr: false,
 			errText: "",
 		},
