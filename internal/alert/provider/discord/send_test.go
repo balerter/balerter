@@ -13,7 +13,6 @@ import (
 )
 
 func TestSend(t *testing.T) {
-
 	successCases := []struct {
 		name string
 		data api.SendMessageData
@@ -132,7 +131,7 @@ func TestSend(t *testing.T) {
 	})
 }
 
-func sanitizeMessage(m discord.Message, id, channelID, authorID discord.Snowflake) discord.Message {
+func sanitizeMessage(m discord.Message, id, channelID, authorID discord.Snowflake) discord.Message { //nolint:gocritic
 	if m.ID <= 0 {
 		m.ID = id
 	}
@@ -146,7 +145,7 @@ func sanitizeMessage(m discord.Message, id, channelID, authorID discord.Snowflak
 	return m
 }
 
-func User(u discord.User, id discord.Snowflake) discord.User {
+func User(u discord.User, id discord.Snowflake) discord.User { //nolint:gocritic
 	if u.ID <= 0 {
 		u.ID = id
 	}
