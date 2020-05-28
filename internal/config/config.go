@@ -9,7 +9,13 @@ import (
 )
 
 func New(configSource string) (*Config, error) {
-	cfg := &Config{}
+	cfg := &Config{
+		Scripts:     &Scripts{},
+		DataSources: &DataSources{},
+		Channels:    &Channels{},
+		Storages:    &Storages{},
+		Global:      &Global{},
+	}
 
 	var data []byte
 	var err error
@@ -36,11 +42,11 @@ func New(configSource string) (*Config, error) {
 }
 
 type Config struct {
-	Scripts     Scripts     `json:"scripts" yaml:"scripts"`
-	DataSources DataSources `json:"datasources" yaml:"datasources"`
-	Channels    Channels    `json:"channels" yaml:"channels"`
-	Storages    Storages    `json:"storages" yaml:"storages"`
-	Global      Global      `json:"global" yaml:"global"`
+	Scripts     *Scripts     `json:"scripts" yaml:"scripts"`
+	DataSources *DataSources `json:"datasources" yaml:"datasources"`
+	Channels    *Channels    `json:"channels" yaml:"channels"`
+	Storages    *Storages    `json:"storages" yaml:"storages"`
+	Global      *Global      `json:"global" yaml:"global"`
 }
 
 func (cfg *Config) Validate() error {

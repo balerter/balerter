@@ -10,7 +10,7 @@ type DataSources struct {
 	Loki       []*DataSourceLoki       `json:"loki" yaml:"loki"`
 }
 
-func (cfg DataSources) Validate() error {
+func (cfg *DataSources) Validate() error { //nolint:gocyclo // Validate calls only once on application start
 	var names []string
 
 	for _, c := range cfg.Clickhouse {

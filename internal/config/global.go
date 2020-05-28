@@ -8,7 +8,7 @@ type Global struct {
 	LuaModulesPath        string         `json:"luaModulesPath" yaml:"luaModulesPath"`
 }
 
-func (cfg Global) Validate() error {
+func (cfg *Global) Validate() error {
 	if err := cfg.API.Validate(); err != nil {
 		return err
 	}

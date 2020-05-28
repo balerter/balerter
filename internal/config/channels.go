@@ -11,7 +11,7 @@ type Channels struct {
 	Discord  []*ChannelDiscord  `json:"discord" yaml:"discord"`
 }
 
-func (cfg Channels) Validate() error {
+func (cfg *Channels) Validate() error { //nolint:gocyclo // Validate calls only once on application start
 	var names []string
 
 	for _, c := range cfg.Email {
