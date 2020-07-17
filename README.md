@@ -27,7 +27,7 @@ docker pull balerter/balerter
 
 ```
 docker run \
-    -v /peth/to/config.yml:/opt/config.yml \
+    -v /path/to/config.yml:/opt/config.yml \
     -v /path/to/scripts:/opt/scripts \ 
     -v /path/to/cert.crt:/home/user/db.crt \
     balerter/balerter -config=/opt/config.yml
