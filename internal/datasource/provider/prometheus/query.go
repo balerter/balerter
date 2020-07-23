@@ -114,48 +114,11 @@ func (m *Prometheus) doRange(luaState *lua.LState) int {
 
 	switch v.Type() {
 	case model.ValMatrix:
-		vv := v.(model.Matrix)
-
-		tbl := &lua.LTable{}
-		for _, s := range vv {
-			row := &lua.LTable{}
-
-			metrics := &lua.LTable{}
-			for key, val := range s.Metric {
-				metrics.RawSet(lua.LString(key), lua.LString(val))
-			}
-
-			values := &lua.LTable{}
-			for _, val := range s.Values {
-				value := &lua.LTable{}
-				value.RawSet(lua.LString("timestamp"), lua.LNumber(val.Timestamp.Unix()))
-				value.RawSet(lua.LString("value"), lua.LNumber(val.Value))
-
-				values.Append(value)
-			}
-
-			row.RawSet(lua.LString("metrics"), metrics)
-			row.RawSet(lua.LString("values"), values)
-			tbl.Append(row)
-		}
-
+		tbl := processValMatrixRange(v.(model.Matrix))
 		luaState.Push(tbl)
 
 	case model.ValVector:
-		vv := v.(model.Vector)
-
-		tbl := &lua.LTable{}
-		for _, s := range vv {
-			row := &lua.LTable{}
-			metrics := &lua.LTable{}
-			for key, val := range s.Metric {
-				metrics.RawSet(lua.LString(key), lua.LString(val))
-			}
-			row.RawSet(lua.LString("metrics"), metrics)
-			row.RawSet(lua.LString("value"), lua.LNumber(s.Value))
-			tbl.Append(row)
-		}
-
+		tbl := processValVectorRange(v.(model.Vector))
 		luaState.Push(tbl)
 	default:
 		m.logger.Debug("query error: unexpected prometheus model type")
@@ -167,4 +130,47 @@ func (m *Prometheus) doRange(luaState *lua.LState) int {
 	luaState.Push(lua.LNil)
 
 	return 2 //nolint:mnd
+}
+
+func processValVectorRange(vv model.Vector) *lua.LTable {
+	tbl := &lua.LTable{}
+	for _, s := range vv {
+		row := &lua.LTable{}
+		metrics := &lua.LTable{}
+		for key, val := range s.Metric {
+			metrics.RawSet(lua.LString(key), lua.LString(val))
+		}
+		row.RawSet(lua.LString("metrics"), metrics)
+		row.RawSet(lua.LString("value"), lua.LNumber(s.Value))
+		tbl.Append(row)
+	}
+
+	return tbl
+}
+
+func processValMatrixRange(vv model.Matrix) *lua.LTable {
+	tbl := &lua.LTable{}
+	for _, s := range vv {
+		row := &lua.LTable{}
+
+		metrics := &lua.LTable{}
+		for key, val := range s.Metric {
+			metrics.RawSet(lua.LString(key), lua.LString(val))
+		}
+
+		values := &lua.LTable{}
+		for _, val := range s.Values {
+			value := &lua.LTable{}
+			value.RawSet(lua.LString("timestamp"), lua.LNumber(val.Timestamp.Unix()))
+			value.RawSet(lua.LString("value"), lua.LNumber(val.Value))
+
+			values.Append(value)
+		}
+
+		row.RawSet(lua.LString("metrics"), metrics)
+		row.RawSet(lua.LString("values"), values)
+		tbl.Append(row)
+	}
+
+	return tbl
 }
