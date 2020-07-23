@@ -44,7 +44,7 @@ var (
 	defaultLuaModulesPath = "./?.lua;./modules/?.lua;./modules/?/init.lua"
 )
 
-func main() {
+func main() { //nolint:funlen,gocyclo // main function
 	lua.LuaPathDefault = defaultLuaModulesPath
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
