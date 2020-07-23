@@ -62,22 +62,23 @@ func (rnr *Runner) Run() ([]modules.TestResult, bool, error) {
 	}
 
 	for name, pair := range pairs {
-		scriptResult, err := rnr.runPair(result, name, pair)
+		result, err = rnr.runPair(result, name, pair)
 		if err != nil {
 			return nil, false, err
 		}
+	}
 
-		if !scriptResult.Ok {
+	for _, r := range result {
+		if !r.Ok {
 			ok = false
+			break
 		}
-
-		result = append(result, *scriptResult)
 	}
 
 	return result, ok, nil
 }
 
-func (rnr *Runner) runPair(result []modules.TestResult, name string, pair pair) (*modules.TestResult, error) {
+func (rnr *Runner) runPair(result []modules.TestResult, name string, pair pair) ([]modules.TestResult, error) {
 	rnr.logger.Debug("run test", zap.String("name", name))
 
 	// run test file
@@ -134,9 +135,9 @@ func (rnr *Runner) runPair(result []modules.TestResult, name string, pair pair) 
 	}
 
 	// total script result
-	scriptResult := &modules.TestResult{
+	scriptResult := modules.TestResult{
 		ScriptName: pair.test.Name,
-		ModuleName: "result",
+		ModuleName: "RESULT",
 		Message:    "PASS",
 		Ok:         true,
 	}
@@ -149,7 +150,9 @@ func (rnr *Runner) runPair(result []modules.TestResult, name string, pair pair) 
 		}
 	}
 
-	return scriptResult, nil
+	result = append(result, scriptResult)
+
+	return result, nil
 }
 
 func (rnr *Runner) createLuaState(s *script.Script) *lua.LState {
