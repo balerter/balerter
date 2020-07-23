@@ -86,7 +86,7 @@ func (rnr *Runner) runPair(result []modules.TestResult, name string, pair pair) 
 	err := LTest.DoString(string(pair.test.Body))
 	if err != nil {
 		LTest.Close()
-		return nil, fmt.Errorf("error select tests, %w", err)
+		return nil, fmt.Errorf("error run test job, %w", err)
 	}
 	LTest.Close()
 

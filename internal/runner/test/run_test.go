@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"testing"
 )
@@ -106,13 +107,68 @@ func (m *managerMock) Clean() {
 }
 
 func Test_runPair(t *testing.T) {
+	mTest1 := &modules.ModuleMock{}
+	mTest1.On("Name").Return("mt1")
+	mTest1.On("GetLoader", mock.Anything).Return(getLGFunc())
+	mTest1.On("Result").Return([]modules.TestResult{}, nil)
+	mTest1.On("Clean").Return()
+
+	storageManagerMock := &managerMock{}
+	storageManagerMock.On("Get").Return([]modules.ModuleTest{mTest1})
+	storageManagerMock.On("Result").Return([]modules.TestResult{{Ok: true, Message: "PASS"}}, nil)
+
+	dsManagerMock := &managerMock{}
+	dsManagerMock.On("Get").Return([]modules.ModuleTest{mTest1})
+	dsManagerMock.On("Result").Return([]modules.TestResult{{Ok: true, Message: "PASS"}}, nil)
+
+	coreModule1 := &modules.ModuleMock{}
+	coreModule1.On("Name").Return("m1")
+	coreModule1.On("GetLoader", mock.Anything).Return(getLGFunc())
+	coreModule1.On("Result").Return([]modules.TestResult{{Ok: true, Message: "PASS"}}, nil)
+	coreModule1.On("Clean").Return()
+
+	rnr := &Runner{
+		logger:          zap.NewNop(),
+		storagesManager: storageManagerMock,
+		dsManager:       dsManagerMock,
+		coreModules:     []modules.ModuleTest{coreModule1},
+	}
+
+	p := pair{
+		main: &script.Script{
+			Name:   "s1",
+			Body:   []byte("a = 10"),
+			IsTest: false,
+		},
+		test: &script.Script{
+			Name:       "s1_test",
+			Body:       []byte("a = 10"),
+			IsTest:     true,
+			TestTarget: "s1",
+		},
+	}
+
+	var res []modules.TestResult
+
+	res, err := rnr.runPair(res, "pair", p)
+	require.NoError(t, err)
+
+	assert.Equal(t, 4, len(res))
+
+	for _, r := range res {
+		assert.Equal(t, true, r.Ok)
+		assert.Equal(t, "PASS", r.Message)
+	}
+}
+
+func Test_runPair_with_fail_result(t *testing.T) {
 	storageManagerMock := &managerMock{}
 	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
 	storageManagerMock.On("Result").Return([]modules.TestResult{}, nil)
 
 	dsManagerMock := &managerMock{}
 	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
-	dsManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+	dsManagerMock.On("Result").Return([]modules.TestResult{{Ok: false, Message: "FAIL"}}, nil)
 
 	rnr := &Runner{
 		logger:          zap.NewNop(),
@@ -139,10 +195,192 @@ func Test_runPair(t *testing.T) {
 	res, err := rnr.runPair(res, "pair", p)
 	require.NoError(t, err)
 
-	assert.Equal(t, 1, len(res))
+	assert.Equal(t, 2, len(res))
 
 	r := res[0]
+	assert.Equal(t, false, r.Ok)
+	assert.Equal(t, "FAIL", r.Message)
 
-	assert.Equal(t, true, r.Ok)
-	assert.Equal(t, "PASS", r.Message)
+	r = res[1]
+	assert.Equal(t, false, r.Ok)
+	assert.Equal(t, "FAIL", r.Message)
+}
+
+func Test_runPair_error_run_test(t *testing.T) {
+	storageManagerMock := &managerMock{}
+	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
+	storageManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+
+	dsManagerMock := &managerMock{}
+	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
+	dsManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+
+	rnr := &Runner{
+		logger:          zap.NewNop(),
+		storagesManager: storageManagerMock,
+		dsManager:       dsManagerMock,
+	}
+
+	p := pair{
+		test: &script.Script{
+			Name:       "s1_test",
+			Body:       []byte{0x00},
+			IsTest:     true,
+			TestTarget: "s1",
+		},
+	}
+
+	_, err := rnr.runPair([]modules.TestResult{}, "pair", p)
+	require.Error(t, err)
+	assert.Equal(t, "error run test job, <string> line:1(column:1) near '\x00':   Invalid token\n", err.Error())
+}
+
+func Test_runPair_error_run_main(t *testing.T) {
+	storageManagerMock := &managerMock{}
+	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
+	storageManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+
+	dsManagerMock := &managerMock{}
+	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
+	dsManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+
+	rnr := &Runner{
+		logger:          zap.NewNop(),
+		storagesManager: storageManagerMock,
+		dsManager:       dsManagerMock,
+	}
+
+	p := pair{
+		main: &script.Script{
+			Name:   "s1",
+			Body:   []byte{0x00},
+			IsTest: false,
+		},
+		test: &script.Script{
+			Name:       "s1_test",
+			Body:       []byte("a = 10"),
+			IsTest:     true,
+			TestTarget: "s1",
+		},
+	}
+
+	_, err := rnr.runPair([]modules.TestResult{}, "pair", p)
+	require.Error(t, err)
+	assert.Equal(t, "error run main job, <string> line:1(column:1) near '\x00':   Invalid token\n", err.Error())
+}
+
+func Test_runPair_error_get_ds_results(t *testing.T) {
+	storageManagerMock := &managerMock{}
+	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
+	storageManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+
+	dsManagerMock := &managerMock{}
+	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
+	dsManagerMock.On("Result").Return([]modules.TestResult{}, fmt.Errorf("error1"))
+
+	rnr := &Runner{
+		logger:          zap.NewNop(),
+		storagesManager: storageManagerMock,
+		dsManager:       dsManagerMock,
+	}
+
+	p := pair{
+		main: &script.Script{
+			Name:   "s1",
+			Body:   []byte("a = 10"),
+			IsTest: false,
+		},
+		test: &script.Script{
+			Name:       "s1_test",
+			Body:       []byte("a = 10"),
+			IsTest:     true,
+			TestTarget: "s1",
+		},
+	}
+
+	_, err := rnr.runPair([]modules.TestResult{}, "pair", p)
+	require.Error(t, err)
+	assert.Equal(t, "error get results from datasource manager, error1", err.Error())
+}
+
+func Test_runPair_error_get_storages_results(t *testing.T) {
+	storageManagerMock := &managerMock{}
+	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
+	storageManagerMock.On("Result").Return([]modules.TestResult{}, fmt.Errorf("error1"))
+
+	dsManagerMock := &managerMock{}
+	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
+	dsManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+
+	rnr := &Runner{
+		logger:          zap.NewNop(),
+		storagesManager: storageManagerMock,
+		dsManager:       dsManagerMock,
+	}
+
+	p := pair{
+		main: &script.Script{
+			Name:   "s1",
+			Body:   []byte("a = 10"),
+			IsTest: false,
+		},
+		test: &script.Script{
+			Name:       "s1_test",
+			Body:       []byte("a = 10"),
+			IsTest:     true,
+			TestTarget: "s1",
+		},
+	}
+
+	_, err := rnr.runPair([]modules.TestResult{}, "pair", p)
+	require.Error(t, err)
+	assert.Equal(t, "error get results from storage manager, error1", err.Error())
+}
+
+func getLGFunc() lua.LGFunction {
+	return func(_ *lua.LState) int {
+		return 0
+	}
+}
+
+func Test_runPair_error_get_core_module_results(t *testing.T) {
+	storageManagerMock := &managerMock{}
+	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
+	storageManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+
+	dsManagerMock := &managerMock{}
+	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
+	dsManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+
+	coreModule1 := &modules.ModuleMock{}
+	coreModule1.On("Name").Return("m1")
+	coreModule1.On("GetLoader", mock.Anything).Return(getLGFunc())
+	coreModule1.On("Result").Return([]modules.TestResult{}, fmt.Errorf("error1"))
+
+	rnr := &Runner{
+		logger:          zap.NewNop(),
+		storagesManager: storageManagerMock,
+		dsManager:       dsManagerMock,
+		coreModules: []modules.ModuleTest{
+			coreModule1,
+		},
+	}
+
+	p := pair{
+		main: &script.Script{
+			Name:   "s1",
+			Body:   []byte("a = 10"),
+			IsTest: false,
+		},
+		test: &script.Script{
+			Name:       "s1_test",
+			Body:       []byte("a = 10"),
+			IsTest:     true,
+			TestTarget: "s1",
+		},
+	}
+
+	_, err := rnr.runPair([]modules.TestResult{}, "pair", p)
+	require.Error(t, err)
+	assert.Equal(t, "error get results from 'm1' module, error1", err.Error())
 }
