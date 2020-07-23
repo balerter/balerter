@@ -125,3 +125,13 @@ func (t *Test) GetLoader(s *script.Script) lua.LGFunction {
 		return 1
 	}
 }
+
+// Result is stub for ModuleTest interface
+func (t *Test) Result() ([]modules.TestResult, error) {
+	return nil, nil
+}
+
+// Clean is stub for ModuleTest interface
+func (t *Test) Clean() {
+
+}

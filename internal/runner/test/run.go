@@ -160,8 +160,6 @@ func (rnr *Runner) createLuaState(s *script.Script) *lua.LState {
 
 	L := lua.NewState()
 
-	L.PreloadModule(rnr.testModule.Name(), rnr.testModule.GetLoader(s))
-
 	for _, m := range rnr.coreModules {
 		L.PreloadModule(m.Name(), m.GetLoader(s))
 	}

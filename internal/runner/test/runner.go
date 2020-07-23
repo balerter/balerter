@@ -20,7 +20,6 @@ type Runner struct {
 	scriptsManager  scriptsManager
 	dsManager       manager
 	storagesManager manager
-	testModule      modules.Module
 	logger          *zap.Logger
 
 	coreModules []modules.ModuleTest
@@ -29,7 +28,6 @@ type Runner struct {
 func New(scriptsManager scriptsManager,
 	dsManager,
 	storagesManager manager,
-	testModule modules.Module,
 	coreModules []modules.ModuleTest,
 	logger *zap.Logger,
 ) *Runner {
@@ -37,7 +35,6 @@ func New(scriptsManager scriptsManager,
 		scriptsManager:  scriptsManager,
 		dsManager:       dsManager,
 		storagesManager: storagesManager,
-		testModule:      testModule,
 		logger:          logger,
 		coreModules:     coreModules,
 	}

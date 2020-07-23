@@ -175,13 +175,14 @@ func main() {
 	// | test
 	// |
 	testMod := testModule.New(dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
+	coreModules = append(coreModules, testMod)
 
 	// ---------------------
 	// |
 	// | Runner
 	// |
 	lgr.Logger().Info("init runner")
-	rnr := runnerTest.New(scriptsMgr, dsMgr, uploadStoragesMgr, testMod, coreModules, lgr.Logger())
+	rnr := runnerTest.New(scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
 
 	lgr.Logger().Info("run runner: tests")
 	results, ok, err := rnr.Run()
