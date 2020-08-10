@@ -5,6 +5,7 @@ import (
 )
 
 func createSlackMessageOptions(alertText, imageURL string, fields ...string) []slack.MsgOption {
+	opts := make([]slack.MsgOption, 0)
 	blocks := make([]slack.Block, 0)
 
 	if imageURL != "" {
@@ -14,6 +15,7 @@ func createSlackMessageOptions(alertText, imageURL string, fields ...string) []s
 	}
 
 	if alertText != "" {
+		opts = append(opts, slack.MsgOptionAsUser(true), slack.MsgOptionText(alertText, false))
 		mainTextBlock := slack.NewTextBlockObject("mrkdwn", alertText, false, false)
 		mainSectionBlock := slack.NewSectionBlock(mainTextBlock, nil, nil)
 		blocks = append(blocks, mainSectionBlock)
@@ -41,12 +43,7 @@ func createSlackMessageOptions(alertText, imageURL string, fields ...string) []s
 		blocks = append(blocks, slack.NewSectionBlock(nil, fieldBlock, nil))
 	}
 
-	opts := make([]slack.MsgOption, 0)
 	opts = append(opts, slack.MsgOptionBlocks(blocks...))
-
-	if alertText != "" {
-		opts = append(opts, slack.MsgOptionAsUser(true))
-	}
 
 	return opts
 }
