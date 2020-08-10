@@ -34,7 +34,7 @@ func (m *Prometheus) doQuery(luaState *lua.LState) int {
 
 	m.logger.Debug("call prometheus query", zap.String("name", m.name), zap.String("query", query))
 
-	v, err := m.sendQuery(query, queryOptions)
+	v, err := m.send(m.sendQuery(query, queryOptions))
 	if err != nil {
 		m.logger.Error("error send query to prometheus", zap.Error(err))
 		luaState.Push(lua.LNil)
@@ -104,7 +104,7 @@ func (m *Prometheus) doRange(luaState *lua.LState) int {
 
 	m.logger.Debug("call prometheus query range", zap.String("name", m.name), zap.String("query", query))
 
-	v, err := m.sendRange(query, rangeOptions)
+	v, err := m.send(m.sendRange(query, rangeOptions))
 	if err != nil {
 		m.logger.Error("error send query to prometheus", zap.Error(err))
 		luaState.Push(lua.LNil)

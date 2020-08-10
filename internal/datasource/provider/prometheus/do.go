@@ -18,7 +18,7 @@ const (
 	epQueryRange = apiPrefix + "/query_range"
 )
 
-func (m *Prometheus) sendRange(query string, opts queryRangeOptions) (model.Value, error) {
+func (m *Prometheus) sendRange(query string, opts queryRangeOptions) string {
 	u := *m.url
 
 	q := &url.Values{}
@@ -35,10 +35,10 @@ func (m *Prometheus) sendRange(query string, opts queryRangeOptions) (model.Valu
 	u.RawQuery = q.Encode()
 	u.Path = epQueryRange
 
-	return m.send(&u)
+	return u.String()
 }
 
-func (m *Prometheus) sendQuery(query string, opts queryQueryOptions) (model.Value, error) {
+func (m *Prometheus) sendQuery(query string, opts queryQueryOptions) string {
 	u := *m.url
 
 	q := &url.Values{}
@@ -49,11 +49,11 @@ func (m *Prometheus) sendQuery(query string, opts queryQueryOptions) (model.Valu
 	u.RawQuery = q.Encode()
 	u.Path = epQuery
 
-	return m.send(&u)
+	return u.String()
 }
 
-func (m *Prometheus) send(u fmt.Stringer) (model.Value, error) {
-	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+func (m *Prometheus) send(u string) (model.Value, error) {
+	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		return nil, err
 	}
