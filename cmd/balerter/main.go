@@ -41,7 +41,7 @@ const (
 )
 
 func main() {
-	configSource := flag.String("config", "config.yml", "Configuration source. Currently supports only path to yaml file.")
+	configSource := flag.String("config", "config.yml", "Configuration source. Currently supports only path to yaml file and 'stdin'.")
 	logLevel := flag.String("logLevel", "INFO", "Log level. ERROR, WARN, INFO or DEBUG")
 	debug := flag.Bool("debug", false, "debug mode")
 	once := flag.Bool("once", false, "once run scripts and exit")

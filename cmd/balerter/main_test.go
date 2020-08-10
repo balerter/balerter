@@ -7,23 +7,6 @@ import (
 	"testing"
 )
 
-//func Test_Main(t *testing.T) {
-//	version = "TEST"
-//	os.Args = []string{"-debug", "-once", "-config", "stdin", "-script", "test.lua"}
-//
-//	buf := &bytes.Buffer{}
-//	ws := zapcore.AddSync(buf)
-//
-//	loggerOptions = append(loggerOptions, zap.WrapCore(func(core zapcore.Core) zapcore.Core {
-//		return zapcore.NewCore(zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()), ws, zap.DebugLevel)
-//	}))
-//
-//	main()
-//
-//	assert.Contains(t, buf.String(), `,"msg":"balerter start","version":"TEST"}`)
-//	assert.Contains(t, buf.String(), `,"msg":"Foo Bar","scriptName":"test"}`)
-//}
-
 func Test_Main_bad_log_level(t *testing.T) {
 	msg, code := run("config.yml", "FOO", false, false, "")
 
