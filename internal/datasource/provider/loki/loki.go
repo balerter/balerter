@@ -25,13 +25,18 @@ func Methods() []string {
 	}
 }
 
+type httpClient interface {
+	CloseIdleConnections()
+	Do(r *http.Request) (*http.Response, error)
+}
+
 type Loki struct {
 	logger            *zap.Logger
 	name              string
 	url               *url.URL
 	basicAuthUsername string
 	basicAuthPassword string
-	client            http.Client
+	client            httpClient
 	timeout           time.Duration
 }
 
@@ -55,7 +60,7 @@ func New(cfg *config.DataSourceLoki, logger *zap.Logger) (*Loki, error) {
 		return nil, err
 	}
 
-	m.client = http.Client{
+	m.client = &http.Client{
 		Timeout: time.Second * 30,
 	}
 
