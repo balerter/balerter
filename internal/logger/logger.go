@@ -45,8 +45,6 @@ func New(level string, debugMode bool) (*Logger, error) {
 		ErrorOutputPaths: []string{"stderr"},
 	}
 
-	zap.NewDevelopmentConfig()
-
 	if debugMode {
 		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		config.EncoderConfig.EncodeCaller = zapcore.FullCallerEncoder
