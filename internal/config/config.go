@@ -3,10 +3,13 @@ package config
 import (
 	"fmt"
 	"gopkg.in/yaml.v2"
+	"io"
 	"io/ioutil"
 	"os"
 	"strings"
 )
+
+var StdIn io.Reader = os.Stdin
 
 func New(configSource string) (*Config, error) {
 	cfg := &Config{
@@ -21,7 +24,7 @@ func New(configSource string) (*Config, error) {
 	var err error
 
 	if configSource == "stdin" {
-		data, err = ioutil.ReadAll(os.Stdin)
+		data, err = ioutil.ReadAll(StdIn)
 	} else {
 		data, err = ioutil.ReadFile(configSource)
 	}

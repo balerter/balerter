@@ -10,7 +10,7 @@ type Logger struct {
 	logger *zap.Logger
 }
 
-func New(level string, debugMode bool) (*Logger, error) {
+func New(level string, debugMode bool, opts ...zap.Option) (*Logger, error) {
 	var err error
 
 	lg := &Logger{}
@@ -55,7 +55,7 @@ func New(level string, debugMode bool) (*Logger, error) {
 		config.Sampling = nil
 	}
 
-	lg.logger, err = config.Build()
+	lg.logger, err = config.Build(opts...)
 
 	return lg, err
 }

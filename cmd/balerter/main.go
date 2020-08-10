@@ -32,37 +32,46 @@ import (
 
 var (
 	version = "undefined"
+
+	loggerOptions []zap.Option // for testing purposes
 )
 
-var (
-	configSource = flag.String("config", "config.yml", "Configuration source. Currently supports only path to yaml file.")
-	logLevel     = flag.String("logLevel", "INFO", "Log level. ERROR, WARN, INFO or DEBUG")
-	debug        = flag.Bool("debug", false, "debug mode")
-	once         = flag.Bool("once", false, "once run scripts and exit")
-	withScript   = flag.String("script", "", "ignore all script sources and runs only one script. Meta-tag @ignore will be ignored")
-
+const (
 	defaultLuaModulesPath = "./?.lua;./modules/?.lua;./modules/?/init.lua"
 )
 
-func main() { //nolint:funlen,gocyclo // main function
+func main() {
+	configSource := flag.String("config", "config.yml", "Configuration source. Currently supports only path to yaml file.")
+	logLevel := flag.String("logLevel", "INFO", "Log level. ERROR, WARN, INFO or DEBUG")
+	debug := flag.Bool("debug", false, "debug mode")
+	once := flag.Bool("once", false, "once run scripts and exit")
+	withScript := flag.String("script", "", "ignore all script sources and runs only one script. Meta-tag @ignore will be ignored")
+
+	flag.Parse()
+
+	msg, code := run(*configSource, *logLevel, *debug, *once, *withScript)
+
+	log.Print(msg)
+	os.Exit(code)
+}
+
+func run(configSource, logLevel string, debug, once bool, withScript string) (string, int) { //nolint:gocritic // Run main application
 	lua.LuaPathDefault = defaultLuaModulesPath
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
+	defer ctxCancel()
+
 	wg := &sync.WaitGroup{}
 
 	coreModules := make([]modules.Module, 0)
 
-	flag.Parse()
-
-	if err := validateLogLevel(*logLevel); err != nil {
-		log.Print(err)
-		os.Exit(1)
+	if err := validateLogLevel(logLevel); err != nil {
+		return err.Error(), 1
 	}
 
-	lgr, err := logger.New(*logLevel, *debug)
+	lgr, err := logger.New(logLevel, debug, loggerOptions...)
 	if err != nil {
-		log.Printf("error init zap logger, %v", err)
-		os.Exit(1)
+		return fmt.Sprintf("error init zap logger, %v", err), 1
 	}
 
 	metrics.SetVersion(version)
@@ -70,10 +79,9 @@ func main() { //nolint:funlen,gocyclo // main function
 	lgr.Logger().Info("balerter start", zap.String("version", version))
 
 	// Configuration
-	cfg, err := config.New(*configSource)
+	cfg, err := config.New(configSource)
 	if err != nil {
-		lgr.Logger().Error("error init config", zap.Error(err))
-		os.Exit(1)
+		return fmt.Sprintf("error init config, %v", err), 1
 	}
 	lgr.Logger().Debug("loaded configuration", zap.Any("config", cfg))
 
@@ -87,13 +95,13 @@ func main() { //nolint:funlen,gocyclo // main function
 	lgr.Logger().Info("init scripts manager")
 	scriptsMgr := scriptsManager.New()
 
-	if *withScript != "" {
-		lgr.Logger().Info("rewrite script sources configuration", zap.String("filename", *withScript))
+	if withScript != "" {
+		lgr.Logger().Info("rewrite script sources configuration", zap.String("filename", withScript))
 		cfg.Scripts.Sources = config.ScriptsSources{
 			File: []*config.ScriptSourceFile{
 				{
 					Name:          "cli-script",
-					Filename:      *withScript,
+					Filename:      withScript,
 					DisableIgnore: true,
 				},
 			},
@@ -101,32 +109,28 @@ func main() { //nolint:funlen,gocyclo // main function
 	}
 
 	if err = scriptsMgr.Init(cfg.Scripts.Sources); err != nil {
-		lgr.Logger().Error("error init scripts manager", zap.Error(err))
-		os.Exit(1)
+		return fmt.Sprintf("error init scripts manager, %v", err), 1
 	}
 
 	// datasources
 	lgr.Logger().Info("init datasources manager")
 	dsMgr := dsManager.New(lgr.Logger())
 	if err = dsMgr.Init(cfg.DataSources); err != nil {
-		lgr.Logger().Error("error init datasources manager", zap.Error(err))
-		os.Exit(1)
+		return fmt.Sprintf("error init datasources manager, %v", err), 1
 	}
 
 	// upload storages
 	lgr.Logger().Info("init upload storages manager")
 	uploadStoragesMgr := uploadStorageManager.New(lgr.Logger())
 	if err = uploadStoragesMgr.Init(cfg.Storages.Upload); err != nil {
-		lgr.Logger().Error("error init upload storages manager", zap.Error(err))
-		os.Exit(1)
+		return fmt.Sprintf("error init upload storages manager, %v", err), 1
 	}
 
 	// core storages
 	lgr.Logger().Info("init core storages manager")
 	coreStoragesMgr, err := coreStorageManager.New(cfg.Storages.Core, lgr.Logger())
 	if err != nil {
-		lgr.Logger().Error("error create core storages manager", zap.Error(err))
-		os.Exit(1)
+		return fmt.Sprintf("error create core storages manager, %v", err), 1
 	}
 
 	// ---------------------
@@ -139,13 +143,11 @@ func main() { //nolint:funlen,gocyclo // main function
 
 	alertManagerStorageEngine, err := coreStoragesMgr.Get(cfg.Global.Storages.Alert)
 	if err != nil {
-		lgr.Logger().Error("error get core storages engine for alert", zap.String("name", cfg.Global.Storages.Alert), zap.Error(err))
-		os.Exit(1)
+		return fmt.Sprintf("error get core storages engine for alert '%s', %v", cfg.Global.Storages.Alert, err), 1
 	}
 	alertMgr := alertManager.New(alertManagerStorageEngine, lgr.Logger())
 	if err = alertMgr.Init(cfg.Channels); err != nil {
-		lgr.Logger().Error("error init alert manager", zap.Error(err))
-		os.Exit(1)
+		return fmt.Sprintf("error init alert manager, %v", err), 1
 	}
 	coreModules = append(coreModules, alertMgr)
 
@@ -167,8 +169,7 @@ func main() { //nolint:funlen,gocyclo // main function
 	// |
 	kvEngine, err := coreStoragesMgr.Get(cfg.Global.Storages.KV)
 	if err != nil {
-		lgr.Logger().Error("error get kv storage engine", zap.String("name", cfg.Global.Storages.KV), zap.Error(err))
-		os.Exit(1)
+		return fmt.Sprintf("error get kv storage engine '%s', %v", cfg.Global.Storages.KV, err), 1
 	}
 	lgr.Logger().Info("init kv storage", zap.String("engine", cfg.Global.Storages.KV))
 	kvModule := kv.New(kvEngine)
@@ -217,7 +218,7 @@ func main() { //nolint:funlen,gocyclo // main function
 	// |
 	// | runtime
 	// |
-	runtimeMod := runtimeModule.New(*logLevel, *debug, *once, *withScript, *configSource, lgr.Logger())
+	runtimeMod := runtimeModule.New(logLevel, debug, once, withScript, configSource, lgr.Logger())
 	coreModules = append(coreModules, runtimeMod)
 
 	// ---------------------
@@ -228,7 +229,7 @@ func main() { //nolint:funlen,gocyclo // main function
 	rnr := runner.New(cfg.Scripts.UpdateInterval, scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
 
 	lgr.Logger().Info("run runner")
-	go rnr.Watch(ctx, ctxCancel, wg, *once)
+	go rnr.Watch(ctx, ctxCancel, wg, once)
 
 	// ---------------------
 	// |
@@ -258,6 +259,8 @@ func main() { //nolint:funlen,gocyclo // main function
 	}
 
 	lgr.Logger().Info("terminate")
+
+	return "", 0
 }
 
 func validateLogLevel(level string) error {
