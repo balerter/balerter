@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	lokihttp "github.com/grafana/loki/pkg/loghttp"
 	"go.uber.org/zap"
 	"io/ioutil"
@@ -20,7 +19,7 @@ const (
 	epQueryRange = apiPrefix + "/query_range"
 )
 
-func (m *Loki) sendRange(query string, opts *rangeOptions) (*lokihttp.QueryResponse, error) {
+func (m *Loki) sendRange(query string, opts *rangeOptions) string {
 	u := *m.url
 
 	q := &url.Values{}
@@ -43,10 +42,10 @@ func (m *Loki) sendRange(query string, opts *rangeOptions) (*lokihttp.QueryRespo
 	u.RawQuery = q.Encode()
 	u.Path = epQueryRange
 
-	return m.send(&u)
+	return u.String()
 }
 
-func (m *Loki) sendQuery(query string, opts *queryOptions) (*lokihttp.QueryResponse, error) {
+func (m *Loki) sendQuery(query string, opts *queryOptions) string {
 	u := *m.url
 
 	q := &url.Values{}
@@ -63,13 +62,13 @@ func (m *Loki) sendQuery(query string, opts *queryOptions) (*lokihttp.QueryRespo
 	u.RawQuery = q.Encode()
 	u.Path = epQuery
 
-	return m.send(&u)
+	return u.String()
 }
 
-func (m *Loki) send(u fmt.Stringer) (*lokihttp.QueryResponse, error) {
-	m.logger.Debug("request to loki", zap.String("url", u.String()))
+func (m *Loki) send(u string) (*lokihttp.QueryResponse, error) {
+	m.logger.Debug("request to loki", zap.String("url", u))
 
-	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		return nil, err
 	}

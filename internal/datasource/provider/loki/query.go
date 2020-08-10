@@ -25,7 +25,7 @@ func (m *Loki) doQuery(luaState *lua.LState) int { //nolint:dupl // some code du
 
 	m.logger.Debug("call loki query", zap.String("name", m.name), zap.String("query", query), zap.Any("options", queryOptions))
 
-	v, err := m.sendQuery(query, queryOptions)
+	v, err := m.send(m.sendQuery(query, queryOptions))
 	if err != nil {
 		m.logger.Error("error send query to loki", zap.Error(err))
 		luaState.Push(lua.LNil)
@@ -88,7 +88,7 @@ func (m *Loki) doRange(luaState *lua.LState) int { //nolint:dupl // some code du
 
 	m.logger.Debug("call loki query range", zap.String("name", m.name), zap.String("query", query), zap.Any("options", rangeOptions))
 
-	v, err := m.sendRange(query, rangeOptions)
+	v, err := m.send(m.sendRange(query, rangeOptions))
 	if err != nil {
 		m.logger.Error("error send query to loki", zap.Error(err))
 		luaState.Push(lua.LNil)
