@@ -55,7 +55,13 @@ func main() {
 	os.Exit(code)
 }
 
-func run(configSource, logLevel string, debug, once bool, withScript string) (string, int) { //nolint:gocritic // Run main application
+func run( //nolint:gocritic,gocyclo,funlen // Run main application
+	configSource,
+	logLevel string,
+	debug,
+	once bool,
+	withScript string,
+) (string, int) {
 	lua.LuaPathDefault = defaultLuaModulesPath
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
