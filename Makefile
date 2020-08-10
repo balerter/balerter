@@ -8,6 +8,9 @@ TAG         ?=  latest
 	build-tgtool push-tgtool \
 	test-full test-integration
 
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
 build-balerter: ## Build balerter docker image
 	@echo Build Balerter $(TAG)
 	docker build --build-arg version=$(TAG) -t balerter/balerter:$(TAG) -f ./contrib/balerter.Dockerfile .
@@ -34,7 +37,3 @@ test-full: ## Run full tests
 test-integration: ## Run integration tests
 	go build -race -o ./integration/balerter ./cmd/balerter
 	go test ./integration
-
-# Absolutely awesome: http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
-help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
