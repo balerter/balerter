@@ -47,7 +47,10 @@ type httpClientMock struct {
 	mock.Mock
 }
 
-func (m *httpClientMock) CloseIdleConnections() {}
+func (m *httpClientMock) CloseIdleConnections() {
+	m.Called()
+}
+
 func (m *httpClientMock) Do(req *http.Request) (*http.Response, error) {
 	args := m.Called(req)
 	r := args.Get(0)
