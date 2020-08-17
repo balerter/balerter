@@ -139,3 +139,33 @@ func Test_doQuery(t *testing.T) {
 	assert.Equal(t, lua.LTTable, luaState.Get(1).Type())
 	assert.Equal(t, lua.LTNil, luaState.Get(2).Type())
 }
+
+func Test_doQuery_badQuery(t *testing.T) {
+	m := &Loki{
+		logger: zap.NewNop(),
+	}
+
+	luaState := lua.NewState()
+
+	n := m.doQuery(luaState)
+
+	assert.Equal(t, 2, n)
+	assert.Equal(t, lua.LTNil, luaState.Get(1).Type())
+	assert.Equal(t, lua.LTString, luaState.Get(2).Type())
+	assert.Equal(t, "query must be not empty", luaState.Get(2).String())
+}
+
+func Test_doRange_badQuery(t *testing.T) {
+	m := &Loki{
+		logger: zap.NewNop(),
+	}
+
+	luaState := lua.NewState()
+
+	n := m.doRange(luaState)
+
+	assert.Equal(t, 2, n)
+	assert.Equal(t, lua.LTNil, luaState.Get(1).Type())
+	assert.Equal(t, lua.LTString, luaState.Get(2).Type())
+	assert.Equal(t, "query must be not empty", luaState.Get(2).String())
+}
