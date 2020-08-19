@@ -6,16 +6,6 @@ import (
 	"time"
 )
 
-type ProxyConfig struct {
-	Address string           `json:"address" yaml:"address"`
-	Auth    *ProxyAuthConfig `json:"auth" yaml:"auth"`
-}
-
-type ProxyAuthConfig struct {
-	Username string `json:"username" yaml:"username"`
-	Password string `json:"password" yaml:"password"`
-}
-
 type Telegram struct {
 	Name    string        `json:"name" yaml:"name"`
 	Token   string        `json:"token" yaml:"token"`
