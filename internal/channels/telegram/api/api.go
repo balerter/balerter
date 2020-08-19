@@ -3,60 +3,29 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/balerter/balerter/internal/config/channels/telegram"
-	"golang.org/x/net/proxy"
+	config "github.com/balerter/balerter/internal/config/channels/telegram"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"net"
-	"net/http"
 	"time"
 )
 
 const (
-	apiEndpoint              = "https://api.telegram.org/bot"
 	defaultHTTPClientTimeout = time.Second * 5
-
-	methodSendMessage = "sendMessage"
-	methodSendPhoto   = "sendPhoto"
 )
 
 type API struct {
-	endpoint   string
-	httpClient *http.Client
+	api        *tgbotapi.BotAPI
 }
 
-func New(cfg *telegram.Telegram) (*API, error) {
+func New(cfg *config.Telegram) (*API, error) {
+	botAPI, err := tgbotapi.NewBotAPI(cfg.Token)
+
+	if err != nil {
+		return nil, fmt.Errorf("error create bot api, %w", err)
+	}
+
 	a := &API{
-		endpoint: apiEndpoint + cfg.Token + "/",
-	}
-
-	a.httpClient = &http.Client{
-		CheckRedirect: nil,
-		Jar:           nil,
-		Timeout:       cfg.Timeout,
-	}
-
-	if cfg.Proxy != nil {
-		var proxyAuth *proxy.Auth
-
-		if cfg.Proxy.Auth != nil {
-			proxyAuth = &proxy.Auth{
-				User:     cfg.Proxy.Auth.Username,
-				Password: cfg.Proxy.Auth.Password,
-			}
-		}
-
-		d, err := proxy.SOCKS5("tcp4", cfg.Proxy.Address, proxyAuth, nil)
-		if err != nil {
-			return nil, fmt.Errorf("error create proxy, %w", err)
-		}
-
-		a.httpClient.Transport = &http.Transport{
-			Proxy:       nil,
-			DialContext: getDialContextFunc(d.Dial),
-		}
-	}
-
-	if a.httpClient.Timeout == 0 {
-		a.httpClient.Timeout = defaultHTTPClientTimeout
+		api: botAPI,
 	}
 
 	return a, nil

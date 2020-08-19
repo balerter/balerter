@@ -20,7 +20,6 @@ type Telegram struct {
 	Name    string        `json:"name" yaml:"name"`
 	Token   string        `json:"token" yaml:"token"`
 	ChatID  int64         `json:"chatId" yaml:"chatId"`
-	Proxy   *ProxyConfig  `json:"proxy" yaml:"proxy"`
 	Timeout time.Duration `json:"timeout" yaml:"timeout"`
 }
 

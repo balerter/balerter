@@ -1,43 +1,27 @@
 package api
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"net/http"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 func (api *API) SendPhotoMessage(mes *PhotoMessage) error {
-	body, err := json.Marshal(mes)
+	file, err := mes.getPhotoFile()
 	if err != nil {
-		return fmt.Errorf("error marshaling a message, %w", err)
+		return fmt.Errorf("error get photo file, %w", err)
 	}
 
-	return api.sendMessage(body, methodSendPhoto)
+	msg := tgbotapi.NewPhotoUpload(mes.ChatID, file)
+	api.sendMessage(msg)
+	return nil
 }
 
 func (api *API) SendTextMessage(mes *TextMessage) error {
-	body, err := json.Marshal(mes)
-	if err != nil {
-		return fmt.Errorf("error marshaling a message, %w", err)
-	}
-
-	return api.sendMessage(body, methodSendMessage)
+	msg := tgbotapi.NewMessage(mes.ChatID, mes.Text)
+	api.sendMessage(msg)
+	return nil
 }
 
-func (api *API) sendMessage(body []byte, method string) error {
-	req, err := http.NewRequest(http.MethodPost, api.endpoint+method, bytes.NewReader(body))
-	if err != nil {
-		return fmt.Errorf("error generate request to telegram, %w", err)
-	}
-	req.Header.Add("Content-type", "application/json")
-
-	res, err := api.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("error send request, %w", err)
-	}
-
-	res.Body.Close()
-
-	return nil
+func (api *API) sendMessage(message tgbotapi.Chattable) {
+	api.api.Send(message)
 }
