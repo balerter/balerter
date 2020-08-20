@@ -3,9 +3,9 @@ package api
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 )
 
 type TextMessage struct {
@@ -20,13 +20,7 @@ type PhotoMessage struct {
 }
 
 func (message *PhotoMessage) getPhotoFile() (fileName string, err error) {
-	tokens := strings.Split(message.Photo, "/")
-
-	_ = os.Mkdir("tmp", os.ModePerm)
-
-	fileName = "tmp/" + tokens[len(tokens)-1]
-
-	output, err := os.Create(fileName)
+	output, err := ioutil.TempFile(os.TempDir(), "balerter.*")
 	if err != nil {
 		fmt.Println("Error while creating", fileName, "-", err)
 		return
