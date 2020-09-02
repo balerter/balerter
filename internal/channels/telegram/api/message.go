@@ -25,6 +25,7 @@ func (message *PhotoMessage) getPhotoFile() (fileName string, err error) {
 		fmt.Println("Error while creating", fileName, "-", err)
 		return
 	}
+	fileName = output.Name()
 	defer output.Close()
 
 	response, err := http.Get(message.Photo)
@@ -40,7 +41,7 @@ func (message *PhotoMessage) getPhotoFile() (fileName string, err error) {
 		return
 	}
 
-	return fileName, nil
+	return
 }
 
 func NewPhotoMessage(chatID int64, photo, text string) *PhotoMessage {
