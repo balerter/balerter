@@ -19,6 +19,11 @@ FROM  debian:stretch-slim
 COPY --from=build /balerter /
 COPY --from=build /build/balerter/modules /modules
 
+RUN apt-get update \
+     && apt-get install -y --no-install-recommends ca-certificates
+
+RUN update-ca-certificates
+
 ENTRYPOINT ["/balerter"]
 
 CMD ["/balerter"]
