@@ -12,16 +12,24 @@ func (api *API) SendPhotoMessage(mes *PhotoMessage) error {
 	}
 
 	msg := tgbotapi.NewPhotoUpload(mes.ChatID, file)
-	api.sendMessage(msg)
+	err = api.sendMessage(msg)
+	if err != nil {
+		return fmt.Errorf("error send message, %w", err)
+	}
+
 	return nil
 }
 
 func (api *API) SendTextMessage(mes *TextMessage) error {
 	msg := tgbotapi.NewMessage(mes.ChatID, mes.Text)
-	api.sendMessage(msg)
+	err := api.sendMessage(msg)
+	if err != nil {
+		return fmt.Errorf("error send message, %w", err)
+	}
 	return nil
 }
 
-func (api *API) sendMessage(message tgbotapi.Chattable) {
-	api.api.Send(message)
+func (api *API) sendMessage(message tgbotapi.Chattable) (err error) {
+	_, err = api.api.Send(message)
+	return
 }
