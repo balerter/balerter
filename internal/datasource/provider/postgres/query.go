@@ -53,6 +53,12 @@ func (m *Postgres) query(luaState *lua.LState) int {
 
 		result.Append(row)
 	}
+	if err := rows.Err(); err != nil {
+		m.logger.Error("error next", zap.Error(err))
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("error next: " + err.Error()))
+		return 2 //nolint:mnd
+	}
 
 	luaState.Push(result)
 	luaState.Push(lua.LNil)
