@@ -5,7 +5,6 @@
 > A Project in active development. Features may have breaking changes at any time before v1.0.0 version 
 
 - [Telegram Group](https://t.me/balerter)
-- [Slack workspace](https://join.slack.com/t/balerter/shared_invite/zt-dv94fjb6-xC8rZvr79m4JJEy1LkKPPw)
 
 Balerter is a scripts based alerting system.
 
