@@ -52,7 +52,7 @@ func (m *Manager) Init(cfg *config.DataSources) error {
 	}
 
 	for idx := range cfg.MySQL {
-		module, err := mysql.New(cfg.MySQL[idx], m.logger)
+		module, err := mysql.New(cfg.MySQL[idx], sqlx.Connect, m.logger)
 		if err != nil {
 			return err
 		}
