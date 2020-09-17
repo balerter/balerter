@@ -31,7 +31,9 @@ type MySQL struct {
 	timeout time.Duration
 }
 
-func New(cfg *config.DataSourceMysql, logger *zap.Logger) (*MySQL, error) {
+type SQLConnFunc func(string, string) (*sqlx.DB, error)
+
+func New(cfg *config.DataSourceMysql, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*MySQL, error) {
 	p := &MySQL{
 		name:    ModuleName(cfg.Name),
 		logger:  logger,
@@ -44,7 +46,7 @@ func New(cfg *config.DataSourceMysql, logger *zap.Logger) (*MySQL, error) {
 
 	var err error
 
-	p.db, err = sqlx.Connect("mysql", cfg.DSN)
+	p.db, err = sqlConnFunc("mysql", cfg.DSN)
 	if err != nil {
 		return nil, err
 	}
