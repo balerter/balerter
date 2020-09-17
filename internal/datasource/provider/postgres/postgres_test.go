@@ -57,3 +57,35 @@ func TestNew(t *testing.T) {
 	require.NoError(t, err)
 	assert.IsType(t, &Postgres{}, p)
 }
+
+func TestName(t *testing.T) {
+	p := &Postgres{name: "Foo"}
+	assert.Equal(t, "Foo", p.Name())
+}
+
+func TestStop_Error(t *testing.T) {
+	db, dbmock, err := sqlmock.New(sqlmock.MonitorPingsOption(true))
+	require.NoError(t, err)
+	p := &Postgres{
+		db: sqlx.NewDb(db, "sqlmock"),
+	}
+
+	dbmock.ExpectClose().WillReturnError(fmt.Errorf("err1"))
+
+	err = p.Stop()
+	require.Error(t, err)
+	assert.Equal(t, "err1", err.Error())
+}
+
+func TestStop(t *testing.T) {
+	db, dbmock, err := sqlmock.New(sqlmock.MonitorPingsOption(true))
+	require.NoError(t, err)
+	p := &Postgres{
+		db: sqlx.NewDb(db, "sqlmock"),
+	}
+
+	dbmock.ExpectClose()
+
+	err = p.Stop()
+	require.NoError(t, err)
+}
