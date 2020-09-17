@@ -32,7 +32,9 @@ type Postgres struct {
 	timeout time.Duration
 }
 
-func New(cfg *config.DataSourcePostgres, logger *zap.Logger) (*Postgres, error) {
+type SQLConnFunc func(string, string) (*sqlx.DB, error)
+
+func New(cfg *config.DataSourcePostgres, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*Postgres, error) {
 	p := &Postgres{
 		name:    ModuleName(cfg.Name),
 		logger:  logger,
@@ -54,7 +56,7 @@ func New(cfg *config.DataSourcePostgres, logger *zap.Logger) (*Postgres, error) 
 	)
 	var err error
 
-	p.db, err = sqlx.Connect("postgres", pgConnString)
+	p.db, err = sqlConnFunc("postgres", pgConnString)
 	if err != nil {
 		return nil, err
 	}
