@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"testing"
 )
@@ -88,4 +89,25 @@ func TestStop(t *testing.T) {
 
 	err = p.Stop()
 	require.NoError(t, err)
+}
+
+func TestGetLoader(t *testing.T) {
+	p := &Postgres{}
+
+	loader := p.GetLoader(nil)
+
+	luaState := lua.NewState()
+
+	n := loader(luaState)
+	assert.Equal(t, 1, n)
+
+	v := luaState.Get(1).(*lua.LTable)
+
+	for _, method := range Methods() {
+		assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString(method)))
+	}
+}
+
+func TestModuleName(t *testing.T) {
+	assert.Equal(t, "postgres.Foo", ModuleName("Foo"))
 }
