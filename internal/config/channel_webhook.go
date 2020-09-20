@@ -19,7 +19,7 @@ type AuthBearerConfig struct {
 
 type AuthCustomConfig struct {
 	Headers     map[string]string `json:"headers" yaml:"headers"`
-	QueryParams map[string]string `json:"query_params" yaml:"query_params"`
+	QueryParams map[string]string `json:"queryParams" yaml:"queryParams"`
 }
 
 type AuthConfig struct {
@@ -60,9 +60,6 @@ func (cfg *AuthConfig) Validate() error {
 		}
 		return nil
 	case AuthTypeCustom:
-		if len(cfg.AuthCustomConfig.Headers)+len(cfg.AuthCustomConfig.QueryParams) == 0 {
-			return fmt.Errorf("headers and query_params must be not empty")
-		}
 		return nil
 	default:
 		return fmt.Errorf("type must be set to none, basic, bearer or custom")
@@ -70,7 +67,7 @@ func (cfg *AuthConfig) Validate() error {
 }
 
 type PayloadConfig struct {
-	QueryParams map[string]string `json:"query_params" yaml:"query_params"`
+	QueryParams map[string]string `json:"queryParams" yaml:"queryParams"`
 	Body        string            `json:"body" yaml:"body"`
 }
 
@@ -84,7 +81,7 @@ func (cfg PayloadConfig) Validate(method string) error {
 		return nil
 	case http.MethodGet:
 		if len(cfg.QueryParams) == 0 {
-			return fmt.Errorf("query_params must be not empty")
+			return fmt.Errorf("queryParams must be not empty")
 		}
 		return nil
 
@@ -120,9 +117,6 @@ func (cfg *ChannelWebhook) Validate() error {
 	cfg.Method = strings.ToUpper(strings.TrimSpace(cfg.Method))
 	if cfg.Method == "" {
 		cfg.Method = http.MethodPost
-	}
-	if cfg.Method != http.MethodPost && cfg.Method != http.MethodGet {
-		return fmt.Errorf("method must be set to post or get")
 	}
 
 	if cfg.Timeout < 0 {

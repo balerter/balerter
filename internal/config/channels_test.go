@@ -72,7 +72,20 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated webhook",
 			fields: fields{
-				Webhook: []ChannelWebhook{{Name: "foo", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}}, Payload: PayloadConfig{Body: `{}`}}, {Name: "foo", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}}, Payload: PayloadConfig{Body: `{}`}}},
+				Webhook: []*ChannelWebhook{
+					{
+						Name:    "foo",
+						URL:     "https://foo.bar/baz",
+						Auth:    AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}},
+						Payload: PayloadConfig{Body: `{}`},
+					},
+					{
+						Name:    "foo",
+						URL:     "https://foo.bar/baz",
+						Auth:    AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}},
+						Payload: PayloadConfig{Body: `{}`},
+					},
+				},
 			},
 			wantErr: true,
 			errText: "found duplicated name for channels 'webhook': foo",
@@ -92,7 +105,9 @@ func TestChannels_Validate(t *testing.T) {
 				Notify: []*ChannelNotify{{Name: "foo"}, {Name: "foo2"}},
 				Discord: []*ChannelDiscord{{Name: "foo", Token: "a", ChannelID: 1},
 					{Name: "foo2", Token: "a", ChannelID: 1}},
-				Webhook: []*ChannelWebhook{{Name: "foo", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}}, Payload: PayloadConfig{Body: `{}`}}, {Name: "foo2", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}}, Payload: PayloadConfig{Body: `{}`}}},
+				Webhook: []*ChannelWebhook{
+					{Name: "foo", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}}, Payload: PayloadConfig{Body: `{}`}},
+					{Name: "foo2", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}}, Payload: PayloadConfig{Body: `{}`}}},
 			},
 			wantErr: false,
 			errText: "",

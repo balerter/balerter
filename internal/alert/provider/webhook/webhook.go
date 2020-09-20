@@ -1,6 +1,8 @@
 package webhook
 
 import (
+	"net/http"
+
 	"github.com/balerter/balerter/internal/config"
 	"go.uber.org/zap"
 )
@@ -9,11 +11,21 @@ import (
 type Webhook struct {
 	conf   *config.ChannelWebhook
 	logger *zap.Logger
+	client *http.Client
 	name   string
 }
 
 func New(cfg config.ChannelWebhook, logger *zap.Logger) (*Webhook, error) {
-	return &Webhook{conf: &cfg, logger: logger, name: cfg.Name}, nil
+	client := &http.Client{
+		Timeout: cfg.Timeout,
+	}
+
+	return &Webhook{
+		conf:   &cfg,
+		logger: logger,
+		client: client,
+		name:   cfg.Name,
+	}, nil
 }
 
 func (w *Webhook) Name() string {

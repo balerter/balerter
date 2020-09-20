@@ -2,6 +2,7 @@ package webhook
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -15,15 +16,12 @@ func (w *Webhook) Send(message *message.Message) error {
 
 	req, err := w.request(ctx, message)
 	if err != nil {
-		return err
+		return fmt.Errorf("webhook request creation failed: %w", err)
 	}
 
-	client := &http.Client{
-		Timeout: w.conf.Timeout,
-	}
-	resp, err := client.Do(req)
+	resp, err := w.client.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("webhook request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -42,6 +40,7 @@ func (w *Webhook) request(ctx context.Context, message *message.Message) (*http.
 	for param, value := range w.conf.Payload.QueryParams {
 		query.Add(param, interpolate(value, message))
 	}
+	req.URL.RawQuery = query.Encode()
 
 	switch w.conf.Auth.Type {
 	case config.AuthTypeBasic:
@@ -53,10 +52,12 @@ func (w *Webhook) request(ctx context.Context, message *message.Message) (*http.
 		for key, value := range w.conf.Auth.AuthCustomConfig.Headers {
 			req.Header.Add(key, value)
 		}
+
 		query := req.URL.Query()
 		for param, value := range w.conf.Auth.AuthCustomConfig.QueryParams {
 			query.Add(param, value)
 		}
+		req.URL.RawQuery = query.Encode()
 	}
 	return req, nil
 }
@@ -65,10 +66,11 @@ func interpolate(s string, message *message.Message) string {
 	if message == nil {
 		return s
 	}
-	s = strings.ReplaceAll(s, "$level", message.Level)
-	s = strings.ReplaceAll(s, "$alert_name", message.AlertName)
-	s = strings.ReplaceAll(s, "$text", message.Text)
-	s = strings.ReplaceAll(s, "$image", message.Image)
 
-	return s
+	return strings.NewReplacer(
+		"$level", message.Level,
+		"$alert_name", message.AlertName,
+		"$text", message.Text,
+		"$image", message.Image,
+	).Replace(s)
 }

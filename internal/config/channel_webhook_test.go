@@ -33,12 +33,6 @@ func TestChannelWebhook_Validate(t *testing.T) {
 			errText: "url must be not empty",
 		},
 		{
-			name:    "patch method",
-			fields:  fields{Name: "foo", URL: "https://foo.bar/baz", Method: "patch"},
-			wantErr: true,
-			errText: "method must be set to post or get",
-		},
-		{
 			name:    "low timeout",
 			fields:  fields{Name: "foo", URL: "https://foo.bar/baz", Timeout: -1},
 			wantErr: true,
@@ -69,22 +63,10 @@ func TestChannelWebhook_Validate(t *testing.T) {
 			errText: "error validate auth: token must be not empty",
 		},
 		{
-			name:    "empty headers and query_params",
-			fields:  fields{Name: "foo", URL: "https://foo.bar/baz", Auth: AuthConfig{Type: "custom"}},
-			wantErr: true,
-			errText: "error validate auth: headers and query_params must be not empty",
-		},
-		{
 			name:    "empty body",
 			fields:  fields{Name: "foo", URL: "https://foo.bar/baz"},
 			wantErr: true,
 			errText: "error validate payload: body must be not empty",
-		},
-		{
-			name:    "empty query_params",
-			fields:  fields{Name: "foo", URL: "https://foo.bar/baz", Method: "get"},
-			wantErr: true,
-			errText: "error validate payload: query_params must be not empty",
 		},
 		{
 			name: "post basic ok",
