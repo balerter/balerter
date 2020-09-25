@@ -3,12 +3,13 @@ package config
 import "fmt"
 
 type Channels struct {
-	Email        []*ChannelEmail        `json:"email" yaml:"email"`
-	Slack        []*ChannelSlack        `json:"slack" yaml:"slack"`
-	Telegram     []*ChannelTelegram     `json:"telegram" yaml:"telegram"`
-	Syslog       []*ChannelSyslog       `json:"syslog" yaml:"syslog"`
-	Notify       []*ChannelNotify       `json:"notify" yaml:"notify"`
-	Discord      []*ChannelDiscord      `json:"discord" yaml:"discord"`
+	Email    []*ChannelEmail    `json:"email" yaml:"email"`
+	Slack    []*ChannelSlack    `json:"slack" yaml:"slack"`
+	Telegram []*ChannelTelegram `json:"telegram" yaml:"telegram"`
+	Syslog   []*ChannelSyslog   `json:"syslog" yaml:"syslog"`
+	Notify   []*ChannelNotify   `json:"notify" yaml:"notify"`
+	Discord  []*ChannelDiscord  `json:"discord" yaml:"discord"`
+	Webhook  []*ChannelWebhook  `json:"webhook" yaml:"webhook"`
 	Alertmanager []*ChannelAlertmanager `json:"alertmanager" yaml:"alertmanager"`
 }
 
@@ -81,7 +82,18 @@ func (cfg *Channels) Validate() error { //nolint:gocyclo // Validate calls only 
 	}
 
 	names = names[:0]
-	for _, c := range cfg.Alertmanager {
+	for _, c := range cfg.Webhook {
+		names = append(names, c.Name)
+		if err := c.Validate(); err != nil {
+			return fmt.Errorf("validate channel webhook: %w", err)
+		}
+	}
+	if name := checkUnique(names); name != "" {
+		return fmt.Errorf("found duplicated name for channels 'webhook': %s", name)
+  }
+  
+	names = names[:0]
+  for _, c := range cfg.Alertmanager {
 		names = append(names, c.Name)
 		if err := c.Validate(); err != nil {
 			return fmt.Errorf("validate channel alertmanager: %w", err)
