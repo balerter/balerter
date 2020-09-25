@@ -23,6 +23,11 @@ func newPromAlert() *model.Alert {
 func (a *AlertManager) Send(mes *message.Message) error {
 	promAlert := newPromAlert()
 
+	// TODO (negasus): After refactoring with pass Alert to 'send' method, this condition should be refactoring
+	if mes.Level == "success" {
+		promAlert.EndsAt = time.Now()
+	}
+
 	promAlert.Labels["name"] = model.LabelValue(mes.AlertName)
 	promAlert.Annotations["description"] = model.LabelValue(mes.Text)
 
