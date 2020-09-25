@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+	"github.com/balerter/balerter/internal/alert/provider/alertmanager"
 
 	"github.com/balerter/balerter/internal/alert/alert"
 	"github.com/balerter/balerter/internal/alert/message"
@@ -93,6 +94,15 @@ func (m *Manager) Init(cfg *config.Channels) error {
 		module, err := discord.New(cfg.Discord[idx], m.logger)
 		if err != nil {
 			return fmt.Errorf("error init discord channel %s, %w", cfg.Discord[idx].Name, err)
+		}
+
+		m.channels[module.Name()] = module
+	}
+
+	for idx := range cfg.Alertmanager {
+		module, err := alertmanager.New(cfg.Alertmanager[idx], m.logger)
+		if err != nil {
+			return fmt.Errorf("error init alertmanager channel %s, %w", cfg.Alertmanager[idx].Name, err)
 		}
 
 		m.channels[module.Name()] = module

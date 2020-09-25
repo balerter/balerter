@@ -78,8 +78,11 @@ func (api *API) Run(ctx context.Context, ctxCancel context.CancelFunc, wg *sync.
 
 	api.logger.Info("shutdown api server")
 
-	if err := api.server.Shutdown(ctx); err != nil {
-		api.logger.Error("error shutdown api server", zap.Error(err))
+	err = api.server.Shutdown(ctx)
+	if err != nil {
+		if err.Error() != "context canceled" {
+			api.logger.Error("error shutdown api server", zap.Error(err))
+		}
 	}
 }
 
