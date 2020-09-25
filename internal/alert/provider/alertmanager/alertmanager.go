@@ -2,7 +2,6 @@ package alertmanager
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/alert/message"
 	"github.com/balerter/balerter/internal/config"
 	"go.uber.org/zap"
 	"net/url"
@@ -44,7 +43,7 @@ func New(cfg *config.ChannelAlertmanager, logger *zap.Logger) (*AlertManager, er
 	case versionV2:
 		u.Path = "/api/v2/alerts"
 	default:
-		return nil, fmt.Errorf("unsuppored api version")
+		return nil, fmt.Errorf("unsuppored api version %s", a.version)
 	}
 
 	a.url = u.String()
@@ -54,15 +53,4 @@ func New(cfg *config.ChannelAlertmanager, logger *zap.Logger) (*AlertManager, er
 
 func (a *AlertManager) Name() string {
 	return a.name
-}
-
-func (a *AlertManager) Send(mes *message.Message) error {
-	switch a.version {
-	case versionV1:
-		return a.send(mes)
-	case versionV2:
-		return a.send(mes)
-	}
-
-	return fmt.Errorf("unsupported version %s", a.version)
 }

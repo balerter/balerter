@@ -20,7 +20,7 @@ func newPromAlert() *model.Alert {
 	}
 }
 
-func (a *AlertManager) send(mes *message.Message) error {
+func (a *AlertManager) Send(mes *message.Message) error {
 	promAlert := newPromAlert()
 
 	promAlert.Labels["name"] = model.LabelValue(mes.AlertName)
