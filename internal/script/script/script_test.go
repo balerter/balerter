@@ -74,7 +74,7 @@ func TestScript_ParseMeta_WrongDuration(t *testing.T) {
 	err := s.ParseMeta()
 
 	require.Error(t, err)
-	assert.Equal(t, "time: unknown unit sm in duration 5sm", err.Error())
+	assert.Equal(t, "time: unknown unit \"sm\" in duration \"5sm\"", err.Error())
 }
 
 func TestScript_ParseMeta_EmptyName(t *testing.T) {
