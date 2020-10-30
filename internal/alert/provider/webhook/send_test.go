@@ -149,7 +149,7 @@ func TestSend(t *testing.T) {
 
 	t.Run("timeout-error", func(t *testing.T) {
 		a := require.New(t)
-		conf.Timeout = 1 * time.Second
+		conf.Timeout = 1000
 
 		err := testHook(conf, msg, func(w http.ResponseWriter, req *http.Request) {
 			time.Sleep(3 * time.Second)
