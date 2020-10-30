@@ -68,8 +68,9 @@ func (api *API) Run(ctx context.Context, ctxCancel context.CancelFunc, wg *sync.
 
 	go func() {
 		api.logger.Info("serve api server", zap.String("address", api.address))
-		if err := api.server.Serve(ln); err != nil && err.Error() != "http: Server closed" {
-			api.logger.Error("error serve api server", zap.Error(err))
+		e := api.server.Serve(ln)
+		if e != nil && e.Error() != "http: Server closed" {
+			api.logger.Error("error serve api server", zap.Error(e))
 			ctxCancel()
 		}
 	}()
