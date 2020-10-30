@@ -100,7 +100,7 @@ type ChannelWebhook struct {
 	Timeout time.Duration `json:"timeout" yaml:"timeout"`
 }
 
-// Validate checks the webhool configuration.
+// Validate checks the webhook configuration.
 func (cfg *ChannelWebhook) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
