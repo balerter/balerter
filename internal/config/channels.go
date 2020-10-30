@@ -3,14 +3,15 @@ package config
 import "fmt"
 
 type Channels struct {
-	Email        []*ChannelEmail        `json:"email" yaml:"email"`
-	Slack        []*ChannelSlack        `json:"slack" yaml:"slack"`
-	Telegram     []*ChannelTelegram     `json:"telegram" yaml:"telegram"`
-	Syslog       []*ChannelSyslog       `json:"syslog" yaml:"syslog"`
-	Notify       []*ChannelNotify       `json:"notify" yaml:"notify"`
-	Discord      []*ChannelDiscord      `json:"discord" yaml:"discord"`
-	Webhook      []*ChannelWebhook      `json:"webhook" yaml:"webhook"`
-	Alertmanager []*ChannelAlertmanager `json:"alertmanager" yaml:"alertmanager"`
+	Email                []*ChannelEmail                `json:"email" yaml:"email"`
+	Slack                []*ChannelSlack                `json:"slack" yaml:"slack"`
+	Telegram             []*ChannelTelegram             `json:"telegram" yaml:"telegram"`
+	Syslog               []*ChannelSyslog               `json:"syslog" yaml:"syslog"`
+	Notify               []*ChannelNotify               `json:"notify" yaml:"notify"`
+	Discord              []*ChannelDiscord              `json:"discord" yaml:"discord"`
+	Webhook              []*ChannelWebhook              `json:"webhook" yaml:"webhook"`
+	Alertmanager         []*ChannelAlertmanager         `json:"alertmanager" yaml:"alertmanager"`
+	AlertmanagerReceiver []*ChannelAlertmanagerReceiver `json:"alertmanager_receiver" yaml:"alertmanager_receiver"`
 }
 
 func (cfg *Channels) Validate() error { //nolint:gocyclo // Validate calls only once on application start
@@ -101,6 +102,17 @@ func (cfg *Channels) Validate() error { //nolint:gocyclo // Validate calls only 
 	}
 	if name := checkUnique(names); name != "" {
 		return fmt.Errorf("found duplicated name for channels 'alertmanager': %s", name)
+	}
+
+	names = names[:0]
+	for _, c := range cfg.AlertmanagerReceiver {
+		names = append(names, c.Name)
+		if err := c.Validate(); err != nil {
+			return fmt.Errorf("validate channel alertmanager_receiver: %w", err)
+		}
+	}
+	if name := checkUnique(names); name != "" {
+		return fmt.Errorf("found duplicated name for channels 'alertmanager_receiver': %s", name)
 	}
 
 	return nil

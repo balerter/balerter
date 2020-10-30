@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	versionV1 = "v1"
-	versionV2 = "v2"
+	VersionV1 = "v1"
+	VersionV2 = "v2"
 
-	defaultVersion = versionV1
+	defaultVersion = VersionV1
 )
 
 type AlertManager struct {
@@ -38,9 +38,9 @@ func New(cfg *config.ChannelAlertmanager, logger *zap.Logger) (*AlertManager, er
 	}
 
 	switch a.version {
-	case versionV1:
+	case VersionV1:
 		u.Path = "/api/v1/alerts"
-	case versionV2:
+	case VersionV2:
 		u.Path = "/api/v2/alerts"
 	default:
 		return nil, fmt.Errorf("unsuppored api version %s", a.version)

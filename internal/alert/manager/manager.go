@@ -3,6 +3,7 @@ package manager
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert/provider/alertmanager"
+	alertmanagerreceiver "github.com/balerter/balerter/internal/alert/provider/alertmanager_receiver"
 	"github.com/balerter/balerter/internal/alert/provider/webhook"
 
 	"github.com/balerter/balerter/internal/alert/alert"
@@ -113,6 +114,15 @@ func (m *Manager) Init(cfg *config.Channels) error {
 		module, err := alertmanager.New(cfg.Alertmanager[idx], m.logger)
 		if err != nil {
 			return fmt.Errorf("error init alertmanager channel %s, %w", cfg.Alertmanager[idx].Name, err)
+		}
+
+		m.channels[module.Name()] = module
+	}
+
+	for idx := range cfg.AlertmanagerReceiver {
+		module, err := alertmanagerreceiver.New(cfg.AlertmanagerReceiver[idx], m.logger)
+		if err != nil {
+			return fmt.Errorf("error init alertmanager_receiver channel %s, %w", cfg.AlertmanagerReceiver[idx].Name, err)
 		}
 
 		m.channels[module.Name()] = module
