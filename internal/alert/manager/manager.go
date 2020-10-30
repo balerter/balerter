@@ -3,6 +3,7 @@ package manager
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert/provider/alertmanager"
+	"github.com/balerter/balerter/internal/alert/provider/webhook"
 
 	"github.com/balerter/balerter/internal/alert/alert"
 	"github.com/balerter/balerter/internal/alert/message"
@@ -94,6 +95,15 @@ func (m *Manager) Init(cfg *config.Channels) error {
 		module, err := discord.New(cfg.Discord[idx], m.logger)
 		if err != nil {
 			return fmt.Errorf("error init discord channel %s, %w", cfg.Discord[idx].Name, err)
+		}
+
+		m.channels[module.Name()] = module
+	}
+
+	for idx := range cfg.Webhook {
+		module, err := webhook.New(cfg.Webhook[idx], m.logger)
+		if err != nil {
+			return fmt.Errorf("error init webhook channel %s, %w", cfg.Webhook[idx].Name, err)
 		}
 
 		m.channels[module.Name()] = module
