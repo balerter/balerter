@@ -3,15 +3,14 @@ package webhook
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"strings"
-
 	"github.com/balerter/balerter/internal/alert/message"
 	"github.com/balerter/balerter/internal/config"
+	"net/http"
+	"strings"
 )
 
 func (w *Webhook) Send(message *message.Message) error {
-	ctx, cancel := context.WithTimeout(context.Background(), w.conf.Timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), w.timeout)
 	defer cancel()
 
 	req, err := w.request(ctx, message)
