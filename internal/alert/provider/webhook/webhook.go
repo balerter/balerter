@@ -27,7 +27,7 @@ func New(cfg *config.ChannelWebhook, logger *zap.Logger) (*Webhook, error) {
 		t = defaultTimeout
 	}
 
-	timeout := time.Millisecond * time.Duration(t)
+	timeout := time.Millisecond * t
 
 	client := &http.Client{
 		Timeout: timeout,

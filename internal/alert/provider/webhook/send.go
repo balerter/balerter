@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-func (w *Webhook) Send(message *message.Message) error {
+func (w *Webhook) Send(m *message.Message) error {
 	ctx, cancel := context.WithTimeout(context.Background(), w.timeout)
 	defer cancel()
 
-	req, err := w.request(ctx, message)
+	req, err := w.request(ctx, m)
 	if err != nil {
 		return fmt.Errorf("webhook request creation failed: %w", err)
 	}
@@ -27,8 +27,8 @@ func (w *Webhook) Send(message *message.Message) error {
 	return nil
 }
 
-func (w *Webhook) request(ctx context.Context, message *message.Message) (*http.Request, error) {
-	body := interpolate(w.conf.Payload.Body, message)
+func (w *Webhook) request(ctx context.Context, m *message.Message) (*http.Request, error) {
+	body := interpolate(w.conf.Payload.Body, m)
 
 	req, err := http.NewRequestWithContext(ctx, w.conf.Method, w.conf.URL, strings.NewReader(body))
 	if err != nil {
@@ -37,7 +37,7 @@ func (w *Webhook) request(ctx context.Context, message *message.Message) (*http.
 
 	query := req.URL.Query()
 	for param, value := range w.conf.Payload.QueryParams {
-		query.Add(param, interpolate(value, message))
+		query.Add(param, interpolate(value, m))
 	}
 	req.URL.RawQuery = query.Encode()
 
@@ -61,15 +61,15 @@ func (w *Webhook) request(ctx context.Context, message *message.Message) (*http.
 	return req, nil
 }
 
-func interpolate(s string, message *message.Message) string {
-	if message == nil {
+func interpolate(s string, m *message.Message) string {
+	if m == nil {
 		return s
 	}
 
 	return strings.NewReplacer(
-		"$level", message.Level,
-		"$alert_name", message.AlertName,
-		"$text", message.Text,
-		"$image", message.Image,
+		"$level", m.Level,
+		"$alert_name", m.AlertName,
+		"$text", m.Text,
+		"$image", m.Image,
 	).Replace(s)
 }
