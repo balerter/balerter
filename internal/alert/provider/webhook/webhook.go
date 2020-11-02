@@ -22,7 +22,7 @@ type Webhook struct {
 }
 
 func New(cfg *config.ChannelWebhook, logger *zap.Logger) (*Webhook, error) {
-	t := cfg.Timeout
+	t := cfg.Settings.Timeout
 	if t == 0 {
 		t = defaultTimeout
 	}

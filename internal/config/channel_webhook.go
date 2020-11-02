@@ -90,14 +90,18 @@ func (cfg PayloadConfig) Validate(method string) error {
 	}
 }
 
-// ChannelWebhook configures notifications via webhook.
-type ChannelWebhook struct {
-	Name    string        `json:"name" yaml:"name"`
+type WebhookSettings struct {
 	URL     string        `json:"url" yaml:"url"`
 	Method  string        `json:"method" yaml:"method"`
 	Auth    AuthConfig    `json:"auth" yaml:"auth"`
 	Payload PayloadConfig `json:"payload" yaml:"payload"`
 	Timeout time.Duration `json:"timeout" yaml:"timeout"`
+}
+
+// ChannelWebhook configures notifications via webhook.
+type ChannelWebhook struct {
+	Name     string          `json:"name" yaml:"name"`
+	Settings WebhookSettings `json:"settings" yaml:"settings"`
 }
 
 // Validate checks the webhook configuration.
@@ -106,6 +110,10 @@ func (cfg *ChannelWebhook) Validate() error {
 		return fmt.Errorf("name must be not empty")
 	}
 
+	return cfg.Settings.Validate()
+}
+
+func (cfg *WebhookSettings) Validate() error {
 	addr := strings.TrimSpace(cfg.URL)
 	if addr == "" {
 		return fmt.Errorf("url must be not empty")

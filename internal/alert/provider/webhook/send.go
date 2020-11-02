@@ -28,32 +28,32 @@ func (w *Webhook) Send(m *message.Message) error {
 }
 
 func (w *Webhook) request(ctx context.Context, m *message.Message) (*http.Request, error) {
-	body := interpolate(w.conf.Payload.Body, m)
+	body := interpolate(w.conf.Settings.Payload.Body, m)
 
-	req, err := http.NewRequestWithContext(ctx, w.conf.Method, w.conf.URL, strings.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, w.conf.Settings.Method, w.conf.Settings.URL, strings.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
 
 	query := req.URL.Query()
-	for param, value := range w.conf.Payload.QueryParams {
+	for param, value := range w.conf.Settings.Payload.QueryParams {
 		query.Add(param, interpolate(value, m))
 	}
 	req.URL.RawQuery = query.Encode()
 
-	switch w.conf.Auth.Type {
+	switch w.conf.Settings.Auth.Type {
 	case config.AuthTypeBasic:
-		req.SetBasicAuth(w.conf.Auth.AuthBasicConfig.Login, w.conf.Auth.AuthBasicConfig.Password)
+		req.SetBasicAuth(w.conf.Settings.Auth.AuthBasicConfig.Login, w.conf.Settings.Auth.AuthBasicConfig.Password)
 	case config.AuthTypeBearer:
-		token := "Bearer " + w.conf.Auth.AuthBearerConfig.Token
+		token := "Bearer " + w.conf.Settings.Auth.AuthBearerConfig.Token
 		req.Header.Add("Authorization", token)
 	case config.AuthTypeCustom:
-		for key, value := range w.conf.Auth.AuthCustomConfig.Headers {
+		for key, value := range w.conf.Settings.Auth.AuthCustomConfig.Headers {
 			req.Header.Add(key, value)
 		}
 
 		query := req.URL.Query()
-		for param, value := range w.conf.Auth.AuthCustomConfig.QueryParams {
+		for param, value := range w.conf.Settings.Auth.AuthCustomConfig.QueryParams {
 			query.Add(param, value)
 		}
 		req.URL.RawQuery = query.Encode()

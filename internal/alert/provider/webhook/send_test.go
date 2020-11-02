@@ -27,7 +27,7 @@ func testHook(conf *config.ChannelWebhook, msg *message.Message, h http.HandlerF
 	s := httptest.NewServer(h)
 	defer s.Close()
 
-	conf.URL = s.URL
+	conf.Settings.URL = s.URL
 	return webhookSend(conf, msg)
 }
 
@@ -46,22 +46,24 @@ func TestSend(t *testing.T) {
 	}
 
 	conf := &config.ChannelWebhook{
-		Name:   "foo",
-		Method: http.MethodPost,
-		Auth: config.AuthConfig{
-			Type: config.AuthTypeNone,
+		Name: "foo",
+		Settings: config.WebhookSettings{
+			Method: http.MethodPost,
+			Auth: config.AuthConfig{
+				Type: config.AuthTypeNone,
+			},
+			Payload: config.PayloadConfig{
+				Body: `{"message": "$text"}`,
+			},
+			Timeout: 5 * time.Second,
 		},
-		Payload: config.PayloadConfig{
-			Body: `{"message": "$text"}`,
-		},
-		Timeout: 5 * time.Second,
 	}
 
 	t.Run("no-auth", func(t *testing.T) {
 		a := require.New(t)
 
 		err := testHook(conf, msg, func(w http.ResponseWriter, req *http.Request) {
-			a.Equal(conf.Method, req.Method)
+			a.Equal(conf.Settings.Method, req.Method)
 
 			b, err := ioutil.ReadAll(req.Body)
 			a.NoError(err)
@@ -73,7 +75,7 @@ func TestSend(t *testing.T) {
 	t.Run("query-params-payload", func(t *testing.T) {
 		a := require.New(t)
 
-		conf.Payload = config.PayloadConfig{
+		conf.Settings.Payload = config.PayloadConfig{
 			QueryParams: map[string]string{
 				"foo": "bar",
 			},
@@ -91,7 +93,7 @@ func TestSend(t *testing.T) {
 		a := require.New(t)
 
 		login, pass := "login", "pass"
-		conf.Auth = config.AuthConfig{
+		conf.Settings.Auth = config.AuthConfig{
 			Type: config.AuthTypeBasic,
 			AuthBasicConfig: config.AuthBasicConfig{
 				Login:    login,
@@ -109,7 +111,7 @@ func TestSend(t *testing.T) {
 	t.Run("bearer", func(t *testing.T) {
 		a := require.New(t)
 
-		conf.Auth = config.AuthConfig{
+		conf.Settings.Auth = config.AuthConfig{
 			Type: config.AuthTypeBearer,
 			AuthBearerConfig: config.AuthBearerConfig{
 				Token: "test-token",
@@ -125,7 +127,7 @@ func TestSend(t *testing.T) {
 
 	t.Run("custom", func(t *testing.T) {
 		a := require.New(t)
-		conf.Auth = config.AuthConfig{
+		conf.Settings.Auth = config.AuthConfig{
 			Type: config.AuthTypeCustom,
 			AuthCustomConfig: config.AuthCustomConfig{
 				Headers: map[string]string{
@@ -149,7 +151,7 @@ func TestSend(t *testing.T) {
 
 	t.Run("timeout-error", func(t *testing.T) {
 		a := require.New(t)
-		conf.Timeout = 1000
+		conf.Settings.Timeout = 1000
 
 		err := testHook(conf, msg, func(w http.ResponseWriter, req *http.Request) {
 			time.Sleep(3 * time.Second)

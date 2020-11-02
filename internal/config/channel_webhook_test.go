@@ -129,12 +129,14 @@ func TestChannelWebhook_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := ChannelWebhook{
-				Name:    tt.fields.Name,
-				URL:     tt.fields.URL,
-				Method:  tt.fields.Method,
-				Auth:    tt.fields.Auth,
-				Payload: tt.fields.Payload,
-				Timeout: tt.fields.Timeout,
+				Name: tt.fields.Name,
+				Settings: WebhookSettings{
+					URL:     tt.fields.URL,
+					Method:  tt.fields.Method,
+					Auth:    tt.fields.Auth,
+					Payload: tt.fields.Payload,
+					Timeout: tt.fields.Timeout,
+				},
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {
