@@ -36,9 +36,9 @@ func (a *AlertManager) Send(mes *message.Message) error {
 		return fmt.Errorf("error marshal prometheus alert, %w", err)
 	}
 
-	resp, err := http.Post(a.url, "application/json", bytes.NewReader(data))
+	resp, err := a.whCore.Send(bytes.NewReader(data), mes)
 	if err != nil {
-		return fmt.Errorf("error send request to %s, %w", a.url, err)
+		return fmt.Errorf("error send request, %w", err)
 	}
 	defer resp.Body.Close()
 

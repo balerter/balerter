@@ -6,8 +6,8 @@ import (
 )
 
 type ChannelAlertmanagerReceiver struct {
-	Name string `json:"name" yaml:"name"`
-	URL  string `json:"url" yaml:"url"`
+	Name     string           `json:"name" yaml:"name"`
+	Settings *WebhookSettings `json:"settings" yaml:"settings"`
 }
 
 func (cfg *ChannelAlertmanagerReceiver) Validate() error {
@@ -15,9 +15,5 @@ func (cfg *ChannelAlertmanagerReceiver) Validate() error {
 		return fmt.Errorf("name must be not empty")
 	}
 
-	if strings.TrimSpace(cfg.URL) == "" {
-		return fmt.Errorf("url must be not empty")
-	}
-
-	return nil
+	return cfg.Settings.Validate()
 }

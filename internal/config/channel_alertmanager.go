@@ -6,9 +6,8 @@ import (
 )
 
 type ChannelAlertmanager struct {
-	Name    string `json:"name" yaml:"name"`
-	Version string `json:"version" yaml:"version"`
-	URL     string `json:"url" yaml:"url"`
+	Name     string           `json:"name" yaml:"name"`
+	Settings *WebhookSettings `json:"settings"`
 }
 
 func (cfg *ChannelAlertmanager) Validate() error {
@@ -16,14 +15,9 @@ func (cfg *ChannelAlertmanager) Validate() error {
 		return fmt.Errorf("name must be not empty")
 	}
 
-	ver := strings.TrimSpace(cfg.Version)
-	if ver != "" && ver != "v1" && ver != "v2" {
-		return fmt.Errorf("version must be empty or v1 or v2")
+	if cfg.Settings == nil {
+		return fmt.Errorf("sttings must be defined")
 	}
 
-	if strings.TrimSpace(cfg.URL) == "" {
-		return fmt.Errorf("url must be not empty")
-	}
-
-	return nil
+	return cfg.Settings.Validate()
 }
