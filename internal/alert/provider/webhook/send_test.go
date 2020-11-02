@@ -47,7 +47,7 @@ func TestSend(t *testing.T) {
 
 	conf := &config.ChannelWebhook{
 		Name: "foo",
-		Settings: config.WebhookSettings{
+		Settings: &config.WebhookSettings{
 			Method: http.MethodPost,
 			Auth: config.AuthConfig{
 				Type: config.AuthTypeNone,

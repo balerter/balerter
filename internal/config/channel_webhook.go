@@ -100,8 +100,8 @@ type WebhookSettings struct {
 
 // ChannelWebhook configures notifications via webhook.
 type ChannelWebhook struct {
-	Name     string          `json:"name" yaml:"name"`
-	Settings WebhookSettings `json:"settings" yaml:"settings"`
+	Name     string           `json:"name" yaml:"name"`
+	Settings *WebhookSettings `json:"settings" yaml:"settings"`
 }
 
 // Validate checks the webhook configuration.

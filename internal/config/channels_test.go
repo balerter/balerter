@@ -75,7 +75,7 @@ func TestChannels_Validate(t *testing.T) {
 				Webhook: []*ChannelWebhook{
 					{
 						Name: "foo",
-						Settings: WebhookSettings{
+						Settings: &WebhookSettings{
 							URL:     "https://foo.bar/baz",
 							Auth:    AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}},
 							Payload: PayloadConfig{Body: `{}`},
@@ -83,7 +83,7 @@ func TestChannels_Validate(t *testing.T) {
 					},
 					{
 						Name: "foo",
-						Settings: WebhookSettings{
+						Settings: &WebhookSettings{
 							URL:     "https://foo.bar/baz",
 							Auth:    AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}},
 							Payload: PayloadConfig{Body: `{}`},
@@ -110,10 +110,10 @@ func TestChannels_Validate(t *testing.T) {
 				Discord: []*ChannelDiscord{{Name: "foo", Token: "a", ChannelID: 1},
 					{Name: "foo2", Token: "a", ChannelID: 1}},
 				Webhook: []*ChannelWebhook{
-					{Name: "foo", Settings: WebhookSettings{URL: "https://foo.bar/baz",
+					{Name: "foo", Settings: &WebhookSettings{URL: "https://foo.bar/baz",
 						Auth:    AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}},
 						Payload: PayloadConfig{Body: `{}`}}},
-					{Name: "foo2", Settings: WebhookSettings{URL: "https://foo.bar/baz",
+					{Name: "foo2", Settings: &WebhookSettings{URL: "https://foo.bar/baz",
 						Auth:    AuthConfig{Type: "bearer", AuthBearerConfig: AuthBearerConfig{Token: "token"}},
 						Payload: PayloadConfig{Body: `{}`}}}},
 			},

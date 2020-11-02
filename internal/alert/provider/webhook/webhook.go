@@ -1,44 +1,24 @@
 package webhook
 
 import (
-	"net/http"
-	"time"
-
 	"github.com/balerter/balerter/internal/config"
 	"go.uber.org/zap"
 )
 
-const (
-	defaultTimeout = 3000
-)
-
 // Webhook implements a Provider for webhook notifications.
 type Webhook struct {
-	conf    *config.ChannelWebhook
-	logger  *zap.Logger
-	client  *http.Client
-	name    string
-	timeout time.Duration
+	logger *zap.Logger
+	name   string
+	body   string
+	whCore *Core
 }
 
 func New(cfg *config.ChannelWebhook, logger *zap.Logger) (*Webhook, error) {
-	t := cfg.Settings.Timeout
-	if t == 0 {
-		t = defaultTimeout
-	}
-
-	timeout := time.Millisecond * t
-
-	client := &http.Client{
-		Timeout: timeout,
-	}
-
 	return &Webhook{
-		conf:    cfg,
-		logger:  logger,
-		client:  client,
-		name:    cfg.Name,
-		timeout: timeout,
+		body:   cfg.Settings.Payload.Body,
+		logger: logger,
+		name:   cfg.Name,
+		whCore: NewCore(cfg.Settings),
 	}, nil
 }
 

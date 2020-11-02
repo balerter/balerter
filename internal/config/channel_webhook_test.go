@@ -130,7 +130,7 @@ func TestChannelWebhook_Validate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := ChannelWebhook{
 				Name: tt.fields.Name,
-				Settings: WebhookSettings{
+				Settings: &WebhookSettings{
 					URL:     tt.fields.URL,
 					Method:  tt.fields.Method,
 					Auth:    tt.fields.Auth,
