@@ -19,7 +19,7 @@ func New(cfg *config.ChannelAlertmanagerReceiver, logger *zap.Logger) (*AMReceiv
 		logger: logger,
 	}
 
-	u, err := url.Parse(cfg.URL)
+	u, err := url.Parse(cfg.Settings.URL)
 	if err != nil {
 		return nil, fmt.Errorf("error parse url, %w", err)
 	}
