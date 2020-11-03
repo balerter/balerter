@@ -14,7 +14,7 @@ type Channels struct {
 	AlertmanagerReceiver []*ChannelAlertmanagerReceiver `json:"alertmanager_receiver" yaml:"alertmanager_receiver"`
 }
 
-func (cfg *Channels) Validate() error { //nolint:gocyclo // Validate calls only once on application start
+func (cfg *Channels) Validate() error { //nolint:gocyclo,funlen // Validate calls only once on application start
 	var names []string
 
 	for _, c := range cfg.Email {
