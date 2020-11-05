@@ -54,9 +54,9 @@ func (a *AMReceiver) Send(mes *message.Message) error {
 		return fmt.Errorf("error marshal message, %w", err)
 	}
 
-	resp, err := http.Post(a.url, "application/json", bytes.NewReader(buf))
+	resp, err := a.whCore.Send(bytes.NewReader(buf), mes)
 	if err != nil {
-		return fmt.Errorf("error send request to %s, %w", a.url, err)
+		return fmt.Errorf("error send request, %w", err)
 	}
 	defer resp.Body.Close()
 
