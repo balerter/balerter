@@ -23,6 +23,10 @@ func (w *Core) Send(body io.Reader, m *message.Message) (*http.Response, error) 
 	}
 	req.URL.RawQuery = query.Encode()
 
+	for key, value := range w.cfg.Headers {
+		req.Header.Add(key, value)
+	}
+
 	switch w.cfg.Auth.Type {
 	case config.AuthTypeBasic:
 		req.SetBasicAuth(w.cfg.Auth.AuthBasicConfig.Login, w.cfg.Auth.AuthBasicConfig.Password)

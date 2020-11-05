@@ -36,7 +36,7 @@ func TestChannelWebhook_Validate(t *testing.T) {
 			name:    "low timeout",
 			fields:  fields{Name: "foo", URL: "https://foo.bar/baz", Timeout: -1},
 			wantErr: true,
-			errText: "timeout must be greater than 0",
+			errText: "timeout must be greater or equals 0",
 		},
 		{
 			name: "incorrect auth type",

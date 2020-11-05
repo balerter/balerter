@@ -18,6 +18,7 @@ type AuthBearerConfig struct {
 }
 
 type AuthCustomConfig struct {
+	// TODO (negasus): remove Headers in favor of cfg.Headers option
 	Headers     map[string]string `json:"headers" yaml:"headers"`
 	QueryParams map[string]string `json:"queryParams" yaml:"queryParams"`
 }
@@ -91,11 +92,12 @@ func (cfg PayloadConfig) Validate(method string) error {
 }
 
 type WebhookSettings struct {
-	URL     string        `json:"url" yaml:"url"`
-	Method  string        `json:"method" yaml:"method"`
-	Auth    AuthConfig    `json:"auth" yaml:"auth"`
-	Payload PayloadConfig `json:"payload" yaml:"payload"`
-	Timeout time.Duration `json:"timeout" yaml:"timeout"`
+	URL     string            `json:"url" yaml:"url"`
+	Method  string            `json:"method" yaml:"method"`
+	Auth    AuthConfig        `json:"auth" yaml:"auth"`
+	Payload PayloadConfig     `json:"payload" yaml:"payload"`
+	Timeout time.Duration     `json:"timeout" yaml:"timeout"`
+	Headers map[string]string `json:"headers" yaml:"headers"`
 }
 
 // ChannelWebhook configures notifications via webhook.
@@ -122,13 +124,14 @@ func (cfg *WebhookSettings) Validate() error {
 		return fmt.Errorf("error validate url: %w", err)
 	}
 
+	// TODO (negasus): mutation in the Validate method looks not good
 	cfg.Method = strings.ToUpper(strings.TrimSpace(cfg.Method))
 	if cfg.Method == "" {
 		cfg.Method = http.MethodPost
 	}
 
 	if cfg.Timeout < 0 {
-		return fmt.Errorf("timeout must be greater than 0")
+		return fmt.Errorf("timeout must be greater or equals 0")
 	}
 
 	if err := cfg.Auth.Validate(); err != nil {
