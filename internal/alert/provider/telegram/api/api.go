@@ -26,7 +26,11 @@ func New(cfg *config.ChannelTelegram) (*API, error) {
 		endpoint: apiEndpoint + cfg.Token + "/",
 	}
 
-	var tr *http.Transport
+	a.httpClient = &http.Client{
+		CheckRedirect: nil,
+		Jar:           nil,
+		Timeout:       cfg.Timeout,
+	}
 
 	if cfg.Proxy != nil {
 		var proxyAuth *proxy.Auth
@@ -43,18 +47,11 @@ func New(cfg *config.ChannelTelegram) (*API, error) {
 			return nil, fmt.Errorf("error create proxy, %w", err)
 		}
 
-		tr = &http.Transport{
+		a.httpClient.Transport = &http.Transport{
 			Proxy:       nil,
 			DialContext: nil,
 			Dial:        d.Dial,
 		}
-	}
-
-	a.httpClient = &http.Client{
-		Transport:     tr,
-		CheckRedirect: nil,
-		Jar:           nil,
-		Timeout:       cfg.Timeout,
 	}
 
 	if a.httpClient.Timeout == 0 {
