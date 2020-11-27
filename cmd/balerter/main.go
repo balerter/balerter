@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/balerter/balerter/internal/modules/alert"
 	"log"
 	"os"
 	"os/signal"
@@ -139,14 +140,8 @@ func run( //nolint:gocritic,gocyclo,funlen // Run main application
 		return fmt.Sprintf("error create core storages manager, %v", err), 1
 	}
 
-	// ---------------------
-	// |
-	// | Core Modules
-	// |
-	// | AlertManager
-	// |
+	// Alert Manager
 	lgr.Logger().Info("init alert manager")
-
 	alertManagerStorageEngine, err := coreStoragesMgr.Get(cfg.Global.Storages.Alert)
 	if err != nil {
 		return fmt.Sprintf("error get core storages engine for alert '%s', %v", cfg.Global.Storages.Alert, err), 1
@@ -155,10 +150,18 @@ func run( //nolint:gocritic,gocyclo,funlen // Run main application
 	if err = alertMgr.Init(cfg.Channels); err != nil {
 		return fmt.Sprintf("error init alert manager, %v", err), 1
 	}
-	coreModules = append(coreModules, alertMgr)
+
+	// ---------------------
+	// |
+	// | Core Modules
+	// |
+	// | Alert
+	// |
+	alertModule := alert.New(alertMgr, lgr.Logger())
+	coreModules = append(coreModules, alertModule)
 
 	if len(cfg.Global.SendStartNotification) > 0 {
-		alertMgr.Send("", "", "Balerter Start", cfg.Global.SendStartNotification, nil, "")
+		alertMgr.Send("", "", "Balerter start", cfg.Global.SendStartNotification, nil, "")
 	}
 
 	for idx := range cfg.Channels.Email {
@@ -261,7 +264,7 @@ func run( //nolint:gocritic,gocyclo,funlen // Run main application
 	dsMgr.Stop()
 
 	if len(cfg.Global.SendStopNotification) > 0 {
-		alertMgr.Send("", "", "Balerter Stop", cfg.Global.SendStopNotification, nil, "")
+		alertMgr.Send("", "", "Balerter stop", cfg.Global.SendStopNotification, nil, "")
 	}
 
 	lgr.Logger().Info("terminate")

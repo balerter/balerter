@@ -7,13 +7,13 @@ import (
 	"log"
 	"os"
 
-	alertManager "github.com/balerter/balerter/internal/alert/manager"
 	"github.com/balerter/balerter/internal/config"
 	dsManagerTest "github.com/balerter/balerter/internal/datasource/manager/test"
 	"github.com/balerter/balerter/internal/logger"
 	"github.com/balerter/balerter/internal/metrics"
 	"github.com/balerter/balerter/internal/mock"
 	"github.com/balerter/balerter/internal/modules"
+	alertModule "github.com/balerter/balerter/internal/modules/alert"
 	chartModule "github.com/balerter/balerter/internal/modules/chart"
 	httpModule "github.com/balerter/balerter/internal/modules/http"
 	"github.com/balerter/balerter/internal/modules/kv"
@@ -114,7 +114,7 @@ func main() { //nolint:funlen // main function
 	// |
 	// | AlertManager
 	// |
-	alertMgr := mock.New(alertManager.ModuleName(), alertManager.Methods(), lgr.Logger())
+	alertMgr := mock.New(alertModule.ModuleName(), alertModule.Methods(), lgr.Logger())
 	coreModules = append(coreModules, alertMgr)
 
 	// ---------------------

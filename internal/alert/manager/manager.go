@@ -6,7 +6,6 @@ import (
 	alertmanagerreceiver "github.com/balerter/balerter/internal/alert/provider/alertmanager_receiver"
 	"github.com/balerter/balerter/internal/alert/provider/webhook"
 
-	"github.com/balerter/balerter/internal/alert/alert"
 	"github.com/balerter/balerter/internal/alert/message"
 	"github.com/balerter/balerter/internal/alert/provider/discord"
 	"github.com/balerter/balerter/internal/alert/provider/email"
@@ -16,8 +15,6 @@ import (
 	"github.com/balerter/balerter/internal/alert/provider/telegram"
 	"github.com/balerter/balerter/internal/config"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
-	"github.com/balerter/balerter/internal/script/script"
-	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
 
@@ -129,60 +126,4 @@ func (m *Manager) Init(cfg *config.Channels) error { //nolint:gocyclo,funlen // 
 	}
 
 	return nil
-}
-
-// Name returns the alert manager name
-func (m *Manager) Name() string {
-	return ModuleName()
-}
-
-// Stop the alert manager
-func (m *Manager) Stop() error {
-	return nil
-}
-
-// ModuleName returns a lua module name for the alert manager
-func ModuleName() string {
-	return "alert"
-}
-
-// Methods returns the list of methods of the alert manager
-func Methods() []string {
-	return []string{
-		"warn",
-		"warning",
-
-		"error",
-		"fail",
-
-		"success",
-		"ok",
-
-		"get",
-	}
-}
-
-// GetLoader implements Modules/Module.GetLoader
-func (m *Manager) GetLoader(s *script.Script) lua.LGFunction {
-	return func() lua.LGFunction {
-		return func(luaState *lua.LState) int {
-			var exports = map[string]lua.LGFunction{
-				"warn":    m.luaCall(s, alert.LevelWarn),
-				"warning": m.luaCall(s, alert.LevelWarn),
-
-				"error": m.luaCall(s, alert.LevelError),
-				"fail":  m.luaCall(s, alert.LevelError),
-
-				"success": m.luaCall(s, alert.LevelSuccess),
-				"ok":      m.luaCall(s, alert.LevelSuccess),
-
-				"get": m.get(s),
-			}
-
-			mod := luaState.SetFuncs(luaState.NewTable(), exports)
-
-			luaState.Push(mod)
-			return 1
-		}
-	}()
 }

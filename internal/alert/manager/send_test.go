@@ -2,12 +2,27 @@ package manager
 
 import (
 	"fmt"
+	"github.com/balerter/balerter/internal/alert/message"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 	"testing"
 )
+
+type alertChannelMock struct {
+	mock.Mock
+}
+
+func (m *alertChannelMock) Name() string {
+	args := m.Called()
+	return args.String(0)
+}
+
+func (m *alertChannelMock) Send(mes *message.Message) error {
+	args := m.Called(mes)
+	return args.Error(0)
+}
 
 func TestManager_Send_no_channels(t *testing.T) {
 	core, logs := observer.New(zap.DebugLevel)

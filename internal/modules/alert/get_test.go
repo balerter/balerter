@@ -1,17 +1,17 @@
-package manager
+package alert
 
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert/alert"
-	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
 	"testing"
 )
 
 func TestGet_NoArgs(t *testing.T) {
-	m := &Manager{}
+	m := &Alert{}
 
 	f := m.get(nil)
 
@@ -29,7 +29,7 @@ func TestGet_NoArgs(t *testing.T) {
 }
 
 func TestGet_AlertNameNotString(t *testing.T) {
-	m := &Manager{}
+	m := &Alert{}
 
 	f := m.get(nil)
 
@@ -47,31 +47,14 @@ func TestGet_AlertNameNotString(t *testing.T) {
 	assert.Equal(t, "alert name must be a string", e2.String())
 }
 
-func TestGet_AlertNameEmptyString(t *testing.T) {
-	m := &Manager{}
-
-	f := m.get(nil)
-
-	L := lua.NewState()
-	L.Push(lua.LString(" "))
-
-	n := f(L)
-
-	assert.Equal(t, 2, n)
-
-	e1 := L.Get(2)
-	e2 := L.Get(3)
-
-	assert.Equal(t, lua.LTNil, e1.Type())
-	assert.Equal(t, "alert name must be not empty", e2.String())
-}
-
 func TestGet_ErrorGet(t *testing.T) {
-	mck := coreStorage.NewMock("")
-	mck.AlertMock().On("Get", "foo").Return(nil, fmt.Errorf("error1"))
+	err1 := fmt.Errorf("error1")
 
-	m := &Manager{
-		engine: mck,
+	mgrMock := &managerMock{}
+	mgrMock.On("Get", mock.Anything).Return(nil, err1)
+
+	m := &Alert{
+		manager: mgrMock,
 	}
 
 	f := m.get(nil)
@@ -96,11 +79,11 @@ func TestGet(t *testing.T) {
 	a.UpdateLevel(alert.LevelError)
 	a.Inc()
 
-	mck := coreStorage.NewMock("")
-	mck.AlertMock().On("Get", "foo").Return(a, nil)
+	mgrMock := &managerMock{}
+	mgrMock.On("Get", mock.Anything).Return(a, nil)
 
-	m := &Manager{
-		engine: mck,
+	m := &Alert{
+		manager: mgrMock,
 	}
 
 	f := m.get(nil)
