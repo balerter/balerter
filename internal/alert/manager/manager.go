@@ -23,12 +23,15 @@ type alertChannel interface {
 	Send(*message.Message) error
 }
 
+type sendMessageFunc func(level, alertName, text string, channels, fields []string, image string)
+
 // Manager represents the Alert manager struct
 type Manager struct {
 	logger   *zap.Logger
 	channels map[string]alertChannel
 
-	engine coreStorage.CoreStorage
+	sendMessageFunc sendMessageFunc
+	engine          coreStorage.CoreStorage
 }
 
 // New returns new Alert manager instance
@@ -38,6 +41,8 @@ func New(engine coreStorage.CoreStorage, logger *zap.Logger) *Manager {
 		engine:   engine,
 		channels: make(map[string]alertChannel),
 	}
+
+	m.sendMessageFunc = m.Send
 
 	return m
 }

@@ -26,7 +26,7 @@ func (m *Manager) Call(name string, level alert.Level, text string, options *ale
 		a.Inc()
 
 		if !options.Quiet && options.Repeat > 0 && a.Count()%options.Repeat == 0 {
-			m.Send(level.String(), name, text, options.Channels, options.Fields, options.Image)
+			m.sendMessageFunc(level.String(), name, text, options.Channels, options.Fields, options.Image)
 		}
 
 		return nil
@@ -35,11 +35,12 @@ func (m *Manager) Call(name string, level alert.Level, text string, options *ale
 	a.UpdateLevel(level)
 
 	if !options.Quiet {
-		m.Send(level.String(), name, text, options.Channels, options.Fields, options.Image)
+		m.sendMessageFunc(level.String(), name, text, options.Channels, options.Fields, options.Image)
 	}
 
-	if err := m.engine.Alert().Release(a); err != nil {
-		m.logger.Error("error release alert", zap.Error(err))
+	err = m.engine.Alert().Release(a)
+	if err != nil {
+		return fmt.Errorf("error release alert, %w", err)
 	}
 
 	return nil
