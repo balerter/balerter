@@ -6,6 +6,14 @@ import (
 	"time"
 )
 
+type Options struct {
+	Fields   []string
+	Channels []string
+	Quiet    bool
+	Repeat   int
+	Image    string
+}
+
 // Level is the type for describe an Alert level
 type Level int
 
