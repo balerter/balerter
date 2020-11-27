@@ -128,6 +128,14 @@ func (a *Alert) Inc() {
 	a.count++
 }
 
+// HasLevel return true if the alert.Level equals to the level argument
+func (a *Alert) HasLevel(level Level) bool {
+	a.mx.Lock()
+	defer a.mx.Unlock()
+
+	return a.level == level
+}
+
 // Level allows to get an alert level
 func (a *Alert) Level() Level {
 	a.mx.Lock()
