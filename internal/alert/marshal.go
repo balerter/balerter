@@ -5,6 +5,10 @@ import (
 	"fmt"
 )
 
+const (
+	timeFieldBinarySize = 15
+)
+
 // Marshal an Alert to the byte slice
 func (a *Alert) Marshal() ([]byte, error) {
 	res := make([]byte, 0)
@@ -70,24 +74,24 @@ func (a *Alert) Unmarshal(src []byte) error {
 	src = src[n:]
 
 	// LastChange
-	if len(src) < 15 { //nolint:mnd
+	if len(src) < timeFieldBinarySize {
 		return fmt.Errorf("source too small")
 	}
-	err := a.lastChange.UnmarshalBinary(src[:15])
+	err := a.lastChange.UnmarshalBinary(src[:timeFieldBinarySize])
 	if err != nil {
 		return err
 	}
-	src = src[15:]
+	src = src[timeFieldBinarySize:]
 
 	// Start
-	if len(src) < 15 { //nolint:mnd
+	if len(src) < timeFieldBinarySize {
 		return fmt.Errorf("source too small")
 	}
-	err = a.start.UnmarshalBinary(src[:15])
+	err = a.start.UnmarshalBinary(src[:timeFieldBinarySize])
 	if err != nil {
 		return err
 	}
-	src = src[15:]
+	src = src[timeFieldBinarySize:]
 
 	// Count
 	if len(src) == 0 {
