@@ -3,7 +3,7 @@ package manager
 import (
 	"errors"
 	"fmt"
-	alert2 "github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/alert"
 	"strings"
 )
 
@@ -11,7 +11,7 @@ var (
 	ErrEmptyName = errors.New("empty alert name")
 )
 
-func (m *Manager) Get(name string) (*alert2.Alert, error) {
+func (m *Manager) Get(name string) (*alert.Alert, error) {
 	name = strings.TrimSpace(name)
 
 	if name == "" {

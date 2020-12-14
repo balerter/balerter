@@ -48,7 +48,7 @@ func New(engine coreStorage.CoreStorage, logger *zap.Logger) *Manager {
 }
 
 // Init the Alert manager
-func (m *Manager) Init(cfg *config.Channels) error { //nolint:gocyclo,funlen // Validate calls only once on application start
+func (m *Manager) Init(cfg *config.Channels) error { // nolint:gocyclo // init function
 	for idx := range cfg.Email {
 		module, err := email.New(cfg.Email[idx], m.logger)
 		if err != nil {
