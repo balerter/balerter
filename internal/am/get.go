@@ -18,7 +18,7 @@ func (m *Manager) Get(name string) (*alert.Alert, error) {
 		return nil, ErrEmptyName
 	}
 
-	a, err := m.engine.Alert().Get(name)
+	a, err := m.storage.Alert().Get(name)
 	if err != nil {
 		return nil, fmt.Errorf("error get alert, %w", err)
 	}

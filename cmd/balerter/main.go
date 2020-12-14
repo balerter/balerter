@@ -11,7 +11,7 @@ import (
 	"sync"
 	"syscall"
 
-	alertManager "github.com/balerter/balerter/internal/alert/manager"
+	alertManager "github.com/balerter/balerter/internal/am"
 	apiManager "github.com/balerter/balerter/internal/api/manager"
 	"github.com/balerter/balerter/internal/config"
 	coreStorageManager "github.com/balerter/balerter/internal/corestorage/manager"

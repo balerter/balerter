@@ -18,8 +18,8 @@ func TestCall_error_get_alert(t *testing.T) {
 	em.AlertMock().On("GetOrNew", mock.Anything).Return(nil, e1)
 
 	m := &Manager{
-		engine: em,
-		logger: zap.NewNop(),
+		storage: em,
+		logger:  zap.NewNop(),
 	}
 
 	err := m.Call("", 0, "", nil)
@@ -40,7 +40,7 @@ func TestCall_same_level__quiet(t *testing.T) {
 	em.AlertMock().On("GetOrNew", mock.Anything).Return(a, nil)
 
 	m := &Manager{
-		engine:          em,
+		storage:         em,
 		logger:          zap.NewNop(),
 		sendMessageFunc: mockSend,
 	}
@@ -63,7 +63,7 @@ func TestCall_same_level__norepeat(t *testing.T) {
 	em.AlertMock().On("GetOrNew", mock.Anything).Return(a, nil)
 
 	m := &Manager{
-		engine:          em,
+		storage:         em,
 		logger:          zap.NewNop(),
 		sendMessageFunc: mockSend,
 	}
@@ -89,7 +89,7 @@ func TestCall_same_level(t *testing.T) {
 	em.AlertMock().On("GetOrNew", mock.Anything).Return(a, nil)
 
 	m := &Manager{
-		engine:          em,
+		storage:         em,
 		logger:          zap.NewNop(),
 		sendMessageFunc: mockSend,
 	}
@@ -118,7 +118,7 @@ func TestCall_update_level__release_error(t *testing.T) {
 	em.AlertMock().On("Release", mock.Anything).Return(e1)
 
 	m := &Manager{
-		engine:          em,
+		storage:         em,
 		logger:          zap.NewNop(),
 		sendMessageFunc: mockSend,
 	}
@@ -146,7 +146,7 @@ func TestCall_update_level__quiet(t *testing.T) {
 	em.AlertMock().On("Release", mock.Anything).Return(nil)
 
 	m := &Manager{
-		engine:          em,
+		storage:         em,
 		logger:          zap.NewNop(),
 		sendMessageFunc: mockSend,
 	}
@@ -178,7 +178,7 @@ func TestCall_update_level_ok(t *testing.T) {
 	em.AlertMock().On("Release", mock.Anything).Return(nil)
 
 	m := &Manager{
-		engine:          em,
+		storage:         em,
 		logger:          zap.NewNop(),
 		sendMessageFunc: mockSend,
 	}

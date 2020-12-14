@@ -17,7 +17,7 @@ func (m *Manager) Call(name string, level alert.Level, text string, options *ale
 
 	metrics.SetAlertLevel(name, level)
 
-	a, err := m.engine.Alert().GetOrNew(name)
+	a, err := m.storage.Alert().GetOrNew(name)
 	if err != nil {
 		return fmt.Errorf("error get alert %s, %w", name, err)
 	}
@@ -38,7 +38,7 @@ func (m *Manager) Call(name string, level alert.Level, text string, options *ale
 		m.sendMessageFunc(level.String(), name, text, options.Channels, options.Fields, options.Image)
 	}
 
-	err = m.engine.Alert().Release(a)
+	err = m.storage.Alert().Release(a)
 	if err != nil {
 		return fmt.Errorf("error release alert, %w", err)
 	}

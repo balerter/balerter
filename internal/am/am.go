@@ -31,14 +31,14 @@ type Manager struct {
 	channels map[string]alertChannel
 
 	sendMessageFunc sendMessageFunc
-	engine          coreStorage.CoreStorage
+	storage         coreStorage.CoreStorage
 }
 
 // New returns new Alert manager instance
 func New(engine coreStorage.CoreStorage, logger *zap.Logger) *Manager {
 	m := &Manager{
 		logger:   logger,
-		engine:   engine,
+		storage:  engine,
 		channels: make(map[string]alertChannel),
 	}
 
