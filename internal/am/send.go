@@ -11,6 +11,7 @@ func (m *Manager) Send(level, alertName, text string, channels, fields []string,
 
 	if len(channels) > 0 {
 		for _, channelName := range channels {
+			// TODO: race on m.channels
 			ch, ok := m.channels[channelName]
 			if !ok {
 				m.logger.Error("channel not found", zap.String("channel name", channelName))
