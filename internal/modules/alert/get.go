@@ -1,7 +1,7 @@
 package alert
 
 import (
-	alerts "github.com/balerter/balerter/internal/alert/alert"
+	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 )
@@ -23,7 +23,7 @@ func (a *Alert) get(_ *script.Script) lua.LGFunction {
 		}
 
 		t := alrt.MarshalLua()
-		alerts.ReleaseAlert(alrt)
+		alert.ReleaseAlert(alrt)
 
 		luaState.Push(t)
 

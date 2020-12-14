@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/balerter/balerter/internal/alert/message"
+	"github.com/balerter/balerter/internal/message"
 	mail "github.com/xhit/go-simple-mail/v2"
 )
 

@@ -1,7 +1,7 @@
 package corestorage
 
 import (
-	"github.com/balerter/balerter/internal/alert/alert"
+	alert2 "github.com/balerter/balerter/internal/alert"
 )
 
 type KV interface {
@@ -13,10 +13,10 @@ type KV interface {
 }
 
 type Alert interface {
-	GetOrNew(string) (*alert.Alert, error)
-	All() ([]*alert.Alert, error)
-	Release(a *alert.Alert) error
-	Get(string) (*alert.Alert, error)
+	GetOrNew(string) (*alert2.Alert, error)
+	All() ([]*alert2.Alert, error)
+	Release(a *alert2.Alert) error
+	Get(string) (*alert2.Alert, error)
 }
 
 type CoreStorage interface {

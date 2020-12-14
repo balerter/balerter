@@ -1,7 +1,7 @@
 package metrics
 
 import (
-	"github.com/balerter/balerter/internal/alert/alert"
+	alert2 "github.com/balerter/balerter/internal/alert"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/zap"
 )
@@ -50,7 +50,7 @@ func SetVersion(version string) {
 	metricInfoVersion.WithLabelValues(version).Inc()
 }
 
-func SetAlertLevel(alertName string, level alert.Level) {
+func SetAlertLevel(alertName string, level alert2.Level) {
 	metricAlert.WithLabelValues(alertName).Set(float64(level))
 }
 

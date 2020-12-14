@@ -3,7 +3,7 @@ package syslog
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/balerter/balerter/internal/alert/message"
+	"github.com/balerter/balerter/internal/message"
 )
 
 func (sl *Syslog) Send(mes *message.Message) error {

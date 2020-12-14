@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/balerter/balerter/internal/alert/message"
+	"github.com/balerter/balerter/internal/message"
 	"github.com/prometheus/common/model"
 	"net/http"
 	"time"

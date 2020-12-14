@@ -2,7 +2,7 @@ package alerts
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/alert/alert"
+	alert2 "github.com/balerter/balerter/internal/alert"
 	"net/http"
 	"strings"
 )
@@ -21,15 +21,15 @@ func parseNames(argValue string) map[string]struct{} {
 	return result
 }
 
-func parseLevels(argValue string) (map[alert.Level]struct{}, error) {
-	result := map[alert.Level]struct{}{}
+func parseLevels(argValue string) (map[alert2.Level]struct{}, error) {
+	result := map[alert2.Level]struct{}{}
 	if argValue == "" {
 		return result, nil
 	}
 
 	levels := strings.Split(argValue, ",")
 	for _, l := range levels {
-		ll, err := alert.LevelFromString(l)
+		ll, err := alert2.LevelFromString(l)
 		if err != nil {
 			return nil, fmt.Errorf("bad level value")
 		}
@@ -40,7 +40,7 @@ func parseLevels(argValue string) (map[alert.Level]struct{}, error) {
 	return result, nil
 }
 
-func filter(req *http.Request, data []*alert.Alert) ([]*alert.Alert, error) {
+func filter(req *http.Request, data []*alert2.Alert) ([]*alert2.Alert, error) {
 	levelsMap, err := parseLevels(req.URL.Query().Get("level"))
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func filter(req *http.Request, data []*alert.Alert) ([]*alert.Alert, error) {
 
 	namesMap := parseNames(req.URL.Query().Get("name"))
 
-	var result []*alert.Alert
+	var result []*alert2.Alert
 
 	for _, item := range data {
 		if _, ok := levelsMap[item.Level()]; len(levelsMap) > 0 && !ok {

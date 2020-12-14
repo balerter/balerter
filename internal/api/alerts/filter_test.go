@@ -1,7 +1,7 @@
 package alerts
 
 import (
-	"github.com/balerter/balerter/internal/alert/alert"
+	alert2 "github.com/balerter/balerter/internal/alert"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"net/http"
@@ -64,7 +64,7 @@ func Test_parseLevels(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    map[alert.Level]struct{}
+		want    map[alert2.Level]struct{}
 		wantErr bool
 		errText string
 	}{
@@ -73,7 +73,7 @@ func Test_parseLevels(t *testing.T) {
 			args: args{
 				argValue: "",
 			},
-			want:    map[alert.Level]struct{}{},
+			want:    map[alert2.Level]struct{}{},
 			wantErr: false,
 			errText: "",
 		},
@@ -82,7 +82,7 @@ func Test_parseLevels(t *testing.T) {
 			args: args{
 				argValue: "error",
 			},
-			want:    map[alert.Level]struct{}{alert.LevelError: {}},
+			want:    map[alert2.Level]struct{}{alert2.LevelError: {}},
 			wantErr: false,
 			errText: "",
 		},
@@ -91,7 +91,7 @@ func Test_parseLevels(t *testing.T) {
 			args: args{
 				argValue: "error,success",
 			},
-			want:    map[alert.Level]struct{}{alert.LevelError: {}, alert.LevelSuccess: {}},
+			want:    map[alert2.Level]struct{}{alert2.LevelError: {}, alert2.LevelSuccess: {}},
 			wantErr: false,
 			errText: "",
 		},
@@ -138,7 +138,7 @@ func TestFilter_ErrorLevel(t *testing.T) {
 	}
 	req.URL.RawQuery = "name=foo,bar&level=error,success,bad"
 
-	var data []*alert.Alert
+	var data []*alert2.Alert
 
 	_, err := filter(req, data)
 	require.Error(t, err)
@@ -151,25 +151,25 @@ func TestFilter(t *testing.T) {
 	}
 	req.URL.RawQuery = "name=foo,bar&level=error,success"
 
-	var data []*alert.Alert
+	var data []*alert2.Alert
 
-	a0 := alert.AcquireAlert()
-	a0.UpdateLevel(alert.LevelSuccess)
+	a0 := alert2.AcquireAlert()
+	a0.UpdateLevel(alert2.LevelSuccess)
 	a0.SetName("baz")
 	data = append(data, a0)
 
-	a1 := alert.AcquireAlert()
-	a1.UpdateLevel(alert.LevelSuccess)
+	a1 := alert2.AcquireAlert()
+	a1.UpdateLevel(alert2.LevelSuccess)
 	a1.SetName("foo")
 	data = append(data, a1)
 
-	a2 := alert.AcquireAlert()
-	a2.UpdateLevel(alert.LevelError)
+	a2 := alert2.AcquireAlert()
+	a2.UpdateLevel(alert2.LevelError)
 	a2.SetName("bar")
 	data = append(data, a2)
 
-	a3 := alert.AcquireAlert()
-	a3.UpdateLevel(alert.LevelWarn)
+	a3 := alert2.AcquireAlert()
+	a3.UpdateLevel(alert2.LevelWarn)
 	a3.SetName("bar")
 	data = append(data, a3)
 

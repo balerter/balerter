@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/balerter/balerter/internal/alert/message"
 	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/message"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )

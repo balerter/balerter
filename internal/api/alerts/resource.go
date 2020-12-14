@@ -3,7 +3,7 @@ package alerts
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/balerter/balerter/internal/alert/alert"
+	alert2 "github.com/balerter/balerter/internal/alert"
 	"net/http"
 	"time"
 )
@@ -19,7 +19,7 @@ type resourceItem struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-func newResource(data []*alert.Alert) *resource {
+func newResource(data []*alert2.Alert) *resource {
 	res := &resource{
 		items: []resourceItem{},
 	}

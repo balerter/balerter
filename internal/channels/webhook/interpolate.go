@@ -1,7 +1,7 @@
 package webhook
 
 import (
-	"github.com/balerter/balerter/internal/alert/message"
+	"github.com/balerter/balerter/internal/message"
 	"strings"
 )
 

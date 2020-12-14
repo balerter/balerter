@@ -2,7 +2,7 @@ package manager
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/alert/message"
+	"github.com/balerter/balerter/internal/message"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"

@@ -1,7 +1,7 @@
 package alert
 
 import (
-	"github.com/balerter/balerter/internal/alert/alert"
+	alert2 "github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
 	lua "github.com/yuin/gopher-lua"
@@ -29,7 +29,7 @@ func TestManager_getAlertData(t *testing.T) {
 		args             args
 		wantAlertName    string
 		wantAlertText    string
-		wantAlertOptions *alert.Options
+		wantAlertOptions *alert2.Options
 		wantErr          bool
 	}{
 		{
@@ -43,7 +43,7 @@ func TestManager_getAlertData(t *testing.T) {
 			},
 			wantAlertName:    "",
 			wantAlertText:    "",
-			wantAlertOptions: &alert.Options{},
+			wantAlertOptions: &alert2.Options{},
 			wantErr:          true,
 		},
 		{
@@ -58,7 +58,7 @@ func TestManager_getAlertData(t *testing.T) {
 			},
 			wantAlertName:    "alertName1",
 			wantAlertText:    "",
-			wantAlertOptions: &alert.Options{},
+			wantAlertOptions: &alert2.Options{},
 			wantErr:          false,
 		},
 		{
@@ -73,7 +73,7 @@ func TestManager_getAlertData(t *testing.T) {
 			},
 			wantAlertName:    "",
 			wantAlertText:    "",
-			wantAlertOptions: &alert.Options{},
+			wantAlertOptions: &alert2.Options{},
 			wantErr:          true,
 		},
 		{
@@ -89,7 +89,7 @@ func TestManager_getAlertData(t *testing.T) {
 			},
 			wantAlertName:    "alertName1",
 			wantAlertText:    "alertText1",
-			wantAlertOptions: &alert.Options{},
+			wantAlertOptions: &alert2.Options{},
 			wantErr:          false,
 		},
 		{
@@ -106,7 +106,7 @@ func TestManager_getAlertData(t *testing.T) {
 			},
 			wantAlertName:    "alertName1",
 			wantAlertText:    "alertText1",
-			wantAlertOptions: &alert.Options{},
+			wantAlertOptions: &alert2.Options{},
 			wantErr:          true,
 		},
 		{
@@ -132,7 +132,7 @@ func TestManager_getAlertData(t *testing.T) {
 			},
 			wantAlertName:    "alertName1",
 			wantAlertText:    "alertText1",
-			wantAlertOptions: &alert.Options{Quiet: true, Fields: []string{"foo", "bar"}},
+			wantAlertOptions: &alert2.Options{Quiet: true, Fields: []string{"foo", "bar"}},
 			wantErr:          false,
 		},
 		{
@@ -158,7 +158,7 @@ func TestManager_getAlertData(t *testing.T) {
 			},
 			wantAlertName:    "alertName1",
 			wantAlertText:    "alertText1",
-			wantAlertOptions: &alert.Options{Quiet: false, Fields: []string{"foo", "bar"}},
+			wantAlertOptions: &alert2.Options{Quiet: false, Fields: []string{"foo", "bar"}},
 			wantErr:          true,
 		},
 	}
@@ -197,7 +197,7 @@ func TestManager_luaCall_errorGetAlertData(t *testing.T) {
 	L.Push(lua.LString("alertName"))
 	L.Push(lua.LString("alertText1"))
 	L.Push(opts)
-	n := m.call(script.New(), alert.LevelError)(L)
+	n := m.call(script.New(), alert2.LevelError)(L)
 	assert.Equal(t, 1, n)
 
 	v := L.Get(4).String()

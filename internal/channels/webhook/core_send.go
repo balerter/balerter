@@ -2,8 +2,8 @@ package webhook
 
 import (
 	"context"
-	"github.com/balerter/balerter/internal/alert/message"
 	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/message"
 	"io"
 	"net/http"
 )

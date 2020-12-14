@@ -1,7 +1,7 @@
 package alertmanagerreceiver
 
 import (
-	"github.com/balerter/balerter/internal/alert/provider/webhook"
+	"github.com/balerter/balerter/internal/channels/webhook"
 	"github.com/balerter/balerter/internal/config"
 	"go.uber.org/zap"
 )

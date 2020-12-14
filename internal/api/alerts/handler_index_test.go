@@ -2,7 +2,7 @@ package alerts
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/alert/alert"
+	alert2 "github.com/balerter/balerter/internal/alert"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/stretchr/testify/assert"
 	httpTestify "github.com/stretchr/testify/http"
@@ -14,7 +14,7 @@ import (
 )
 
 func TestHandler_ErrorGetAlerts(t *testing.T) {
-	var resultData []*alert.Alert
+	var resultData []*alert2.Alert
 
 	am := coreStorage.NewMock("")
 	am.AlertMock().On("All").Return(resultData, fmt.Errorf("error1"))
@@ -32,11 +32,11 @@ func TestHandler_ErrorGetAlerts(t *testing.T) {
 }
 
 func TestHandler(t *testing.T) {
-	var resultData []*alert.Alert
+	var resultData []*alert2.Alert
 
-	a1 := alert.AcquireAlert()
+	a1 := alert2.AcquireAlert()
 	a1.SetName("foo")
-	a1.UpdateLevel(alert.LevelError)
+	a1.UpdateLevel(alert2.LevelError)
 	a1.Inc()
 	resultData = append(resultData, a1)
 
@@ -57,7 +57,7 @@ func TestHandler(t *testing.T) {
 }
 
 func TestHandler_BadLevelArgument(t *testing.T) {
-	var resultData []*alert.Alert
+	var resultData []*alert2.Alert
 
 	am := coreStorage.NewMock("")
 	am.AlertMock().On("All").Return(resultData, nil)

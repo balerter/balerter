@@ -2,12 +2,12 @@ package manager
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/alert/alert"
+	alert2 "github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/metrics"
 	"go.uber.org/zap"
 )
 
-func (m *Manager) Call(name string, level alert.Level, text string, options *alert.Options) error {
+func (m *Manager) Call(name string, level alert2.Level, text string, options *alert2.Options) error {
 	m.logger.Debug("alertManager call",
 		zap.String("name", name),
 		zap.Int("level", int(level)),

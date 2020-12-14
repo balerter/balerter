@@ -2,19 +2,19 @@ package manager
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/alert/provider/alertmanager"
-	alertmanagerreceiver "github.com/balerter/balerter/internal/alert/provider/alertmanager_receiver"
-	"github.com/balerter/balerter/internal/alert/provider/webhook"
+	"github.com/balerter/balerter/internal/channels/alertmanager"
+	alertmanagerreceiver "github.com/balerter/balerter/internal/channels/alertmanager_receiver"
+	"github.com/balerter/balerter/internal/channels/webhook"
 
-	"github.com/balerter/balerter/internal/alert/message"
-	"github.com/balerter/balerter/internal/alert/provider/discord"
-	"github.com/balerter/balerter/internal/alert/provider/email"
-	"github.com/balerter/balerter/internal/alert/provider/notify"
-	"github.com/balerter/balerter/internal/alert/provider/slack"
-	"github.com/balerter/balerter/internal/alert/provider/syslog"
-	"github.com/balerter/balerter/internal/alert/provider/telegram"
+	"github.com/balerter/balerter/internal/channels/discord"
+	"github.com/balerter/balerter/internal/channels/email"
+	"github.com/balerter/balerter/internal/channels/notify"
+	"github.com/balerter/balerter/internal/channels/slack"
+	"github.com/balerter/balerter/internal/channels/syslog"
+	"github.com/balerter/balerter/internal/channels/telegram"
 	"github.com/balerter/balerter/internal/config"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
+	"github.com/balerter/balerter/internal/message"
 	"go.uber.org/zap"
 )
 

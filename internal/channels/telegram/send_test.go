@@ -1,8 +1,8 @@
 package telegram
 
 import (
-	"github.com/balerter/balerter/internal/alert/message"
-	"github.com/balerter/balerter/internal/alert/provider/telegram/api"
+	"github.com/balerter/balerter/internal/channels/telegram/api"
+	"github.com/balerter/balerter/internal/message"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

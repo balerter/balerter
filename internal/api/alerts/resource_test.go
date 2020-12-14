@@ -1,7 +1,7 @@
 package alerts
 
 import (
-	"github.com/balerter/balerter/internal/alert/alert"
+	alert2 "github.com/balerter/balerter/internal/alert"
 	"github.com/stretchr/testify/assert"
 	httpTestify "github.com/stretchr/testify/http"
 	"github.com/stretchr/testify/require"
@@ -10,19 +10,19 @@ import (
 )
 
 func TestResource(t *testing.T) {
-	var data []*alert.Alert
+	var data []*alert2.Alert
 
-	a1 := alert.AcquireAlert()
+	a1 := alert2.AcquireAlert()
 	a1.SetName("foo")
-	a1.UpdateLevel(alert.LevelError)
+	a1.UpdateLevel(alert2.LevelError)
 	a1.Inc()
 	a1.Inc()
 	updateAt1 := a1.GetLastChangeTime().Format(time.RFC3339)
 	data = append(data, a1)
 
-	a2 := alert.AcquireAlert()
+	a2 := alert2.AcquireAlert()
 	a2.SetName("bar")
-	a2.UpdateLevel(alert.LevelSuccess)
+	a2.UpdateLevel(alert2.LevelSuccess)
 	a2.Inc()
 	a2.Inc()
 	updateAt2 := a1.GetLastChangeTime().Format(time.RFC3339)

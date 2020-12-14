@@ -2,7 +2,7 @@ package alert
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/alert/alert"
+	alert2 "github.com/balerter/balerter/internal/alert"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -74,9 +74,9 @@ func TestGet_ErrorGet(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	a := &alert.Alert{}
+	a := &alert2.Alert{}
 	a.SetName("bar")
-	a.UpdateLevel(alert.LevelError)
+	a.UpdateLevel(alert2.LevelError)
 	a.Inc()
 
 	mgrMock := &managerMock{}

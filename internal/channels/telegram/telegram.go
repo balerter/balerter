@@ -2,7 +2,7 @@ package telegram
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/alert/provider/telegram/api"
+	"github.com/balerter/balerter/internal/channels/telegram/api"
 	"github.com/balerter/balerter/internal/config"
 	"go.uber.org/zap"
 )

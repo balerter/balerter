@@ -1,7 +1,7 @@
 package discord
 
 import (
-	"github.com/balerter/balerter/internal/alert/message"
+	"github.com/balerter/balerter/internal/message"
 )
 
 // Send implements

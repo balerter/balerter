@@ -1,7 +1,7 @@
 package slack
 
 import (
-	"github.com/balerter/balerter/internal/alert/message"
+	"github.com/balerter/balerter/internal/message"
 	"github.com/nlopes/slack"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

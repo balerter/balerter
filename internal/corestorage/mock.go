@@ -1,7 +1,7 @@
 package corestorage
 
 import (
-	"github.com/balerter/balerter/internal/alert/alert"
+	alert2 "github.com/balerter/balerter/internal/alert"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -51,33 +51,33 @@ type AlertMock struct {
 	mock.Mock
 }
 
-func (m *AlertMock) GetOrNew(string) (*alert.Alert, error) {
+func (m *AlertMock) GetOrNew(string) (*alert2.Alert, error) {
 	args := m.Called()
 	a := args.Get(0)
 	if a == nil {
 		return nil, args.Error(1)
 	}
-	return a.(*alert.Alert), args.Error(1)
+	return a.(*alert2.Alert), args.Error(1)
 }
 
-func (m *AlertMock) All() ([]*alert.Alert, error) {
+func (m *AlertMock) All() ([]*alert2.Alert, error) {
 	args := m.Called()
-	return args.Get(0).([]*alert.Alert), args.Error(1)
+	return args.Get(0).([]*alert2.Alert), args.Error(1)
 }
 
-func (m *AlertMock) Release(a *alert.Alert) error {
+func (m *AlertMock) Release(a *alert2.Alert) error {
 	args := m.Called(a)
 	return args.Error(0)
 }
 
-func (m *AlertMock) Get(s string) (*alert.Alert, error) {
+func (m *AlertMock) Get(s string) (*alert2.Alert, error) {
 	args := m.Called(s)
 	a := args.Get(0)
 	e := args.Error(1)
 	if a == nil {
 		return nil, e
 	}
-	return a.(*alert.Alert), e
+	return a.(*alert2.Alert), e
 }
 
 type KVMock struct {

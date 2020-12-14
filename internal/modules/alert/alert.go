@@ -1,7 +1,7 @@
 package alert
 
 import (
-	"github.com/balerter/balerter/internal/alert/alert"
+	alert2 "github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -24,8 +24,8 @@ func Methods() []string {
 }
 
 type Manager interface {
-	Call(alertName string, alertLevel alert.Level, text string, options *alert.Options) error
-	Get(name string) (*alert.Alert, error)
+	Call(alertName string, alertLevel alert2.Level, text string, options *alert2.Options) error
+	Get(name string) (*alert2.Alert, error)
 }
 
 type Alert struct {
@@ -50,14 +50,14 @@ func (a *Alert) GetLoader(s *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
-				"warn":    a.call(s, alert.LevelWarn),
-				"warning": a.call(s, alert.LevelWarn),
+				"warn":    a.call(s, alert2.LevelWarn),
+				"warning": a.call(s, alert2.LevelWarn),
 
-				"error": a.call(s, alert.LevelError),
-				"fail":  a.call(s, alert.LevelError),
+				"error": a.call(s, alert2.LevelError),
+				"fail":  a.call(s, alert2.LevelError),
 
-				"success": a.call(s, alert.LevelSuccess),
-				"ok":      a.call(s, alert.LevelSuccess),
+				"success": a.call(s, alert2.LevelSuccess),
+				"ok":      a.call(s, alert2.LevelSuccess),
 
 				"get": a.get(s),
 			}

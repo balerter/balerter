@@ -10,8 +10,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/balerter/balerter/internal/alert/message"
 	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/message"
 )
 
 func webhookSend(conf *config.ChannelWebhook, msg *message.Message) error {

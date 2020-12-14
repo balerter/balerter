@@ -1,18 +1,18 @@
 package memory
 
 import (
-	"github.com/balerter/balerter/internal/alert/alert"
+	alert2 "github.com/balerter/balerter/internal/alert"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestAlert_GetOrNew(t *testing.T) {
-	m := storageAlert{alerts: map[string]*alert.Alert{}}
+	m := storageAlert{alerts: map[string]*alert2.Alert{}}
 
 	a, err := m.GetOrNew("foo")
 	assert.NoError(t, err)
-	assert.IsType(t, &alert.Alert{}, a)
+	assert.IsType(t, &alert2.Alert{}, a)
 
 	assert.Equal(t, 1, len(m.alerts))
 	_, ok := m.alerts["foo"]
@@ -20,7 +20,7 @@ func TestAlert_GetOrNew(t *testing.T) {
 
 	a2, err := m.GetOrNew("foo")
 	assert.NoError(t, err)
-	assert.IsType(t, &alert.Alert{}, a2)
+	assert.IsType(t, &alert2.Alert{}, a2)
 
 	assert.Equal(t, 1, len(m.alerts))
 	_, ok = m.alerts["foo"]
@@ -29,13 +29,13 @@ func TestAlert_GetOrNew(t *testing.T) {
 }
 
 func TestAlert_All(t *testing.T) {
-	m := storageAlert{alerts: map[string]*alert.Alert{}}
+	m := storageAlert{alerts: map[string]*alert2.Alert{}}
 
-	a1 := &alert.Alert{}
+	a1 := &alert2.Alert{}
 	a1.SetName("foo")
 	m.alerts["foo"] = a1
 
-	a2 := &alert.Alert{}
+	a2 := &alert2.Alert{}
 	a2.SetName("bar")
 	m.alerts["bar"] = a2
 
