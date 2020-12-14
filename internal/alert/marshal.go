@@ -2,11 +2,19 @@ package alert
 
 import (
 	"encoding/binary"
-	"fmt"
+	"errors"
 )
 
 const (
 	timeFieldBinarySize = 15
+)
+
+var (
+	ErrDecodeAlertName = errors.New("error decode alert name")
+	ErrSourceTooSmall  = errors.New("source too small")
+	ErrDecodeLevel     = errors.New("error decode level")
+	ErrDecodeCount     = errors.New("error decode count")
+	ErrSourceTooLong   = errors.New("source too long")
 )
 
 // Marshal an Alert to the byte slice
@@ -51,31 +59,31 @@ func (a *Alert) Unmarshal(src []byte) error {
 	// Name length
 	l, n := binary.Uvarint(src)
 	if n <= 0 {
-		return fmt.Errorf("error decode alert name")
+		return ErrDecodeAlertName
 	}
 	src = src[n:]
 
 	// Name
 	if len(src) < int(l) {
-		return fmt.Errorf("source too small")
+		return ErrSourceTooSmall
 	}
 	a.name = string(src[:l])
 	src = src[l:]
 
 	// Level
 	if len(src) == 0 {
-		return fmt.Errorf("source too small")
+		return ErrSourceTooSmall
 	}
 	l, n = binary.Uvarint(src)
 	if n <= 0 {
-		return fmt.Errorf("error decode level")
+		return ErrDecodeLevel
 	}
 	a.level = Level(l)
 	src = src[n:]
 
 	// LastChange
 	if len(src) < timeFieldBinarySize {
-		return fmt.Errorf("source too small")
+		return ErrSourceTooSmall
 	}
 	err := a.lastChange.UnmarshalBinary(src[:timeFieldBinarySize])
 	if err != nil {
@@ -85,7 +93,7 @@ func (a *Alert) Unmarshal(src []byte) error {
 
 	// Start
 	if len(src) < timeFieldBinarySize {
-		return fmt.Errorf("source too small")
+		return ErrSourceTooSmall
 	}
 	err = a.start.UnmarshalBinary(src[:timeFieldBinarySize])
 	if err != nil {
@@ -95,17 +103,17 @@ func (a *Alert) Unmarshal(src []byte) error {
 
 	// Count
 	if len(src) == 0 {
-		return fmt.Errorf("source too small")
+		return ErrSourceTooSmall
 	}
 	l, n = binary.Uvarint(src)
 	if n <= 0 {
-		return fmt.Errorf("error decode last change")
+		return ErrDecodeCount
 	}
 	a.count = int(l)
 	src = src[n:]
 
 	if len(src) > 0 {
-		return fmt.Errorf("source too long")
+		return ErrSourceTooLong
 	}
 
 	return nil

@@ -1,7 +1,7 @@
 package alert
 
 import (
-	"fmt"
+	"errors"
 	"sync"
 	"time"
 )
@@ -24,6 +24,10 @@ const (
 	LevelWarn Level = 2
 	// LevelError is Error level of an alert
 	LevelError Level = 3
+)
+
+var (
+	ErrBadLevel = errors.New("bad level")
 )
 
 var (
@@ -68,7 +72,7 @@ func LevelFromString(s string) (Level, error) {
 		return LevelError, nil
 	}
 
-	return 0, fmt.Errorf("bad level")
+	return 0, ErrBadLevel
 }
 
 // String returns string value of the Level
