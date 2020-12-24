@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/channels/alertmanager"
 	alertmanagerreceiver "github.com/balerter/balerter/internal/channels/alertmanager_receiver"
 	"github.com/balerter/balerter/internal/channels/webhook"
@@ -23,7 +24,7 @@ type alertChannel interface {
 	Send(*message.Message) error
 }
 
-type sendMessageFunc func(level, alertName, text string, channels, fields []string, image string)
+type sendMessageFunc func(level, alertName, text string, options *alert.Options, errs chan<- error) error
 
 // Manager represents the Alert manager struct
 type Manager struct {
@@ -32,6 +33,8 @@ type Manager struct {
 
 	sendMessageFunc sendMessageFunc
 	storage         coreStorage.CoreStorage
+
+	errs chan error
 }
 
 // New returns new Alert manager instance
@@ -40,9 +43,16 @@ func New(engine coreStorage.CoreStorage, logger *zap.Logger) *Manager {
 		logger:   logger,
 		storage:  engine,
 		channels: make(map[string]alertChannel),
+		errs:     make(chan error),
 	}
 
 	m.sendMessageFunc = m.Send
+
+	go func() {
+		for err := range m.errs {
+			m.logger.Error("alert manager error", zap.Error(err))
+		}
+	}()
 
 	return m
 }
