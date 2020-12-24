@@ -92,6 +92,12 @@ github.com/containerd/continuity/sysx
 github.com/cortexproject/cortex/pkg/prom1/storage/metric
 github.com/cortexproject/cortex/pkg/util
 github.com/cortexproject/cortex/pkg/util/spanlogger
+# github.com/cristalhq/aconfig v0.10.0
+## explicit
+github.com/cristalhq/aconfig
+# github.com/cristalhq/aconfig/aconfigyaml v0.10.0
+## explicit
+github.com/cristalhq/aconfig/aconfigyaml
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/deckarep/gosx-notifier v0.0.0-20180201035817-e127226297fb
@@ -564,8 +570,7 @@ google.golang.org/grpc/tap
 # gopkg.in/toast.v1 v1.0.0-20180812000517-0a84660828b2
 ## explicit
 gopkg.in/toast.v1
-# gopkg.in/yaml.v2 v2.2.8
-## explicit
+# gopkg.in/yaml.v2 v2.3.0
 gopkg.in/yaml.v2
 # honnef.co/go/tools v0.0.1-2019.2.3
 honnef.co/go/tools/arg

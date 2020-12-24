@@ -2,39 +2,32 @@ package config
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/cristalhq/aconfig"
+	"github.com/cristalhq/aconfig/aconfigyaml"
 )
 
 var StdIn io.Reader = os.Stdin
 
 func New(configSource string) (*Config, error) {
-	cfg := &Config{
-		Scripts:     &Scripts{},
-		DataSources: &DataSources{},
-		Channels:    &Channels{},
-		Storages:    &Storages{},
-		Global:      &Global{},
-	}
+	cfg := &Config{}
 
-	var data []byte
-	var err error
+	loader := aconfig.LoaderFor(cfg, aconfig.Config{
+		SkipEnv:   true,
+		SkipFlags: true,
 
-	if configSource == "stdin" {
-		data, err = ioutil.ReadAll(StdIn)
-	} else {
-		data, err = ioutil.ReadFile(configSource)
-	}
+		FailOnFileNotFound: true,
+		Files:              []string{configSource},
+		FileDecoders: map[string]aconfig.FileDecoder{
+			".yaml": aconfigyaml.New(),
+		},
+	})
 
-	if err != nil {
+	if err := loader.Load(); err != nil {
 		return nil, fmt.Errorf("error read config file, %w", err)
-	}
-
-	if err := yaml.Unmarshal(data, cfg); err != nil {
-		return nil, fmt.Errorf("error parse config file, %w", err)
 	}
 
 	if err := cfg.Validate(); err != nil {

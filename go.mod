@@ -6,6 +6,8 @@ require (
 	github.com/ClickHouse/clickhouse-go v1.3.13
 	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/aws/aws-sdk-go v1.29.4
+	github.com/cristalhq/aconfig v0.10.0
+	github.com/cristalhq/aconfig/aconfigyaml v0.10.0
 	github.com/deckarep/gosx-notifier v0.0.0-20180201035817-e127226297fb // indirect
 	github.com/diamondburned/arikawa v0.9.2
 	github.com/docker/go-connections v0.4.0
@@ -34,7 +36,6 @@ require (
 	gonum.org/v1/netlib v0.0.0-20191229114700-bbb4dff026f8 // indirect
 	gonum.org/v1/plot v0.0.0-20200212202559-4d97eda4de95
 	gopkg.in/toast.v1 v1.0.0-20180812000517-0a84660828b2 // indirect
-	gopkg.in/yaml.v2 v2.2.8
 )
 
 // Override reference causing proxy error.  Otherwise it attempts to download https://proxy.golang.org/golang.org/x/net/@v/v0.0.0-20190813000000-74dc4d7220e7.info
