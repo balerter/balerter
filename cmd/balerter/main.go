@@ -4,7 +4,8 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/balerter/balerter/internal/modules/alert"
+	"github.com/balerter/balerter/internal/alert"
+	alertModule "github.com/balerter/balerter/internal/modules/alert"
 	"log"
 	"os"
 	"os/signal"
@@ -115,6 +116,13 @@ func run( //nolint:gocritic,gocyclo,funlen // Run main application
 		}
 	}
 
+	// log if use a 465 port and an empty secure string for an email channel
+	for idx := range cfg.Channels.Email {
+		if cfg.Channels.Email[idx].Port == "465" && cfg.Channels.Email[idx].Secure == "" {
+			lgr.Logger().Info("secure port 465 with ssl for email channel " + cfg.Channels.Email[idx].Name)
+		}
+	}
+
 	if err = scriptsMgr.Init(cfg.Scripts.Sources); err != nil {
 		return fmt.Sprintf("error init scripts manager, %v", err), 1
 	}
@@ -157,18 +165,8 @@ func run( //nolint:gocritic,gocyclo,funlen // Run main application
 	// |
 	// | Alert
 	// |
-	alertModule := alert.New(alertMgr, lgr.Logger())
-	coreModules = append(coreModules, alertModule)
-
-	if len(cfg.Global.SendStartNotification) > 0 {
-		alertMgr.Send("", "", "Balerter start", cfg.Global.SendStartNotification, nil, "")
-	}
-
-	for idx := range cfg.Channels.Email {
-		if cfg.Channels.Email[idx].Port == "465" && cfg.Channels.Email[idx].Secure == "" {
-			lgr.Logger().Info("secure port 465 with ssl for email channel " + cfg.Channels.Email[idx].Name)
-		}
-	}
+	alertMod := alertModule.New(alertMgr, lgr.Logger())
+	coreModules = append(coreModules, alertMod)
 
 	// ---------------------
 	// |
@@ -230,6 +228,15 @@ func run( //nolint:gocritic,gocyclo,funlen // Run main application
 	runtimeMod := runtimeModule.New(logLevel, debug, once, withScript, configSource, lgr.Logger())
 	coreModules = append(coreModules, runtimeMod)
 
+	if len(cfg.Global.SendStartNotification) > 0 {
+		err = alertMgr.Send("", "", "Balerter start", &alert.Options{
+			Channels: cfg.Global.SendStartNotification,
+		}, nil)
+		if err != nil {
+			lgr.Logger().Error("error send start notification", zap.Error(err))
+		}
+	}
+
 	// ---------------------
 	// |
 	// | Runner
@@ -264,7 +271,12 @@ func run( //nolint:gocritic,gocyclo,funlen // Run main application
 	dsMgr.Stop()
 
 	if len(cfg.Global.SendStopNotification) > 0 {
-		alertMgr.Send("", "", "Balerter stop", cfg.Global.SendStopNotification, nil, "")
+		err = alertMgr.Send("", "", "Balerter stop", &alert.Options{
+			Channels: cfg.Global.SendStopNotification,
+		}, nil)
+		if err != nil {
+			lgr.Logger().Error("error send stop notification", zap.Error(err))
+		}
 	}
 
 	lgr.Logger().Info("terminate")
