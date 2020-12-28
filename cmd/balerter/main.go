@@ -186,6 +186,8 @@ func run( //nolint:gocritic,gocyclo,funlen // Run main application
 	kvModule := kv.New(kvEngine)
 	coreModules = append(coreModules, kvModule)
 
+	var ln net.Listener
+
 	// ---------------------
 	// |
 	// | API
@@ -201,7 +203,7 @@ func run( //nolint:gocritic,gocyclo,funlen // Run main application
 	// | Service
 	// |
 	if cfg.Global.Service.Address != "" {
-		ln, err := net.Listen("tcp", cfg.Global.Service.Address)
+		ln, err = net.Listen("tcp", cfg.Global.Service.Address)
 		if err != nil {
 			return fmt.Sprintf("error create service listener, %v", err), 1
 		}
