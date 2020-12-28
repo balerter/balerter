@@ -44,7 +44,7 @@ var (
 	errorOSReturnCode = 1
 )
 
-func main() { //nolint:funlen // main function
+func main() {
 	var resultsOutput io.Writer = os.Stdout
 
 	lua.LuaPathDefault = defaultLuaModulesPath

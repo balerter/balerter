@@ -19,12 +19,12 @@ func (m *Loki) getQuery(luaState *lua.LState) (string, error) {
 	return query, nil
 }
 
-func (m *Loki) doQuery(luaState *lua.LState) int { //nolint:dupl // not same code!
+func (m *Loki) doQuery(luaState *lua.LState) int {
 	query, err := m.getQuery(luaState)
 	if err != nil {
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString(err.Error()))
-		return 2 //nolint:mnd
+		return 2
 	}
 
 	queryOptions, err := m.parseQueryOptions(luaState)
@@ -32,7 +32,7 @@ func (m *Loki) doQuery(luaState *lua.LState) int { //nolint:dupl // not same cod
 		m.logger.Error("error parse query options", zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error parse query options"))
-		return 2 //nolint:mnd
+		return 2
 	}
 
 	m.logger.Debug("call loki query", zap.String("name", m.name), zap.String("query", query), zap.Any("options", queryOptions))
@@ -42,18 +42,18 @@ func (m *Loki) doQuery(luaState *lua.LState) int { //nolint:dupl // not same cod
 		m.logger.Error("error send query to loki", zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error send query to loki: " + err.Error()))
-		return 2 //nolint:mnd
+		return 2
 	}
 
 	return m.do(v, luaState)
 }
 
-func (m *Loki) doRange(luaState *lua.LState) int { //nolint:dupl // not same code!
+func (m *Loki) doRange(luaState *lua.LState) int {
 	query, err := m.getQuery(luaState)
 	if err != nil {
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString(err.Error()))
-		return 2 //nolint:mnd
+		return 2
 	}
 
 	rangeOptions, err := m.parseRangeOptions(luaState)
@@ -61,7 +61,7 @@ func (m *Loki) doRange(luaState *lua.LState) int { //nolint:dupl // not same cod
 		m.logger.Error("error parse range options", zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error parse range options"))
-		return 2 //nolint:mnd
+		return 2
 	}
 
 	m.logger.Debug("call loki query range", zap.String("name", m.name), zap.String("query", query), zap.Any("options", rangeOptions))
@@ -71,7 +71,7 @@ func (m *Loki) doRange(luaState *lua.LState) int { //nolint:dupl // not same cod
 		m.logger.Error("error send query to loki", zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error send query to loki: " + err.Error()))
-		return 2 //nolint:mnd
+		return 2
 	}
 
 	return m.do(v, luaState)
@@ -107,10 +107,10 @@ func (m *Loki) do(v *lokihttp.QueryResponse, luaState *lua.LState) int {
 		m.logger.Error("query error: unexpected loki model type")
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("query error: unexpected loki model type"))
-		return 2 //nolint:mnd
+		return 2
 	}
 
 	luaState.Push(lua.LNil)
 
-	return 2 //nolint:mnd
+	return 2
 }

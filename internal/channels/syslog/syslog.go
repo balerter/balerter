@@ -51,14 +51,14 @@ func parsePriority(s string) syslog.Priority {
 
 	priority := getSeverity(parts[0])
 
-	if len(parts) == 2 { //nolint:mnd
+	if len(parts) == 2 {
 		priority |= getFacility(parts[1])
 	}
 
 	return priority
 }
 
-func getFacility(s string) syslog.Priority { //nolint:cocyclo
+func getFacility(s string) syslog.Priority {
 	switch s {
 	case "KERN":
 		return syslog.LOG_KERN

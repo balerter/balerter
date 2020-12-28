@@ -48,7 +48,7 @@ func (kv *KV) GetLoader(_ *script.Script) lua.LGFunction {
 			mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
 			luaState.Push(mod)
-			return 1 //nolint:mnd // its arguments count, not magic number
+			return 1
 		}
 	}()
 }
@@ -58,55 +58,55 @@ func (kv *KV) Stop() error {
 }
 
 func (kv *KV) get(luaState *lua.LState) int {
-	varName := luaState.Get(1).String() //nolint:mnd // its argument index, not magic number
+	varName := luaState.Get(1).String()
 
 	val, err := kv.engine.KV().Get(varName)
 	if err != nil {
 		luaState.Push(lua.LString(""))
 		luaState.Push(lua.LString(err.Error()))
-		return 2 //nolint:mnd // its arguments count, not magic number
+		return 2
 	}
 
 	luaState.Push(lua.LString(val))
 	luaState.Push(lua.LNil)
 
-	return 2 //nolint:mnd // its arguments count, not magic number
+	return 2
 }
 
 func (kv *KV) put(luaState *lua.LState) int {
-	varName := luaState.Get(1).String() //nolint:mnd // its argument index, not magic number
-	varVal := luaState.Get(2).String()  //nolint:mnd // its argument index, not magic number
+	varName := luaState.Get(1).String()
+	varVal := luaState.Get(2).String()
 
 	err := kv.engine.KV().Put(varName, varVal)
 	if err != nil {
 		luaState.Push(lua.LString(err.Error()))
-		return 1 //nolint:mnd // its arguments count, not magic number
+		return 1
 	}
 
-	return 0 //nolint:mnd // its arguments count, not magic number
+	return 0
 }
 
 func (kv *KV) upsert(luaState *lua.LState) int {
-	varName := luaState.Get(1).String() //nolint:mnd // its argument index, not magic number
-	varVal := luaState.Get(2).String()  //nolint:mnd // its argument index, not magic number
+	varName := luaState.Get(1).String()
+	varVal := luaState.Get(2).String()
 
 	err := kv.engine.KV().Upsert(varName, varVal)
 	if err != nil {
 		luaState.Push(lua.LString(err.Error()))
-		return 1 //nolint:mnd // its arguments count, not magic number
+		return 1
 	}
 
-	return 0 //nolint:mnd // its arguments count, not magic number
+	return 0
 }
 
 func (kv *KV) delete(luaState *lua.LState) int {
-	varName := luaState.Get(1).String() //nolint:mnd // its argument index, not magic number
+	varName := luaState.Get(1).String()
 
 	err := kv.engine.KV().Delete(varName)
 	if err != nil {
 		luaState.Push(lua.LString(err.Error()))
-		return 1 //nolint:mnd // its arguments count, not magic number
+		return 1
 	}
 
-	return 0 //nolint:mnd // its arguments count, not magic number
+	return 0
 }

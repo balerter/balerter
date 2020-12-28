@@ -21,10 +21,10 @@ func (q *rangeOptions) validate() error {
 	return nil
 }
 
-func (m *Loki) parseRangeOptions(luaState *lua.LState) (*rangeOptions, error) { //nolint:dupl // some code duplicated with queryOptions
+func (m *Loki) parseRangeOptions(luaState *lua.LState) (*rangeOptions, error) {
 	queryOptions := &rangeOptions{}
 
-	options := luaState.Get(2) //nolint:mnd
+	options := luaState.Get(2)
 	if options.Type() == lua.LTNil {
 		return queryOptions, nil
 	}

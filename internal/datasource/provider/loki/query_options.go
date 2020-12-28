@@ -19,10 +19,10 @@ func (q *queryOptions) validate() error {
 	return nil
 }
 
-func (m *Loki) parseQueryOptions(luaState *lua.LState) (*queryOptions, error) { //nolint:dupl // some code duplicated with rangeOptions
+func (m *Loki) parseQueryOptions(luaState *lua.LState) (*queryOptions, error) {
 	queryOptions := &queryOptions{}
 
-	options := luaState.Get(2) //nolint:mnd
+	options := luaState.Get(2)
 	if options.Type() == lua.LTNil {
 		return queryOptions, nil
 	}

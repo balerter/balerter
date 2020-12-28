@@ -13,7 +13,7 @@ import (
 func (a *Alert) getAlertData(luaState *lua.LState) (alertName, alertText string, options *alert2.Options, err error) {
 	options = &alert2.Options{}
 
-	alertNameLua := luaState.Get(1) //nolint:mnd
+	alertNameLua := luaState.Get(1)
 	if alertNameLua.Type() == lua.LTNil {
 		err = fmt.Errorf("alert name must be provided")
 		return
@@ -25,14 +25,14 @@ func (a *Alert) getAlertData(luaState *lua.LState) (alertName, alertText string,
 		return
 	}
 
-	alertTextLua := luaState.Get(2) //nolint:mnd
+	alertTextLua := luaState.Get(2)
 	if alertTextLua.Type() == lua.LTNil {
 		return
 	}
 
 	alertText = alertTextLua.String()
 
-	alertOptionsLua := luaState.Get(3) //nolint:mnd
+	alertOptionsLua := luaState.Get(3)
 	if alertOptionsLua.Type() == lua.LTNil {
 		return
 	}

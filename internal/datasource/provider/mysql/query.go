@@ -20,7 +20,7 @@ func (m *MySQL) query(luaState *lua.LState) int {
 		m.logger.Error("error mysql query", zap.String("query", q), zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString(err.Error()))
-		return 2 //nolint:mnd
+		return 2
 	}
 	defer rows.Close()
 
@@ -41,7 +41,7 @@ func (m *MySQL) query(luaState *lua.LState) int {
 			m.logger.Error("error scan", zap.Error(err))
 			luaState.Push(lua.LNil)
 			luaState.Push(lua.LString("error scan: " + err.Error()))
-			return 2 //nolint:mnd
+			return 2
 		}
 
 		row := &lua.LTable{}
@@ -57,10 +57,10 @@ func (m *MySQL) query(luaState *lua.LState) int {
 		m.logger.Error("error next", zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error next: " + err.Error()))
-		return 2 //nolint:mnd
+		return 2
 	}
 
 	luaState.Push(result)
 	luaState.Push(lua.LNil)
-	return 2 //nolint:mnd
+	return 2
 }

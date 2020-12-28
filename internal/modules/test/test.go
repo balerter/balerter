@@ -53,7 +53,7 @@ func (t *Test) Stop() error {
 	return nil
 }
 
-func (t *Test) getStorage(s *script.Script) lua.LGFunction { //nolint:dupl // partially duplicated test
+func (t *Test) getStorage(s *script.Script) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		nameL := luaState.Get(1)
 		if nameL.Type() == lua.LTNil {
@@ -79,7 +79,7 @@ func (t *Test) getStorage(s *script.Script) lua.LGFunction { //nolint:dupl // pa
 	}
 }
 
-func (t *Test) getDatasource(s *script.Script) lua.LGFunction { //nolint:dupl // partially duplicated test
+func (t *Test) getDatasource(s *script.Script) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		nameL := luaState.Get(1)
 		if nameL.Type() == lua.LTNil {

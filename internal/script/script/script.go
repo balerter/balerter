@@ -1,7 +1,7 @@
 package script
 
 import (
-	"crypto/sha1" //nolint:gosec // sha1 uses not for security
+	"crypto/sha1"
 	"fmt"
 	"strings"
 	"time"
@@ -33,7 +33,7 @@ type Script struct {
 }
 
 func (s *Script) Hash() string {
-	return fmt.Sprintf("%x", sha1.Sum(append([]byte(s.Name+"@"), s.Body...))) //nolint:gosec // sha1 uses not for security
+	return fmt.Sprintf("%x", sha1.Sum(append([]byte(s.Name+"@"), s.Body...)))
 }
 
 type parseMetaFunc func(l string, s *Script) error

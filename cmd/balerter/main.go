@@ -61,7 +61,7 @@ func main() {
 	os.Exit(code)
 }
 
-func run( //nolint:gocritic,gocyclo,funlen // Run main application
+func run(
 	configSource,
 	logLevel string,
 	debug,

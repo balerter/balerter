@@ -25,13 +25,13 @@ func newRequestArgs() *requestArgs {
 func (h *HTTP) parseRequestArgs(luaState *lua.LState) (*requestArgs, error) {
 	args := newRequestArgs()
 
-	argURI := luaState.Get(1) //nolint:mnd
+	argURI := luaState.Get(1)
 	if argURI.Type() != lua.LTString {
 		return nil, fmt.Errorf("uri argument must be a string")
 	}
 	args.URI = argURI.(lua.LString).String()
 
-	argBody := luaState.Get(2) //nolint:mnd
+	argBody := luaState.Get(2)
 	switch argBody.Type() {
 	case lua.LTString:
 		args.Body = []byte(argBody.(lua.LString).String())
@@ -43,7 +43,7 @@ func (h *HTTP) parseRequestArgs(luaState *lua.LState) (*requestArgs, error) {
 		return nil, fmt.Errorf("first argument must be a string")
 	}
 
-	argHeaders := luaState.Get(3) //nolint:mnd
+	argHeaders := luaState.Get(3)
 	switch argHeaders.Type() {
 	case lua.LTTable:
 		argHeaders.(*lua.LTable).ForEach(func(value lua.LValue, value2 lua.LValue) {

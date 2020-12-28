@@ -8,18 +8,18 @@ import (
 
 func (a *Alert) get(_ *script.Script) lua.LGFunction {
 	return func(luaState *lua.LState) int {
-		name := luaState.Get(1) //nolint:mnd
+		name := luaState.Get(1)
 		if name.Type() != lua.LTString {
 			luaState.Push(lua.LNil)
 			luaState.Push(lua.LString("alert name must be a string"))
-			return 2 //nolint:mnd
+			return 2
 		}
 
 		alrt, err := a.manager.Get(name.String())
 		if err != nil {
 			luaState.Push(lua.LNil)
 			luaState.Push(lua.LString("error get alert: " + err.Error()))
-			return 2 //nolint:mnd
+			return 2
 		}
 
 		t := alrt.MarshalLua()

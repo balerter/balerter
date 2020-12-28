@@ -64,7 +64,7 @@ func (ch *Chart) GetLoader(s *script.Script) lua.LGFunction {
 		mod := luaState.SetFuncs(luaState.NewTable(), exports)
 
 		luaState.Push(mod)
-		return 1 //nolint:mnd
+		return 1
 	}
 }
 
@@ -72,18 +72,18 @@ func (ch *Chart) render(_ *script.Script) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		ch.logger.Debug("Chart.Render")
 
-		chartTitle := luaState.Get(1) //nolint:mnd
+		chartTitle := luaState.Get(1)
 		if chartTitle.Type() == lua.LTNil {
 			luaState.Push(lua.LNil)
 			luaState.Push(lua.LString("title must be defined"))
-			return 2 //nolint:mnd
+			return 2
 		}
 
-		chartData := luaState.Get(2) //nolint:mnd
+		chartData := luaState.Get(2)
 		if chartData.Type() != lua.LTTable {
 			luaState.Push(lua.LNil)
 			luaState.Push(lua.LString("chart data table must be defined"))
-			return 2 //nolint:mnd
+			return 2
 		}
 
 		data := &Data{}
@@ -92,7 +92,7 @@ func (ch *Chart) render(_ *script.Script) lua.LGFunction {
 		if err != nil {
 			luaState.Push(lua.LNil)
 			luaState.Push(lua.LString("wrong chart data format, " + err.Error()))
-			return 2 //nolint:mnd
+			return 2
 		}
 
 		buf := bytes.NewBuffer([]byte{})
@@ -101,11 +101,11 @@ func (ch *Chart) render(_ *script.Script) lua.LGFunction {
 		if err != nil {
 			luaState.Push(lua.LNil)
 			luaState.Push(lua.LString("error render chart, " + err.Error()))
-			return 2 //nolint:mnd
+			return 2
 		}
 
 		luaState.Push(lua.LString(buf.String()))
 
-		return 1 //nolint:mnd
+		return 1
 	}
 }
