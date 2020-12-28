@@ -24,7 +24,7 @@ func Methods() []string {
 }
 
 type Manager interface {
-	Call(alertName string, alertLevel alert2.Level, text string, options *alert2.Options) error
+	Update(alertName string, alertLevel alert2.Level, text string, options *alert2.Options) error
 	Get(name string) (*alert2.Alert, error)
 }
 

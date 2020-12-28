@@ -9,7 +9,7 @@ type managerMock struct {
 	mock.Mock
 }
 
-func (m *managerMock) Call(alertName string, alertLevel alert2.Level, text string, options *alert2.Options) error {
+func (m *managerMock) Update(alertName string, alertLevel alert2.Level, text string, options *alert2.Options) error {
 	args := m.Called(alertName, alertLevel, text, options)
 	return args.Error(0)
 }

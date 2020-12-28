@@ -64,7 +64,7 @@ func (a *Alert) call(s *script.Script, alertLevel alert2.Level) lua.LGFunction {
 			options.Channels = s.Channels
 		}
 
-		err = a.manager.Call(name, alertLevel, text, options)
+		err = a.manager.Update(name, alertLevel, text, options)
 		if err != nil {
 			a.logger.Error("error call alert manager", zap.Error(err))
 			luaState.Push(lua.LString("error call alert manager: " + err.Error()))

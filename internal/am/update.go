@@ -7,8 +7,8 @@ import (
 	"go.uber.org/zap"
 )
 
-func (m *Manager) Call(name string, level alert.Level, text string, options *alert.Options) error {
-	m.logger.Debug("alertManager call",
+func (m *Manager) Update(name string, level alert.Level, text string, options *alert.Options) error {
+	m.logger.Debug("alertManager update",
 		zap.String("name", name),
 		zap.Int("level", int(level)),
 		zap.String("text", text),

@@ -22,7 +22,7 @@ func TestCall_error_get_alert(t *testing.T) {
 		logger:  zap.NewNop(),
 	}
 
-	err := m.Call("", 0, "", nil)
+	err := m.Update("", 0, "", nil)
 
 	require.Error(t, err)
 	assert.Equal(t, "error get alert , e1", err.Error())
@@ -46,7 +46,7 @@ func TestCall_same_level__quiet(t *testing.T) {
 		sendMessageFunc: mockSend,
 	}
 
-	err := m.Call("foo", alert.LevelError, "bar", &alert.Options{Quiet: true})
+	err := m.Update("foo", alert.LevelError, "bar", &alert.Options{Quiet: true})
 
 	require.NoError(t, err)
 	assert.Equal(t, 1, a.Count())
@@ -70,7 +70,7 @@ func TestCall_same_level__norepeat(t *testing.T) {
 		sendMessageFunc: mockSend,
 	}
 
-	err := m.Call("foo", alert.LevelError, "bar", &alert.Options{Repeat: 0})
+	err := m.Update("foo", alert.LevelError, "bar", &alert.Options{Repeat: 0})
 
 	require.NoError(t, err)
 	assert.Equal(t, 1, a.Count())
@@ -96,7 +96,7 @@ func TestCall_same_level(t *testing.T) {
 		sendMessageFunc: mockSend,
 	}
 
-	err := m.Call("foo", alert.LevelError, "bar", &alert.Options{Repeat: 2})
+	err := m.Update("foo", alert.LevelError, "bar", &alert.Options{Repeat: 2})
 
 	require.NoError(t, err)
 	assert.Equal(t, 2, a.Count())
@@ -127,7 +127,7 @@ func TestCall_update_level__release_error(t *testing.T) {
 		sendMessageFunc: mockSend,
 	}
 
-	err := m.Call("foo", alert.LevelError, "bar", &alert.Options{})
+	err := m.Update("foo", alert.LevelError, "bar", &alert.Options{})
 
 	require.Error(t, err)
 	assert.Equal(t, alert.LevelError, a.Level())
@@ -156,7 +156,7 @@ func TestCall_update_level__quiet(t *testing.T) {
 		sendMessageFunc: mockSend,
 	}
 
-	err := m.Call("foo", alert.LevelError, "bar", &alert.Options{Quiet: true})
+	err := m.Update("foo", alert.LevelError, "bar", &alert.Options{Quiet: true})
 
 	require.NoError(t, err)
 	assert.Equal(t, 0, a.Count())
@@ -189,7 +189,7 @@ func TestCall_update_level_ok(t *testing.T) {
 		sendMessageFunc: mockSend,
 	}
 
-	err := m.Call("foo", alert.LevelError, "bar", &alert.Options{})
+	err := m.Update("foo", alert.LevelError, "bar", &alert.Options{})
 
 	require.NoError(t, err)
 	assert.Equal(t, 0, a.Count())
