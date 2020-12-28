@@ -6,5 +6,5 @@ import (
 
 func FromDateBytes(v interface{}) lua.LValue {
 	t := v.(*[]byte)
-	return lua.LString(string(*t))
+	return lua.LString(*t)
 }
