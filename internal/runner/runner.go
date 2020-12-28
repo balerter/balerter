@@ -5,6 +5,7 @@ import (
 	"github.com/balerter/balerter/internal/metrics"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
+	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 	"sync"
 	"time"
@@ -37,10 +38,18 @@ type Runner struct {
 
 	poolMx sync.Mutex
 	pool   map[string]*Job
+
+	cron *cron.Cron
 }
 
-func New(updateInterval time.Duration, scriptsManager scriptsManager, dsManager dsManager,
-	storagesManager storagesManager, coreModules []modules.Module, logger *zap.Logger) *Runner {
+func New(
+	updateInterval time.Duration,
+	scriptsManager scriptsManager,
+	dsManager dsManager,
+	storagesManager storagesManager,
+	coreModules []modules.Module,
+	logger *zap.Logger,
+) *Runner {
 	r := &Runner{
 		scriptsManager:  scriptsManager,
 		dsManager:       dsManager,
@@ -49,6 +58,7 @@ func New(updateInterval time.Duration, scriptsManager scriptsManager, dsManager 
 		logger:          logger,
 		coreModules:     coreModules,
 		pool:            make(map[string]*Job),
+		cron:            cron.New(cron.WithSeconds(), cron.WithParser(script.CronParser)),
 	}
 
 	if r.updateInterval == 0 {
@@ -59,6 +69,13 @@ func New(updateInterval time.Duration, scriptsManager scriptsManager, dsManager 
 }
 
 func (rnr *Runner) Watch(ctx context.Context, ctxCancel context.CancelFunc, wg *sync.WaitGroup, once bool) {
+	rnr.cron.Start()
+
+	defer func() {
+		stopCtx := rnr.cron.Stop()
+		<-stopCtx.Done()
+	}()
+
 	for {
 		ss, err := rnr.scriptsManager.Get()
 
@@ -78,13 +95,14 @@ func (rnr *Runner) Watch(ctx context.Context, ctxCancel context.CancelFunc, wg *
 		select {
 		case <-ctx.Done():
 			return
-
 		case <-time.After(rnr.updateInterval):
 		}
 	}
 }
 
 func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, wg *sync.WaitGroup) {
+	var err error
+
 	rnr.poolMx.Lock()
 	defer rnr.poolMx.Unlock()
 
@@ -103,21 +121,25 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, 
 
 		// if script already running
 		if _, ok := rnr.pool[s.Hash()]; ok {
-			rnr.logger.Debug("script already running", zap.String("name", s.Name))
+			rnr.logger.Debug("script already scheduled", zap.String("name", s.Name))
 			continue
 		}
 
-		rnr.logger.Debug("run script job", zap.String("hash", s.Hash()), zap.String("script name", s.Name), zap.Duration("interval", s.Interval))
+		rnr.logger.Debug("schedule script job", zap.String("hash", s.Hash()), zap.String("script name", s.Name), zap.String("cron", s.CronValue))
 		job := newJob(s, rnr.logger)
+		rnr.createLuaState(job)
 
-		wg.Add(1)
-		go rnr.runJob(job, wg)
+		job.entryID, err = rnr.cron.AddJob(s.CronValue, job)
+		if err != nil {
+			rnr.logger.Error("error schedule script", zap.String("script name", s.Name), zap.Error(err))
+			continue
+		}
 
 		rnr.pool[s.Hash()] = job
 	}
 
 	// stop outdated jobs
-	for hash, j := range rnr.pool {
+	for hash, job := range rnr.pool {
 		select {
 		case <-ctx.Done():
 			return
@@ -125,8 +147,9 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, 
 		}
 
 		if _, ok := newScripts[hash]; !ok {
-			rnr.logger.Debug("stop script job", zap.String("hash", hash), zap.String("script name", j.script.Name))
-			j.Stop()
+			rnr.logger.Debug("stop script job", zap.String("hash", hash), zap.String("script name", job.script.Name))
+			rnr.cron.Remove(job.entryID)
+			job.Stop()
 			delete(rnr.pool, hash)
 		}
 	}
@@ -138,9 +161,10 @@ func (rnr *Runner) Stop() {
 	rnr.poolMx.Lock()
 	defer rnr.poolMx.Unlock()
 
-	for hash, j := range rnr.pool {
-		rnr.logger.Debug("stop script job", zap.String("hash", hash), zap.String("script name", j.script.Name))
-		j.Stop()
+	for hash, job := range rnr.pool {
+		rnr.logger.Debug("stop script job", zap.String("hash", hash), zap.String("script name", job.script.Name))
+		rnr.cron.Remove(job.entryID)
+		job.Stop()
 		delete(rnr.pool, hash)
 	}
 }

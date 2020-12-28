@@ -7,12 +7,25 @@ import (
 	"time"
 )
 
+func TestScript_error_parse_cron_value(t *testing.T) {
+	s := &Script{
+		Body: []byte(`
+-- @cron 0 0 0 0 0 0
+`),
+	}
+
+	err := s.ParseMeta()
+
+	require.Error(t, err)
+	assert.Equal(t, "error parse cron value, beginning of range (0) below minimum (1): 0", err.Error())
+}
+
 func TestScript_ParseMeta_without_meta(t *testing.T) {
 	s := &Script{
-		Interval: time.Second,
+		CronValue: "* * * * * *",
 		Body: []byte(`
 print
--- @interval 10m
+-- @cron 1 1 1 1 1 1
 -- @ignore
 `),
 	}
@@ -22,10 +35,10 @@ print
 	require.NoError(t, err)
 
 	assert.False(t, s.Ignore)
-	assert.Equal(t, time.Second, s.Interval)
+	assert.Equal(t, "* * * * * *", s.CronValue)
 
 	s = &Script{
-		Interval: time.Second,
+		CronValue: "* * * * * *",
 		Body: []byte(`
 -- hello 
 `),
@@ -36,14 +49,14 @@ print
 	require.NoError(t, err)
 
 	assert.False(t, s.Ignore)
-	assert.Equal(t, time.Second, s.Interval)
+	assert.Equal(t, "* * * * * *", s.CronValue)
 }
 
 func TestScript_ParseMeta(t *testing.T) {
 	s := &Script{
 		Body: []byte(`
 -- header
--- @interval 5m
+-- @cron 1 1 1 1 1 1
 -- foo
 -- @name newname
 --
@@ -61,20 +74,9 @@ print
 	require.NoError(t, err)
 
 	assert.True(t, s.Ignore)
-	assert.Equal(t, time.Minute*6, s.Interval)
+	assert.Equal(t, "1 1 1 1 1 1", s.CronValue)
 	assert.Equal(t, "newname", s.Name)
 	assert.Equal(t, time.Second*10, s.Timeout)
-}
-
-func TestScript_ParseMeta_WrongDuration(t *testing.T) {
-	s := &Script{
-		Body: []byte(`-- @interval 5sm`),
-	}
-
-	err := s.ParseMeta()
-
-	require.Error(t, err)
-	assert.Equal(t, "time: unknown unit \"sm\" in duration \"5sm\"", err.Error())
 }
 
 func TestScript_ParseMeta_EmptyName(t *testing.T) {

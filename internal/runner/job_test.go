@@ -8,7 +8,6 @@ import (
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"testing"
-	"time"
 )
 
 type alertManagerMock struct {
@@ -107,26 +106,14 @@ func TestRunner_createLuaState(t *testing.T) {
 		coreModules:     []modules.Module{alertManager},
 	}
 
-	L := rnr.createLuaState(&Job{name: "job1"})
+	j := &Job{name: "job1"}
+
+	rnr.createLuaState(j)
 
 	m1.AssertCalled(t, "Name")
 	m1.AssertCalled(t, "GetLoader", mock.Anything)
 
-	require.NotNil(t, L)
+	require.NotNil(t, j.luaState)
 	m1.AssertExpectations(t)
 	dsManager.AssertExpectations(t)
-}
-
-func TestJob_Stop(t *testing.T) {
-	j := &Job{
-		stop: make(chan struct{}),
-	}
-
-	j.Stop()
-
-	select {
-	case <-j.stop:
-	case <-time.After(time.Millisecond * 100):
-		t.Fatal("wrong wait close a channel")
-	}
 }

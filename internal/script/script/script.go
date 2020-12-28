@@ -3,28 +3,33 @@ package script
 import (
 	"crypto/sha1"
 	"fmt"
+	"github.com/robfig/cron/v3"
 	"strings"
 	"time"
 )
 
 const (
-	DefaultInterval = time.Second * 60
-	DefaultTimeout  = time.Hour
+	DefaultCronValue = "0 * * * * *"
+	DefaultTimeout   = time.Hour
 )
 
 func New() *Script {
 	s := &Script{
-		Interval: DefaultInterval,
-		Timeout:  DefaultTimeout,
+		CronValue: DefaultCronValue,
+		Timeout:   DefaultTimeout,
 	}
 
 	return s
 }
 
+var (
+	CronParser = cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
+)
+
 type Script struct {
 	Name       string
 	Body       []byte
-	Interval   time.Duration
+	CronValue  string
 	Timeout    time.Duration
 	Ignore     bool
 	Channels   []string
@@ -40,7 +45,7 @@ type parseMetaFunc func(l string, s *Script) error
 
 var (
 	metas = map[string]parseMetaFunc{
-		"@interval": parseMetaInterval,
+		"@cron":     parseMetaCron,
 		"@ignore":   parseMetaIgnore,
 		"@name":     parseMetaName,
 		"@channels": parseMetaChannels,
@@ -76,13 +81,13 @@ func (s *Script) ParseMeta() error {
 	return nil
 }
 
-func parseMetaInterval(l string, s *Script) error {
-	d, err := time.ParseDuration(strings.TrimSpace(l))
+func parseMetaCron(l string, s *Script) error {
+	_, err := CronParser.Parse(l)
 	if err != nil {
-		return err
+		return fmt.Errorf("error parse cron value, %w", err)
 	}
 
-	s.Interval = d
+	s.CronValue = l
 
 	return nil
 }
