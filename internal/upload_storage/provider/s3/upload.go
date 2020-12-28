@@ -31,7 +31,7 @@ func (p *Provider) getArgs(luaState *lua.LState) (data []byte, filename string, 
 
 	data = []byte(dataValue.String())
 
-	filenameValue := luaState.Get(2) //nolint:mnd
+	filenameValue := luaState.Get(2)
 	switch filenameValue.Type() {
 	case lua.LTNil:
 		filename = strconv.Itoa(int(time.Now().UnixNano())) + "-" + strconv.Itoa(int(crc32.Checksum(data, crcTable)))
@@ -55,7 +55,7 @@ func (p *Provider) upload(luaState *lua.LState, extension string) int {
 	if err != nil {
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("wrong arguments: " + err.Error()))
-		return 2 //nolint:mnd
+		return 2
 	}
 
 	filename = filename + "." + extension
@@ -88,12 +88,12 @@ func (p *Provider) upload(luaState *lua.LState, extension string) int {
 	if err != nil {
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error upload object: " + err.Error()))
-		return 2 //nolint:mnd
+		return 2
 	}
 
 	resultFilename := fmt.Sprintf("https://%s.%s/%s", p.bucket, p.endpoint, filename)
 
 	luaState.Push(lua.LString(resultFilename))
 
-	return 1 //nolint:mnd
+	return 1
 }
