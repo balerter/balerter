@@ -1,9 +1,11 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"github.com/balerter/balerter/internal/config/channels/telegram"
 	"golang.org/x/net/proxy"
+	"net"
 	"net/http"
 	"time"
 )
@@ -49,8 +51,7 @@ func New(cfg *telegram.Telegram) (*API, error) {
 
 		a.httpClient.Transport = &http.Transport{
 			Proxy:       nil,
-			DialContext: nil,
-			Dial:        d.Dial,
+			DialContext: getDialContextFunc(d.Dial),
 		}
 	}
 
@@ -59,4 +60,13 @@ func New(cfg *telegram.Telegram) (*API, error) {
 	}
 
 	return a, nil
+}
+
+type dialFunc func(network, addr string) (net.Conn, error)
+type dialContextFunc func(ctx context.Context, network, addr string) (net.Conn, error)
+
+func getDialContextFunc(d dialFunc) dialContextFunc {
+	return func(_ context.Context, network, addr string) (net.Conn, error) {
+		return d(network, addr)
+	}
 }
