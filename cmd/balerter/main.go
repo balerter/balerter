@@ -186,16 +186,19 @@ func run(
 	kvModule := kv.New(kvEngine)
 	coreModules = append(coreModules, kvModule)
 
-	var ln net.Listener
-
 	// ---------------------
 	// |
 	// | API
 	// |
 	if cfg.Global.API.Address != "" {
-		wg.Add(1)
+		var ln net.Listener
+		ln, err = net.Listen("tcp", cfg.Global.API.Address)
+		if err != nil {
+			return fmt.Sprintf("error create api listener, %v", err), 1
+		}
 		apis := apiManager.New(cfg.Global.API, alertManagerStorageEngine, kvEngine, lgr.Logger())
-		go apis.Run(ctx, ctxCancel, wg)
+		wg.Add(1)
+		go apis.Run(ctx, ctxCancel, wg, ln)
 	}
 
 	// ---------------------
@@ -203,12 +206,13 @@ func run(
 	// | Service
 	// |
 	if cfg.Global.Service.Address != "" {
+		var ln net.Listener
 		ln, err = net.Listen("tcp", cfg.Global.Service.Address)
 		if err != nil {
 			return fmt.Sprintf("error create service listener, %v", err), 1
 		}
-		wg.Add(1)
 		srv := service.New(lgr.Logger())
+		wg.Add(1)
 		go srv.Run(ctx, ctxCancel, wg, ln)
 	}
 

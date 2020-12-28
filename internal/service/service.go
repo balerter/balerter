@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"github.com/balerter/balerter/internal/metrics"
 	"github.com/go-chi/chi"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -50,14 +51,17 @@ func (s *Service) Run(ctx context.Context, cancel context.CancelFunc, wg *sync.W
 	defer wg.Done()
 
 	go func() {
+		s.logger.Info("serve service server", zap.String("address", ln.Addr().String()))
 		err := s.server.Serve(ln)
-		if err != nil {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			s.logger.Error("error serve service server", zap.Error(err))
 			cancel()
 		}
 	}()
 
 	<-ctx.Done()
+
+	s.logger.Info("shutdown service server")
 
 	err := s.server.Shutdown(context.Background())
 	if err != nil {

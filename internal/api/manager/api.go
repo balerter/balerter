@@ -2,6 +2,7 @@ package manager
 
 import (
 	"context"
+	"errors"
 	"github.com/balerter/balerter/internal/api/alerts"
 	"github.com/balerter/balerter/internal/api/kv"
 	apiConfig "github.com/balerter/balerter/internal/config/global/api"
@@ -35,20 +36,14 @@ func New(cfg apiConfig.API, coreStorageAlert, coreStorageKV coreStorage.CoreStor
 	return api
 }
 
-func (api *API) Run(ctx context.Context, ctxCancel context.CancelFunc, wg *sync.WaitGroup) {
+func (api *API) Run(ctx context.Context, ctxCancel context.CancelFunc, wg *sync.WaitGroup, ln net.Listener) {
 	defer wg.Done()
-
-	ln, err := net.Listen("tcp4", api.address)
-	if err != nil {
-		api.logger.Error("error listen address for api server", zap.String("address", api.address), zap.Error(err))
-		ctxCancel()
-		return
-	}
 
 	go func() {
 		api.logger.Info("serve api server", zap.String("address", api.address))
 		e := api.server.Serve(ln)
-		if e != nil && e.Error() != "http: Server closed" {
+
+		if e != nil && !errors.Is(e, http.ErrServerClosed) {
 			api.logger.Error("error serve api server", zap.Error(e))
 			ctxCancel()
 		}
@@ -58,10 +53,8 @@ func (api *API) Run(ctx context.Context, ctxCancel context.CancelFunc, wg *sync.
 
 	api.logger.Info("shutdown api server")
 
-	err = api.server.Shutdown(ctx)
+	err := api.server.Shutdown(context.Background())
 	if err != nil {
-		if err.Error() != "context canceled" {
-			api.logger.Error("error shutdown api server", zap.Error(err))
-		}
+		api.logger.Error("error shutdown api server", zap.Error(err))
 	}
 }
