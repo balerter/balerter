@@ -2,22 +2,14 @@ package manager
 
 import (
 	"context"
-	"fmt"
 	"github.com/balerter/balerter/internal/api/alerts"
 	"github.com/balerter/balerter/internal/api/kv"
 	"github.com/balerter/balerter/internal/config"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
-	"github.com/balerter/balerter/internal/metrics"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 	"net"
 	"net/http"
-	"net/http/pprof"
 	"sync"
-)
-
-const (
-	pprofPrefix = "/debug/pprof"
 )
 
 type API struct {
@@ -35,21 +27,8 @@ func New(cfg config.API, coreStorageAlert, coreStorageKV coreStorage.CoreStorage
 
 	m := http.NewServeMux()
 
-	m.HandleFunc("/liveness", api.handlerLiveness)
 	m.HandleFunc("/api/v1/alerts", alerts.HandlerIndex(coreStorageAlert, logger))
 	m.HandleFunc("/api/v1/kv", kv.HandlerIndex(coreStorageKV, logger))
-
-	m.HandleFunc(pprofPrefix+"/profile", pprof.Profile)
-	m.HandleFunc(pprofPrefix+"/trace", pprof.Trace)
-	m.HandleFunc(pprofPrefix+"/heap", pprof.Handler("heap").ServeHTTP)
-	m.HandleFunc(pprofPrefix+"/goroutine", pprof.Handler("goroutine").ServeHTTP)
-	m.HandleFunc(pprofPrefix+"/allocs", pprof.Handler("allocs").ServeHTTP)
-
-	if cfg.Metrics {
-		api.logger.Info("enable exposing prometheus metrics")
-		m.Handle("/metrics", promhttp.Handler())
-		metrics.Register(logger)
-	}
 
 	api.server.Handler = m
 
@@ -84,12 +63,5 @@ func (api *API) Run(ctx context.Context, ctxCancel context.CancelFunc, wg *sync.
 		if err.Error() != "context canceled" {
 			api.logger.Error("error shutdown api server", zap.Error(err))
 		}
-	}
-}
-
-func (api *API) handlerLiveness(rw http.ResponseWriter, _ *http.Request) {
-	if _, err := fmt.Fprint(rw, "ok"); err != nil {
-		api.logger.Error("error write response", zap.Error(err))
-		rw.WriteHeader(http.StatusInternalServerError)
 	}
 }

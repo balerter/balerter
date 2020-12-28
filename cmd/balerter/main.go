@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert"
 	alertModule "github.com/balerter/balerter/internal/modules/alert"
+	"github.com/balerter/balerter/internal/service"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"sync"
@@ -190,6 +192,20 @@ func run( //nolint:gocritic,gocyclo,funlen // Run main application
 		wg.Add(1)
 		apis := apiManager.New(cfg.Global.API, alertManagerStorageEngine, kvEngine, lgr.Logger())
 		go apis.Run(ctx, ctxCancel, wg)
+	}
+
+	// ---------------------
+	// |
+	// | Service
+	// |
+	if cfg.Global.Service.Address != "" {
+		ln, err := net.Listen("tcp", cfg.Global.Service.Address)
+		if err != nil {
+			return fmt.Sprintf("error create service listener, %v", err), 1
+		}
+		wg.Add(1)
+		srv := service.New(lgr.Logger())
+		go srv.Run(ctx, ctxCancel, wg, ln)
 	}
 
 	// ---------------------

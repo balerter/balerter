@@ -6,6 +6,11 @@ type Global struct {
 	API                   API            `json:"api" yaml:"api"`
 	Storages              GlobalStorages `json:"storages" yaml:"storages"`
 	LuaModulesPath        string         `json:"luaModulesPath" yaml:"luaModulesPath"`
+	Service               Service        `json:"service" yaml:"service"`
+}
+
+type Service struct {
+	Address string `json:"address" yaml:"address"`
 }
 
 func (cfg *Global) Validate() error {

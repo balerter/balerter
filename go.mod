@@ -10,6 +10,7 @@ require (
 	github.com/diamondburned/arikawa v0.9.2
 	github.com/docker/go-connections v0.4.0
 	github.com/fatih/color v1.7.0
+	github.com/go-chi/chi v1.5.1
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/grafana/loki v1.3.0
