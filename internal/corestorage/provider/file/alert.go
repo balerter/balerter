@@ -2,12 +2,12 @@ package file
 
 import (
 	"fmt"
-	alert2 "github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/alert"
 	"go.etcd.io/bbolt"
 	"go.uber.org/zap"
 )
 
-func (s *storageAlert) GetOrNew(name string) (*alert2.Alert, error) {
+func (s *storageAlert) GetOrNew(name string) (*alert.Alert, error) {
 	var v []byte
 
 	err := s.db.View(func(tx *bbolt.Tx) error {
@@ -25,7 +25,7 @@ func (s *storageAlert) GetOrNew(name string) (*alert2.Alert, error) {
 		return nil, fmt.Errorf("error get item, %w", err)
 	}
 
-	a := alert2.AcquireAlert()
+	a := alert.AcquireAlert()
 	a.SetName(name)
 
 	// if the buffer is empty, returns a new alert
@@ -41,7 +41,7 @@ func (s *storageAlert) GetOrNew(name string) (*alert2.Alert, error) {
 	return a, nil
 }
 
-func (s *storageAlert) All() ([]*alert2.Alert, error) {
+func (s *storageAlert) All() ([]*alert.Alert, error) {
 	var vv [][]byte
 
 	err := s.db.View(func(tx *bbolt.Tx) error {
@@ -62,14 +62,14 @@ func (s *storageAlert) All() ([]*alert2.Alert, error) {
 		return nil, fmt.Errorf("error get item, %w", err)
 	}
 
-	res := make([]*alert2.Alert, 0)
+	res := make([]*alert.Alert, 0)
 
 	for _, v := range vv {
 		if len(v) == 0 {
 			continue
 		}
 
-		a := alert2.AcquireAlert()
+		a := alert.AcquireAlert()
 
 		err = a.Unmarshal(v)
 		if err != nil {
@@ -82,8 +82,8 @@ func (s *storageAlert) All() ([]*alert2.Alert, error) {
 	return res, nil
 }
 
-func (s *storageAlert) Release(a *alert2.Alert) error {
-	defer alert2.ReleaseAlert(a)
+func (s *storageAlert) Release(a *alert.Alert) error {
+	defer alert.ReleaseAlert(a)
 
 	data, err := a.Marshal()
 	if err != nil {
@@ -106,7 +106,7 @@ func (s *storageAlert) Release(a *alert2.Alert) error {
 	return nil
 }
 
-func (s *storageAlert) Get(name string) (*alert2.Alert, error) {
+func (s *storageAlert) Get(name string) (*alert.Alert, error) {
 	var res []byte
 
 	err := s.db.View(func(tx *bbolt.Tx) error {
@@ -129,7 +129,7 @@ func (s *storageAlert) Get(name string) (*alert2.Alert, error) {
 		return nil, fmt.Errorf("alert not found")
 	}
 
-	a := alert2.AcquireAlert()
+	a := alert.AcquireAlert()
 
 	err = a.Unmarshal(res)
 	if err != nil {
