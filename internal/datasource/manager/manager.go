@@ -1,7 +1,7 @@
 package manager
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/datasources"
 	"github.com/balerter/balerter/internal/datasource/provider/clickhouse"
 	"github.com/balerter/balerter/internal/datasource/provider/loki"
 	"github.com/balerter/balerter/internal/datasource/provider/mysql"
@@ -26,7 +26,7 @@ func New(logger *zap.Logger) *Manager {
 	return m
 }
 
-func (m *Manager) Init(cfg *config.DataSources) error {
+func (m *Manager) Init(cfg *datasources.DataSources) error {
 	for idx := range cfg.Clickhouse {
 		module, err := clickhouse.New(cfg.Clickhouse[idx], m.logger)
 		if err != nil {

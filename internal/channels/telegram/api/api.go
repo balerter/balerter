@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/channels/telegram"
 	"golang.org/x/net/proxy"
 	"net/http"
 	"time"
@@ -21,7 +21,7 @@ type API struct {
 	httpClient *http.Client
 }
 
-func New(cfg *config.ChannelTelegram) (*API, error) {
+func New(cfg *telegram.Telegram) (*API, error) {
 	a := &API{
 		endpoint: apiEndpoint + cfg.Token + "/",
 	}

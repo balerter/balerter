@@ -1,16 +1,16 @@
 package notify
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/channels/notify"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestNew(t *testing.T) {
-	p, err := New(&config.ChannelNotify{
+	p, err := New(&notify.Notify{
 		Name: "foo",
-		Icons: config.ChannelNotifyIcons{
+		Icons: notify.ChannelNotifyIcons{
 			Success: "icon1",
 			Error:   "icon2",
 			Warning: "icon3",

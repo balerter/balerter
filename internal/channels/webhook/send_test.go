@@ -1,6 +1,7 @@
 package webhook
 
 import (
+	"github.com/balerter/balerter/internal/config/channels/webhook"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
@@ -10,11 +11,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/message"
 )
 
-func webhookSend(conf *config.ChannelWebhook, msg *message.Message) error {
+func webhookSend(conf *webhook.Webhook, msg *message.Message) error {
 	webhook, err := New(conf, zap.NewNop())
 	if err != nil {
 		return err
@@ -23,7 +23,7 @@ func webhookSend(conf *config.ChannelWebhook, msg *message.Message) error {
 	return webhook.Send(msg)
 }
 
-func testHook(conf *config.ChannelWebhook, msg *message.Message, h http.HandlerFunc) error {
+func testHook(conf *webhook.Webhook, msg *message.Message, h http.HandlerFunc) error {
 	s := httptest.NewServer(h)
 	defer s.Close()
 
@@ -45,14 +45,14 @@ func TestSend(t *testing.T) {
 		Image:     "alert image",
 	}
 
-	conf := &config.ChannelWebhook{
+	conf := &webhook.Webhook{
 		Name: "foo",
-		Settings: &config.WebhookSettings{
+		Settings: &webhook.Settings{
 			Method: http.MethodPost,
-			Auth: config.AuthConfig{
-				Type: config.AuthTypeNone,
+			Auth: webhook.AuthConfig{
+				Type: webhook.AuthTypeNone,
 			},
-			Payload: config.PayloadConfig{
+			Payload: webhook.PayloadConfig{
 				Body: `{"message": "$text"}`,
 			},
 			Timeout: 5 * time.Second,
@@ -75,7 +75,7 @@ func TestSend(t *testing.T) {
 	t.Run("query-params-payload", func(t *testing.T) {
 		a := require.New(t)
 
-		conf.Settings.Payload = config.PayloadConfig{
+		conf.Settings.Payload = webhook.PayloadConfig{
 			QueryParams: map[string]string{
 				"foo": "bar",
 			},
@@ -93,9 +93,9 @@ func TestSend(t *testing.T) {
 		a := require.New(t)
 
 		login, pass := "login", "pass"
-		conf.Settings.Auth = config.AuthConfig{
-			Type: config.AuthTypeBasic,
-			AuthBasicConfig: config.AuthBasicConfig{
+		conf.Settings.Auth = webhook.AuthConfig{
+			Type: webhook.AuthTypeBasic,
+			AuthBasicConfig: webhook.AuthBasicConfig{
 				Login:    login,
 				Password: pass,
 			},
@@ -111,9 +111,9 @@ func TestSend(t *testing.T) {
 	t.Run("bearer", func(t *testing.T) {
 		a := require.New(t)
 
-		conf.Settings.Auth = config.AuthConfig{
-			Type: config.AuthTypeBearer,
-			AuthBearerConfig: config.AuthBearerConfig{
+		conf.Settings.Auth = webhook.AuthConfig{
+			Type: webhook.AuthTypeBearer,
+			AuthBearerConfig: webhook.AuthBearerConfig{
 				Token: "test-token",
 			},
 		}
@@ -127,9 +127,9 @@ func TestSend(t *testing.T) {
 
 	t.Run("custom", func(t *testing.T) {
 		a := require.New(t)
-		conf.Settings.Auth = config.AuthConfig{
-			Type: config.AuthTypeCustom,
-			AuthCustomConfig: config.AuthCustomConfig{
+		conf.Settings.Auth = webhook.AuthConfig{
+			Type: webhook.AuthTypeCustom,
+			AuthCustomConfig: webhook.AuthCustomConfig{
 				Headers: map[string]string{
 					"X-Header": "foo",
 				},

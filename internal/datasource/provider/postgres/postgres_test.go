@@ -3,7 +3,7 @@ package postgres
 import (
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/datasources/postgres"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -17,7 +17,7 @@ func TestNew_ErrorConnect(t *testing.T) {
 		return nil, fmt.Errorf("err1")
 	}
 
-	cfg := &config.DataSourcePostgres{}
+	cfg := &postgres.Postgres{}
 
 	_, err := New(cfg, mockConnFunc, zap.NewNop())
 
@@ -35,7 +35,7 @@ func TestNew_ErrorPing(t *testing.T) {
 
 	dbmock.ExpectPing().WillReturnError(fmt.Errorf("err2"))
 
-	cfg := &config.DataSourcePostgres{}
+	cfg := &postgres.Postgres{}
 
 	_, err = New(cfg, mockConnFunc, zap.NewNop())
 
@@ -51,7 +51,7 @@ func TestNew(t *testing.T) {
 		return sqlx.NewDb(db, "sqlmock"), nil
 	}
 
-	cfg := &config.DataSourcePostgres{}
+	cfg := &postgres.Postgres{}
 
 	p, err := New(cfg, mockConnFunc, zap.NewNop())
 

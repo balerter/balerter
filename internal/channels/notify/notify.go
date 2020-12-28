@@ -1,7 +1,7 @@
 package notify
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/channels/notify"
 	"github.com/balerter/balerter/internal/message"
 	systemNotify "github.com/martinlindhe/notify"
 	"go.uber.org/zap"
@@ -14,7 +14,7 @@ type Notify struct {
 	iconWarning string
 }
 
-func New(cfg *config.ChannelNotify, _ *zap.Logger) (*Notify, error) {
+func New(cfg *notify.Notify, _ *zap.Logger) (*Notify, error) {
 	p := &Notify{
 		name:        cfg.Name,
 		iconSuccess: cfg.Icons.Success,

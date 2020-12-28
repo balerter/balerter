@@ -6,7 +6,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
-	"github.com/balerter/balerter/internal/config"
+	clickhouse2 "github.com/balerter/balerter/internal/config/datasources/clickhouse"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/jmoiron/sqlx"
 	lua "github.com/yuin/gopher-lua"
@@ -36,7 +36,7 @@ type Clickhouse struct {
 	timeout time.Duration
 }
 
-func New(cfg *config.DataSourceClickhouse, logger *zap.Logger) (*Clickhouse, error) {
+func New(cfg *clickhouse2.Clickhouse, logger *zap.Logger) (*Clickhouse, error) {
 	c := &Clickhouse{
 		name:    ModuleName(cfg.Name),
 		logger:  logger,

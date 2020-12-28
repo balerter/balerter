@@ -2,7 +2,7 @@ package webhook
 
 import (
 	"context"
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/channels/webhook"
 	"github.com/balerter/balerter/internal/message"
 	"io"
 	"net/http"
@@ -28,12 +28,12 @@ func (w *Core) Send(body io.Reader, m *message.Message) (*http.Response, error) 
 	}
 
 	switch w.cfg.Auth.Type {
-	case config.AuthTypeBasic:
+	case webhook.AuthTypeBasic:
 		req.SetBasicAuth(w.cfg.Auth.AuthBasicConfig.Login, w.cfg.Auth.AuthBasicConfig.Password)
-	case config.AuthTypeBearer:
+	case webhook.AuthTypeBearer:
 		token := "Bearer " + w.cfg.Auth.AuthBearerConfig.Token
 		req.Header.Add("Authorization", token)
-	case config.AuthTypeCustom:
+	case webhook.AuthTypeCustom:
 		for key, value := range w.cfg.Auth.AuthCustomConfig.Headers {
 			req.Header.Add(key, value)
 		}

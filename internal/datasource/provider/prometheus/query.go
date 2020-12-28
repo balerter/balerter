@@ -17,10 +17,10 @@ func (m *Prometheus) doQuery(luaState *lua.LState) int {
 	if query == "" {
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("query must be not empty"))
-		return 2 //nolint:mnd
+		return 2
 	}
 
-	options := luaState.Get(2) //nolint:mnd
+	options := luaState.Get(2)
 	queryOptions := queryQueryOptions{}
 	if options.Type() == lua.LTTable {
 		err := gluamapper.Map(options.(*lua.LTable), &queryOptions)
@@ -28,7 +28,7 @@ func (m *Prometheus) doQuery(luaState *lua.LState) int {
 			m.logger.Error("error decode query query options", zap.Error(err))
 			luaState.Push(lua.LNil)
 			luaState.Push(lua.LString("error decode query query options"))
-			return 2 //nolint:mnd
+			return 2
 		}
 	}
 
@@ -39,7 +39,7 @@ func (m *Prometheus) doQuery(luaState *lua.LState) int {
 		m.logger.Error("error send query to prometheus", zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error send query to prometheus: " + err.Error()))
-		return 2 //nolint:mnd
+		return 2
 	}
 
 	switch v.Type() {
@@ -68,12 +68,12 @@ func (m *Prometheus) doQuery(luaState *lua.LState) int {
 		m.logger.Debug("query error: unexpected prometheus model type")
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("query error: unexpected prometheus model type"))
-		return 2 //nolint:mnd
+		return 2
 	}
 
 	luaState.Push(lua.LNil)
 
-	return 2 //nolint:mnd
+	return 2
 }
 
 type queryRangeOptions struct {
@@ -87,10 +87,10 @@ func (m *Prometheus) doRange(luaState *lua.LState) int {
 	if query == "" {
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("query must be not empty"))
-		return 2 //nolint:mnd
+		return 2
 	}
 
-	options := luaState.Get(2) //nolint:mnd
+	options := luaState.Get(2)
 	rangeOptions := queryRangeOptions{}
 	if options.Type() == lua.LTTable {
 		err := gluamapper.Map(options.(*lua.LTable), &rangeOptions)
@@ -98,7 +98,7 @@ func (m *Prometheus) doRange(luaState *lua.LState) int {
 			m.logger.Error("error decode query range options", zap.Error(err))
 			luaState.Push(lua.LNil)
 			luaState.Push(lua.LString("error decode query range options"))
-			return 2 //nolint:mnd
+			return 2
 		}
 	}
 
@@ -109,7 +109,7 @@ func (m *Prometheus) doRange(luaState *lua.LState) int {
 		m.logger.Error("error send query to prometheus", zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error send query to prometheus: " + err.Error()))
-		return 2 //nolint:mnd
+		return 2
 	}
 
 	switch v.Type() {
@@ -124,12 +124,12 @@ func (m *Prometheus) doRange(luaState *lua.LState) int {
 		m.logger.Debug("query error: unexpected prometheus model type")
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("query error: unexpected prometheus model type"))
-		return 2 //nolint:mnd
+		return 2
 	}
 
 	luaState.Push(lua.LNil)
 
-	return 2 //nolint:mnd
+	return 2
 }
 
 func processValVectorRange(vv model.Vector) *lua.LTable {

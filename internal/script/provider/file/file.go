@@ -1,7 +1,7 @@
 package folder
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/scripts/sources/file"
 	"github.com/balerter/balerter/internal/script/script"
 	"io/ioutil"
 	"path"
@@ -13,7 +13,7 @@ type Provider struct {
 	disableIgnore bool
 }
 
-func New(cfg *config.ScriptSourceFile) *Provider {
+func New(cfg *file.File) *Provider {
 	p := &Provider{
 		filename:      cfg.Filename,
 		disableIgnore: cfg.DisableIgnore,

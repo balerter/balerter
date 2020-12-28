@@ -6,6 +6,7 @@ import (
 	"github.com/balerter/balerter/internal/channels/alertmanager"
 	alertmanagerreceiver "github.com/balerter/balerter/internal/channels/alertmanager_receiver"
 	"github.com/balerter/balerter/internal/channels/webhook"
+	"github.com/balerter/balerter/internal/config/channels"
 
 	"github.com/balerter/balerter/internal/channels/discord"
 	"github.com/balerter/balerter/internal/channels/email"
@@ -13,7 +14,6 @@ import (
 	"github.com/balerter/balerter/internal/channels/slack"
 	"github.com/balerter/balerter/internal/channels/syslog"
 	"github.com/balerter/balerter/internal/channels/telegram"
-	"github.com/balerter/balerter/internal/config"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/balerter/balerter/internal/message"
 	"go.uber.org/zap"
@@ -58,7 +58,7 @@ func New(engine coreStorage.CoreStorage, logger *zap.Logger) *Manager {
 }
 
 // Init the Alert manager
-func (m *Manager) Init(cfg *config.Channels) error { // nolint:gocyclo // init function
+func (m *Manager) Init(cfg *channels.Channels) error { // nolint:gocyclo // init function
 	for idx := range cfg.Email {
 		module, err := email.New(cfg.Email[idx], m.logger)
 		if err != nil {

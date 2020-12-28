@@ -1,7 +1,7 @@
 package prometheus
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/datasources/prometheus"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -40,7 +40,7 @@ type Prometheus struct {
 	timeout           time.Duration
 }
 
-func New(cfg *config.DataSourcePrometheus, logger *zap.Logger) (*Prometheus, error) {
+func New(cfg *prometheus.Prometheus, logger *zap.Logger) (*Prometheus, error) {
 	m := &Prometheus{
 		logger:            logger,
 		name:              ModuleName(cfg.Name),

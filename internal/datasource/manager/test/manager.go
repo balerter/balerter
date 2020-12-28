@@ -1,7 +1,7 @@
 package manager
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/datasources"
 	"github.com/balerter/balerter/internal/datasource/provider/clickhouse"
 	"github.com/balerter/balerter/internal/datasource/provider/loki"
 	"github.com/balerter/balerter/internal/datasource/provider/mysql"
@@ -47,7 +47,7 @@ func (m *Manager) Result() ([]modules.TestResult, error) {
 	return result, nil
 }
 
-func (m *Manager) Init(cfg *config.DataSources) error {
+func (m *Manager) Init(cfg *datasources.DataSources) error {
 	for idx := range cfg.Clickhouse {
 		mod := moduleMock.New(clickhouse.ModuleName(cfg.Clickhouse[idx].Name), clickhouse.Methods(), m.logger)
 		m.modules[mod.Name()] = mod

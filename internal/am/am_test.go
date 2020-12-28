@@ -1,9 +1,15 @@
 package manager
 
 import (
+	"github.com/balerter/balerter/internal/config/channels"
+	"github.com/balerter/balerter/internal/config/channels/discord"
+	"github.com/balerter/balerter/internal/config/channels/email"
+	"github.com/balerter/balerter/internal/config/channels/notify"
+	"github.com/balerter/balerter/internal/config/channels/slack"
+	"github.com/balerter/balerter/internal/config/channels/syslog"
+	"github.com/balerter/balerter/internal/config/channels/telegram"
 	"testing"
 
-	"github.com/balerter/balerter/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -12,13 +18,13 @@ import (
 func TestManager_Init(t *testing.T) {
 	m := New(nil, zap.NewNop())
 
-	cfg := config.Channels{
-		Email:    []*config.ChannelEmail{{Name: "email1"}},
-		Slack:    []*config.ChannelSlack{{Name: "slack1"}},
-		Telegram: []*config.ChannelTelegram{{Name: "tg1"}},
-		Syslog:   []*config.ChannelSyslog{{Name: "sl1", Network: "udp", Address: "127.0.0.1:2000"}},
-		Notify:   []*config.ChannelNotify{{Name: "n1"}},
-		Discord:  []*config.ChannelDiscord{{Name: "discord1"}},
+	cfg := channels.Channels{
+		Email:    []*email.Email{{Name: "email1"}},
+		Slack:    []*slack.Slack{{Name: "slack1"}},
+		Telegram: []*telegram.Telegram{{Name: "tg1"}},
+		Syslog:   []*syslog.Syslog{{Name: "sl1", Network: "udp", Address: "127.0.0.1:2000"}},
+		Notify:   []*notify.Notify{{Name: "n1"}},
+		Discord:  []*discord.Discord{{Name: "discord1"}},
 	}
 
 	err := m.Init(&cfg)

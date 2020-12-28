@@ -3,7 +3,7 @@ package telegram
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/channels/telegram/api"
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/channels/telegram"
 	"go.uber.org/zap"
 )
 
@@ -19,7 +19,7 @@ type Telegram struct {
 	api    APIer
 }
 
-func New(cfg *config.ChannelTelegram, logger *zap.Logger) (*Telegram, error) {
+func New(cfg *telegram.Telegram, logger *zap.Logger) (*Telegram, error) {
 	tg := &Telegram{
 		name:   cfg.Name,
 		chatID: cfg.ChatID,

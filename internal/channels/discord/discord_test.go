@@ -1,15 +1,15 @@
 package discord
 
 import (
+	"github.com/balerter/balerter/internal/config/channels/discord"
 	"testing"
 
-	"github.com/balerter/balerter/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNew(t *testing.T) {
-	d, err := New(&config.ChannelDiscord{Name: "foo", ChannelID: 123}, nil)
+	d, err := New(&discord.Discord{Name: "foo", ChannelID: 123}, nil)
 	require.NoError(t, err)
 	assert.IsType(t, &Discord{}, d)
 	assert.Equal(t, "foo", d.name)

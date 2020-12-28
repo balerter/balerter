@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/datasources/postgres"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // DB driver
@@ -34,7 +34,7 @@ type Postgres struct {
 
 type SQLConnFunc func(string, string) (*sqlx.DB, error)
 
-func New(cfg *config.DataSourcePostgres, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*Postgres, error) {
+func New(cfg *postgres.Postgres, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*Postgres, error) {
 	p := &Postgres{
 		name:    ModuleName(cfg.Name),
 		logger:  logger,

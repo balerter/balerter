@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/datasources/mysql"
 	"github.com/balerter/balerter/internal/script/script"
 	_ "github.com/go-sql-driver/mysql" // import DB driver
 	"github.com/jmoiron/sqlx"
@@ -33,7 +33,7 @@ type MySQL struct {
 
 type SQLConnFunc func(string, string) (*sqlx.DB, error)
 
-func New(cfg *config.DataSourceMysql, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*MySQL, error) {
+func New(cfg *mysql.Mysql, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*MySQL, error) {
 	p := &MySQL{
 		name:    ModuleName(cfg.Name),
 		logger:  logger,

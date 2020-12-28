@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/config/scripts/sources"
+	"github.com/balerter/balerter/internal/config/scripts/sources/file"
 	alertModule "github.com/balerter/balerter/internal/modules/alert"
 	"github.com/balerter/balerter/internal/service"
 	"log"
@@ -107,8 +109,8 @@ func run( //nolint:gocritic,gocyclo,funlen // Run main application
 
 	if withScript != "" {
 		lgr.Logger().Info("rewrite script sources configuration", zap.String("filename", withScript))
-		cfg.Scripts.Sources = config.ScriptsSources{
-			File: []*config.ScriptSourceFile{
+		cfg.Scripts.Sources = sources.Sources{
+			File: []*file.File{
 				{
 					Name:          "cli-script",
 					Filename:      withScript,

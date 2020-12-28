@@ -1,7 +1,8 @@
 package manager
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/storages/upload"
+	"github.com/balerter/balerter/internal/config/storages/upload/s3"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
@@ -54,7 +55,7 @@ func TestManager_Init(t *testing.T) {
 		modules: map[string]modules.Module{},
 	}
 
-	err := m.Init(config.StoragesUpload{S3: []*config.StorageUploadS3{{
+	err := m.Init(upload.Upload{S3: []*s3.S3{{
 		Name:     "f1",
 		Region:   "f2",
 		Key:      "f3",

@@ -1,7 +1,8 @@
 package prometheus
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/common"
+	"github.com/balerter/balerter/internal/config/datasources/prometheus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -9,10 +10,10 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	m, err := New(&config.DataSourcePrometheus{
+	m, err := New(&prometheus.Prometheus{
 		Name:      "prom1",
 		URL:       "http://domain.com",
-		BasicAuth: config.BasicAuth{},
+		BasicAuth: common.BasicAuth{},
 		Timeout:   0,
 	}, zap.NewNop())
 

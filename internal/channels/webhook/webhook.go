@@ -1,7 +1,7 @@
 package webhook
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/channels/webhook"
 	"go.uber.org/zap"
 )
 
@@ -13,7 +13,7 @@ type Webhook struct {
 	whCore *Core
 }
 
-func New(cfg *config.ChannelWebhook, logger *zap.Logger) (*Webhook, error) {
+func New(cfg *webhook.Webhook, logger *zap.Logger) (*Webhook, error) {
 	return &Webhook{
 		body:   cfg.Settings.Payload.Body,
 		logger: logger,

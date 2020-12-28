@@ -2,7 +2,7 @@ package manager
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/storages/upload"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/upload_storage/provider/s3"
 	"go.uber.org/zap"
@@ -26,7 +26,7 @@ func New(logger *zap.Logger) *Manager {
 	return m
 }
 
-func (m *Manager) Init(cfg config.StoragesUpload) error {
+func (m *Manager) Init(cfg upload.Upload) error {
 	for idx := range cfg.S3 {
 		module, err := s3.New(cfg.S3[idx], m.logger)
 		if err != nil {

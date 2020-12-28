@@ -1,11 +1,11 @@
 package email
 
 import (
+	"github.com/balerter/balerter/internal/config/channels/email"
 	"net"
 	"testing"
 	"time"
 
-	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/message"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -13,7 +13,7 @@ import (
 
 func TestSend(t *testing.T) {
 	e := &Email{
-		conf: &config.ChannelEmail{
+		conf: &email.Email{
 			Name:   "foo",
 			From:   "gopher@example.net",
 			To:     "foo1@example.com;foo2@example.com",

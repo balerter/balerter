@@ -2,7 +2,7 @@ package alertmanager
 
 import (
 	"github.com/balerter/balerter/internal/channels/webhook"
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/channels/alertmanager"
 	"go.uber.org/zap"
 )
 
@@ -12,7 +12,7 @@ type AlertManager struct {
 	logger *zap.Logger
 }
 
-func New(cfg *config.ChannelAlertmanager, logger *zap.Logger) (*AlertManager, error) {
+func New(cfg *alertmanager.Alertmanager, logger *zap.Logger) (*AlertManager, error) {
 	a := &AlertManager{
 		name:   cfg.Name,
 		logger: logger,

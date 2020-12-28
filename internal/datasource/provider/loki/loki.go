@@ -1,7 +1,7 @@
 package loki
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/datasources/loki"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -40,7 +40,7 @@ type Loki struct {
 	timeout           time.Duration
 }
 
-func New(cfg *config.DataSourceLoki, logger *zap.Logger) (*Loki, error) {
+func New(cfg *loki.Loki, logger *zap.Logger) (*Loki, error) {
 	m := &Loki{
 		logger:            logger,
 		name:              ModuleName(cfg.Name),

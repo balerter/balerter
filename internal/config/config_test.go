@@ -1,6 +1,9 @@
 package config
 
-import "testing"
+import (
+	"github.com/balerter/balerter/internal/util"
+	"testing"
+)
 
 func Test_checkUnique(t *testing.T) {
 	type args struct {
@@ -49,7 +52,7 @@ func Test_checkUnique(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := checkUnique(tt.args.data); got != tt.want {
+			if got := util.CheckUnique(tt.args.data); got != tt.want {
 				t.Errorf("checkUnique() = %v, want %v", got, tt.want)
 			}
 		})

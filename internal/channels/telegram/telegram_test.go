@@ -1,14 +1,14 @@
 package telegram
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/channels/telegram"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestNew(t *testing.T) {
-	tg, err := New(&config.ChannelTelegram{Name: "foo", ChatID: 42}, nil)
+	tg, err := New(&telegram.Telegram{Name: "foo", ChatID: 42}, nil)
 	require.NoError(t, err)
 	assert.IsType(t, &Telegram{}, tg)
 	assert.Equal(t, "foo", tg.name)

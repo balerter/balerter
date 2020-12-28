@@ -1,7 +1,7 @@
 package syslog
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	syslog2 "github.com/balerter/balerter/internal/config/channels/syslog"
 	"go.uber.org/zap"
 	"io"
 	"log/syslog"
@@ -18,7 +18,7 @@ var (
 	defaultPriority = "EMERG"
 )
 
-func New(cfg *config.ChannelSyslog, logger *zap.Logger) (*Syslog, error) {
+func New(cfg *syslog2.Syslog, logger *zap.Logger) (*Syslog, error) {
 	sl := &Syslog{
 		name:   cfg.Name,
 		logger: logger,

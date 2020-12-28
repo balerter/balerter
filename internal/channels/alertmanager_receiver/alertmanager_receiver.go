@@ -2,7 +2,7 @@ package alertmanagerreceiver
 
 import (
 	"github.com/balerter/balerter/internal/channels/webhook"
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/channels/alertmanagerreceiver"
 	"go.uber.org/zap"
 )
 
@@ -12,7 +12,7 @@ type AMReceiver struct {
 	logger *zap.Logger
 }
 
-func New(cfg *config.ChannelAlertmanagerReceiver, logger *zap.Logger) (*AMReceiver, error) {
+func New(cfg *alertmanagerreceiver.AlertmanagerReceiver, logger *zap.Logger) (*AMReceiver, error) {
 	cfg.Settings.Headers["content-type"] = "application/json"
 
 	a := &AMReceiver{

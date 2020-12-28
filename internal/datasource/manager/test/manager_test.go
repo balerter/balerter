@@ -2,7 +2,12 @@ package manager
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/datasources"
+	"github.com/balerter/balerter/internal/config/datasources/clickhouse"
+	"github.com/balerter/balerter/internal/config/datasources/loki"
+	"github.com/balerter/balerter/internal/config/datasources/mysql"
+	"github.com/balerter/balerter/internal/config/datasources/postgres"
+	"github.com/balerter/balerter/internal/config/datasources/prometheus"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -82,12 +87,12 @@ func TestResult_error(t *testing.T) {
 func TestInit(t *testing.T) {
 	m := New(zap.NewNop())
 
-	cfg := config.DataSources{
-		Clickhouse: []*config.DataSourceClickhouse{{Name: "ch1"}},
-		Prometheus: []*config.DataSourcePrometheus{{Name: "prom1"}},
-		Postgres:   []*config.DataSourcePostgres{{Name: "pg1"}},
-		MySQL:      []*config.DataSourceMysql{{Name: "mysql1"}},
-		Loki:       []*config.DataSourceLoki{{Name: "loki1"}},
+	cfg := datasources.DataSources{
+		Clickhouse: []*clickhouse.Clickhouse{{Name: "ch1"}},
+		Prometheus: []*prometheus.Prometheus{{Name: "prom1"}},
+		Postgres:   []*postgres.Postgres{{Name: "pg1"}},
+		MySQL:      []*mysql.Mysql{{Name: "mysql1"}},
+		Loki:       []*loki.Loki{{Name: "loki1"}},
 	}
 
 	err := m.Init(&cfg)

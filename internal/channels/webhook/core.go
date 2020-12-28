@@ -1,7 +1,7 @@
 package webhook
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/channels/webhook"
 	"net/http"
 	"time"
 )
@@ -11,12 +11,12 @@ const (
 )
 
 type Core struct {
-	cfg     *config.WebhookSettings
+	cfg     *webhook.Settings
 	client  *http.Client
 	timeout time.Duration
 }
 
-func NewCore(cfg *config.WebhookSettings) *Core {
+func NewCore(cfg *webhook.Settings) *Core {
 	t := cfg.Timeout
 	if t == 0 {
 		t = defaultTimeout

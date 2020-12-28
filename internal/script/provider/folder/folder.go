@@ -1,12 +1,12 @@
 package folder
 
 import (
+	"github.com/balerter/balerter/internal/config/scripts/sources/folder"
 	"io/ioutil"
 	"path"
 	"path/filepath"
 	"strings"
 
-	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/script/script"
 )
 
@@ -15,7 +15,7 @@ type Provider struct {
 	mask string
 }
 
-func New(cfg *config.ScriptSourceFolder) *Provider {
+func New(cfg *folder.Folder) *Provider {
 	p := &Provider{
 		path: cfg.Path,
 		mask: cfg.Mask,

@@ -2,7 +2,7 @@ package manager
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/storages/core"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/balerter/balerter/internal/corestorage/provider/file"
 	"github.com/balerter/balerter/internal/corestorage/provider/memory"
@@ -13,7 +13,7 @@ type Manager struct {
 	storages map[string]coreStorage.CoreStorage
 }
 
-func New(cfg config.StoragesCore, logger *zap.Logger) (*Manager, error) {
+func New(cfg core.Core, logger *zap.Logger) (*Manager, error) {
 	m := &Manager{
 		storages: map[string]coreStorage.CoreStorage{},
 	}

@@ -2,7 +2,7 @@ package file
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/storages/core/file"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"go.etcd.io/bbolt"
 	"go.uber.org/zap"
@@ -42,7 +42,7 @@ func (s *Storage) Alert() coreStorage.Alert {
 	return s.alert
 }
 
-func New(cfg *config.StorageCoreFile, logger *zap.Logger) (*Storage, error) {
+func New(cfg *file.File, logger *zap.Logger) (*Storage, error) {
 	s := &Storage{
 		name:   "file." + cfg.Name,
 		logger: logger,

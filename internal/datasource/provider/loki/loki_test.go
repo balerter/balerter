@@ -1,7 +1,8 @@
 package loki
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/common"
+	"github.com/balerter/balerter/internal/config/datasources/loki"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
@@ -11,10 +12,10 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	l, err := New(&config.DataSourceLoki{
+	l, err := New(&loki.Loki{
 		Name: "foo",
 		URL:  "http://domain.com",
-		BasicAuth: config.BasicAuth{
+		BasicAuth: common.BasicAuth{
 			Username: "user",
 			Password: "secret",
 		},
@@ -29,7 +30,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestNewDefaultTimeout(t *testing.T) {
-	l, err := New(&config.DataSourceLoki{}, zap.NewNop())
+	l, err := New(&loki.Loki{}, zap.NewNop())
 
 	require.NoError(t, err)
 	assert.IsType(t, &Loki{}, l)
@@ -37,7 +38,7 @@ func TestNewDefaultTimeout(t *testing.T) {
 }
 
 func TestNewWrongURL(t *testing.T) {
-	_, err := New(&config.DataSourceLoki{URL: "foobar\ncom"}, zap.NewNop())
+	_, err := New(&loki.Loki{URL: "foobar\ncom"}, zap.NewNop())
 	require.Error(t, err)
 	require.Equal(t, "parse \"foobar\\ncom\": net/url: invalid control character in URL", err.Error())
 }

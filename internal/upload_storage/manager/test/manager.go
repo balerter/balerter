@@ -1,7 +1,7 @@
 package manager
 
 import (
-	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/storages/upload"
 	moduleMock "github.com/balerter/balerter/internal/mock"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/upload_storage/provider/s3"
@@ -26,7 +26,7 @@ func New(logger *zap.Logger) *Manager {
 	return m
 }
 
-func (m *Manager) Init(cfg config.StoragesUpload) error {
+func (m *Manager) Init(cfg upload.Upload) error {
 	for _, c := range cfg.S3 {
 		mod := moduleMock.New(s3.ModuleName(c.Name), s3.Methods(), m.logger)
 
