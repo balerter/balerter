@@ -53,17 +53,17 @@ func (t *Test) Stop() error {
 	return nil
 }
 
-func (t *Test) getStorage(s *script.Script) lua.LGFunction {
+func (t *Test) getModule(moduleName string, s *script.Script) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		nameL := luaState.Get(1)
 		if nameL.Type() == lua.LTNil {
-			t.logger.Error("module test.storage should have 1 argument")
+			t.logger.Error("module should have 1 argument", zap.String("module", moduleName))
 			return 0
 		}
 
 		name := strings.TrimSpace(nameL.String())
 		if name == "" {
-			t.logger.Error("module test.storage should have 1 not empty argument")
+			t.logger.Error("module should have 1 not empty argument", zap.String("module", moduleName))
 			return 0
 		}
 
@@ -79,38 +79,11 @@ func (t *Test) getStorage(s *script.Script) lua.LGFunction {
 	}
 }
 
-func (t *Test) getDatasource(s *script.Script) lua.LGFunction {
-	return func(luaState *lua.LState) int {
-		nameL := luaState.Get(1)
-		if nameL.Type() == lua.LTNil {
-			t.logger.Error("module test.datasource should have 1 argument")
-			return 0
-		}
-
-		name := strings.TrimSpace(nameL.String())
-		if name == "" {
-			t.logger.Error("module test.datasource should have 1 not empty argument")
-			return 0
-		}
-
-		m, ok := t.datasource[name]
-		if !ok {
-			t.logger.Error("datasource not found", zap.String("name", name))
-			return 0
-		}
-
-		m.GetLoader(s)(luaState)
-
-		return 1
-	}
-}
-
 func (t *Test) GetLoader(s *script.Script) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		var exports = map[string]lua.LGFunction{
-			"datasource": t.getDatasource(s),
-			"storage":    t.getStorage(s),
-			//	"run": t.run(script.Name),
+			"datasource": t.getModule("test.datasource", s),
+			"storage":    t.getModule("test.storage", s),
 		}
 
 		for _, mod := range t.mods {
