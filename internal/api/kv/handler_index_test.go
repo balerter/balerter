@@ -20,12 +20,15 @@ func TestHandlerIndex(t *testing.T) {
 	am := coreStorage.NewMock("")
 	am.KVMock().On("All").Return(resultData, nil)
 
-	f := HandlerIndex(am, zap.NewNop())
+	kv := &KV{
+		storage: am.KV(),
+		logger:  zap.NewNop(),
+	}
 
 	rw := &httpTestify.TestResponseWriter{}
 	req := &http.Request{URL: &url.URL{}}
 
-	f(rw, req)
+	kv.handlerIndex(rw, req)
 
 	assert.Equal(t, 200, rw.StatusCode)
 	assert.Contains(t, rw.Output, `{"name":"f1","value":"v1"}`)
@@ -38,12 +41,15 @@ func TestHandlerIndex_ErrorGetFromStorage(t *testing.T) {
 	am := coreStorage.NewMock("")
 	am.KVMock().On("All").Return(resultData, fmt.Errorf("error1"))
 
-	f := HandlerIndex(am, zap.NewNop())
+	kv := &KV{
+		storage: am.KV(),
+		logger:  zap.NewNop(),
+	}
 
 	rw := &httpTestify.TestResponseWriter{}
 	req := &http.Request{URL: &url.URL{}}
 
-	f(rw, req)
+	kv.handlerIndex(rw, req)
 
 	assert.Equal(t, 500, rw.StatusCode)
 	assert.Equal(t, "error1", rw.Header().Get("X-Error"))

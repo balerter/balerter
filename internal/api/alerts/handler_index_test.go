@@ -19,12 +19,15 @@ func TestHandler_ErrorGetAlerts(t *testing.T) {
 	am := coreStorage.NewMock("")
 	am.AlertMock().On("All").Return(resultData, fmt.Errorf("error1"))
 
-	f := HandlerIndex(am, zap.NewNop())
+	a := &Alerts{
+		storage: am.Alert(),
+		logger:  zap.NewNop(),
+	}
 
 	rw := &httpTestify.TestResponseWriter{}
 	req := &http.Request{URL: &url.URL{}}
 
-	f(rw, req)
+	a.handlerIndex(rw, req)
 
 	assert.Equal(t, 500, rw.StatusCode)
 	assert.Equal(t, "error1", rw.Header().Get("X-Error"))
@@ -45,12 +48,15 @@ func TestHandler(t *testing.T) {
 	am := coreStorage.NewMock("")
 	am.AlertMock().On("All").Return(resultData, nil)
 
-	f := HandlerIndex(am, zap.NewNop())
+	a := &Alerts{
+		storage: am.Alert(),
+		logger:  zap.NewNop(),
+	}
 
 	rw := &httpTestify.TestResponseWriter{}
 	req := &http.Request{URL: &url.URL{}}
 
-	f(rw, req)
+	a.handlerIndex(rw, req)
 
 	assert.Equal(t, 200, rw.StatusCode)
 	assert.Equal(t, `[{"name":"foo","level":"error","count":1,"updated_at":"`+updatedAt+`"}]`, rw.Output)
@@ -62,12 +68,15 @@ func TestHandler_BadLevelArgument(t *testing.T) {
 	am := coreStorage.NewMock("")
 	am.AlertMock().On("All").Return(resultData, nil)
 
-	f := HandlerIndex(am, zap.NewNop())
+	a := &Alerts{
+		storage: am.Alert(),
+		logger:  zap.NewNop(),
+	}
 
 	rw := &httpTestify.TestResponseWriter{}
 	req := &http.Request{URL: &url.URL{RawQuery: "level=foo"}}
 
-	f(rw, req)
+	a.handlerIndex(rw, req)
 
 	assert.Equal(t, 400, rw.StatusCode)
 	assert.Equal(t, "bad level value", rw.Header().Get("X-Error"))

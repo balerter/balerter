@@ -7,6 +7,7 @@ import (
 	"github.com/balerter/balerter/internal/api/kv"
 	apiConfig "github.com/balerter/balerter/internal/config/global/api"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
+	"github.com/go-chi/chi"
 	"go.uber.org/zap"
 	"net"
 	"net/http"
@@ -26,12 +27,17 @@ func New(cfg apiConfig.API, coreStorageAlert, coreStorageKV coreStorage.CoreStor
 		logger:  logger,
 	}
 
-	m := http.NewServeMux()
+	alertsRouter := alerts.New(coreStorageAlert.Alert(), logger)
+	kvRouter := kv.New(coreStorageKV.KV(), logger)
 
-	m.HandleFunc("/api/v1/alerts", alerts.HandlerIndex(coreStorageAlert, logger))
-	m.HandleFunc("/api/v1/kv", kv.HandlerIndex(coreStorageKV, logger))
+	router := chi.NewRouter()
 
-	api.server.Handler = m
+	router.Route("/api/v1", func(r chi.Router) {
+		r.Route("/alerts", alertsRouter.Handler)
+		r.Route("/kv", kvRouter.Handler)
+	})
+
+	api.server.Handler = router
 
 	return api
 }

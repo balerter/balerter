@@ -1,12 +1,11 @@
 package alerts
 
 import (
-	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"go.uber.org/zap"
 	"net/http"
 )
 
-// HandlerIndex handle API request GET /api/v1/alerts
+// GET /api/v1/alerts
 //
 // Endpoint receive arguments:
 // name=<NAME1>,<NAME2> - filter by name
@@ -16,32 +15,30 @@ import (
 // GET /api/v1/alerts?level=error
 // GET /api/v1/alerts?level=error,warn&name=foo
 // GET /api/v1/alerts?level=error,warn&name=foo,bar
-func HandlerIndex(coreStorageAlert coreStorage.CoreStorage, logger *zap.Logger) http.HandlerFunc {
-	return func(rw http.ResponseWriter, req *http.Request) {
-		var err error
+func (a *Alerts) handlerIndex(rw http.ResponseWriter, req *http.Request) {
+	var err error
 
-		data, err := coreStorageAlert.Alert().All()
-		if err != nil {
-			logger.Error("error get alerts", zap.Error(err))
-			rw.Header().Add("X-Error", err.Error())
-			rw.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+	data, err := a.storage.All()
+	if err != nil {
+		a.logger.Error("error get alerts", zap.Error(err))
+		rw.Header().Add("X-Error", err.Error())
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-		data, err = filter(req, data)
-		if err != nil {
-			logger.Error("error filter alerts", zap.Error(err))
-			rw.Header().Add("X-Error", err.Error())
-			rw.WriteHeader(http.StatusBadRequest)
-			return
-		}
+	data, err = filter(req, data)
+	if err != nil {
+		a.logger.Error("error filter alerts", zap.Error(err))
+		rw.Header().Add("X-Error", err.Error())
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
-		err = newResource(data).render(rw)
-		if err != nil {
-			logger.Error("error write response", zap.Error(err))
-			rw.Header().Add("X-Error", "error write response")
-			rw.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+	err = newResource(data).render(rw)
+	if err != nil {
+		a.logger.Error("error write response", zap.Error(err))
+		rw.Header().Add("X-Error", "error write response")
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 }
