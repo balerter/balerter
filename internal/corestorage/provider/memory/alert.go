@@ -2,10 +2,10 @@ package memory
 
 import (
 	"fmt"
-	alert2 "github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/alert"
 )
 
-func (m *storageAlert) GetOrNew(name string) (*alert2.Alert, error) {
+func (m *storageAlert) GetOrNew(name string) (*alert.Alert, error) {
 	m.mxAlerts.RLock()
 	a, ok := m.alerts[name]
 	m.mxAlerts.RUnlock()
@@ -20,14 +20,14 @@ func (m *storageAlert) GetOrNew(name string) (*alert2.Alert, error) {
 	if ok {
 		return a, nil
 	}
-	a = alert2.AcquireAlert()
+	a = alert.AcquireAlert()
 	a.SetName(name)
 	m.alerts[name] = a
 	return a, nil
 }
 
-func (m *storageAlert) All() ([]*alert2.Alert, error) {
-	var result []*alert2.Alert
+func (m *storageAlert) All() ([]*alert.Alert, error) {
+	var result []*alert.Alert
 
 	m.mxAlerts.RLock()
 	defer m.mxAlerts.RUnlock()
@@ -39,11 +39,11 @@ func (m *storageAlert) All() ([]*alert2.Alert, error) {
 	return result, nil
 }
 
-func (m *storageAlert) Release(_ *alert2.Alert) error {
+func (m *storageAlert) Release(_ *alert.Alert) error {
 	return nil
 }
 
-func (m *storageAlert) Get(name string) (*alert2.Alert, error) {
+func (m *storageAlert) Get(name string) (*alert.Alert, error) {
 	m.mxAlerts.RLock()
 	defer m.mxAlerts.RUnlock()
 
