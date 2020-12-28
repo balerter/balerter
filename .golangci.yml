@@ -149,11 +149,11 @@ linters:
     - gocritic
     - gocyclo
     - gofmt
-#    - goimports
+    - goimports
     - golint
     - gomnd
     - goprintffuncname
-    - gosec
+#    - gosec
     - gosimple
     - govet
     - ineffassign
