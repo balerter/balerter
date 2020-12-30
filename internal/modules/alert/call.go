@@ -2,15 +2,15 @@ package alert
 
 import (
 	"fmt"
-	alert2 "github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/yuin/gluamapper"
 	lua "github.com/yuin/gopher-lua"
 	"strings"
 )
 
-func (a *Alert) getAlertData(luaState *lua.LState) (alertName, alertText string, options *alert2.Options, err error) {
-	options = &alert2.Options{}
+func (a *Alert) getAlertData(luaState *lua.LState) (alertName, alertText string, options *alert.Options, err error) {
+	options = &alert.Options{}
 
 	alertNameLua := luaState.Get(1)
 	if alertNameLua.Type() == lua.LTNil {
@@ -50,7 +50,7 @@ func (a *Alert) getAlertData(luaState *lua.LState) (alertName, alertText string,
 	return alertName, alertText, options, nil
 }
 
-func (a *Alert) call(s *script.Script, alertLevel alert2.Level) lua.LGFunction {
+func (a *Alert) call(s *script.Script, alertLevel alert.Level) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		// TODO: wip
 

@@ -1,7 +1,7 @@
 package alert
 
 import (
-	alert2 "github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/corestorage"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
@@ -46,14 +46,14 @@ func (a *Alert) GetLoader(s *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
-				"warn":    a.call(s, alert2.LevelWarn),
-				"warning": a.call(s, alert2.LevelWarn),
+				"warn":    a.call(s, alert.LevelWarn),
+				"warning": a.call(s, alert.LevelWarn),
 
-				"error": a.call(s, alert2.LevelError),
-				"fail":  a.call(s, alert2.LevelError),
+				"error": a.call(s, alert.LevelError),
+				"fail":  a.call(s, alert.LevelError),
 
-				"success": a.call(s, alert2.LevelSuccess),
-				"ok":      a.call(s, alert2.LevelSuccess),
+				"success": a.call(s, alert.LevelSuccess),
+				"ok":      a.call(s, alert.LevelSuccess),
 
 				"get": a.get(s),
 			}
