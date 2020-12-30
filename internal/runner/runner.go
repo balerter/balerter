@@ -156,7 +156,7 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, 
 }
 
 func (rnr *Runner) Stop() {
-	rnr.logger.Debug("stop jobs")
+	rnr.logger.Info("stop jobs")
 
 	rnr.poolMx.Lock()
 	defer rnr.poolMx.Unlock()
