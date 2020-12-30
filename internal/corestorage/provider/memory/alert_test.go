@@ -31,12 +31,10 @@ func TestAlert_GetOrNew(t *testing.T) {
 func TestAlert_All(t *testing.T) {
 	m := storageAlert{alerts: map[string]*alert2.Alert{}}
 
-	a1 := &alert2.Alert{}
-	a1.SetName("foo")
+	a1 := alert2.New("foo")
 	m.alerts["foo"] = a1
 
-	a2 := &alert2.Alert{}
-	a2.SetName("bar")
+	a2 := alert2.New("bar")
 	m.alerts["bar"] = a2
 
 	aa, err := m.All()

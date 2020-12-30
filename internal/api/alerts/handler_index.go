@@ -18,7 +18,7 @@ import (
 func (a *Alerts) handlerIndex(rw http.ResponseWriter, req *http.Request) {
 	var err error
 
-	data, err := a.storage.All()
+	data, err := a.alertManager.All()
 	if err != nil {
 		a.logger.Error("error get alerts", zap.Error(err))
 		rw.Header().Add("X-Error", err.Error())

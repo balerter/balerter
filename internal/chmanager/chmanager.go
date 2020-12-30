@@ -14,10 +14,14 @@ import (
 	"github.com/balerter/balerter/internal/channels/slack"
 	"github.com/balerter/balerter/internal/channels/syslog"
 	"github.com/balerter/balerter/internal/channels/telegram"
-	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/balerter/balerter/internal/message"
 	"go.uber.org/zap"
 )
+
+/*
+Channels Manager is sending messages to channels
+
+*/
 
 type alertChannel interface {
 	Name() string
@@ -26,22 +30,20 @@ type alertChannel interface {
 
 type sendMessageFunc func(level, alertName, text string, options *alert.Options, errs chan<- error) error
 
-// Manager represents the Alert manager struct
-type Manager struct {
+// ChannelsManager represents the Alert manager struct
+type ChannelsManager struct {
 	logger   *zap.Logger
 	channels map[string]alertChannel
 
 	sendMessageFunc sendMessageFunc
-	storage         coreStorage.CoreStorage
 
 	errs chan error
 }
 
 // New returns new Alert manager instance
-func New(engine coreStorage.CoreStorage, logger *zap.Logger) *Manager {
-	m := &Manager{
+func New(logger *zap.Logger) *ChannelsManager {
+	m := &ChannelsManager{
 		logger:   logger,
-		storage:  engine,
 		channels: make(map[string]alertChannel),
 		errs:     make(chan error),
 	}
@@ -58,7 +60,7 @@ func New(engine coreStorage.CoreStorage, logger *zap.Logger) *Manager {
 }
 
 // Init the Alert manager
-func (m *Manager) Init(cfg *channels.Channels) error {
+func (m *ChannelsManager) Init(cfg *channels.Channels) error {
 	for idx := range cfg.Email {
 		module, err := email.New(cfg.Email[idx], m.logger)
 		if err != nil {

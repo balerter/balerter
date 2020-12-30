@@ -30,30 +30,6 @@ var (
 	ErrBadLevel = errors.New("bad level")
 )
 
-var (
-	alertsPool = sync.Pool{}
-)
-
-// AcquireAlert returns new Alert from a sync.Pool
-func AcquireAlert() *Alert {
-	a := alertsPool.Get()
-	if a == nil {
-		a := &Alert{}
-		a.init()
-		return a
-	}
-
-	a.(*Alert).init()
-
-	return a.(*Alert)
-}
-
-// ReleaseAlert puts an alert to a sync.pool
-func ReleaseAlert(a *Alert) {
-	a.reset()
-	alertsPool.Put(a)
-}
-
 const (
 	levelStringSuccess  = "success"
 	levelStringWarning1 = "warning"
@@ -100,26 +76,17 @@ type Alert struct {
 	count      int
 }
 
-func (a *Alert) init() {
+func New(name string) *Alert {
 	now := time.Now()
 
-	a.level = LevelSuccess
-	a.lastChange = now
-	a.start = now
-	a.count = 0
-}
+	a := &Alert{
+		name:       name,
+		level:      LevelSuccess,
+		lastChange: now,
+		start:      now,
+	}
 
-func (a *Alert) reset() {
-	a.name = ""
-	a.level = 0
-	a.lastChange = time.Time{}
-	a.start = time.Time{}
-	a.count = 0
-}
-
-// SetName allows to set an Alert name
-func (a *Alert) SetName(name string) {
-	a.name = name
+	return a
 }
 
 // UpdateLevel allows to update an Alert level

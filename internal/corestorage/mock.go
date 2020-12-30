@@ -65,7 +65,7 @@ func (m *AlertMock) All() ([]*alert2.Alert, error) {
 	return args.Get(0).([]*alert2.Alert), args.Error(1)
 }
 
-func (m *AlertMock) Release(a *alert2.Alert) error {
+func (m *AlertMock) Store(a *alert2.Alert) error {
 	args := m.Called(a)
 	return args.Error(0)
 }

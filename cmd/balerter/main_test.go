@@ -48,7 +48,7 @@ global:
 
 	msg, code := run("stdin", "INFO", false, false, "")
 
-	assert.Equal(t, "error get core storages engine for alert 'foobar', storage not found", msg)
+	assert.Equal(t, "error get core storage: alert 'foobar', storage not found", msg)
 	assert.Equal(t, 1, code)
 }
 
@@ -65,7 +65,7 @@ channels:
 
 	msg, code := run("stdin", "INFO", false, false, "")
 
-	assert.Equal(t, "error init alert manager, error init syslog channel default, dial tcp: address 70000: invalid port", msg)
+	assert.Equal(t, "error init channels manager, error init syslog channel default, dial tcp: address 70000: invalid port", msg)
 	assert.Equal(t, 1, code)
 }
 
@@ -80,7 +80,7 @@ global:
 
 	msg, code := run("stdin", "INFO", false, false, "")
 
-	assert.Equal(t, "error get kv storage engine 'foobar', storage not found", msg)
+	assert.Equal(t, "error get core storage: kv 'foobar', storage not found", msg)
 	assert.Equal(t, 1, code)
 }
 

@@ -1,37 +1,9 @@
 package alert
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"time"
 )
-
-func TestAcquireAlert(t *testing.T) {
-	a1 := &Alert{}
-	alertsPool.Put(a1)
-
-	now := time.Now()
-
-	a2 := AcquireAlert()
-
-	assert.Equal(t, fmt.Sprintf("%p", a1), fmt.Sprintf("%p", a2))
-	assert.GreaterOrEqual(t, a2.lastChange.UnixNano(), now.UnixNano())
-	assert.GreaterOrEqual(t, a2.GetStartTime().UnixNano(), now.UnixNano())
-	assert.Equal(t, LevelSuccess, a2.level)
-	assert.Equal(t, 0, a2.count)
-}
-
-func TestAcquireAlert2(t *testing.T) {
-	now := time.Now()
-
-	a2 := AcquireAlert()
-
-	assert.GreaterOrEqual(t, a2.lastChange.UnixNano(), now.UnixNano())
-	assert.GreaterOrEqual(t, a2.GetStartTime().UnixNano(), now.UnixNano())
-	assert.Equal(t, LevelSuccess, a2.level)
-	assert.Equal(t, 0, a2.count)
-}
 
 func TestLevelFromString(t *testing.T) {
 	type args struct {

@@ -153,24 +153,20 @@ func TestFilter(t *testing.T) {
 
 	var data []*alert2.Alert
 
-	a0 := alert2.AcquireAlert()
+	a0 := alert2.New("baz")
 	a0.UpdateLevel(alert2.LevelSuccess)
-	a0.SetName("baz")
 	data = append(data, a0)
 
-	a1 := alert2.AcquireAlert()
+	a1 := alert2.New("foo")
 	a1.UpdateLevel(alert2.LevelSuccess)
-	a1.SetName("foo")
 	data = append(data, a1)
 
-	a2 := alert2.AcquireAlert()
+	a2 := alert2.New("bar")
 	a2.UpdateLevel(alert2.LevelError)
-	a2.SetName("bar")
 	data = append(data, a2)
 
-	a3 := alert2.AcquireAlert()
+	a3 := alert2.New("bar")
 	a3.UpdateLevel(alert2.LevelWarn)
-	a3.SetName("bar")
 	data = append(data, a3)
 
 	result, err := filter(req, data)

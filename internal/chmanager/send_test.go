@@ -27,7 +27,7 @@ func (m *alertChannelMock) Send(mes *message.Message) error {
 }
 
 func TestManager_Send_no_channels(t *testing.T) {
-	m := &Manager{
+	m := &ChannelsManager{
 		channels: map[string]alertChannel{},
 	}
 
@@ -39,7 +39,7 @@ func TestManager_Send_no_channels(t *testing.T) {
 func TestManager_Send_channel_not_found(t *testing.T) {
 	chan1 := &alertChannelMock{}
 
-	m := &Manager{
+	m := &ChannelsManager{
 		channels: map[string]alertChannel{
 			"chan1": chan1,
 		},
@@ -61,7 +61,7 @@ func TestManager_Send_ok(t *testing.T) {
 	chan1 := &alertChannelMock{}
 	chan1.On("Send", mock.Anything).Return(nil)
 
-	m := &Manager{
+	m := &ChannelsManager{
 		logger: logger,
 		channels: map[string]alertChannel{
 			"chan1": chan1,
@@ -82,7 +82,7 @@ func TestManager_Send_error(t *testing.T) {
 	chan1 := &alertChannelMock{}
 	chan1.On("Send", mock.Anything).Return(fmt.Errorf("err1"))
 
-	m := &Manager{
+	m := &ChannelsManager{
 		channels: map[string]alertChannel{
 			"chan1": chan1,
 		},

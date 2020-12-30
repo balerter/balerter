@@ -6,6 +6,7 @@ import (
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/balerter/balerter/internal/corestorage/provider/file"
 	"github.com/balerter/balerter/internal/corestorage/provider/memory"
+	"github.com/balerter/balerter/internal/corestorage/provider/postgres"
 	"go.uber.org/zap"
 )
 
@@ -24,6 +25,15 @@ func New(cfg core.Core, logger *zap.Logger) (*Manager, error) {
 		s, err := file.New(c, logger)
 		if err != nil {
 			return nil, fmt.Errorf("error create file storage, %w", err)
+		}
+
+		m.storages[s.Name()] = s
+	}
+
+	for _, c := range cfg.Postgres {
+		s, err := postgres.New(c, logger)
+		if err != nil {
+			return nil, fmt.Errorf("error create postgres storage, %w", err)
 		}
 
 		m.storages[s.Name()] = s

@@ -20,10 +20,10 @@ func Methods() []string {
 }
 
 type KV struct {
-	engine coreStorage.CoreStorage
+	engine coreStorage.KV
 }
 
-func New(engine coreStorage.CoreStorage) *KV {
+func New(engine coreStorage.KV) *KV {
 	kv := &KV{
 		engine: engine,
 	}
@@ -60,7 +60,7 @@ func (kv *KV) Stop() error {
 func (kv *KV) get(luaState *lua.LState) int {
 	varName := luaState.Get(1).String()
 
-	val, err := kv.engine.KV().Get(varName)
+	val, err := kv.engine.Get(varName)
 	if err != nil {
 		luaState.Push(lua.LString(""))
 		luaState.Push(lua.LString(err.Error()))
@@ -77,7 +77,7 @@ func (kv *KV) put(luaState *lua.LState) int {
 	varName := luaState.Get(1).String()
 	varVal := luaState.Get(2).String()
 
-	err := kv.engine.KV().Put(varName, varVal)
+	err := kv.engine.Put(varName, varVal)
 	if err != nil {
 		luaState.Push(lua.LString(err.Error()))
 		return 1
@@ -90,7 +90,7 @@ func (kv *KV) upsert(luaState *lua.LState) int {
 	varName := luaState.Get(1).String()
 	varVal := luaState.Get(2).String()
 
-	err := kv.engine.KV().Upsert(varName, varVal)
+	err := kv.engine.Upsert(varName, varVal)
 	if err != nil {
 		luaState.Push(lua.LString(err.Error()))
 		return 1
@@ -102,7 +102,7 @@ func (kv *KV) upsert(luaState *lua.LState) int {
 func (kv *KV) delete(luaState *lua.LState) int {
 	varName := luaState.Get(1).String()
 
-	err := kv.engine.KV().Delete(varName)
+	err := kv.engine.Delete(varName)
 	if err != nil {
 		luaState.Push(lua.LString(err.Error()))
 		return 1

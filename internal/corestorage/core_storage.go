@@ -15,7 +15,7 @@ type KV interface {
 type Alert interface {
 	GetOrNew(string) (*alert.Alert, error)
 	All() ([]*alert.Alert, error)
-	Release(a *alert.Alert) error
+	Store(a *alert.Alert) error
 	Get(string) (*alert.Alert, error)
 }
 

@@ -2,6 +2,7 @@ package alert
 
 import (
 	alert2 "github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/corestorage"
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -23,19 +24,14 @@ func Methods() []string {
 	}
 }
 
-type Manager interface {
-	Update(alertName string, alertLevel alert2.Level, text string, options *alert2.Options) error
-	Get(name string) (*alert2.Alert, error)
-}
-
 type Alert struct {
-	manager Manager
+	storage corestorage.Alert
 	logger  *zap.Logger
 }
 
-func New(manager Manager, logger *zap.Logger) *Alert {
+func New(storage corestorage.Alert, logger *zap.Logger) *Alert {
 	a := &Alert{
-		manager: manager,
+		storage: storage,
 		logger:  logger,
 	}
 

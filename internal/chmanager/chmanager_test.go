@@ -16,7 +16,7 @@ import (
 )
 
 func TestManager_Init(t *testing.T) {
-	m := New(nil, zap.NewNop())
+	m := New(zap.NewNop())
 
 	cfg := channels.Channels{
 		Email:    []*email.Email{{Name: "email1"}},

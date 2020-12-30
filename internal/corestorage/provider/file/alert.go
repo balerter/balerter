@@ -25,8 +25,7 @@ func (s *storageAlert) GetOrNew(name string) (*alert.Alert, error) {
 		return nil, fmt.Errorf("error get item, %w", err)
 	}
 
-	a := alert.AcquireAlert()
-	a.SetName(name)
+	a := alert.New(name)
 
 	// if the buffer is empty, returns a new alert
 	if len(v) == 0 {
@@ -69,7 +68,7 @@ func (s *storageAlert) All() ([]*alert.Alert, error) {
 			continue
 		}
 
-		a := alert.AcquireAlert()
+		a := alert.New("")
 
 		err = a.Unmarshal(v)
 		if err != nil {
@@ -82,9 +81,7 @@ func (s *storageAlert) All() ([]*alert.Alert, error) {
 	return res, nil
 }
 
-func (s *storageAlert) Release(a *alert.Alert) error {
-	defer alert.ReleaseAlert(a)
-
+func (s *storageAlert) Store(a *alert.Alert) error {
 	data, err := a.Marshal()
 	if err != nil {
 		return fmt.Errorf("error marshal alert, %w", err)
@@ -129,7 +126,7 @@ func (s *storageAlert) Get(name string) (*alert.Alert, error) {
 		return nil, fmt.Errorf("alert not found")
 	}
 
-	a := alert.AcquireAlert()
+	a := alert.New("")
 
 	err = a.Unmarshal(res)
 	if err != nil {

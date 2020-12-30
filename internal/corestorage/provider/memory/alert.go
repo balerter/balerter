@@ -20,8 +20,7 @@ func (m *storageAlert) GetOrNew(name string) (*alert.Alert, error) {
 	if ok {
 		return a, nil
 	}
-	a = alert.AcquireAlert()
-	a.SetName(name)
+	a = alert.New(name)
 	m.alerts[name] = a
 	return a, nil
 }
@@ -39,7 +38,10 @@ func (m *storageAlert) All() ([]*alert.Alert, error) {
 	return result, nil
 }
 
-func (m *storageAlert) Release(_ *alert.Alert) error {
+func (m *storageAlert) Store(a *alert.Alert) error {
+	m.mxAlerts.Lock()
+	m.alerts[a.Name()] = a
+	m.mxAlerts.Unlock()
 	return nil
 }
 

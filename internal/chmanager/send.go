@@ -12,7 +12,7 @@ var (
 )
 
 // Send a message
-func (m *Manager) Send(level, alertName, text string, options *alert.Options, errs chan<- error) error {
+func (m *ChannelsManager) Send(level, alertName, text string, options *alert.Options, errs chan<- error) error {
 	chs := make(map[string]alertChannel)
 
 	if len(options.Channels) > 0 {

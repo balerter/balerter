@@ -7,6 +7,7 @@ import (
 	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/config/scripts/sources"
 	"github.com/balerter/balerter/internal/config/scripts/sources/file"
+	"github.com/balerter/balerter/internal/corestorage"
 	alertModule "github.com/balerter/balerter/internal/modules/alert"
 	"github.com/balerter/balerter/internal/service"
 	"log"
@@ -16,8 +17,8 @@ import (
 	"sync"
 	"syscall"
 
-	alertManager "github.com/balerter/balerter/internal/am"
 	apiManager "github.com/balerter/balerter/internal/api/manager"
+	channelsManager "github.com/balerter/balerter/internal/chmanager"
 	"github.com/balerter/balerter/internal/config"
 	coreStorageManager "github.com/balerter/balerter/internal/corestorage/manager"
 	dsManager "github.com/balerter/balerter/internal/datasource/manager"
@@ -74,8 +75,6 @@ func run(
 	defer ctxCancel()
 
 	wg := &sync.WaitGroup{}
-
-	coreModules := make([]modules.Module, 0)
 
 	if err := validateLogLevel(logLevel); err != nil {
 		return err.Error(), 1
@@ -151,40 +150,22 @@ func run(
 	if err != nil {
 		return fmt.Sprintf("error create core storages manager, %v", err), 1
 	}
-
-	// Alert Manager
-	lgr.Logger().Info("init alert manager")
-	alertManagerStorageEngine, err := coreStoragesMgr.Get(cfg.Global.Storages.Alert)
+	coreStorageAlert, err := coreStoragesMgr.Get(cfg.Global.Storages.Alert)
 	if err != nil {
-		return fmt.Sprintf("error get core storages engine for alert '%s', %v", cfg.Global.Storages.Alert, err), 1
+		return fmt.Sprintf("error get core storage: alert '%s', %v", cfg.Global.Storages.Alert, err), 1
 	}
-	alertMgr := alertManager.New(alertManagerStorageEngine, lgr.Logger())
-	if err = alertMgr.Init(cfg.Channels); err != nil {
-		return fmt.Sprintf("error init alert manager, %v", err), 1
-	}
-
-	// ---------------------
-	// |
-	// | Core Modules
-	// |
-	// | Alert
-	// |
-	alertMod := alertModule.New(alertMgr, lgr.Logger())
-	coreModules = append(coreModules, alertMod)
-
-	// ---------------------
-	// |
-	// | Core Modules
-	// |
-	// | KV
-	// |
-	kvEngine, err := coreStoragesMgr.Get(cfg.Global.Storages.KV)
+	coreStorageKV, err := coreStoragesMgr.Get(cfg.Global.Storages.KV)
 	if err != nil {
-		return fmt.Sprintf("error get kv storage engine '%s', %v", cfg.Global.Storages.KV, err), 1
+		return fmt.Sprintf("error get core storage: kv '%s', %v", cfg.Global.Storages.KV, err), 1
 	}
-	lgr.Logger().Info("init kv storage", zap.String("engine", cfg.Global.Storages.KV))
-	kvModule := kv.New(kvEngine)
-	coreModules = append(coreModules, kvModule)
+
+	// ChannelsManager
+	lgr.Logger().Info("init channels manager")
+	channelsMgr := channelsManager.New(lgr.Logger())
+	if err = channelsMgr.Init(cfg.Channels); err != nil {
+		return fmt.Sprintf("error init channels manager, %v", err), 1
+	}
+	// TODO: pass channels manager...
 
 	// ---------------------
 	// |
@@ -196,7 +177,7 @@ func run(
 		if err != nil {
 			return fmt.Sprintf("error create api listener, %v", err), 1
 		}
-		apis := apiManager.New(cfg.Global.API, alertManagerStorageEngine, kvEngine, lgr.Logger())
+		apis := apiManager.New(cfg.Global.API, coreStorageAlert, coreStorageKV, lgr.Logger())
 		wg.Add(1)
 		go apis.Run(ctx, ctxCancel, wg, ln)
 	}
@@ -216,44 +197,10 @@ func run(
 		go srv.Run(ctx, ctxCancel, wg, ln)
 	}
 
-	// ---------------------
-	// |
-	// | Core Modules
-	// |
-	// | Log
-	// |
-	logMod := logModule.New(lgr.Logger())
-	coreModules = append(coreModules, logMod)
-
-	// ---------------------
-	// |
-	// | Core Modules
-	// |
-	// | Chart
-	// |
-	chartMod := chartModule.New(lgr.Logger())
-	coreModules = append(coreModules, chartMod)
-
-	// ---------------------
-	// |
-	// | Core Modules
-	// |
-	// | http
-	// |
-	httpMod := httpModule.New(lgr.Logger())
-	coreModules = append(coreModules, httpMod)
-
-	// ---------------------
-	// |
-	// | Core Modules
-	// |
-	// | runtime
-	// |
-	runtimeMod := runtimeModule.New(logLevel, debug, once, withScript, configSource, lgr.Logger())
-	coreModules = append(coreModules, runtimeMod)
+	coreModules := initCoreModules(coreStorageAlert, coreStorageKV, lgr.Logger(), logLevel, debug, once, withScript, configSource)
 
 	if len(cfg.Global.SendStartNotification) > 0 {
-		err = alertMgr.Send("", "", "Balerter start", &alert.Options{
+		err = channelsMgr.Send("", "", "Balerter start", &alert.Options{
 			Channels: cfg.Global.SendStartNotification,
 		}, nil)
 		if err != nil {
@@ -295,7 +242,7 @@ func run(
 	dsMgr.Stop()
 
 	if len(cfg.Global.SendStopNotification) > 0 {
-		err = alertMgr.Send("", "", "Balerter stop", &alert.Options{
+		err = channelsMgr.Send("", "", "Balerter stop", &alert.Options{
 			Channels: cfg.Global.SendStopNotification,
 		}, nil)
 		if err != nil {
@@ -306,6 +253,39 @@ func run(
 	lgr.Logger().Info("terminate")
 
 	return "", 0
+}
+
+func initCoreModules(
+	coreStorageAlert corestorage.CoreStorage,
+	coreStorageKV corestorage.CoreStorage,
+	logger *zap.Logger,
+	logLevel string,
+	debug bool,
+	once bool,
+	withScript string,
+	configSource string,
+) []modules.Module {
+	coreModules := make([]modules.Module, 0)
+
+	alertMod := alertModule.New(coreStorageAlert.Alert(), logger)
+	coreModules = append(coreModules, alertMod)
+
+	kvModule := kv.New(coreStorageKV.KV())
+	coreModules = append(coreModules, kvModule)
+
+	logMod := logModule.New(logger)
+	coreModules = append(coreModules, logMod)
+
+	chartMod := chartModule.New(logger)
+	coreModules = append(coreModules, chartMod)
+
+	httpMod := httpModule.New(logger)
+	coreModules = append(coreModules, httpMod)
+
+	runtimeMod := runtimeModule.New(logLevel, debug, once, withScript, configSource, logger)
+	coreModules = append(coreModules, runtimeMod)
+
+	return coreModules
 }
 
 func validateLogLevel(level string) error {
