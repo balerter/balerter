@@ -6,6 +6,7 @@ import (
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/yuin/gluamapper"
 	lua "github.com/yuin/gopher-lua"
+	"go.uber.org/zap"
 	"strings"
 )
 
@@ -52,25 +53,27 @@ func (a *Alert) getAlertData(luaState *lua.LState) (alertName, alertText string,
 
 func (a *Alert) call(s *script.Script, alertLevel alert.Level) lua.LGFunction {
 	return func(luaState *lua.LState) int {
-		// TODO: wip
+		name, text, options, err := a.getAlertData(luaState)
+		if err != nil {
+			a.logger.Error("error get args", zap.Error(err))
+			luaState.Push(lua.LString("error get arguments: " + err.Error()))
+			return 1
+		}
 
-		//name, text, options, err := a.getAlertData(luaState)
-		//if err != nil {
-		//	a.logger.Error("error get args", zap.Error(err))
-		//	luaState.Push(lua.LString("error get arguments: " + err.Error()))
-		//	return 1
-		//}
-		//
-		//if len(options.Channels) == 0 {
-		//	options.Channels = s.Channels
-		//}
+		if len(options.Channels) == 0 {
+			options.Channels = s.Channels
+		}
 
-		//err = a.storage.Update(name, alertLevel, text, options)
-		//if err != nil {
-		//	a.logger.Error("error call alert storage", zap.Error(err))
-		//	luaState.Push(lua.LString("error call alert storage: " + err.Error()))
-		//	return 1
-		//}
+		updatedAlert, levelWasUpdated, err := a.storage.Update(name, alertLevel)
+		if err != nil {
+			a.logger.Error("error update an alert", zap.Error(err))
+			luaState.Push(lua.LString("error update an alert: " + err.Error()))
+			return 1
+		}
+
+		if levelWasUpdated {
+			a.chManager.Send(updatedAlert, text, options)
+		}
 
 		return 0
 	}

@@ -51,10 +51,10 @@ func filter(req *http.Request, data []*alert2.Alert) ([]*alert2.Alert, error) {
 	var result []*alert2.Alert
 
 	for _, item := range data {
-		if _, ok := levelsMap[item.Level()]; len(levelsMap) > 0 && !ok {
+		if _, ok := levelsMap[item.Level]; len(levelsMap) > 0 && !ok {
 			continue
 		}
-		if _, ok := namesMap[item.Name()]; len(namesMap) > 0 && !ok {
+		if _, ok := namesMap[item.Name]; len(namesMap) > 0 && !ok {
 			continue
 		}
 

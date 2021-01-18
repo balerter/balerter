@@ -16,11 +16,11 @@ func TestAlert_Marshal(t *testing.T) {
 	now := time.Date(2020, 01, 01, 01, 01, 01, 01, time.UTC)
 
 	a := &Alert{
-		name:       "bar",
-		level:      2,
-		lastChange: now,
-		start:      now,
-		count:      10,
+		Name:       "bar",
+		Level:      2,
+		LastChange: now,
+		Start:      now,
+		Count:      10,
 	}
 
 	res, err := a.Marshal()
@@ -37,11 +37,11 @@ func TestAlert_Unmarshal(t *testing.T) {
 	err := a.Unmarshal(etalon)
 	require.NoError(t, err)
 
-	assert.Equal(t, "bar", a.name)
-	assert.Equal(t, Level(2), a.level)
-	assert.Equal(t, now, a.lastChange)
-	assert.Equal(t, now, a.start)
-	assert.Equal(t, 10, a.count)
+	assert.Equal(t, "bar", a.Name)
+	assert.Equal(t, Level(2), a.Level)
+	assert.Equal(t, now, a.LastChange)
+	assert.Equal(t, now, a.Start)
+	assert.Equal(t, 10, a.Count)
 }
 
 func TestAlert_Unmarshal_Errors(t *testing.T) {
@@ -50,11 +50,11 @@ func TestAlert_Unmarshal_Errors(t *testing.T) {
 
 	err = a.Unmarshal(nil)
 	require.Error(t, err)
-	assert.Equal(t, "error decode alert name", err.Error())
+	assert.Equal(t, "error decode alert Name", err.Error())
 
 	err = a.Unmarshal([]byte{0x9F})
 	require.Error(t, err)
-	assert.Equal(t, "error decode alert name", err.Error())
+	assert.Equal(t, "error decode alert Name", err.Error())
 
 	err = a.Unmarshal([]byte{0x03, 'b', 'a'})
 	require.Error(t, err)
@@ -63,8 +63,8 @@ func TestAlert_Unmarshal_Errors(t *testing.T) {
 	err = a.Unmarshal([]byte{0x03, 'b', 'a', 'c', 0x02})
 	require.Error(t, err)
 	assert.Equal(t, "source too small", err.Error())
-	assert.Equal(t, "bac", a.name)
-	assert.Equal(t, Level(2), a.level)
+	assert.Equal(t, "bac", a.Name)
+	assert.Equal(t, Level(2), a.Level)
 
 	err = a.Unmarshal([]byte{0x03, 'b', 'a', 'c', 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
@@ -75,19 +75,19 @@ func TestAlert_Unmarshal_Errors(t *testing.T) {
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 	require.Error(t, err)
 	assert.Equal(t, "source too small", err.Error())
-	assert.Equal(t, "0001-01-01T00:00:00Z", a.lastChange.Format(time.RFC3339))
+	assert.Equal(t, "0001-01-01T00:00:00Z", a.LastChange.Format(time.RFC3339))
 
 	err = a.Unmarshal([]byte{0x03, 'b', 'a', 'c', 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 	require.Error(t, err)
 	assert.Equal(t, "source too small", err.Error())
-	assert.Equal(t, "0001-01-01T00:00:00Z", a.lastChange.Format(time.RFC3339))
-	assert.Equal(t, "0001-01-01T00:00:00Z", a.start.Format(time.RFC3339))
+	assert.Equal(t, "0001-01-01T00:00:00Z", a.LastChange.Format(time.RFC3339))
+	assert.Equal(t, "0001-01-01T00:00:00Z", a.Start.Format(time.RFC3339))
 
 	err = a.Unmarshal([]byte{0x03, 'b', 'a', 'c', 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05})
 	require.NoError(t, err)
-	assert.Equal(t, 5, a.count)
+	assert.Equal(t, 5, a.Count)
 }

@@ -13,10 +13,8 @@ type KV interface {
 }
 
 type Alert interface {
-	GetOrNew(string) (*alert.Alert, error)
-	All() ([]*alert.Alert, error)
-	Store(a *alert.Alert) error
-	Get(string) (*alert.Alert, error)
+	// Update exists alert or create new
+	Update(name string, level alert.Level) (*alert.Alert, bool, error)
 }
 
 type CoreStorage interface {

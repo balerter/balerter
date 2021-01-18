@@ -10,10 +10,10 @@ const (
 )
 
 var (
-	ErrDecodeAlertName = errors.New("error decode alert name")
+	ErrDecodeAlertName = errors.New("error decode alert Name")
 	ErrSourceTooSmall  = errors.New("source too small")
-	ErrDecodeLevel     = errors.New("error decode level")
-	ErrDecodeCount     = errors.New("error decode count")
+	ErrDecodeLevel     = errors.New("error decode Level")
+	ErrDecodeCount     = errors.New("error decode Count")
 	ErrSourceTooLong   = errors.New("source too long")
 )
 
@@ -25,30 +25,30 @@ func (a *Alert) Marshal() ([]byte, error) {
 	var n int
 
 	// Name
-	n = binary.PutUvarint(buf, uint64(len(a.name)))
+	n = binary.PutUvarint(buf, uint64(len(a.Name)))
 	res = append(res, buf[:n]...)
-	res = append(res, a.name...)
+	res = append(res, a.Name...)
 
 	// Level
-	n = binary.PutUvarint(buf, uint64(a.level))
+	n = binary.PutUvarint(buf, uint64(a.Level))
 	res = append(res, buf[:n]...)
 
 	// LastChange
-	t, err := a.lastChange.MarshalBinary()
+	t, err := a.LastChange.MarshalBinary()
 	if err != nil {
 		return nil, err
 	}
 	res = append(res, t...)
 
 	// Start
-	t, err = a.start.MarshalBinary()
+	t, err = a.Start.MarshalBinary()
 	if err != nil {
 		return nil, err
 	}
 	res = append(res, t...)
 
 	// Count
-	n = binary.PutUvarint(buf, uint64(a.count))
+	n = binary.PutUvarint(buf, uint64(a.Count))
 	res = append(res, buf[:n]...)
 
 	return res, nil
@@ -67,7 +67,7 @@ func (a *Alert) Unmarshal(src []byte) error {
 	if len(src) < int(l) {
 		return ErrSourceTooSmall
 	}
-	a.name = string(src[:l])
+	a.Name = string(src[:l])
 	src = src[l:]
 
 	// Level
@@ -78,14 +78,14 @@ func (a *Alert) Unmarshal(src []byte) error {
 	if n <= 0 {
 		return ErrDecodeLevel
 	}
-	a.level = Level(l)
+	a.Level = Level(l)
 	src = src[n:]
 
 	// LastChange
 	if len(src) < timeFieldBinarySize {
 		return ErrSourceTooSmall
 	}
-	err := a.lastChange.UnmarshalBinary(src[:timeFieldBinarySize])
+	err := a.LastChange.UnmarshalBinary(src[:timeFieldBinarySize])
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func (a *Alert) Unmarshal(src []byte) error {
 	if len(src) < timeFieldBinarySize {
 		return ErrSourceTooSmall
 	}
-	err = a.start.UnmarshalBinary(src[:timeFieldBinarySize])
+	err = a.Start.UnmarshalBinary(src[:timeFieldBinarySize])
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (a *Alert) Unmarshal(src []byte) error {
 	if n <= 0 {
 		return ErrDecodeCount
 	}
-	a.count = int(l)
+	a.Count = int(l)
 	src = src[n:]
 
 	if len(src) > 0 {

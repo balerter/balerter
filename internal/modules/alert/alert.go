@@ -25,14 +25,20 @@ func Methods() []string {
 }
 
 type Alert struct {
-	storage corestorage.Alert
-	logger  *zap.Logger
+	storage   corestorage.Alert
+	chManager ChManager
+	logger    *zap.Logger
 }
 
-func New(storage corestorage.Alert, logger *zap.Logger) *Alert {
+type ChManager interface {
+	Send(a *alert.Alert, text string, options *alert.Options)
+}
+
+func New(storage corestorage.Alert, chManager ChManager, logger *zap.Logger) *Alert {
 	a := &Alert{
-		storage: storage,
-		logger:  logger,
+		storage:   storage,
+		chManager: chManager,
+		logger:    logger,
 	}
 
 	return a

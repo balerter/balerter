@@ -68,7 +68,7 @@ func New(
 	return r
 }
 
-func (rnr *Runner) Watch(ctx context.Context, ctxCancel context.CancelFunc, wg *sync.WaitGroup, once bool) {
+func (rnr *Runner) Watch(ctx context.Context, ctxCancel context.CancelFunc, once bool) {
 	rnr.cron.Start()
 
 	defer func() {
@@ -84,7 +84,7 @@ func (rnr *Runner) Watch(ctx context.Context, ctxCancel context.CancelFunc, wg *
 		if err != nil {
 			rnr.logger.Error("error get scripts", zap.Error(err))
 		} else {
-			rnr.updateScripts(ctx, ss, wg)
+			rnr.updateScripts(ctx, ss, once)
 		}
 
 		if once {
@@ -100,7 +100,7 @@ func (rnr *Runner) Watch(ctx context.Context, ctxCancel context.CancelFunc, wg *
 	}
 }
 
-func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, wg *sync.WaitGroup) {
+func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, once bool) {
 	var err error
 
 	rnr.poolMx.Lock()
@@ -128,6 +128,12 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, 
 		rnr.logger.Debug("schedule script job", zap.String("hash", s.Hash()), zap.String("script name", s.Name), zap.String("cron", s.CronValue))
 		job := newJob(s, rnr.logger)
 		rnr.createLuaState(job)
+
+		if once {
+			job.Run()
+			rnr.pool[s.Hash()] = job
+			continue
+		}
 
 		job.entryID, err = rnr.cron.AddJob(s.CronValue, job)
 		if err != nil {

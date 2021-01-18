@@ -26,10 +26,10 @@ func newResource(data []*alert.Alert) *resource {
 
 	for _, item := range data {
 		i := resourceItem{
-			Name:      item.Name(),
-			Level:     item.Level().String(),
-			Count:     item.Count(),
-			UpdatedAt: item.GetLastChangeTime().Format(time.RFC3339),
+			Name:      item.Name,
+			Level:     item.Level.String(),
+			Count:     item.Count,
+			UpdatedAt: item.LastChange.Format(time.RFC3339),
 		}
 
 		res.items = append(res.items, i)

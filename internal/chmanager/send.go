@@ -1,28 +1,24 @@
 package manager
 
 import (
-	"errors"
-	"fmt"
 	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/message"
-)
-
-var (
-	ErrEmptyChannels = errors.New("empty channels")
+	"go.uber.org/zap"
 )
 
 // Send a message
-func (m *ChannelsManager) Send(level, alertName, text string, options *alert.Options, errs chan<- error) error {
+func (m *ChannelsManager) Send(a *alert.Alert, text string, options *alert.Options) {
+	if options.Quiet {
+		return
+	}
+
 	chs := make(map[string]alertChannel)
 
 	if len(options.Channels) > 0 {
 		for _, channelName := range options.Channels {
-			// TODO: race on m.channels
 			ch, ok := m.channels[channelName]
 			if !ok {
-				if errs != nil {
-					errs <- fmt.Errorf("channel '%s' not found", channelName)
-				}
+				m.logger.Warn("channel not found", zap.String("name", channelName))
 				continue
 			}
 			chs[channelName] = ch
@@ -32,16 +28,13 @@ func (m *ChannelsManager) Send(level, alertName, text string, options *alert.Opt
 	}
 
 	if len(chs) == 0 {
-		return ErrEmptyChannels
+		m.logger.Warn("the message was not sent, empty channels")
+		return
 	}
 
 	for name, module := range chs {
-		if err := module.Send(message.New(level, alertName, text, options.Fields, options.Image)); err != nil {
-			if errs != nil {
-				errs <- fmt.Errorf("error send message to channel %s, %v", name, err)
-			}
+		if err := module.Send(message.New(a.Level.String(), a.Name, text, options.Fields, options.Image)); err != nil {
+			m.logger.Error("error send the message to the channel", zap.String("channel name", name), zap.Error(err))
 		}
 	}
-
-	return nil
 }

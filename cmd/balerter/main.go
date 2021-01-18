@@ -197,15 +197,12 @@ func run(
 		go srv.Run(ctx, ctxCancel, wg, ln)
 	}
 
-	coreModules := initCoreModules(coreStorageAlert, coreStorageKV, lgr.Logger(), logLevel, debug, once, withScript, configSource)
+	coreModules := initCoreModules(coreStorageAlert, coreStorageKV, channelsMgr, lgr.Logger(), logLevel, debug, once, withScript, configSource)
 
 	if len(cfg.Global.SendStartNotification) > 0 {
-		err = channelsMgr.Send("", "", "Balerter start", &alert.Options{
+		channelsMgr.Send(nil, "Balerter start", &alert.Options{
 			Channels: cfg.Global.SendStartNotification,
-		}, nil)
-		if err != nil {
-			lgr.Logger().Error("error send start notification", zap.Error(err))
-		}
+		})
 	}
 
 	// ---------------------
@@ -216,7 +213,7 @@ func run(
 	rnr := runner.New(cfg.Scripts.UpdateInterval, scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
 
 	lgr.Logger().Info("run runner")
-	go rnr.Watch(ctx, ctxCancel, wg, once)
+	go rnr.Watch(ctx, ctxCancel, once)
 
 	// ---------------------
 	// |
@@ -242,12 +239,9 @@ func run(
 	dsMgr.Stop()
 
 	if len(cfg.Global.SendStopNotification) > 0 {
-		err = channelsMgr.Send("", "", "Balerter stop", &alert.Options{
+		channelsMgr.Send(nil, "Balerter stop", &alert.Options{
 			Channels: cfg.Global.SendStopNotification,
-		}, nil)
-		if err != nil {
-			lgr.Logger().Error("error send stop notification", zap.Error(err))
-		}
+		})
 	}
 
 	lgr.Logger().Info("terminate")
@@ -258,6 +252,7 @@ func run(
 func initCoreModules(
 	coreStorageAlert corestorage.CoreStorage,
 	coreStorageKV corestorage.CoreStorage,
+	chManager *channelsManager.ChannelsManager,
 	logger *zap.Logger,
 	logLevel string,
 	debug bool,
@@ -267,7 +262,7 @@ func initCoreModules(
 ) []modules.Module {
 	coreModules := make([]modules.Module, 0)
 
-	alertMod := alertModule.New(coreStorageAlert.Alert(), logger)
+	alertMod := alertModule.New(coreStorageAlert.Alert(), chManager, logger)
 	coreModules = append(coreModules, alertMod)
 
 	kvModule := kv.New(coreStorageKV.KV())
