@@ -1,11 +1,12 @@
 package sql
 
 import (
+	"time"
+
 	"github.com/balerter/balerter/internal/corestorage"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"go.uber.org/zap"
-	"time"
 )
 
 // SQL implements CoreStorage with the SQL as a storage backend
@@ -27,7 +28,7 @@ func New(name, driver, connectionString, tableAlerts, tableKV string, timeout ti
 	}
 
 	p := &SQL{
-		name:   "postgres." + name,
+		name:   name,
 		db:     conn,
 		alerts: &PostgresAlert{db: conn, table: tableAlerts, timeout: timeout, logger: logger},
 		kv:     &PostgresKV{db: conn, table: tableKV, timeout: timeout, logger: logger},
