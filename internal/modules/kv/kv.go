@@ -12,6 +12,7 @@ func ModuleName() string {
 
 func Methods() []string {
 	return []string{
+		"all",
 		"get",
 		"put",
 		"delete",
@@ -39,6 +40,7 @@ func (kv *KV) GetLoader(_ *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
+				"all":    kv.all,
 				"get":    kv.get,
 				"put":    kv.put,
 				"delete": kv.delete,
@@ -55,6 +57,26 @@ func (kv *KV) GetLoader(_ *script.Script) lua.LGFunction {
 
 func (kv *KV) Stop() error {
 	return nil
+}
+
+func (kv *KV) all(luaState *lua.LState) int {
+	data, err := kv.engine.All()
+	if err != nil {
+		luaState.Push(lua.LString(""))
+		luaState.Push(lua.LString(err.Error()))
+		return 2
+	}
+
+	res := &lua.LTable{}
+
+	for key, value := range data {
+		res.RawSetString(key, lua.LString(value))
+	}
+
+	luaState.Push(res)
+	luaState.Push(lua.LNil)
+
+	return 2
 }
 
 func (kv *KV) get(luaState *lua.LState) int {
