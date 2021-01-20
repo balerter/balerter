@@ -17,7 +17,7 @@ require (
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/lib/pq v1.0.0
 	github.com/martinlindhe/notify v0.0.0-20181008203735-20632c9a275a
-	github.com/mattn/go-sqlite3 v1.14.6 // indirect
+	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/mavolin/dismock v1.0.0
 	github.com/nlopes/slack v0.6.0
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect

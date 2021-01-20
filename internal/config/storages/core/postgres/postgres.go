@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+type Tables struct {
+	Alerts string `json:"alerts" yaml:"alerts"`
+	KV     string `json:"kv" yaml:"kv"`
+}
+
 type Postgres struct {
 	Name        string        `json:"name" yaml:"name"`
 	Host        string        `json:"host" yaml:"host"`
@@ -17,8 +22,7 @@ type Postgres struct {
 	SSLCertPath string        `json:"sslCertPath" yaml:"sslCertPath"`
 	Timeout     time.Duration `json:"timeout" yaml:"timeout"`
 
-	TableAlerts string `json:"tableAlerts" yaml:"tableAlerts"`
-	TableKV     string `json:"tableKV" yaml:"tableKV"`
+	Tables Tables `json:"tables" yaml:"tables"`
 }
 
 func (cfg *Postgres) Validate() error {
@@ -33,12 +37,6 @@ func (cfg *Postgres) Validate() error {
 	}
 	if cfg.Timeout < 0 {
 		return fmt.Errorf("timeout must be greater than 0")
-	}
-	if strings.TrimSpace(cfg.TableAlerts) == "" {
-		return fmt.Errorf("empty tableAlerts")
-	}
-	if strings.TrimSpace(cfg.TableKV) == "" {
-		return fmt.Errorf("empty tableKV")
 	}
 
 	return nil
