@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+
 	"github.com/balerter/balerter/internal/config/storages/core"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/balerter/balerter/internal/corestorage/provider/memory"
@@ -21,7 +22,7 @@ func New(cfg core.Core, logger *zap.Logger) (*Manager, error) {
 	m.storages["memory"] = memory.New()
 
 	for _, c := range cfg.File {
-		s, err := sql.New(c.Name, "sqlite3", c.Path, c.Tables.Alerts, c.Tables.KV, c.Timeout, logger)
+		s, err := sql.New("file."+c.Name, "sqlite3", c.Path, c.Tables.Alerts, c.Tables.KV, c.Timeout, logger)
 		if err != nil {
 			return nil, fmt.Errorf("error create file storage, %w", err)
 		}
@@ -40,7 +41,7 @@ func New(cfg core.Core, logger *zap.Logger) (*Manager, error) {
 			c.SSLCertPath,
 		)
 
-		s, err := sql.New(c.Name, "postgres", connectionString, c.Tables.Alerts, c.Tables.KV, c.Timeout, logger)
+		s, err := sql.New("postgres."+c.Name, "postgres", connectionString, c.Tables.Alerts, c.Tables.KV, c.Timeout, logger)
 		if err != nil {
 			return nil, fmt.Errorf("error create postgres storage, %w", err)
 		}
