@@ -1,7 +1,7 @@
 package memory
 
 import (
-	alert2 "github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/alert"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"sync"
 )
@@ -13,7 +13,7 @@ type storageKV struct {
 
 type storageAlert struct {
 	mxAlerts sync.RWMutex
-	alerts   map[string]*alert2.Alert
+	alerts   map[string]*alert.Alert
 }
 
 type Memory struct {
@@ -27,7 +27,7 @@ func New() *Memory {
 			kv: make(map[string]string),
 		},
 		alert: &storageAlert{
-			alerts: make(map[string]*alert2.Alert),
+			alerts: make(map[string]*alert.Alert),
 		},
 	}
 

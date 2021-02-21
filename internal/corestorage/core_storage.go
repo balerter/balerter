@@ -15,6 +15,7 @@ type KV interface {
 type Alert interface {
 	// Update exists alert or create new
 	Update(name string, level alert.Level) (*alert.Alert, bool, error)
+	Index(levels []alert.Level) (alert.Alerts, error)
 }
 
 type CoreStorage interface {

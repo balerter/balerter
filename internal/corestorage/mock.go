@@ -1,7 +1,8 @@
 package corestorage
 
 import (
-	alert2 "github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/alert"
+	//alertModule "github.com/balerter/balerter/internal/modules/alert"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -51,42 +52,22 @@ type AlertMock struct {
 	mock.Mock
 }
 
-//func (m *AlertMock) GetOrNew(string) (*alert2.Alert, error) {
-//	args := m.Called()
-//	a := args.Get(0)
-//	if a == nil {
-//		return nil, args.Error(1)
-//	}
-//	return a.(*alert2.Alert), args.Error(1)
-//}
-//
-//func (m *AlertMock) All() ([]*alert2.Alert, error) {
-//	args := m.Called()
-//	return args.Get(0).([]*alert2.Alert), args.Error(1)
-//}
-//
-//func (m *AlertMock) Store(a *alert2.Alert) error {
-//	args := m.Called(a)
-//	return args.Error(0)
-//}
-//
-//func (m *AlertMock) Get(s string) (*alert2.Alert, error) {
-//	args := m.Called(s)
-//	a := args.Get(0)
-//	e := args.Error(1)
-//	if a == nil {
-//		return nil, e
-//	}
-//	return a.(*alert2.Alert), e
-//}
+func (m *AlertMock) Index(levels []alert.Level) (alert.Alerts, error) {
+	args := m.Called(levels)
+	a := args.Get(0)
+	if a == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(alert.Alerts), args.Error(1)
+}
 
-func (m *AlertMock) Update(name string, level alert2.Level) (*alert2.Alert, bool, error) {
+func (m *AlertMock) Update(name string, level alert.Level) (*alert.Alert, bool, error) {
 	args := m.Called(name, level)
 	a := args.Get(0)
 	if a == nil {
 		return nil, args.Bool(1), args.Error(2)
 	}
-	return args.Get(0).(*alert2.Alert), args.Bool(1), args.Error(2)
+	return args.Get(0).(*alert.Alert), args.Bool(1), args.Error(2)
 }
 
 type KVMock struct {
