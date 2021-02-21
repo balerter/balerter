@@ -1,6 +1,7 @@
 package kv
 
 import (
+	"encoding/json"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -17,11 +18,17 @@ func (kv *KV) handlerIndex(rw http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
-	err = newResource(data).render(rw)
+	buf, err := json.Marshal(data)
+	if err != nil {
+		kv.logger.Error("error marshal kv data", zap.Error(err))
+		http.Error(rw, "error marshal data", http.StatusInternalServerError)
+		return
+	}
+
+	_, err = rw.Write(buf)
 	if err != nil {
 		kv.logger.Error("error write response", zap.Error(err))
-		rw.Header().Add("X-Error", "error write response")
-		rw.WriteHeader(http.StatusInternalServerError)
+		http.Error(rw, "error write response", http.StatusInternalServerError)
 		return
 	}
 }

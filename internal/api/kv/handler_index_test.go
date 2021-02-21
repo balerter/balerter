@@ -31,8 +31,8 @@ func TestHandlerIndex(t *testing.T) {
 	kv.handlerIndex(rw, req)
 
 	assert.Equal(t, 200, rw.StatusCode)
-	assert.Contains(t, rw.Output, `{"name":"f1","value":"v1"}`)
-	assert.Contains(t, rw.Output, `{"name":"f2","value":"v2"}`)
+	assert.Contains(t, rw.Output, `"f1":"v1"`)
+	assert.Contains(t, rw.Output, `"f2":"v2"`)
 }
 
 func TestHandlerIndex_ErrorGetFromStorage(t *testing.T) {
