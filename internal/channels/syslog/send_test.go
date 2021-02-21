@@ -19,12 +19,11 @@ func TestSend(t *testing.T) {
 		Level:     "foo",
 		AlertName: "bar",
 		Text:      "baz",
-		Fields:    []string{"f1", "f2"},
 		Image:     "img",
 	}
 
 	err := s.Send(mes)
 	require.NoError(t, err)
 
-	assert.Equal(t, `{"level":"foo","alert_name":"bar","text":"baz","fields":["f1","f2"],"image":"img"}`, buf.String())
+	assert.Equal(t, `{"level":"foo","alert_name":"bar","text":"baz","image":"img"}`, buf.String())
 }

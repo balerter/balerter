@@ -2,6 +2,7 @@ package email
 
 import (
 	"github.com/balerter/balerter/internal/config/channels/email"
+	"github.com/stretchr/testify/assert"
 	"net"
 	"testing"
 	"time"
@@ -32,14 +33,14 @@ func TestSend(t *testing.T) {
 		return
 	}
 	if conn != nil {
-		defer conn.Close()
+		err2 := conn.Close()
+		assert.NoError(t, err2)
 	}
 
 	msg := &message.Message{
 		Level:     "error",
 		AlertName: "alert-id",
 		Text:      "alert text",
-		Fields:    []string{"f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11"},
 		Image:     "alert image",
 	}
 

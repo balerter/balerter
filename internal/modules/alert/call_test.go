@@ -130,7 +130,7 @@ func TestManager_getAlertData(t *testing.T) {
 			},
 			wantAlertName:    "alertName1",
 			wantAlertText:    "alertText1",
-			wantAlertOptions: &alert2.Options{Quiet: true, Fields: []string{"foo", "bar"}},
+			wantAlertOptions: &alert2.Options{Quiet: true},
 			wantErr:          false,
 		},
 		{
@@ -156,7 +156,7 @@ func TestManager_getAlertData(t *testing.T) {
 			},
 			wantAlertName:    "alertName1",
 			wantAlertText:    "alertText1",
-			wantAlertOptions: &alert2.Options{Quiet: false, Fields: []string{"foo", "bar"}},
+			wantAlertOptions: &alert2.Options{Quiet: false},
 			wantErr:          true,
 		},
 	}

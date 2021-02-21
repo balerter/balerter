@@ -6,7 +6,6 @@ import (
 )
 
 type Options struct {
-	Fields   []string
 	Channels []string
 	Quiet    bool
 	Repeat   int

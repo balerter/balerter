@@ -36,7 +36,6 @@ func TestSend(t *testing.T) {
 		Level:     "error",
 		AlertName: "alert-id",
 		Text:      "alert text",
-		Fields:    []string{"f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11"},
 		Image:     "alert image",
 	}
 

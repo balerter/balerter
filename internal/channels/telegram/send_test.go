@@ -42,7 +42,6 @@ func TestSend_WithoutImage(t *testing.T) {
 		Level:     "foo",
 		AlertName: "bar",
 		Text:      "baz",
-		Fields:    []string{"f1", "f2"},
 		Image:     "",
 	}
 
@@ -74,7 +73,6 @@ func TestSend_WithImage(t *testing.T) {
 		Level:     "foo",
 		AlertName: "bar",
 		Text:      "baz",
-		Fields:    []string{"f1", "f2"},
 		Image:     "img1",
 	}
 

@@ -50,7 +50,7 @@ func (e *Email) Send(mes *message.Message) error {
 
 	email := mail.NewMSG()
 	to := strings.Split(e.conf.To, ";")
-	subject := fmt.Sprintf("[%s/%s] %s", mes.AlertName, mes.Level, strings.Join(mes.Fields, ","))
+	subject := fmt.Sprintf("[%s/%s]", mes.AlertName, mes.Level)
 	email.SetFrom(e.conf.From).AddTo(to...).SetSubject(subject)
 
 	if len(e.conf.Cc) > 0 {

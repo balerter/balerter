@@ -6,7 +6,7 @@ import (
 )
 
 func (m *Slack) Send(mes *message.Message) error {
-	opts := createSlackMessageOptions(mes.Text, mes.Image, mes.Fields...)
+	opts := createSlackMessageOptions(mes.Text, mes.Image)
 
 	_channel, _timestamp, _text, err := m.api.SendMessage(m.channel, opts...)
 
