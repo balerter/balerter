@@ -1,4 +1,4 @@
-package file
+package sqlite
 
 import (
 	"testing"
@@ -44,7 +44,7 @@ func TestStorageCoreFile_Validate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cfg := File{
+			cfg := Sqlite{
 				Name:    tt.fields.Name,
 				Path:    tt.fields.Path,
 				Timeout: tt.fields.Timeout,

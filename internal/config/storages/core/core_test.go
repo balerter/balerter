@@ -1,13 +1,13 @@
 package core
 
 import (
-	"github.com/balerter/balerter/internal/config/storages/core/file"
+	"github.com/balerter/balerter/internal/config/storages/core/sqlite"
 	"testing"
 )
 
 func TestStoragesCore_Validate(t *testing.T) {
 	type fields struct {
-		File []*file.File
+		File []*sqlite.Sqlite
 	}
 	tests := []struct {
 		name    string
@@ -18,7 +18,7 @@ func TestStoragesCore_Validate(t *testing.T) {
 		{
 			name: "duplicated file",
 			fields: fields{
-				File: []*file.File{{Name: "a", Path: "a"}, {Name: "a", Path: "a"}},
+				File: []*sqlite.Sqlite{{Name: "a", Path: "a"}, {Name: "a", Path: "a"}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for core storages 'file': a",
@@ -26,7 +26,7 @@ func TestStoragesCore_Validate(t *testing.T) {
 		{
 			name: "ok",
 			fields: fields{
-				File: []*file.File{{Name: "a", Path: "a"}, {Name: "a2", Path: "a"}},
+				File: []*sqlite.Sqlite{{Name: "a", Path: "a"}, {Name: "a2", Path: "a"}},
 			},
 			wantErr: false,
 			errText: "",
@@ -35,7 +35,7 @@ func TestStoragesCore_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := Core{
-				File: tt.fields.File,
+				Sqlite: tt.fields.File,
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {
