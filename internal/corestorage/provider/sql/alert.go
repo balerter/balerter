@@ -74,10 +74,6 @@ func (p *PostgresAlert) Update(name string, level alert.Level) (*alert.Alert, bo
 
 	currentLevel, err := alert.LevelFromInt(l)
 	if err != nil {
-		//err2 := tx.Commit()
-		//if err2 != nil {
-		//	err = fmt.Errorf("error commit tx, %w", err2)
-		//}
 		err2 := tx.Rollback()
 		if err2 != nil {
 			p.logger.Error("error rollback tx", zap.Error(err))
