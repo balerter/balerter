@@ -23,11 +23,6 @@ func Test_convertStringLevelToZap(t *testing.T) {
 			want: zap.ErrorLevel,
 		},
 		{
-			name: "WARN",
-			args: args{level: "WARN"},
-			want: zap.WarnLevel,
-		},
-		{
 			name: "INFO",
 			args: args{level: "INFO"},
 			want: zap.InfoLevel,

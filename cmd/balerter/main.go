@@ -49,7 +49,7 @@ const (
 
 func main() {
 	configSource := flag.String("config", "config.yml", "Configuration source. Currently supports only path to yaml file and 'stdin'.")
-	logLevel := flag.String("logLevel", "INFO", "Log level. ERROR, WARN, INFO or DEBUG")
+	logLevel := flag.String("logLevel", "INFO", "Log level. ERROR, INFO or DEBUG")
 	debug := flag.Bool("debug", false, "debug mode")
 	once := flag.Bool("once", false, "once run scripts and exit")
 	withScript := flag.String("script", "", "ignore all script sources and runs only one script. Meta-tag @ignore will be ignored")
@@ -285,7 +285,7 @@ func initCoreModules(
 }
 
 func validateLogLevel(level string) error {
-	for _, l := range []string{"ERROR", "WARN", "INFO", "DEBUG"} {
+	for _, l := range []string{"ERROR", "INFO", "DEBUG"} {
 		if l == level {
 			return nil
 		}

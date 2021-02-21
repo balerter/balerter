@@ -101,13 +101,6 @@ func Test_validateLogLevel(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "level WARN",
-			args: args{
-				level: "WARN",
-			},
-			wantErr: false,
-		},
-		{
 			name: "level INFO",
 			args: args{
 				level: "INFO",

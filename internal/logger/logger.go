@@ -68,8 +68,6 @@ func convertStringLevelToZap(level string) zapcore.Level {
 	switch level {
 	case "ERROR":
 		return zap.ErrorLevel
-	case "WARN":
-		return zap.WarnLevel
 	case "INFO":
 		return zap.InfoLevel
 	case "DEBUG":
