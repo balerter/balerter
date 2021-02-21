@@ -3,6 +3,7 @@ package manager
 import (
 	"context"
 	"errors"
+	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/api/alerts"
 	"github.com/balerter/balerter/internal/api/kv"
 	apiConfig "github.com/balerter/balerter/internal/config/global/api"
@@ -14,20 +15,24 @@ import (
 	"sync"
 )
 
+type ChManager interface {
+	Send(a *alert.Alert, text string, options *alert.Options)
+}
+
 type API struct {
 	address string
 	server  *http.Server
 	logger  *zap.Logger
 }
 
-func New(cfg apiConfig.API, coreStorageAlert, coreStorageKV coreStorage.CoreStorage, logger *zap.Logger) *API {
+func New(cfg apiConfig.API, coreStorageAlert, coreStorageKV coreStorage.CoreStorage, chManager ChManager, logger *zap.Logger) *API {
 	api := &API{
 		address: cfg.Address,
 		server:  &http.Server{},
 		logger:  logger,
 	}
 
-	alertsRouter := alerts.New(coreStorageAlert.Alert(), logger)
+	alertsRouter := alerts.New(coreStorageAlert.Alert(), chManager, logger)
 	kvRouter := kv.New(coreStorageKV.KV(), logger)
 
 	router := chi.NewRouter()

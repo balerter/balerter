@@ -177,7 +177,7 @@ func run(
 		if err != nil {
 			return fmt.Sprintf("error create api listener, %v", err), 1
 		}
-		apis := apiManager.New(cfg.Global.API, coreStorageAlert, coreStorageKV, lgr.Logger())
+		apis := apiManager.New(cfg.Global.API, coreStorageAlert, coreStorageKV, channelsMgr, lgr.Logger())
 		wg.Add(1)
 		go apis.Run(ctx, ctxCancel, wg, ln)
 	}
