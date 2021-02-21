@@ -8,10 +8,10 @@ import (
 func (a *Alert) MarshalLua() *lua.LTable {
 	t := &lua.LTable{}
 
-	t.RawSetString("Name", lua.LString(a.Name))
-	t.RawSetString("Level", lua.LString(a.Level.String()))
+	t.RawSetString("name", lua.LString(a.Name))
+	t.RawSetString("level", lua.LString(a.Level.String()))
 	t.RawSetString("last_change", lua.LNumber(a.LastChange.Unix()))
-	t.RawSetString("Count", lua.LNumber(a.Count))
+	t.RawSetString("count", lua.LNumber(a.Count))
 
 	return t
 }

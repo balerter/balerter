@@ -17,8 +17,8 @@ func TestMarshalLua(t *testing.T) {
 
 	res := a.MarshalLua()
 
-	assert.Equal(t, "foo", res.RawGetString("Name").String())
-	assert.Equal(t, "success", res.RawGetString("Level").String())
+	assert.Equal(t, "foo", res.RawGetString("name").String())
+	assert.Equal(t, "success", res.RawGetString("level").String())
 	assert.Equal(t, "1577840461", res.RawGetString("last_change").String())
-	assert.Equal(t, "10", res.RawGetString("Count").String())
+	assert.Equal(t, "10", res.RawGetString("count").String())
 }
