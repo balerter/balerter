@@ -8,7 +8,7 @@ import (
 )
 
 func TestManager_Get(t *testing.T) {
-	m := &Manager{map[string]coreStorage.CoreStorage{
+	m := &Manager{storages: map[string]coreStorage.CoreStorage{
 		"foo": nil,
 	}}
 

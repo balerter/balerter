@@ -7,9 +7,11 @@ import (
 
 func TestStorageCoreFile_Validate(t *testing.T) {
 	type fields struct {
-		Name    string
-		Path    string
-		Timeout time.Duration
+		Name        string
+		Path        string
+		Timeout     time.Duration
+		TableAlerts string
+		TableKV     string
 	}
 	tests := []struct {
 		name    string
@@ -30,14 +32,26 @@ func TestStorageCoreFile_Validate(t *testing.T) {
 			errText: "path must be not empty",
 		},
 		{
+			name:    "empty table alerts",
+			fields:  fields{Name: "a", Path: "a", Timeout: -1, TableAlerts: "", TableKV: ""},
+			wantErr: true,
+			errText: "table Alerts must be not empty",
+		},
+		{
+			name:    "empty table kv",
+			fields:  fields{Name: "a", Path: "a", Timeout: -1, TableAlerts: "foo", TableKV: ""},
+			wantErr: true,
+			errText: "table KV must be not empty",
+		},
+		{
 			name:    "empty timeout",
-			fields:  fields{Name: "a", Path: "a", Timeout: -1},
+			fields:  fields{Name: "a", Path: "a", Timeout: -1, TableAlerts: "foo", TableKV: "bar"},
 			wantErr: true,
 			errText: "timeout must be greater than 0",
 		},
 		{
 			name:    "ok",
-			fields:  fields{Name: "a", Path: "a", Timeout: 10},
+			fields:  fields{Name: "a", Path: "a", Timeout: 10, TableAlerts: "foo", TableKV: "bar"},
 			wantErr: false,
 			errText: "",
 		},
@@ -48,6 +62,10 @@ func TestStorageCoreFile_Validate(t *testing.T) {
 				Name:    tt.fields.Name,
 				Path:    tt.fields.Path,
 				Timeout: tt.fields.Timeout,
+				Tables: Tables{
+					Alerts: tt.fields.TableAlerts,
+					KV:     tt.fields.TableKV,
+				},
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {

@@ -16,17 +16,23 @@ func TestStoragesCore_Validate(t *testing.T) {
 		errText string
 	}{
 		{
-			name: "duplicated file",
+			name: "duplicated storage name",
 			fields: fields{
-				File: []*sqlite.Sqlite{{Name: "a", Path: "a"}, {Name: "a", Path: "a"}},
+				File: []*sqlite.Sqlite{
+					{Name: "a", Path: "a", Timeout: 0, Tables: sqlite.Tables{Alerts: "a", KV: "k"}},
+					{Name: "a", Path: "a", Timeout: 0, Tables: sqlite.Tables{Alerts: "a", KV: "k"}},
+				},
 			},
 			wantErr: true,
-			errText: "found duplicated name for core storages 'file': a",
+			errText: "found duplicated name for core storages 'sqlite': a",
 		},
 		{
 			name: "ok",
 			fields: fields{
-				File: []*sqlite.Sqlite{{Name: "a", Path: "a"}, {Name: "a2", Path: "a"}},
+				File: []*sqlite.Sqlite{
+					{Name: "a", Path: "a", Timeout: 0, Tables: sqlite.Tables{Alerts: "a", KV: "k"}},
+					{Name: "a2", Path: "a", Timeout: 0, Tables: sqlite.Tables{Alerts: "a", KV: "k"}},
+				},
 			},
 			wantErr: false,
 			errText: "",
