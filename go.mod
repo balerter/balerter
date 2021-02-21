@@ -31,7 +31,6 @@ require (
 	github.com/xhit/go-simple-mail/v2 v2.3.1
 	github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7
 	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb
-	go.etcd.io/bbolt v1.3.3
 	go.uber.org/zap v1.13.0
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	gonum.org/v1/netlib v0.0.0-20191229114700-bbb4dff026f8 // indirect
