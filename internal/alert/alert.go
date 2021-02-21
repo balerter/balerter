@@ -2,6 +2,7 @@ package alert
 
 import (
 	"errors"
+	"strconv"
 	"time"
 )
 
@@ -63,7 +64,10 @@ func LevelFromInt(i int) (Level, error) {
 	return 0, ErrBadLevel
 }
 
-// String returns string value of the Level
+func (l Level) NumString() string {
+	return strconv.Itoa(int(l))
+}
+
 func (l Level) String() string {
 	switch l {
 	case LevelSuccess:
@@ -77,15 +81,15 @@ func (l Level) String() string {
 	panic("unexpected Level value")
 }
 
+type Alerts []*Alert
+
 // Alert is base struct for store Alert information
 type Alert struct {
-	//mx sync.RWMutex
-
-	Name       string
-	Level      Level
-	LastChange time.Time
-	Start      time.Time
-	Count      int
+	Name       string    `json:"name"`
+	Level      Level     `json:"level"`
+	LastChange time.Time `json:"last_change"`
+	Start      time.Time `json:"start"`
+	Count      int       `json:"count"`
 }
 
 func New(name string) *Alert {
@@ -101,74 +105,3 @@ func New(name string) *Alert {
 
 	return a
 }
-
-// UpdateLevel allows to update an Alert Level
-//func (a *Alert) UpdateLevel(Level Level) {
-//	a.mx.Lock()
-//	defer a.mx.Unlock()
-//
-//	a.Level = Level
-//	a.LastChange = time.Now()
-//	a.Count = 0
-//}
-//
-//// Inc increments an Alert counter
-//func (a *Alert) Inc() {
-//	a.mx.Lock()
-//	defer a.mx.Unlock()
-//
-//	a.Count++
-//}
-//
-//// HasLevel return true if the alert.Level equals to the Level argument
-//func (a *Alert) HasLevel(Level Level) bool {
-//	a.mx.Lock()
-//	defer a.mx.Unlock()
-//
-//	return a.Level == Level
-//}
-//
-//// Level allows to get an alert Level
-//func (a *Alert) Level() Level {
-//	a.mx.Lock()
-//	defer a.mx.Unlock()
-//
-//	l := a.Level
-//
-//	return l
-//}
-//
-//// Count allows to get an alert counter value
-//func (a *Alert) Count() int {
-//	a.mx.Lock()
-//	defer a.mx.Unlock()
-//
-//	c := a.Count
-//
-//	return c
-//}
-//
-//// GetLastChangeTime allows to get an Alert.LastChange value
-//func (a *Alert) GetLastChangeTime() time.Time {
-//	a.mx.Lock()
-//	defer a.mx.Unlock()
-//
-//	r := a.LastChange
-//
-//	return r
-//}
-//
-//// GetStartTime allows to get an Alert.Start value
-//func (a *Alert) GetStartTime() time.Time {
-//	a.mx.Lock()
-//	defer a.mx.Unlock()
-//
-//	r := a.Start
-//
-//	return r
-//}
-//
-//// Name returns an Alert Name
-//func (a *Alert) Name() string {
-//	return a.Name
-//}
