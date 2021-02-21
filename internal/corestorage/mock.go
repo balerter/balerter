@@ -52,6 +52,15 @@ type AlertMock struct {
 	mock.Mock
 }
 
+func (m *AlertMock) Get(name string) (*alert.Alert, error) {
+	args := m.Called(name)
+	a := args.Get(0)
+	if a == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*alert.Alert), args.Error(1)
+}
+
 func (m *AlertMock) Index(levels []alert.Level) (alert.Alerts, error) {
 	args := m.Called(levels)
 	a := args.Get(0)

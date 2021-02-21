@@ -30,4 +30,5 @@ func New(alertManager corestorage.Alert, chManager ChManager, logger *zap.Logger
 func (a *Alerts) Handler(r chi.Router) {
 	r.Get("/", a.handlerIndex)
 	r.Post("/{name}", a.handlerUpdate)
+	r.Get("/{name}", a.handlerGet)
 }

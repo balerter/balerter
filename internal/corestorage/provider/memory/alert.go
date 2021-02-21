@@ -5,6 +5,18 @@ import (
 	"time"
 )
 
+func (m *storageAlert) Get(name string) (*alert.Alert, error) {
+	m.mxAlerts.RLock()
+	defer m.mxAlerts.RUnlock()
+
+	a, ok := m.alerts[name]
+	if !ok {
+		return nil, nil
+	}
+
+	return a, nil
+}
+
 func (m *storageAlert) Index(_ []alert.Level) (alert.Alerts, error) {
 	var result alert.Alerts
 	m.mxAlerts.RLock()
