@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -25,6 +26,12 @@ func (api *API) SendTextMessage(mes *TextMessage) error {
 	return api.sendMessage(body, methodSendMessage)
 }
 
+type tgResponse struct {
+	OK          bool   `json:"ok"`
+	ErrorCode   int    `json:"error_code,omitempty"`
+	Description string `json:"description,omitempty"`
+}
+
 func (api *API) sendMessage(body []byte, method string) error {
 	req, err := http.NewRequest(http.MethodPost, api.endpoint+method, bytes.NewReader(body))
 	if err != nil {
@@ -37,7 +44,22 @@ func (api *API) sendMessage(body []byte, method string) error {
 		return fmt.Errorf("error send request, %w", err)
 	}
 
-	res.Body.Close()
+	defer res.Body.Close()
+
+	body, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("error read response body, %w", err)
+	}
+
+	tgResp := &tgResponse{}
+	err = json.Unmarshal(body, tgResp)
+	if err != nil {
+		return fmt.Errorf("error unmarshal response body, %w", err)
+	}
+
+	if !tgResp.OK {
+		return fmt.Errorf("error send message %d: %s", tgResp.ErrorCode, tgResp.Description)
+	}
 
 	return nil
 }
