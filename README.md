@@ -61,7 +61,7 @@ channels:
 
 Sample script `rps.lua`
 ```
--- @interval 10s
+-- @cront */10 * * * *
 -- @name script1
 
 local minRequestsRPS = 100
@@ -107,7 +107,3 @@ test.alert().assertNotCalled('success', 'rps-min-limit', 'Requests RPS ok')
 ```
 
 See a documentation on [https://balerter.com](https://balerter.com)
-
-## Roadmap
-
-See in https://github.com/balerter/balerter/projects/1
