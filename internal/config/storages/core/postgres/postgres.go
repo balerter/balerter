@@ -32,6 +32,12 @@ func (cfg *Postgres) Validate() error {
 	if strings.TrimSpace(cfg.Host) == "" {
 		return fmt.Errorf("host must be defined")
 	}
+	if strings.TrimSpace(cfg.Tables.Alerts) == "" {
+		return fmt.Errorf("table Alerts must be not empty")
+	}
+	if strings.TrimSpace(cfg.Tables.KV) == "" {
+		return fmt.Errorf("table KV must be not empty")
+	}
 	if cfg.Port == 0 {
 		return fmt.Errorf("port must be defined")
 	}
