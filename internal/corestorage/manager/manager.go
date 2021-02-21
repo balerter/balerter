@@ -12,17 +12,19 @@ import (
 
 type Manager struct {
 	storages map[string]coreStorage.CoreStorage
+	logger   *zap.Logger
 }
 
 func New(cfg core.Core, logger *zap.Logger) (*Manager, error) {
 	m := &Manager{
 		storages: map[string]coreStorage.CoreStorage{},
+		logger:   logger,
 	}
 
 	m.storages["memory"] = memory.New()
 
-	for _, c := range cfg.File {
-		s, err := sql.New("file."+c.Name, "sqlite3", c.Path, c.Tables.Alerts, c.Tables.KV, c.Timeout, logger)
+	for _, c := range cfg.Sqlite {
+		s, err := sql.New("sqlite."+c.Name, "sqlite3", c.Path, c.Tables.Alerts, c.Tables.KV, c.Timeout, logger)
 		if err != nil {
 			return nil, fmt.Errorf("error create file storage, %w", err)
 		}
@@ -63,4 +65,15 @@ func (m *Manager) Get(name string) (coreStorage.CoreStorage, error) {
 	}
 
 	return s, nil
+}
+
+func (m *Manager) Stop() {
+	var err error
+	for name, s := range m.storages {
+		m.logger.Debug("stop core storage", zap.String("name", name))
+		err = s.Stop()
+		if err != nil {
+			m.logger.Error("error stop core storage", zap.String("name", name), zap.Error(err))
+		}
+	}
 }

@@ -237,6 +237,7 @@ func run(
 	wg.Wait()
 
 	dsMgr.Stop()
+	coreStoragesMgr.Stop()
 
 	if len(cfg.Global.SendStopNotification) > 0 {
 		channelsMgr.Send(nil, "Balerter stop", &alert.Options{
