@@ -22,7 +22,7 @@ var (
 	livenessResponse = []byte("ok")
 )
 
-func New(logger *zap.Logger) *Service {
+func New(withMetrics bool, logger *zap.Logger) *Service {
 	s := &Service{
 		server: &http.Server{},
 		logger: logger,
@@ -40,7 +40,9 @@ func New(logger *zap.Logger) *Service {
 	})
 
 	router.Get("/liveness", s.livenessHandler)
-	router.Get("/metrics", promhttp.Handler().ServeHTTP)
+	if withMetrics {
+		router.Get("/metrics", promhttp.Handler().ServeHTTP)
+	}
 
 	s.server.Handler = router
 

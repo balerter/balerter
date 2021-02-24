@@ -192,7 +192,7 @@ func run(
 		if err != nil {
 			return fmt.Sprintf("error create service listener, %v", err), 1
 		}
-		srv := service.New(lgr.Logger())
+		srv := service.New(cfg.Global.Service.Metrics, lgr.Logger())
 		wg.Add(1)
 		go srv.Run(ctx, ctxCancel, wg, ln)
 	}
