@@ -79,8 +79,6 @@ func (rnr *Runner) Watch(ctx context.Context, ctxCancel context.CancelFunc, once
 	for {
 		ss, err := rnr.scriptsManager.Get()
 
-		metrics.SetScriptsCount(len(ss))
-
 		if err != nil {
 			rnr.logger.Error("error get scripts", zap.Error(err))
 		} else {
@@ -135,6 +133,7 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, 
 			continue
 		}
 
+		metrics.SetScriptsActive(job.script.Name, true)
 		job.entryID, err = rnr.cron.AddJob(s.CronValue, job)
 		if err != nil {
 			rnr.logger.Error("error schedule script", zap.String("script name", s.Name), zap.Error(err))
@@ -154,6 +153,7 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, 
 
 		if _, ok := newScripts[hash]; !ok {
 			rnr.logger.Debug("stop script job", zap.String("hash", hash), zap.String("script name", job.script.Name))
+			metrics.SetScriptsActive(job.script.Name, false)
 			rnr.cron.Remove(job.entryID)
 			job.Stop()
 			delete(rnr.pool, hash)

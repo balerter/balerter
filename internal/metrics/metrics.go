@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	alert2 "github.com/balerter/balerter/internal/alert"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/zap"
 )
@@ -15,21 +14,13 @@ var (
 		ConstLabels: nil,
 	}, []string{"version"})
 
-	metricAlert = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Namespace:   "balerter",
-		Subsystem:   "alert",
-		Name:        "status",
-		Help:        "Balerter alerts status",
-		ConstLabels: nil,
-	}, []string{"name"})
-
-	metricScriptsCount = prometheus.NewGauge(prometheus.GaugeOpts{
+	metricScripts = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace:   "balerter",
 		Subsystem:   "scripts",
-		Name:        "count",
-		Help:        "Balerter scripts count",
+		Name:        "active",
+		Help:        "Balerter active scripts list",
 		ConstLabels: nil,
-	})
+	}, []string{"name"})
 )
 
 func Register(logger *zap.Logger) {
@@ -38,11 +29,8 @@ func Register(logger *zap.Logger) {
 	if err := prometheus.Register(metricInfoVersion); err != nil {
 		logger.Error("error register metrics", zap.String("name", "infoVersion"), zap.Error(err))
 	}
-	if err := prometheus.Register(metricAlert); err != nil {
-		logger.Error("error register metrics", zap.String("name", "alert"), zap.Error(err))
-	}
-	if err := prometheus.Register(metricScriptsCount); err != nil {
-		logger.Error("error register metrics", zap.String("name", "scriptsCount"), zap.Error(err))
+	if err := prometheus.Register(metricScripts); err != nil {
+		logger.Error("error register metrics", zap.String("name", "scripts"), zap.Error(err))
 	}
 }
 
@@ -50,10 +38,10 @@ func SetVersion(version string) {
 	metricInfoVersion.WithLabelValues(version).Inc()
 }
 
-func SetAlertLevel(alertName string, level alert2.Level) {
-	metricAlert.WithLabelValues(alertName).Set(float64(level))
-}
-
-func SetScriptsCount(count int) {
-	metricScriptsCount.Set(float64(count))
+func SetScriptsActive(name string, active bool) {
+	if active {
+		metricScripts.WithLabelValues(name).Set(1)
+		return
+	}
+	metricScripts.WithLabelValues(name).Set(0)
 }
