@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"fmt"
 	"github.com/balerter/balerter/internal/alert"
 	"time"
 )
@@ -11,7 +12,7 @@ func (m *storageAlert) Get(name string) (*alert.Alert, error) {
 
 	a, ok := m.alerts[name]
 	if !ok {
-		return nil, nil
+		return nil, fmt.Errorf("alert not found")
 	}
 
 	return a, nil
