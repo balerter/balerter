@@ -1,7 +1,7 @@
 package folder
 
 import (
-	"github.com/balerter/balerter/internal/config/scripts/sources/folder"
+	"github.com/balerter/balerter/internal/config/scripts/folder"
 	"io/ioutil"
 	"path"
 	"path/filepath"

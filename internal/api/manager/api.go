@@ -6,7 +6,6 @@ import (
 	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/api/alerts"
 	"github.com/balerter/balerter/internal/api/kv"
-	apiConfig "github.com/balerter/balerter/internal/config/global/api"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/go-chi/chi"
 	"go.uber.org/zap"
@@ -25,9 +24,9 @@ type API struct {
 	logger  *zap.Logger
 }
 
-func New(cfg apiConfig.API, coreStorageAlert, coreStorageKV coreStorage.CoreStorage, chManager ChManager, logger *zap.Logger) *API {
+func New(address string, coreStorageAlert, coreStorageKV coreStorage.CoreStorage, chManager ChManager, logger *zap.Logger) *API {
 	api := &API{
-		address: cfg.Address,
+		address: address,
 		server:  &http.Server{},
 		logger:  logger,
 	}

@@ -1,7 +1,6 @@
 package scripts
 
 import (
-	"github.com/balerter/balerter/internal/config/scripts/sources"
 	"testing"
 	"time"
 )
@@ -9,7 +8,6 @@ import (
 func TestScripts_Validate(t *testing.T) {
 	type fields struct {
 		UpdateInterval time.Duration
-		Sources        sources.Sources
 	}
 	tests := []struct {
 		name    string
@@ -34,7 +32,6 @@ func TestScripts_Validate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := Scripts{
 				UpdateInterval: tt.fields.UpdateInterval,
-				Sources:        tt.fields.Sources,
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {

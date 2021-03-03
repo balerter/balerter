@@ -42,11 +42,14 @@ type Loki struct {
 
 func New(cfg loki.Loki, logger *zap.Logger) (*Loki, error) {
 	m := &Loki{
-		logger:            logger,
-		name:              ModuleName(cfg.Name),
-		basicAuthUsername: cfg.BasicAuth.Username,
-		basicAuthPassword: cfg.BasicAuth.Password,
-		timeout:           cfg.Timeout,
+		logger:  logger,
+		name:    ModuleName(cfg.Name),
+		timeout: cfg.Timeout,
+	}
+
+	if cfg.BasicAuth != nil {
+		m.basicAuthUsername = cfg.BasicAuth.Username
+		m.basicAuthPassword = cfg.BasicAuth.Password
 	}
 
 	if m.timeout == 0 {

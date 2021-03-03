@@ -17,7 +17,7 @@ import (
 type Channels struct {
 	Email                []email.Email                               `json:"email" yaml:"email"`
 	Slack                []slack.Slack                               `json:"slack" yaml:"slack"`
-	Telegram             []telegram.Telegram                         `json:"telegram" yaml:"telegram"`
+	Telegram             []telegram.Telegram                         `json:"telegram" yaml:"telegram" hcl:"telegram,block"`
 	Syslog               []syslog.Syslog                             `json:"syslog" yaml:"syslog"`
 	Notify               []notify.Notify                             `json:"notify" yaml:"notify"`
 	Discord              []discord.Discord                           `json:"discord" yaml:"discord"`

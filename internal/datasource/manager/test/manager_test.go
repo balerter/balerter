@@ -87,7 +87,7 @@ func TestResult_error(t *testing.T) {
 func TestInit(t *testing.T) {
 	m := New(zap.NewNop())
 
-	cfg := datasources.DataSources{
+	cfg := &datasources.DataSources{
 		Clickhouse: []clickhouse.Clickhouse{{Name: "ch1"}},
 		Prometheus: []prometheus.Prometheus{{Name: "prom1"}},
 		Postgres:   []postgres.Postgres{{Name: "pg1"}},

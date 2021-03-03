@@ -7,9 +7,9 @@ import (
 )
 
 type File struct {
-	Name          string `json:"name" yaml:"name"`
-	Filename      string `json:"filename" yaml:"filename"`
-	DisableIgnore bool   `json:"disableIgnore" yaml:"disableIgnore"`
+	Name          string `json:"name" yaml:"name" hcl:"name"`
+	Filename      string `json:"filename" yaml:"filename" hcl:"filename"`
+	DisableIgnore bool   `json:"disableIgnore" yaml:"disableIgnore" hcl:"disableIgnore,optional"`
 }
 
 func (cfg File) Validate() error {

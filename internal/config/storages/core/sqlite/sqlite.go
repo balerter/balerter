@@ -7,15 +7,15 @@ import (
 )
 
 type Tables struct {
-	Alerts string `json:"alerts" yaml:"alerts"`
-	KV     string `json:"kv" yaml:"kv"`
+	Alerts string `json:"alerts" yaml:"alerts" hcl:"alerts"`
+	KV     string `json:"kv" yaml:"kv" hcl:"kv"`
 }
 
 type Sqlite struct {
-	Name    string        `json:"name" yaml:"name"`
-	Path    string        `json:"path" yaml:"path"`
-	Timeout time.Duration `json:"timeout" yaml:"timeout"`
-	Tables  Tables        `json:"tables" yaml:"tables"`
+	Name    string        `json:"name" yaml:"name" hcl:"name,label"`
+	Path    string        `json:"path" yaml:"path" hcl:"path"`
+	Timeout time.Duration `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	Tables  Tables        `json:"tables" yaml:"tables" hcl:"tables,block"`
 }
 
 func (cfg Sqlite) Validate() error {

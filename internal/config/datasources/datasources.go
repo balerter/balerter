@@ -11,11 +11,11 @@ import (
 )
 
 type DataSources struct {
-	Clickhouse []clickhouse.Clickhouse `json:"clickhouse" yaml:"clickhouse"`
-	Prometheus []prometheus.Prometheus `json:"prometheus" yaml:"prometheus"`
-	Postgres   []postgres.Postgres     `json:"postgres" yaml:"postgres"`
-	MySQL      []mysql.Mysql           `json:"mysql" yaml:"mysql"`
-	Loki       []loki.Loki             `json:"loki" yaml:"loki"`
+	Clickhouse []clickhouse.Clickhouse `json:"clickhouse" yaml:"clickhouse" hcl:"clickhouse,block"`
+	Prometheus []prometheus.Prometheus `json:"prometheus" yaml:"prometheus" hcl:"prometheus,block"`
+	Postgres   []postgres.Postgres     `json:"postgres" yaml:"postgres" hcl:"postgres,block"`
+	MySQL      []mysql.Mysql           `json:"mysql" yaml:"mysql" hcl:"mysql,block"`
+	Loki       []loki.Loki             `json:"loki" yaml:"loki" hcl:"loki,block"`
 }
 
 func (cfg DataSources) Validate() error {

@@ -75,8 +75,8 @@ func run(cfg *config.Config, flg *config.Flags) (string, int) {
 	// Configuration
 	lgr.Logger().Debug("loaded configuration", zap.Any("config", cfg), zap.Any("flags", flg))
 
-	if cfg.Global.LuaModulesPath != "" {
-		lua.LuaPathDefault = cfg.Global.LuaModulesPath
+	if cfg.LuaModulesPath != "" {
+		lua.LuaPathDefault = cfg.LuaModulesPath
 	}
 
 	lgr.Logger().Debug("lua modules path", zap.String("path", lua.LuaPathDefault))
@@ -84,7 +84,7 @@ func run(cfg *config.Config, flg *config.Flags) (string, int) {
 	// Scripts sources
 	lgr.Logger().Info("init scripts manager")
 	scriptsMgr := scriptsManager.New()
-	if err = scriptsMgr.Init(cfg.Scripts.Sources); err != nil {
+	if err = scriptsMgr.Init(cfg.Scripts); err != nil {
 		return fmt.Sprintf("error init scripts sources, %v", err), 1
 	}
 
@@ -98,7 +98,7 @@ func run(cfg *config.Config, flg *config.Flags) (string, int) {
 	// upload storages
 	lgr.Logger().Info("init upload storages manager")
 	uploadStoragesMgr := uploadStorageManagerTest.New(lgr.Logger())
-	if err = uploadStoragesMgr.Init(cfg.Storages.Upload); err != nil {
+	if err = uploadStoragesMgr.Init(cfg.StoragesUpload); err != nil {
 		return fmt.Sprintf("error init upload storages manager, %v", err), 1
 	}
 

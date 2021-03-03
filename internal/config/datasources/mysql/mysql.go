@@ -7,9 +7,9 @@ import (
 )
 
 type Mysql struct {
-	Name    string        `json:"name" yaml:"name"`
-	DSN     string        `json:"dsn" yaml:"dsn"`
-	Timeout time.Duration `json:"timeout" yaml:"timeout"`
+	Name    string        `json:"name" yaml:"name" hcl:"name,label"`
+	DSN     string        `json:"dsn" yaml:"dsn" hcl:"dsn"`
+	Timeout time.Duration `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
 }
 
 func (cfg Mysql) Validate() error {

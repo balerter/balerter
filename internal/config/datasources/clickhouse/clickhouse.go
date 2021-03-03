@@ -7,14 +7,14 @@ import (
 )
 
 type Clickhouse struct {
-	Name        string        `json:"name" yaml:"name"`
-	Host        string        `json:"host" yaml:"host"`
-	Port        int           `json:"port" yaml:"port"`
-	Username    string        `json:"username" yaml:"username"`
-	Password    string        `json:"password" yaml:"password"`
-	Database    string        `json:"database" yaml:"database"`
-	SSLCertPath string        `json:"sslCertPath" yaml:"sslCertPath"`
-	Timeout     time.Duration `json:"timeout" yaml:"timeout"`
+	Name        string        `json:"name" yaml:"name" hcl:"name,label"`
+	Host        string        `json:"host" yaml:"host" hcl:"host"`
+	Port        int           `json:"port" yaml:"port" hcl:"port"`
+	Username    string        `json:"username" yaml:"username" hcl:"username"`
+	Password    string        `json:"password" yaml:"password" hcl:"password,optional"`
+	Database    string        `json:"database" yaml:"database" hcl:"database"`
+	SSLCertPath string        `json:"sslCertPath" yaml:"sslCertPath" hcl:"sslCertPath,optional"`
+	Timeout     time.Duration `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
 }
 
 func (cfg Clickhouse) Validate() error {

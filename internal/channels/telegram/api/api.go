@@ -31,13 +31,13 @@ func New(cfg telegram.Telegram) (*API, error) {
 	a.httpClient = &http.Client{
 		CheckRedirect: nil,
 		Jar:           nil,
-		Timeout:       cfg.Timeout,
+		Timeout:       time.Millisecond * time.Duration(cfg.Timeout),
 	}
 
-	if cfg.Proxy.Address != "" {
+	if cfg.Proxy != nil {
 		var proxyAuth *proxy.Auth
 
-		if cfg.Proxy.Auth.Username != "" {
+		if cfg.Proxy.Auth != nil {
 			proxyAuth = &proxy.Auth{
 				User:     cfg.Proxy.Auth.Username,
 				Password: cfg.Proxy.Auth.Password,

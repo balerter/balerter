@@ -7,9 +7,9 @@ import (
 )
 
 type Folder struct {
-	Name string `json:"name" yaml:"name"`
-	Path string `json:"path" yaml:"path"`
-	Mask string `json:"mask" yaml:"mask"`
+	Name string `json:"name" yaml:"name" hcl:"name,label"`
+	Path string `json:"path" yaml:"path" hcl:"path"`
+	Mask string `json:"mask" yaml:"mask" hcl:"mask"`
 }
 
 func (cfg Folder) Validate() error {

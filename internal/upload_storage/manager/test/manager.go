@@ -26,7 +26,10 @@ func New(logger *zap.Logger) *Manager {
 	return m
 }
 
-func (m *Manager) Init(cfg upload.Upload) error {
+func (m *Manager) Init(cfg *upload.Upload) error {
+	if cfg == nil {
+		return nil
+	}
 	for _, c := range cfg.S3 {
 		mod := moduleMock.New(s3.ModuleName(c.Name), s3.Methods(), m.logger)
 

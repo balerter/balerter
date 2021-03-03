@@ -7,22 +7,22 @@ import (
 )
 
 type Tables struct {
-	Alerts string `json:"alerts" yaml:"alerts"`
-	KV     string `json:"kv" yaml:"kv"`
+	Alerts string `json:"alerts" yaml:"alerts" hcl:"alerts"`
+	KV     string `json:"kv" yaml:"kv" hcl:"kv"`
 }
 
 type Postgres struct {
-	Name        string        `json:"name" yaml:"name"`
-	Host        string        `json:"host" yaml:"host"`
-	Port        int           `json:"port" yaml:"port"`
-	Username    string        `json:"username" yaml:"username"`
-	Password    string        `json:"password" yaml:"password"`
-	Database    string        `json:"database" yaml:"database"`
-	SSLMode     string        `json:"sslMode" yaml:"sslMode"`
-	SSLCertPath string        `json:"sslCertPath" yaml:"sslCertPath"`
-	Timeout     time.Duration `json:"timeout" yaml:"timeout"`
+	Name        string        `json:"name" yaml:"name" hcl:"name,label"`
+	Host        string        `json:"host" yaml:"host" hcl:"host"`
+	Port        int           `json:"port" yaml:"port" hcl:"port"`
+	Username    string        `json:"username" yaml:"username" hcl:"username"`
+	Password    string        `json:"password" yaml:"password" hcl:"password"`
+	Database    string        `json:"database" yaml:"database" hcl:"database"`
+	SSLMode     string        `json:"sslMode" yaml:"sslMode" hcl:"sslMode,optional"`
+	SSLCertPath string        `json:"sslCertPath" yaml:"sslCertPath" hcl:"sslCertPath,optional"`
+	Timeout     time.Duration `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
 
-	Tables Tables `json:"tables" yaml:"tables"`
+	Tables Tables `json:"tables" yaml:"tables" hcl:"tables,block"`
 }
 
 func (cfg Postgres) Validate() error {

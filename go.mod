@@ -14,6 +14,7 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/grafana/loki v1.3.0
+	github.com/hashicorp/hcl/v2 v2.9.0
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/lib/pq v1.0.0
 	github.com/martinlindhe/notify v0.0.0-20181008203735-20632c9a275a
@@ -32,7 +33,7 @@ require (
 	github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7
 	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb
 	go.uber.org/zap v1.13.0
-	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 	gonum.org/v1/netlib v0.0.0-20191229114700-bbb4dff026f8 // indirect
 	gonum.org/v1/plot v0.0.0-20200212202559-4d97eda4de95
 	gopkg.in/toast.v1 v1.0.0-20180812000517-0a84660828b2 // indirect

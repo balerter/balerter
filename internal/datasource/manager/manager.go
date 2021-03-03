@@ -26,7 +26,11 @@ func New(logger *zap.Logger) *Manager {
 	return m
 }
 
-func (m *Manager) Init(cfg datasources.DataSources) error {
+func (m *Manager) Init(cfg *datasources.DataSources) error {
+	if cfg == nil {
+		return nil
+	}
+
 	for idx := range cfg.Clickhouse {
 		module, err := clickhouse.New(cfg.Clickhouse[idx], m.logger)
 		if err != nil {

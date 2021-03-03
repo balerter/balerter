@@ -10,7 +10,7 @@ func TestDataSourceLoki_Validate(t *testing.T) {
 	type fields struct {
 		Name      string
 		URL       string
-		BasicAuth common.BasicAuth
+		BasicAuth *common.BasicAuth
 		Timeout   time.Duration
 	}
 	tests := []struct {

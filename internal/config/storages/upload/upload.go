@@ -7,7 +7,7 @@ import (
 )
 
 type Upload struct {
-	S3 []s3.S3 `json:"s3" yaml:"s3"`
+	S3 []s3.S3 `json:"s3" yaml:"s3" hcl:"s3,block"`
 }
 
 func (cfg Upload) Validate() error {

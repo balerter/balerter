@@ -3,9 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/balerter/balerter/internal/alert"
-	"github.com/balerter/balerter/internal/config/scripts/sources"
-	"github.com/balerter/balerter/internal/config/scripts/sources/file"
+	"github.com/balerter/balerter/internal/config/scripts"
+	"github.com/balerter/balerter/internal/config/scripts/file"
 	"github.com/balerter/balerter/internal/corestorage"
 	alertModule "github.com/balerter/balerter/internal/modules/alert"
 	"github.com/balerter/balerter/internal/service"
@@ -85,8 +84,8 @@ func run(
 
 	lgr.Logger().Debug("loaded configuration", zap.Any("config", cfg), zap.Any("flags", flg))
 
-	if cfg.Global.LuaModulesPath != "" {
-		lua.LuaPathDefault = cfg.Global.LuaModulesPath
+	if cfg.LuaModulesPath != "" {
+		lua.LuaPathDefault = cfg.LuaModulesPath
 	}
 
 	lgr.Logger().Debug("lua modules path", zap.String("path", lua.LuaPathDefault))
@@ -97,7 +96,7 @@ func run(
 
 	if flg.Script != "" {
 		lgr.Logger().Info("rewrite script sources configuration", zap.String("filename", flg.Script))
-		cfg.Scripts.Sources = sources.Sources{
+		cfg.Scripts = &scripts.Scripts{
 			File: []file.File{
 				{
 					Name:          "cli-script",
@@ -115,7 +114,7 @@ func run(
 		}
 	}
 
-	if err = scriptsMgr.Init(cfg.Scripts.Sources); err != nil {
+	if err = scriptsMgr.Init(cfg.Scripts); err != nil {
 		return fmt.Sprintf("error init scripts manager, %v", err), 1
 	}
 
@@ -129,23 +128,23 @@ func run(
 	// upload storages
 	lgr.Logger().Info("init upload storages manager")
 	uploadStoragesMgr := uploadStorageManager.New(lgr.Logger())
-	if err = uploadStoragesMgr.Init(cfg.Storages.Upload); err != nil {
+	if err = uploadStoragesMgr.Init(cfg.StoragesUpload); err != nil {
 		return fmt.Sprintf("error init upload storages manager, %v", err), 1
 	}
 
 	// core storages
 	lgr.Logger().Info("init core storages manager")
-	coreStoragesMgr, err := coreStorageManager.New(cfg.Storages.Core, lgr.Logger())
+	coreStoragesMgr, err := coreStorageManager.New(cfg.StoragesCore, lgr.Logger())
 	if err != nil {
 		return fmt.Sprintf("error create core storages manager, %v", err), 1
 	}
-	coreStorageAlert, err := coreStoragesMgr.Get(cfg.Global.Storages.Alert)
+	coreStorageAlert, err := coreStoragesMgr.Get(cfg.StorageAlert)
 	if err != nil {
-		return fmt.Sprintf("error get core storage: alert '%s', %v", cfg.Global.Storages.Alert, err), 1
+		return fmt.Sprintf("error get core storage: alert '%s', %v", cfg.StorageAlert, err), 1
 	}
-	coreStorageKV, err := coreStoragesMgr.Get(cfg.Global.Storages.KV)
+	coreStorageKV, err := coreStoragesMgr.Get(cfg.StorageKV)
 	if err != nil {
-		return fmt.Sprintf("error get core storage: kv '%s', %v", cfg.Global.Storages.KV, err), 1
+		return fmt.Sprintf("error get core storage: kv '%s', %v", cfg.StorageKV, err), 1
 	}
 
 	// ChannelsManager
@@ -160,39 +159,29 @@ func run(
 	// |
 	// | API
 	// |
-	if cfg.Global.API.Address != "" {
+	if cfg.API != nil {
 		var ln net.Listener
-		ln, err = net.Listen("tcp", cfg.Global.API.Address)
+		ln, err = net.Listen("tcp", cfg.API.Address)
 		if err != nil {
 			return fmt.Sprintf("error create api listener, %v", err), 1
 		}
-		apis := apiManager.New(cfg.Global.API, coreStorageAlert, coreStorageKV, channelsMgr, lgr.Logger())
+		apis := apiManager.New(cfg.API.Address, coreStorageAlert, coreStorageKV, channelsMgr, lgr.Logger())
 		wg.Add(1)
 		go apis.Run(ctx, ctxCancel, wg, ln)
-	}
 
-	// ---------------------
-	// |
-	// | Service
-	// |
-	if cfg.Global.Service.Address != "" {
-		var ln net.Listener
-		ln, err = net.Listen("tcp", cfg.Global.Service.Address)
-		if err != nil {
-			return fmt.Sprintf("error create service listener, %v", err), 1
+		if cfg.API.ServiceAddress != "" {
+			var ln net.Listener
+			ln, err = net.Listen("tcp", cfg.API.ServiceAddress)
+			if err != nil {
+				return fmt.Sprintf("error create service listener, %v", err), 1
+			}
+			srv := service.New(lgr.Logger())
+			wg.Add(1)
+			go srv.Run(ctx, ctxCancel, wg, ln)
 		}
-		srv := service.New(cfg.Global.Service.Metrics, lgr.Logger())
-		wg.Add(1)
-		go srv.Run(ctx, ctxCancel, wg, ln)
 	}
 
 	coreModules := initCoreModules(coreStorageAlert, coreStorageKV, channelsMgr, lgr.Logger(), flg)
-
-	if len(cfg.Global.SendStartNotification) > 0 {
-		channelsMgr.Send(nil, "Balerter start", &alert.Options{
-			Channels: cfg.Global.SendStartNotification,
-		})
-	}
 
 	// ---------------------
 	// |
@@ -227,12 +216,6 @@ func run(
 
 	dsMgr.Stop()
 	coreStoragesMgr.Stop()
-
-	if len(cfg.Global.SendStopNotification) > 0 {
-		channelsMgr.Send(nil, "Balerter stop", &alert.Options{
-			Channels: cfg.Global.SendStopNotification,
-		})
-	}
 
 	lgr.Logger().Info("terminate")
 

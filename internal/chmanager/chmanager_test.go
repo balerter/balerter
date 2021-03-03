@@ -18,7 +18,7 @@ import (
 func TestManager_Init(t *testing.T) {
 	m := New(zap.NewNop())
 
-	cfg := channels.Channels{
+	cfg := &channels.Channels{
 		Email:    []email.Email{{Name: "email1"}},
 		Slack:    []slack.Slack{{Name: "slack1"}},
 		Telegram: []telegram.Telegram{{Name: "tg1"}},

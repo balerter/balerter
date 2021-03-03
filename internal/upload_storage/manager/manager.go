@@ -26,7 +26,10 @@ func New(logger *zap.Logger) *Manager {
 	return m
 }
 
-func (m *Manager) Init(cfg upload.Upload) error {
+func (m *Manager) Init(cfg *upload.Upload) error {
+	if cfg == nil {
+		return nil
+	}
 	for idx := range cfg.S3 {
 		module, err := s3.New(cfg.S3[idx], m.logger)
 		if err != nil {

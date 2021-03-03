@@ -15,7 +15,7 @@ func TestNew(t *testing.T) {
 	l, err := New(loki.Loki{
 		Name: "foo",
 		URL:  "http://domain.com",
-		BasicAuth: common.BasicAuth{
+		BasicAuth: &common.BasicAuth{
 			Username: "user",
 			Password: "secret",
 		},

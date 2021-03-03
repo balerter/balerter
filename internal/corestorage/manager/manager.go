@@ -2,7 +2,6 @@ package manager
 
 import (
 	"fmt"
-
 	"github.com/balerter/balerter/internal/config/storages/core"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/balerter/balerter/internal/corestorage/provider/memory"
@@ -15,13 +14,17 @@ type Manager struct {
 	logger   *zap.Logger
 }
 
-func New(cfg core.Core, logger *zap.Logger) (*Manager, error) {
+func New(cfg *core.Core, logger *zap.Logger) (*Manager, error) {
 	m := &Manager{
 		storages: map[string]coreStorage.CoreStorage{},
 		logger:   logger,
 	}
 
 	m.storages["memory"] = memory.New()
+
+	if cfg == nil {
+		return m, nil
+	}
 
 	for _, c := range cfg.Sqlite {
 		s, err := sql.New("sqlite."+c.Name, "sqlite3", c.Path, c.Tables.Alerts, c.Tables.KV, c.Timeout, logger)
