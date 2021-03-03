@@ -12,7 +12,7 @@ type Mysql struct {
 	Timeout time.Duration `json:"timeout" yaml:"timeout"`
 }
 
-func (cfg *Mysql) Validate() error {
+func (cfg Mysql) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

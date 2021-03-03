@@ -26,7 +26,7 @@ func TestChannelAlertmanager_Validate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := Alertmanager{
 				Name:     tt.fields.Name,
-				Settings: &webhook.Settings{},
+				Settings: webhook.Settings{},
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {

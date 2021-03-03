@@ -17,7 +17,7 @@ func TestNew_ErrorConnect(t *testing.T) {
 		return nil, fmt.Errorf("err1")
 	}
 
-	cfg := &mysql.Mysql{}
+	cfg := mysql.Mysql{}
 
 	_, err := New(cfg, mockConnFunc, zap.NewNop())
 
@@ -35,7 +35,7 @@ func TestNew_ErrorPing(t *testing.T) {
 
 	dbmock.ExpectPing().WillReturnError(fmt.Errorf("err2"))
 
-	cfg := &mysql.Mysql{}
+	cfg := mysql.Mysql{}
 
 	_, err = New(cfg, mockConnFunc, zap.NewNop())
 
@@ -51,7 +51,7 @@ func TestNew(t *testing.T) {
 		return sqlx.NewDb(db, "sqlmock"), nil
 	}
 
-	cfg := &mysql.Mysql{}
+	cfg := mysql.Mysql{}
 
 	p, err := New(cfg, mockConnFunc, zap.NewNop())
 

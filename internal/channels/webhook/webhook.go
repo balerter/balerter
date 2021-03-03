@@ -13,7 +13,7 @@ type Webhook struct {
 	whCore *Core
 }
 
-func New(cfg *webhook.Webhook, logger *zap.Logger) (*Webhook, error) {
+func New(cfg webhook.Webhook, logger *zap.Logger) (*Webhook, error) {
 	return &Webhook{
 		body:   cfg.Settings.Payload.Body,
 		logger: logger,

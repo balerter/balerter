@@ -7,7 +7,7 @@ import (
 
 func TestStoragesCore_Validate(t *testing.T) {
 	type fields struct {
-		File []*sqlite.Sqlite
+		File []sqlite.Sqlite
 	}
 	tests := []struct {
 		name    string
@@ -18,7 +18,7 @@ func TestStoragesCore_Validate(t *testing.T) {
 		{
 			name: "duplicated storage name",
 			fields: fields{
-				File: []*sqlite.Sqlite{
+				File: []sqlite.Sqlite{
 					{Name: "a", Path: "a", Timeout: 0, Tables: sqlite.Tables{Alerts: "a", KV: "k"}},
 					{Name: "a", Path: "a", Timeout: 0, Tables: sqlite.Tables{Alerts: "a", KV: "k"}},
 				},
@@ -29,7 +29,7 @@ func TestStoragesCore_Validate(t *testing.T) {
 		{
 			name: "ok",
 			fields: fields{
-				File: []*sqlite.Sqlite{
+				File: []sqlite.Sqlite{
 					{Name: "a", Path: "a", Timeout: 0, Tables: sqlite.Tables{Alerts: "a", KV: "k"}},
 					{Name: "a2", Path: "a", Timeout: 0, Tables: sqlite.Tables{Alerts: "a", KV: "k"}},
 				},

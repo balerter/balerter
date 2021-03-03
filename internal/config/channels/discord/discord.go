@@ -11,7 +11,7 @@ type Discord struct {
 	ChannelID int64  `json:"channelId" yaml:"channelId"`
 }
 
-func (cfg *Discord) Validate() error {
+func (cfg Discord) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

@@ -18,7 +18,7 @@ type Sqlite struct {
 	Tables  Tables        `json:"tables" yaml:"tables"`
 }
 
-func (cfg *Sqlite) Validate() error {
+func (cfg Sqlite) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

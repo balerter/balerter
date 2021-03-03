@@ -10,7 +10,7 @@ type Storages struct {
 	Core   core.Core     `json:"core" yaml:"core"`
 }
 
-func (cfg *Storages) Validate() error {
+func (cfg Storages) Validate() error {
 	if err := cfg.Upload.Validate(); err != nil {
 		return err
 	}

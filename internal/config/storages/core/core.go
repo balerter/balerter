@@ -8,8 +8,8 @@ import (
 )
 
 type Core struct {
-	Sqlite   []*sqlite.Sqlite     `json:"sqlite" yaml:"sqlite"`
-	Postgres []*postgres.Postgres `json:"postgres" yaml:"postgres"`
+	Sqlite   []sqlite.Sqlite     `json:"sqlite" yaml:"sqlite"`
+	Postgres []postgres.Postgres `json:"postgres" yaml:"postgres"`
 }
 
 func (cfg Core) Validate() error {

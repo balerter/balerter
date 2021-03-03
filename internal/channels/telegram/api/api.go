@@ -23,7 +23,7 @@ type API struct {
 	httpClient *http.Client
 }
 
-func New(cfg *telegram.Telegram) (*API, error) {
+func New(cfg telegram.Telegram) (*API, error) {
 	a := &API{
 		endpoint: apiEndpoint + cfg.Token + "/",
 	}
@@ -34,10 +34,10 @@ func New(cfg *telegram.Telegram) (*API, error) {
 		Timeout:       cfg.Timeout,
 	}
 
-	if cfg.Proxy != nil {
+	if cfg.Proxy.Address != "" {
 		var proxyAuth *proxy.Auth
 
-		if cfg.Proxy.Auth != nil {
+		if cfg.Proxy.Auth.Username != "" {
 			proxyAuth = &proxy.Auth{
 				User:     cfg.Proxy.Auth.Username,
 				Password: cfg.Proxy.Auth.Password,

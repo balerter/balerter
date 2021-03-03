@@ -16,7 +16,7 @@ type ChannelNotifyIcons struct {
 	Warning string `json:"warning" yaml:"warning"`
 }
 
-func (cfg *Notify) Validate() error {
+func (cfg Notify) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

@@ -15,7 +15,7 @@ type Provider struct {
 	mask string
 }
 
-func New(cfg *folder.Folder) *Provider {
+func New(cfg folder.Folder) *Provider {
 	p := &Provider{
 		path: cfg.Path,
 		mask: cfg.Mask,

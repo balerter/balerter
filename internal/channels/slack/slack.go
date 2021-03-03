@@ -1,7 +1,7 @@
 package slack
 
 import (
-	slack2 "github.com/balerter/balerter/internal/config/channels/slack"
+	slackCfg "github.com/balerter/balerter/internal/config/channels/slack"
 	"github.com/nlopes/slack"
 	"go.uber.org/zap"
 )
@@ -17,7 +17,7 @@ type Slack struct {
 	api     API
 }
 
-func New(cfg *slack2.Slack, logger *zap.Logger) (*Slack, error) {
+func New(cfg slackCfg.Slack, logger *zap.Logger) (*Slack, error) {
 	m := &Slack{
 		logger:  logger,
 		name:    cfg.Name,

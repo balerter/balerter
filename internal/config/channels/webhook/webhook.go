@@ -40,7 +40,7 @@ const (
 )
 
 // Validate checks the authorization configuration.
-func (cfg *AuthConfig) Validate() error {
+func (cfg AuthConfig) Validate() error {
 	switch authType := strings.ToLower(strings.TrimSpace(cfg.Type)); authType {
 	case "":
 		cfg.Type = AuthTypeNone
@@ -102,12 +102,12 @@ type Settings struct {
 
 // Webhook configures notifications via webhook.
 type Webhook struct {
-	Name     string    `json:"name" yaml:"name"`
-	Settings *Settings `json:"settings" yaml:"settings"`
+	Name     string   `json:"name" yaml:"name"`
+	Settings Settings `json:"settings" yaml:"settings"`
 }
 
 // Validate checks the webhook configuration.
-func (cfg *Webhook) Validate() error {
+func (cfg Webhook) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}
@@ -115,7 +115,7 @@ func (cfg *Webhook) Validate() error {
 	return cfg.Settings.Validate()
 }
 
-func (cfg *Settings) Validate() error {
+func (cfg Settings) Validate() error {
 	addr := strings.TrimSpace(cfg.URL)
 	if addr == "" {
 		return fmt.Errorf("url must be not empty")

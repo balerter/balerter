@@ -11,7 +11,7 @@ type Scripts struct {
 	Sources        sources.Sources `json:"sources" yaml:"sources"`
 }
 
-func (cfg *Scripts) Validate() error {
+func (cfg Scripts) Validate() error {
 	if cfg.UpdateInterval < 0 {
 		return fmt.Errorf("updateInterval must be not less than 0")
 	}

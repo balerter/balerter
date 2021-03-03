@@ -47,7 +47,7 @@ func (m *Manager) Result() ([]modules.TestResult, error) {
 	return result, nil
 }
 
-func (m *Manager) Init(cfg *datasources.DataSources) error {
+func (m *Manager) Init(cfg datasources.DataSources) error {
 	for idx := range cfg.Clickhouse {
 		mod := moduleMock.New(clickhouse.ModuleName(cfg.Clickhouse[idx].Name), clickhouse.Methods(), m.logger)
 		m.modules[mod.Name()] = mod

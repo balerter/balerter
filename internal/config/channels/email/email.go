@@ -20,7 +20,7 @@ type Email struct {
 }
 
 // Validate checks the email configuration.
-func (cfg *Email) Validate() error {
+func (cfg Email) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

@@ -40,7 +40,7 @@ type Loki struct {
 	timeout           time.Duration
 }
 
-func New(cfg *loki.Loki, logger *zap.Logger) (*Loki, error) {
+func New(cfg loki.Loki, logger *zap.Logger) (*Loki, error) {
 	m := &Loki{
 		logger:            logger,
 		name:              ModuleName(cfg.Name),

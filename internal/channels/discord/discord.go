@@ -1,7 +1,7 @@
 package discord
 
 import (
-	discord2 "github.com/balerter/balerter/internal/config/channels/discord"
+	discordCfg "github.com/balerter/balerter/internal/config/channels/discord"
 	"github.com/diamondburned/arikawa/discord"
 	"github.com/diamondburned/arikawa/session"
 	"go.uber.org/zap"
@@ -16,7 +16,7 @@ type Discord struct {
 }
 
 // New returns the new Discord instance
-func New(cfg *discord2.Discord, logger *zap.Logger) (*Discord, error) {
+func New(cfg discordCfg.Discord, logger *zap.Logger) (*Discord, error) {
 	s, err := session.New("Bot " + cfg.Token)
 	if err != nil {
 		return nil, err

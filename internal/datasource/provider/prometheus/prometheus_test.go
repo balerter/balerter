@@ -10,7 +10,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	m, err := New(&prometheus.Prometheus{
+	m, err := New(prometheus.Prometheus{
 		Name:      "prom1",
 		URL:       "http://domain.com",
 		BasicAuth: common.BasicAuth{},

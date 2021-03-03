@@ -14,7 +14,7 @@ import (
 
 func TestSend(t *testing.T) {
 	e := &Email{
-		conf: &email.Email{
+		conf: email.Email{
 			Name:   "foo",
 			From:   "gopher@example.net",
 			To:     "foo1@example.com;foo2@example.com",

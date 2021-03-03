@@ -27,7 +27,7 @@ func ModuleName(name string) string {
 	return "s3." + name
 }
 
-func New(cfg *s3.S3, logger *zap.Logger) (*Provider, error) {
+func New(cfg s3.S3, logger *zap.Logger) (*Provider, error) {
 	p := &Provider{
 		name:     ModuleName(cfg.Name),
 		region:   cfg.Region,

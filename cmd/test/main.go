@@ -32,19 +32,23 @@ var (
 )
 
 var (
-	configSource = flag.String("config", "config.yml", "Configuration source. Currently supports only path to yaml file.")
-	logLevel     = flag.String("logLevel", "ERROR", "Log level. ERROR, WARN, INFO or DEBUG")
-	debug        = flag.Bool("debug", false, "debug mode")
-	asJSON       = flag.Bool("json", false, "output json format")
-
 	defaultLuaModulesPath = "./?.lua;./modules/?.lua;./modules/?/init.lua"
 )
 
-var (
-	errorOSReturnCode = 1
-)
-
 func main() {
+	cfg, flg, err := config.New()
+	if err != nil {
+		log.Printf("error configuration load, %v", err)
+		os.Exit(1)
+	}
+
+	msg, code := run(cfg, flg)
+
+	log.Print(msg)
+	os.Exit(code)
+}
+
+func run(cfg *config.Config, flg *config.Flags) (string, int) {
 	var resultsOutput io.Writer = os.Stdout
 
 	lua.LuaPathDefault = defaultLuaModulesPath
@@ -55,15 +59,13 @@ func main() {
 
 	var err error
 
-	if err = validateLogLevel(*logLevel); err != nil {
-		log.Print(err)
-		os.Exit(errorOSReturnCode)
+	if err = validateLogLevel(flg.LogLevel); err != nil {
+		return err.Error(), 1
 	}
 
-	lgr, err := logger.New(*logLevel, *debug)
+	lgr, err := logger.New(flg.LogLevel, flg.Debug)
 	if err != nil {
-		log.Printf("error init zap logger, %v", err)
-		os.Exit(errorOSReturnCode)
+		return err.Error(), 1
 	}
 
 	metrics.SetVersion(version)
@@ -71,12 +73,7 @@ func main() {
 	lgr.Logger().Info("balerter start", zap.String("version", version))
 
 	// Configuration
-	cfg, err := config.New(*configSource)
-	if err != nil {
-		lgr.Logger().Error("error init config", zap.Error(err))
-		os.Exit(errorOSReturnCode)
-	}
-	lgr.Logger().Debug("loaded configuration", zap.Any("config", cfg))
+	lgr.Logger().Debug("loaded configuration", zap.Any("config", cfg), zap.Any("flags", flg))
 
 	if cfg.Global.LuaModulesPath != "" {
 		lua.LuaPathDefault = cfg.Global.LuaModulesPath
@@ -88,24 +85,21 @@ func main() {
 	lgr.Logger().Info("init scripts manager")
 	scriptsMgr := scriptsManager.New()
 	if err = scriptsMgr.Init(cfg.Scripts.Sources); err != nil {
-		lgr.Logger().Error("error init scripts manager", zap.Error(err))
-		os.Exit(errorOSReturnCode)
+		return fmt.Sprintf("error init scripts sources, %v", err), 1
 	}
 
 	// datasources
 	lgr.Logger().Info("init datasources manager")
 	dsMgr := dsManagerTest.New(lgr.Logger())
 	if err = dsMgr.Init(cfg.DataSources); err != nil {
-		lgr.Logger().Error("error init datasources manager", zap.Error(err))
-		os.Exit(errorOSReturnCode)
+		return fmt.Sprintf("error init datasources manager, %v", err), 1
 	}
 
 	// upload storages
 	lgr.Logger().Info("init upload storages manager")
 	uploadStoragesMgr := uploadStorageManagerTest.New(lgr.Logger())
 	if err = uploadStoragesMgr.Init(cfg.Storages.Upload); err != nil {
-		lgr.Logger().Error("error init upload storages manager", zap.Error(err))
-		os.Exit(errorOSReturnCode)
+		return fmt.Sprintf("error init upload storages manager, %v", err), 1
 	}
 
 	// ---------------------
@@ -191,19 +185,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := output(results, resultsOutput, *asJSON); err != nil {
-		lgr.Logger().Error("error output results", zap.Error(err))
-		os.Exit(errorOSReturnCode)
+	if err := output(results, resultsOutput, flg.AsJSON); err != nil {
+		return fmt.Sprintf("error out results, %v", err), 1
 	}
 
 	lgr.Logger().Info("terminate")
 
 	if !ok {
-		os.Exit(errorOSReturnCode)
-		return
+		return "", 1
 	}
 
-	os.Exit(0)
+	return "", 0
 }
 
 func validateLogLevel(level string) error {

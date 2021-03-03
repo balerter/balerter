@@ -25,7 +25,7 @@ type Postgres struct {
 	Tables Tables `json:"tables" yaml:"tables"`
 }
 
-func (cfg *Postgres) Validate() error {
+func (cfg Postgres) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

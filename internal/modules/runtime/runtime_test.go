@@ -1,20 +1,21 @@
 package runtime
 
 import (
+	"github.com/balerter/balerter/internal/config"
 	"github.com/stretchr/testify/assert"
 	lua "github.com/yuin/gopher-lua"
 	"testing"
 )
 
 func TestNew(t *testing.T) {
-	m := New("1", true, true, "2", "3", nil)
+	m := New(&config.Flags{ConfigFilePath: "1", LogLevel: "2", Debug: true, Once: true, Script: "3"}, nil)
 
 	assert.IsType(t, &Runtime{}, m)
-	assert.Equal(t, "1", m.logLevel)
-	assert.Equal(t, true, m.isDebug)
-	assert.Equal(t, true, m.isOnce)
-	assert.Equal(t, "2", m.withScript)
-	assert.Equal(t, "3", m.configSource)
+	assert.Equal(t, "1", m.flg.ConfigFilePath)
+	assert.Equal(t, "2", m.flg.LogLevel)
+	assert.Equal(t, true, m.flg.Debug)
+	assert.Equal(t, true, m.flg.Once)
+	assert.Equal(t, "3", m.flg.Script)
 }
 
 func TestName(t *testing.T) {
@@ -24,7 +25,9 @@ func TestName(t *testing.T) {
 }
 
 func TestGetLoader(t *testing.T) {
-	m := &Runtime{}
+	m := &Runtime{
+		flg: &config.Flags{},
+	}
 
 	f := m.GetLoader(nil)
 

@@ -21,7 +21,7 @@ type Syslog struct {
 	Priority string `json:"priority" yaml:"priority"`
 }
 
-func (cfg *Syslog) Validate() error {
+func (cfg Syslog) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

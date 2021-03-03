@@ -14,7 +14,7 @@ import (
 	"github.com/balerter/balerter/internal/message"
 )
 
-func webhookSend(conf *webhookConfig.Webhook, msg *message.Message) error {
+func webhookSend(conf webhookConfig.Webhook, msg *message.Message) error {
 	webhook, err := New(conf, zap.NewNop())
 	if err != nil {
 		return err
@@ -23,7 +23,7 @@ func webhookSend(conf *webhookConfig.Webhook, msg *message.Message) error {
 	return webhook.Send(msg)
 }
 
-func testHook(conf *webhookConfig.Webhook, msg *message.Message, h http.HandlerFunc) error {
+func testHook(conf webhookConfig.Webhook, msg *message.Message, h http.HandlerFunc) error {
 	s := httptest.NewServer(h)
 	defer s.Close()
 
@@ -45,9 +45,9 @@ func TestSend(t *testing.T) {
 		Image:     "alert image",
 	}
 
-	conf := &webhookConfig.Webhook{
+	conf := webhookConfig.Webhook{
 		Name: "foo",
-		Settings: &webhookConfig.Settings{
+		Settings: webhookConfig.Settings{
 			Method: http.MethodPost,
 			Auth: webhookConfig.AuthConfig{
 				Type: webhookConfig.AuthTypeNone,

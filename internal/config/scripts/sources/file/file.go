@@ -12,7 +12,7 @@ type File struct {
 	DisableIgnore bool   `json:"disableIgnore" yaml:"disableIgnore"`
 }
 
-func (cfg *File) Validate() error {
+func (cfg File) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

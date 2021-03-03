@@ -13,13 +13,13 @@ import (
 
 func TestChannels_Validate(t *testing.T) {
 	type fields struct {
-		Email    []*email.Email
-		Slack    []*slack.Slack
-		Telegram []*telegram.Telegram
-		Syslog   []*syslog.Syslog
-		Notify   []*notify.Notify
-		Discord  []*discord.Discord
-		Webhook  []*webhook.Webhook
+		Email    []email.Email
+		Slack    []slack.Slack
+		Telegram []telegram.Telegram
+		Syslog   []syslog.Syslog
+		Notify   []notify.Notify
+		Discord  []discord.Discord
+		Webhook  []webhook.Webhook
 	}
 	tests := []struct {
 		name    string
@@ -30,7 +30,7 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated email",
 			fields: fields{
-				Email: []*email.Email{{Name: "foo", From: "gopher@example.net", To: "foo@example.com",
+				Email: []email.Email{{Name: "foo", From: "gopher@example.net", To: "foo@example.com",
 					Host: "mail.example.com", Port: "25"}, {Name: "foo", From: "gopher@example.net",
 					To: "foo@example.com", Host: "mail.example.com", Port: "25"}},
 			},
@@ -40,7 +40,7 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated slack",
 			fields: fields{
-				Slack: []*slack.Slack{{Name: "foo", Token: "a", Channel: "a"}, {Name: "foo", Token: "a", Channel: "a"}},
+				Slack: []slack.Slack{{Name: "foo", Token: "a", Channel: "a"}, {Name: "foo", Token: "a", Channel: "a"}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for channels 'slack': foo",
@@ -48,7 +48,7 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated telegram",
 			fields: fields{
-				Telegram: []*telegram.Telegram{{Name: "foo", Token: "a", ChatID: 1}, {Name: "foo", Token: "a", ChatID: 1}},
+				Telegram: []telegram.Telegram{{Name: "foo", Token: "a", ChatID: 1}, {Name: "foo", Token: "a", ChatID: 1}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for channels 'telegram': foo",
@@ -56,7 +56,7 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated syslog",
 			fields: fields{
-				Syslog: []*syslog.Syslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"},
+				Syslog: []syslog.Syslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"},
 					{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"}},
 			},
 			wantErr: true,
@@ -65,7 +65,7 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated notify",
 			fields: fields{
-				Notify: []*notify.Notify{{Name: "foo"}, {Name: "foo"}},
+				Notify: []notify.Notify{{Name: "foo"}, {Name: "foo"}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for channels 'notify': foo",
@@ -73,7 +73,7 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated discord",
 			fields: fields{
-				Discord: []*discord.Discord{{Name: "foo", Token: "a", ChannelID: 1}, {Name: "foo", Token: "a", ChannelID: 1}},
+				Discord: []discord.Discord{{Name: "foo", Token: "a", ChannelID: 1}, {Name: "foo", Token: "a", ChannelID: 1}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for channels 'discord': foo",
@@ -81,10 +81,10 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "duplicated webhook",
 			fields: fields{
-				Webhook: []*webhook.Webhook{
+				Webhook: []webhook.Webhook{
 					{
 						Name: "foo",
-						Settings: &webhook.Settings{
+						Settings: webhook.Settings{
 							URL:     "https://foo.bar/baz",
 							Auth:    webhook.AuthConfig{Type: "bearer", AuthBearerConfig: webhook.AuthBearerConfig{Token: "token"}},
 							Payload: webhook.PayloadConfig{Body: `{}`},
@@ -92,7 +92,7 @@ func TestChannels_Validate(t *testing.T) {
 					},
 					{
 						Name: "foo",
-						Settings: &webhook.Settings{
+						Settings: webhook.Settings{
 							URL:     "https://foo.bar/baz",
 							Auth:    webhook.AuthConfig{Type: "bearer", AuthBearerConfig: webhook.AuthBearerConfig{Token: "token"}},
 							Payload: webhook.PayloadConfig{Body: `{}`},
@@ -106,23 +106,23 @@ func TestChannels_Validate(t *testing.T) {
 		{
 			name: "ok",
 			fields: fields{
-				Email: []*email.Email{{Name: "foo", From: "gopher@example.net", To: "foo@example.com",
+				Email: []email.Email{{Name: "foo", From: "gopher@example.net", To: "foo@example.com",
 					Host: "mail.example.com", Port: "25"},
 					{Name: "foo2", From: "gopher@example.net", To: "foo@example.com", Host: "mail.example.com", Port: "25"}},
-				Slack: []*slack.Slack{{Name: "foo", Token: "a", Channel: "a"},
+				Slack: []slack.Slack{{Name: "foo", Token: "a", Channel: "a"},
 					{Name: "foo2", Token: "a", Channel: "a"}},
-				Telegram: []*telegram.Telegram{{Name: "foo", Token: "a", ChatID: 1},
+				Telegram: []telegram.Telegram{{Name: "foo", Token: "a", ChatID: 1},
 					{Name: "foo2", Token: "a", ChatID: 1}},
-				Syslog: []*syslog.Syslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"},
+				Syslog: []syslog.Syslog{{Name: "foo", Network: "tcp", Address: "a", Priority: "EMERG"},
 					{Name: "foo2", Network: "tcp", Address: "a", Priority: "EMERG"}},
-				Notify: []*notify.Notify{{Name: "foo"}, {Name: "foo2"}},
-				Discord: []*discord.Discord{{Name: "foo", Token: "a", ChannelID: 1},
+				Notify: []notify.Notify{{Name: "foo"}, {Name: "foo2"}},
+				Discord: []discord.Discord{{Name: "foo", Token: "a", ChannelID: 1},
 					{Name: "foo2", Token: "a", ChannelID: 1}},
-				Webhook: []*webhook.Webhook{
-					{Name: "foo", Settings: &webhook.Settings{URL: "https://foo.bar/baz",
+				Webhook: []webhook.Webhook{
+					{Name: "foo", Settings: webhook.Settings{URL: "https://foo.bar/baz",
 						Auth:    webhook.AuthConfig{Type: "bearer", AuthBearerConfig: webhook.AuthBearerConfig{Token: "token"}},
 						Payload: webhook.PayloadConfig{Body: `{}`}}},
-					{Name: "foo2", Settings: &webhook.Settings{URL: "https://foo.bar/baz",
+					{Name: "foo2", Settings: webhook.Settings{URL: "https://foo.bar/baz",
 						Auth:    webhook.AuthConfig{Type: "bearer", AuthBearerConfig: webhook.AuthBearerConfig{Token: "token"}},
 						Payload: webhook.PayloadConfig{Body: `{}`}}}},
 			},

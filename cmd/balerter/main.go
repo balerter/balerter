@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/config/scripts/sources"
@@ -48,26 +47,21 @@ const (
 )
 
 func main() {
-	configSource := flag.String("config", "config.yml", "Configuration source. Currently supports only path to yaml file and 'stdin'.")
-	logLevel := flag.String("logLevel", "INFO", "Log level. ERROR, INFO or DEBUG")
-	debug := flag.Bool("debug", false, "debug mode")
-	once := flag.Bool("once", false, "once run scripts and exit")
-	withScript := flag.String("script", "", "ignore all script sources and runs only one script. Meta-tag @ignore will be ignored")
+	cfg, flg, err := config.New()
+	if err != nil {
+		log.Printf("error configuration load, %v", err)
+		os.Exit(1)
+	}
 
-	flag.Parse()
-
-	msg, code := run(*configSource, *logLevel, *debug, *once, *withScript)
+	msg, code := run(cfg, flg)
 
 	log.Print(msg)
 	os.Exit(code)
 }
 
 func run(
-	configSource,
-	logLevel string,
-	debug,
-	once bool,
-	withScript string,
+	cfg *config.Config,
+	flg *config.Flags,
 ) (string, int) {
 	lua.LuaPathDefault = defaultLuaModulesPath
 
@@ -76,11 +70,11 @@ func run(
 
 	wg := &sync.WaitGroup{}
 
-	if err := validateLogLevel(logLevel); err != nil {
+	if err := validateLogLevel(flg.LogLevel); err != nil {
 		return err.Error(), 1
 	}
 
-	lgr, err := logger.New(logLevel, debug, loggerOptions...)
+	lgr, err := logger.New(flg.LogLevel, flg.Debug, loggerOptions...)
 	if err != nil {
 		return fmt.Sprintf("error init zap logger, %v", err), 1
 	}
@@ -89,12 +83,7 @@ func run(
 
 	lgr.Logger().Info("balerter start", zap.String("version", version))
 
-	// Configuration
-	cfg, err := config.New(configSource)
-	if err != nil {
-		return fmt.Sprintf("error init config, %v", err), 1
-	}
-	lgr.Logger().Debug("loaded configuration", zap.Any("config", cfg))
+	lgr.Logger().Debug("loaded configuration", zap.Any("config", cfg), zap.Any("flags", flg))
 
 	if cfg.Global.LuaModulesPath != "" {
 		lua.LuaPathDefault = cfg.Global.LuaModulesPath
@@ -106,13 +95,13 @@ func run(
 	lgr.Logger().Info("init scripts manager")
 	scriptsMgr := scriptsManager.New()
 
-	if withScript != "" {
-		lgr.Logger().Info("rewrite script sources configuration", zap.String("filename", withScript))
+	if flg.Script != "" {
+		lgr.Logger().Info("rewrite script sources configuration", zap.String("filename", flg.Script))
 		cfg.Scripts.Sources = sources.Sources{
-			File: []*file.File{
+			File: []file.File{
 				{
 					Name:          "cli-script",
-					Filename:      withScript,
+					Filename:      flg.Script,
 					DisableIgnore: true,
 				},
 			},
@@ -197,7 +186,7 @@ func run(
 		go srv.Run(ctx, ctxCancel, wg, ln)
 	}
 
-	coreModules := initCoreModules(coreStorageAlert, coreStorageKV, channelsMgr, lgr.Logger(), logLevel, debug, once, withScript, configSource)
+	coreModules := initCoreModules(coreStorageAlert, coreStorageKV, channelsMgr, lgr.Logger(), flg)
 
 	if len(cfg.Global.SendStartNotification) > 0 {
 		channelsMgr.Send(nil, "Balerter start", &alert.Options{
@@ -213,7 +202,7 @@ func run(
 	rnr := runner.New(cfg.Scripts.UpdateInterval, scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
 
 	lgr.Logger().Info("run runner")
-	go rnr.Watch(ctx, ctxCancel, once)
+	go rnr.Watch(ctx, ctxCancel, flg.Once)
 
 	// ---------------------
 	// |
@@ -255,11 +244,7 @@ func initCoreModules(
 	coreStorageKV corestorage.CoreStorage,
 	chManager *channelsManager.ChannelsManager,
 	logger *zap.Logger,
-	logLevel string,
-	debug bool,
-	once bool,
-	withScript string,
-	configSource string,
+	flg *config.Flags,
 ) []modules.Module {
 	coreModules := make([]modules.Module, 0)
 
@@ -278,7 +263,7 @@ func initCoreModules(
 	httpMod := httpModule.New(logger)
 	coreModules = append(coreModules, httpMod)
 
-	runtimeMod := runtimeModule.New(logLevel, debug, once, withScript, configSource, logger)
+	runtimeMod := runtimeModule.New(flg, logger)
 	coreModules = append(coreModules, runtimeMod)
 
 	return coreModules

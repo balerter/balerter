@@ -9,14 +9,14 @@ import (
 
 // Email implements a Provider for email notifications.
 type Email struct {
-	conf     *email.Email
+	conf     email.Email
 	hostname string
 	logger   *zap.Logger
 	name     string
 }
 
 // New returns the new Email instance
-func New(cfg *email.Email, logger *zap.Logger) (*Email, error) {
+func New(cfg email.Email, logger *zap.Logger) (*Email, error) {
 	h, err := os.Hostname()
 	// Use localhost if os.Hostname() fails
 	if err != nil {

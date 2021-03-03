@@ -12,7 +12,7 @@ type AlertManager struct {
 	logger *zap.Logger
 }
 
-func New(cfg *alertmanager.Alertmanager, logger *zap.Logger) (*AlertManager, error) {
+func New(cfg alertmanager.Alertmanager, logger *zap.Logger) (*AlertManager, error) {
 	a := &AlertManager{
 		name:   cfg.Name,
 		logger: logger,

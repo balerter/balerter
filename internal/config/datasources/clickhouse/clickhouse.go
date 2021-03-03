@@ -17,7 +17,7 @@ type Clickhouse struct {
 	Timeout     time.Duration `json:"timeout" yaml:"timeout"`
 }
 
-func (cfg *Clickhouse) Validate() error {
+func (cfg Clickhouse) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

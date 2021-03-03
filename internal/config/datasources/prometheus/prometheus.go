@@ -14,7 +14,7 @@ type Prometheus struct {
 	Timeout   time.Duration    `json:"timeout" yaml:"timeout"`
 }
 
-func (cfg *Prometheus) Validate() error {
+func (cfg Prometheus) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

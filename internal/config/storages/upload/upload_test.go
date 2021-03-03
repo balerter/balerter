@@ -7,7 +7,7 @@ import (
 
 func TestStoragesUpload_Validate(t *testing.T) {
 	type fields struct {
-		S3 []*s3.S3
+		S3 []s3.S3
 	}
 	tests := []struct {
 		name    string
@@ -18,7 +18,7 @@ func TestStoragesUpload_Validate(t *testing.T) {
 		{
 			name: "duplicated s3",
 			fields: fields{
-				S3: []*s3.S3{{Name: "a"}, {Name: "a"}},
+				S3: []s3.S3{{Name: "a"}, {Name: "a"}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for upload storages 's3': a",
@@ -26,7 +26,7 @@ func TestStoragesUpload_Validate(t *testing.T) {
 		{
 			name: "ok",
 			fields: fields{
-				S3: []*s3.S3{{Name: "a"}, {Name: "a2"}},
+				S3: []s3.S3{{Name: "a"}, {Name: "a2"}},
 			},
 			wantErr: false,
 			errText: "",

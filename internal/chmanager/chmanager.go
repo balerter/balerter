@@ -53,7 +53,7 @@ func New(logger *zap.Logger) *ChannelsManager {
 }
 
 // Init the Alert manager
-func (m *ChannelsManager) Init(cfg *channels.Channels) error {
+func (m *ChannelsManager) Init(cfg channels.Channels) error {
 	for idx := range cfg.Email {
 		module, err := email.New(cfg.Email[idx], m.logger)
 		if err != nil {

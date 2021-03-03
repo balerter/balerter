@@ -5,6 +5,6 @@ type Service struct {
 	Metrics bool   `json:"metrics" yaml:"metrics"`
 }
 
-func (s *Service) Validate() error {
+func (s Service) Validate() error {
 	return nil
 }

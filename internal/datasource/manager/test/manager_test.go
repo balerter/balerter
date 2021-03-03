@@ -88,14 +88,14 @@ func TestInit(t *testing.T) {
 	m := New(zap.NewNop())
 
 	cfg := datasources.DataSources{
-		Clickhouse: []*clickhouse.Clickhouse{{Name: "ch1"}},
-		Prometheus: []*prometheus.Prometheus{{Name: "prom1"}},
-		Postgres:   []*postgres.Postgres{{Name: "pg1"}},
-		MySQL:      []*mysql.Mysql{{Name: "mysql1"}},
-		Loki:       []*loki.Loki{{Name: "loki1"}},
+		Clickhouse: []clickhouse.Clickhouse{{Name: "ch1"}},
+		Prometheus: []prometheus.Prometheus{{Name: "prom1"}},
+		Postgres:   []postgres.Postgres{{Name: "pg1"}},
+		MySQL:      []mysql.Mysql{{Name: "mysql1"}},
+		Loki:       []loki.Loki{{Name: "loki1"}},
 	}
 
-	err := m.Init(&cfg)
+	err := m.Init(cfg)
 	require.NoError(t, err)
 
 	assert.Equal(t, 5, len(m.modules))

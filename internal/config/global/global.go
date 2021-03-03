@@ -15,7 +15,7 @@ type Global struct {
 	Service               service.Service   `json:"service" yaml:"service"`
 }
 
-func (cfg *Global) Validate() error {
+func (cfg Global) Validate() error {
 	if err := cfg.API.Validate(); err != nil {
 		return err
 	}

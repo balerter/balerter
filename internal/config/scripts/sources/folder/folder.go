@@ -12,7 +12,7 @@ type Folder struct {
 	Mask string `json:"mask" yaml:"mask"`
 }
 
-func (cfg *Folder) Validate() error {
+func (cfg Folder) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

@@ -33,7 +33,7 @@ type MySQL struct {
 
 type SQLConnFunc func(string, string) (*sqlx.DB, error)
 
-func New(cfg *mysql.Mysql, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*MySQL, error) {
+func New(cfg mysql.Mysql, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*MySQL, error) {
 	p := &MySQL{
 		name:    ModuleName(cfg.Name),
 		logger:  logger,

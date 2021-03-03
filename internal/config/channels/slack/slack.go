@@ -11,7 +11,7 @@ type Slack struct {
 	Channel string `json:"channel" yaml:"channel"`
 }
 
-func (cfg *Slack) Validate() error {
+func (cfg Slack) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

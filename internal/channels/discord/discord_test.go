@@ -9,7 +9,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	d, err := New(&discord.Discord{Name: "foo", ChannelID: 123}, nil)
+	d, err := New(discord.Discord{Name: "foo", ChannelID: 123}, nil)
 	require.NoError(t, err)
 	assert.IsType(t, &Discord{}, d)
 	assert.Equal(t, "foo", d.name)

@@ -5,6 +5,6 @@ type Storages struct {
 	Alert string `json:"alert" yaml:"alert"`
 }
 
-func (cfg *Storages) Validate() error {
+func (cfg Storages) Validate() error {
 	return nil
 }

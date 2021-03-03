@@ -14,7 +14,7 @@ type Loki struct {
 	Timeout   time.Duration    `json:"timeout" yaml:"timeout"`
 }
 
-func (cfg *Loki) Validate() error {
+func (cfg Loki) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")
 	}

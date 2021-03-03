@@ -34,7 +34,7 @@ type Postgres struct {
 
 type SQLConnFunc func(string, string) (*sqlx.DB, error)
 
-func New(cfg *postgres.Postgres, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*Postgres, error) {
+func New(cfg postgres.Postgres, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*Postgres, error) {
 	p := &Postgres{
 		name:    ModuleName(cfg.Name),
 		logger:  logger,

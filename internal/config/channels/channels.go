@@ -15,18 +15,18 @@ import (
 )
 
 type Channels struct {
-	Email                []*email.Email                               `json:"email" yaml:"email"`
-	Slack                []*slack.Slack                               `json:"slack" yaml:"slack"`
-	Telegram             []*telegram.Telegram                         `json:"telegram" yaml:"telegram"`
-	Syslog               []*syslog.Syslog                             `json:"syslog" yaml:"syslog"`
-	Notify               []*notify.Notify                             `json:"notify" yaml:"notify"`
-	Discord              []*discord.Discord                           `json:"discord" yaml:"discord"`
-	Webhook              []*webhook.Webhook                           `json:"webhook" yaml:"webhook"`
-	Alertmanager         []*alertmanager.Alertmanager                 `json:"alertmanager" yaml:"alertmanager"`
-	AlertmanagerReceiver []*alertmanagerreceiver.AlertmanagerReceiver `json:"alertmanager_receiver" yaml:"alertmanager_receiver"`
+	Email                []email.Email                               `json:"email" yaml:"email"`
+	Slack                []slack.Slack                               `json:"slack" yaml:"slack"`
+	Telegram             []telegram.Telegram                         `json:"telegram" yaml:"telegram"`
+	Syslog               []syslog.Syslog                             `json:"syslog" yaml:"syslog"`
+	Notify               []notify.Notify                             `json:"notify" yaml:"notify"`
+	Discord              []discord.Discord                           `json:"discord" yaml:"discord"`
+	Webhook              []webhook.Webhook                           `json:"webhook" yaml:"webhook"`
+	Alertmanager         []alertmanager.Alertmanager                 `json:"alertmanager" yaml:"alertmanager"`
+	AlertmanagerReceiver []alertmanagerreceiver.AlertmanagerReceiver `json:"alertmanager_receiver" yaml:"alertmanager_receiver"`
 }
 
-func (cfg *Channels) Validate() error {
+func (cfg Channels) Validate() error {
 	var names []string
 
 	for _, c := range cfg.Email {

@@ -11,11 +11,11 @@ import (
 
 func TestDataSources_Validate(t *testing.T) {
 	type fields struct {
-		Clickhouse []*clickhouse.Clickhouse
-		Prometheus []*prometheus.Prometheus
-		Postgres   []*postgres.Postgres
-		MySQL      []*mysql.Mysql
-		Loki       []*loki.Loki
+		Clickhouse []clickhouse.Clickhouse
+		Prometheus []prometheus.Prometheus
+		Postgres   []postgres.Postgres
+		MySQL      []mysql.Mysql
+		Loki       []loki.Loki
 	}
 	tests := []struct {
 		name    string
@@ -26,7 +26,7 @@ func TestDataSources_Validate(t *testing.T) {
 		{
 			name: "duplicated clickhouse",
 			fields: fields{
-				Clickhouse: []*clickhouse.Clickhouse{{Name: "a", Host: "a", Port: 10}, {Name: "a", Host: "a", Port: 10}},
+				Clickhouse: []clickhouse.Clickhouse{{Name: "a", Host: "a", Port: 10}, {Name: "a", Host: "a", Port: 10}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for datasource 'clickhouse': a",
@@ -34,7 +34,7 @@ func TestDataSources_Validate(t *testing.T) {
 		{
 			name: "duplicated prometheus",
 			fields: fields{
-				Prometheus: []*prometheus.Prometheus{{Name: "a", URL: "a"}, {Name: "a", URL: "a"}},
+				Prometheus: []prometheus.Prometheus{{Name: "a", URL: "a"}, {Name: "a", URL: "a"}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for datasource 'prometheus': a",
@@ -42,7 +42,7 @@ func TestDataSources_Validate(t *testing.T) {
 		{
 			name: "duplicated postgres",
 			fields: fields{
-				Postgres: []*postgres.Postgres{{Name: "a", Host: "a", Port: 10}, {Name: "a", Host: "a", Port: 10}},
+				Postgres: []postgres.Postgres{{Name: "a", Host: "a", Port: 10}, {Name: "a", Host: "a", Port: 10}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for datasource 'postgres': a",
@@ -50,7 +50,7 @@ func TestDataSources_Validate(t *testing.T) {
 		{
 			name: "duplicated mysql",
 			fields: fields{
-				MySQL: []*mysql.Mysql{{Name: "a", DSN: "a"}, {Name: "a", DSN: "a"}},
+				MySQL: []mysql.Mysql{{Name: "a", DSN: "a"}, {Name: "a", DSN: "a"}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for datasource 'mysql': a",
@@ -58,7 +58,7 @@ func TestDataSources_Validate(t *testing.T) {
 		{
 			name: "duplicated loki",
 			fields: fields{
-				Loki: []*loki.Loki{{Name: "a", URL: "a"}, {Name: "a", URL: "a"}},
+				Loki: []loki.Loki{{Name: "a", URL: "a"}, {Name: "a", URL: "a"}},
 			},
 			wantErr: true,
 			errText: "found duplicated name for datasource 'loki': a",
@@ -66,11 +66,11 @@ func TestDataSources_Validate(t *testing.T) {
 		{
 			name: "ok",
 			fields: fields{
-				Clickhouse: []*clickhouse.Clickhouse{{Name: "a", Host: "a", Port: 10}, {Name: "a2", Host: "a", Port: 10}},
-				Prometheus: []*prometheus.Prometheus{{Name: "a", URL: "a"}, {Name: "a2", URL: "a"}},
-				Postgres:   []*postgres.Postgres{{Name: "a", Host: "a", Port: 10}, {Name: "a2", Host: "a", Port: 10}},
-				MySQL:      []*mysql.Mysql{{Name: "a", DSN: "a"}, {Name: "a2", DSN: "a"}},
-				Loki:       []*loki.Loki{{Name: "a", URL: "a"}, {Name: "a2", URL: "a"}},
+				Clickhouse: []clickhouse.Clickhouse{{Name: "a", Host: "a", Port: 10}, {Name: "a2", Host: "a", Port: 10}},
+				Prometheus: []prometheus.Prometheus{{Name: "a", URL: "a"}, {Name: "a2", URL: "a"}},
+				Postgres:   []postgres.Postgres{{Name: "a", Host: "a", Port: 10}, {Name: "a2", Host: "a", Port: 10}},
+				MySQL:      []mysql.Mysql{{Name: "a", DSN: "a"}, {Name: "a2", DSN: "a"}},
+				Loki:       []loki.Loki{{Name: "a", URL: "a"}, {Name: "a2", URL: "a"}},
 			},
 			wantErr: false,
 			errText: "",

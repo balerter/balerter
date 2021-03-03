@@ -8,7 +8,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	p, err := New(&notify.Notify{
+	p, err := New(notify.Notify{
 		Name: "foo",
 		Icons: notify.ChannelNotifyIcons{
 			Success: "icon1",

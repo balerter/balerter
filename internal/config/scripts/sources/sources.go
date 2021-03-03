@@ -8,8 +8,8 @@ import (
 )
 
 type Sources struct {
-	Folder []*folder.Folder `json:"folder" yaml:"folder"`
-	File   []*file.File     `json:"file" yaml:"file"`
+	Folder []folder.Folder `json:"folder" yaml:"folder"`
+	File   []file.File     `json:"file" yaml:"file"`
 }
 
 func (cfg Sources) Validate() error {

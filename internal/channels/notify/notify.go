@@ -14,7 +14,7 @@ type Notify struct {
 	iconWarning string
 }
 
-func New(cfg *notify.Notify, _ *zap.Logger) (*Notify, error) {
+func New(cfg notify.Notify, _ *zap.Logger) (*Notify, error) {
 	p := &Notify{
 		name:        cfg.Name,
 		iconSuccess: cfg.Icons.Success,
