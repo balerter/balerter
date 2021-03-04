@@ -5,11 +5,6 @@ import (
 	"strings"
 )
 
-type Fields struct {
-	Name string `json:"name" yaml:"name" hcl:"name"`
-	Body string `json:"body" yaml:"body" hcl:"body"`
-}
-
 type Postgres struct {
 	Name        string `json:"name" yaml:"name" hcl:"name,label"`
 	Host        string `json:"host" yaml:"host" hcl:"host"`
@@ -20,8 +15,7 @@ type Postgres struct {
 	SSLMode     string `json:"sslMode" yaml:"sslMode" hcl:"sslMode,optional"`
 	SSLCertPath string `json:"sslCertPath" yaml:"sslCertPath" hcl:"sslCertPath,optional"`
 	Timeout     int    `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
-	Table       string `json:"table" yaml:"table" hcl:"table"`
-	Fields      Fields `json:"fields" yaml:"fields" hcl:"fields,block"`
+	Query       string `json:"query" yaml:"query" hcl:"query"`
 }
 
 func (cfg Postgres) Validate() error {
@@ -38,22 +32,9 @@ func (cfg Postgres) Validate() error {
 	if cfg.Timeout < 0 {
 		return fmt.Errorf("timeout must be greater than 0")
 	}
-	if cfg.Table == "" {
-		return fmt.Errorf("table must be defined")
-	}
-	if err := cfg.Fields.Validate(); err != nil {
-		return err
+	if cfg.Query == "" {
+		return fmt.Errorf("query must be defined")
 	}
 
-	return nil
-}
-
-func (f Fields) Validate() error {
-	if f.Name == "" {
-		return fmt.Errorf("field name must be defined")
-	}
-	if f.Body == "" {
-		return fmt.Errorf("field body must be defined")
-	}
 	return nil
 }
