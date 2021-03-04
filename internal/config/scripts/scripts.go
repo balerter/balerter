@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"github.com/balerter/balerter/internal/config/scripts/file"
 	"github.com/balerter/balerter/internal/config/scripts/folder"
+	"github.com/balerter/balerter/internal/config/scripts/postgres"
 	"github.com/balerter/balerter/internal/util"
 )
 
 type Scripts struct {
-	UpdateInterval int             `json:"updateInterval" yaml:"updateInterval" hcl:"updateInterval,optional"`
-	Folder         []folder.Folder `json:"folder" yaml:"folder" hcl:"folder,block"`
-	File           []file.File     `json:"file" yaml:"file" hcl:"file,block"`
+	UpdateInterval int                 `json:"updateInterval" yaml:"updateInterval" hcl:"updateInterval,optional"`
+	Folder         []folder.Folder     `json:"folder" yaml:"folder" hcl:"folder,block"`
+	File           []file.File         `json:"file" yaml:"file" hcl:"file,block"`
+	Postgres       []postgres.Postgres `json:"postgres" yaml:"postgres" hcl:"postgres,block"`
 }
 
 func (cfg Scripts) Validate() error {
@@ -38,6 +40,17 @@ func (cfg Scripts) Validate() error {
 	}
 	if name := util.CheckUnique(names); name != "" {
 		return fmt.Errorf("found duplicated name for scritsource 'file': %s", name)
+	}
+
+	names = names[:0]
+	for _, c := range cfg.Postgres {
+		names = append(names, c.Name)
+		if err := c.Validate(); err != nil {
+			return err
+		}
+	}
+	if name := util.CheckUnique(names); name != "" {
+		return fmt.Errorf("found duplicated name for scritsource 'postgres': %s", name)
 	}
 
 	return nil
