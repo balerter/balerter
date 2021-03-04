@@ -7,7 +7,7 @@ import (
 )
 
 type File struct {
-	Name     string `json:"name" yaml:"name" hcl:"name"`
+	Name     string `json:"name" yaml:"name" hcl:"name,label"`
 	Filename string `json:"filename" yaml:"filename" hcl:"filename"`
 }
 
