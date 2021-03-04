@@ -2,14 +2,13 @@ package sqlite
 
 import (
 	"testing"
-	"time"
 )
 
 func TestStorageCoreFile_Validate(t *testing.T) {
 	type fields struct {
 		Name        string
 		Path        string
-		Timeout     time.Duration
+		Timeout     int
 		TableAlerts string
 		TableKV     string
 	}
