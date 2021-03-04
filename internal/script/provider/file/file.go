@@ -9,14 +9,14 @@ import (
 )
 
 type Provider struct {
-	filename      string
-	disableIgnore bool
+	name     string
+	filename string
 }
 
 func New(cfg file.File) *Provider {
 	p := &Provider{
-		filename:      cfg.Filename,
-		disableIgnore: cfg.DisableIgnore,
+		name:     "file." + cfg.Name,
+		filename: cfg.Filename,
 	}
 
 	return p
@@ -33,16 +33,18 @@ func (p *Provider) Get() ([]*script.Script, error) {
 	_, fn := path.Split(p.filename)
 
 	s := script.New()
-	s.Name = strings.TrimSuffix(fn, ".lua")
+	s.Name = p.name + "." + strings.TrimSuffix(fn, ".lua")
 	s.Body = body
 
 	if err := s.ParseMeta(); err != nil {
 		return nil, err
 	}
 
-	if p.disableIgnore || !s.Ignore {
-		ss = append(ss, s)
+	if s.Ignore {
+		return ss, nil
 	}
+
+	ss = append(ss, s)
 
 	return ss, nil
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/balerter/balerter/internal/config/scripts"
 	fileProvider "github.com/balerter/balerter/internal/script/provider/file"
 	folderProvider "github.com/balerter/balerter/internal/script/provider/folder"
+	"github.com/balerter/balerter/internal/script/provider/postgres"
 	"github.com/balerter/balerter/internal/script/script"
 )
 
@@ -33,6 +34,14 @@ func (m *Manager) Init(cfg *scripts.Scripts) error {
 
 	for _, c := range cfg.File {
 		m.providers[c.Name] = fileProvider.New(c)
+	}
+
+	for _, c := range cfg.Postgres {
+		p, err := postgres.New(c)
+		if err != nil {
+			return err
+		}
+		m.providers[c.Name] = p
 	}
 
 	return nil

@@ -11,12 +11,14 @@ import (
 )
 
 type Provider struct {
+	name string
 	path string
 	mask string
 }
 
 func New(cfg folder.Folder) *Provider {
 	p := &Provider{
+		name: "folder." + cfg.Name,
 		path: cfg.Path,
 		mask: cfg.Mask,
 	}
@@ -47,7 +49,7 @@ func (p *Provider) Get() ([]*script.Script, error) {
 		_, fn := path.Split(filename)
 
 		s := script.New()
-		s.Name = strings.TrimSuffix(fn, ".lua")
+		s.Name = p.name + "." + strings.TrimSuffix(fn, ".lua")
 		s.Body = body
 
 		if err := s.ParseMeta(); err != nil {
