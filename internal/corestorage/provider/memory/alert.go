@@ -39,7 +39,7 @@ func (m *storageAlert) Update(name string, level alert.Level) (*alert.Alert, boo
 		a = alert.New(name)
 		a.Level = level
 		m.alerts[name] = a
-		return a, false, nil
+		return a, level != alert.LevelSuccess, nil
 	}
 
 	if a.Level == level {
