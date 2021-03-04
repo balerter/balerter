@@ -3,7 +3,6 @@ package postgres
 import (
 	"fmt"
 	"strings"
-	"time"
 )
 
 type Tables struct {
@@ -12,15 +11,15 @@ type Tables struct {
 }
 
 type Postgres struct {
-	Name        string        `json:"name" yaml:"name" hcl:"name,label"`
-	Host        string        `json:"host" yaml:"host" hcl:"host"`
-	Port        int           `json:"port" yaml:"port" hcl:"port"`
-	Username    string        `json:"username" yaml:"username" hcl:"username"`
-	Password    string        `json:"password" yaml:"password" hcl:"password"`
-	Database    string        `json:"database" yaml:"database" hcl:"database"`
-	SSLMode     string        `json:"sslMode" yaml:"sslMode" hcl:"sslMode,optional"`
-	SSLCertPath string        `json:"sslCertPath" yaml:"sslCertPath" hcl:"sslCertPath,optional"`
-	Timeout     time.Duration `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	Name        string `json:"name" yaml:"name" hcl:"name,label"`
+	Host        string `json:"host" yaml:"host" hcl:"host"`
+	Port        int    `json:"port" yaml:"port" hcl:"port"`
+	Username    string `json:"username" yaml:"username" hcl:"username"`
+	Password    string `json:"password" yaml:"password" hcl:"password"`
+	Database    string `json:"database" yaml:"database" hcl:"database"`
+	SSLMode     string `json:"sslMode" yaml:"sslMode" hcl:"sslMode,optional"`
+	SSLCertPath string `json:"sslCertPath" yaml:"sslCertPath" hcl:"sslCertPath,optional"`
+	Timeout     int    `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
 
 	Tables Tables `json:"tables" yaml:"tables" hcl:"tables,block"`
 }

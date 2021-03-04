@@ -3,7 +3,6 @@ package sqlite
 import (
 	"fmt"
 	"strings"
-	"time"
 )
 
 type Tables struct {
@@ -12,10 +11,10 @@ type Tables struct {
 }
 
 type Sqlite struct {
-	Name    string        `json:"name" yaml:"name" hcl:"name,label"`
-	Path    string        `json:"path" yaml:"path" hcl:"path"`
-	Timeout time.Duration `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
-	Tables  Tables        `json:"tables" yaml:"tables" hcl:"tables,block"`
+	Name    string `json:"name" yaml:"name" hcl:"name,label"`
+	Path    string `json:"path" yaml:"path" hcl:"path"`
+	Timeout int    `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	Tables  Tables `json:"tables" yaml:"tables" hcl:"tables,block"`
 }
 
 func (cfg Sqlite) Validate() error {

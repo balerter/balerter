@@ -7,6 +7,7 @@ import (
 	"github.com/balerter/balerter/internal/corestorage/provider/memory"
 	"github.com/balerter/balerter/internal/corestorage/provider/sql"
 	"go.uber.org/zap"
+	"time"
 )
 
 type Manager struct {
@@ -27,7 +28,7 @@ func New(cfg *core.Core, logger *zap.Logger) (*Manager, error) {
 	}
 
 	for _, c := range cfg.Sqlite {
-		s, err := sql.New("sqlite."+c.Name, "sqlite3", c.Path, c.Tables.Alerts, c.Tables.KV, c.Timeout, logger)
+		s, err := sql.New("sqlite."+c.Name, "sqlite3", c.Path, c.Tables.Alerts, c.Tables.KV, time.Millisecond*time.Duration(c.Timeout), logger)
 		if err != nil {
 			return nil, fmt.Errorf("error create file storage, %w", err)
 		}
@@ -46,7 +47,7 @@ func New(cfg *core.Core, logger *zap.Logger) (*Manager, error) {
 			c.SSLCertPath,
 		)
 
-		s, err := sql.New("postgres."+c.Name, "postgres", connectionString, c.Tables.Alerts, c.Tables.KV, c.Timeout, logger)
+		s, err := sql.New("postgres."+c.Name, "postgres", connectionString, c.Tables.Alerts, c.Tables.KV, time.Millisecond*time.Duration(c.Timeout), logger)
 		if err != nil {
 			return nil, fmt.Errorf("error create postgres storage, %w", err)
 		}
