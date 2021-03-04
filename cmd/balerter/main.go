@@ -94,9 +94,11 @@ func run(
 	scriptsMgr := scriptsManager.New()
 
 	// log if use a 465 port and an empty secure string for an email channel
-	for idx := range cfg.Channels.Email {
-		if cfg.Channels.Email[idx].Port == "465" && cfg.Channels.Email[idx].Secure == "" {
-			lgr.Logger().Info("secure port 465 with ssl for email channel " + cfg.Channels.Email[idx].Name)
+	if cfg.Channels != nil {
+		for idx := range cfg.Channels.Email {
+			if cfg.Channels.Email[idx].Port == "465" && cfg.Channels.Email[idx].Secure == "" {
+				lgr.Logger().Info("secure port 465 with ssl for email channel " + cfg.Channels.Email[idx].Name)
+			}
 		}
 	}
 
