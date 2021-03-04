@@ -31,6 +31,7 @@ type Runner struct {
 	scriptsManager  scriptsManager
 	dsManager       dsManager
 	storagesManager storagesManager
+	cliScript       string
 	logger          *zap.Logger
 	updateInterval  time.Duration
 
@@ -48,6 +49,7 @@ func New(
 	dsManager dsManager,
 	storagesManager storagesManager,
 	coreModules []modules.Module,
+	cliScript string,
 	logger *zap.Logger,
 ) *Runner {
 	r := &Runner{
@@ -55,6 +57,7 @@ func New(
 		dsManager:       dsManager,
 		storagesManager: storagesManager,
 		updateInterval:  updateInterval,
+		cliScript:       cliScript,
 		logger:          logger,
 		coreModules:     coreModules,
 		pool:            make(map[string]*Job),
@@ -68,6 +71,16 @@ func New(
 	return r
 }
 
+func (rnr *Runner) filterScripts(ss []*script.Script, name string) []*script.Script {
+	for _, s := range ss {
+		if s.Name == name {
+			return []*script.Script{s}
+		}
+	}
+
+	return nil
+}
+
 func (rnr *Runner) Watch(ctx context.Context, ctxCancel context.CancelFunc, once bool) {
 	rnr.cron.Start()
 
@@ -78,6 +91,11 @@ func (rnr *Runner) Watch(ctx context.Context, ctxCancel context.CancelFunc, once
 
 	for {
 		ss, err := rnr.scriptsManager.Get()
+
+		// If provided CLI flag '-script', run only this script (if present)
+		if rnr.cliScript != "" {
+			ss = rnr.filterScripts(ss, rnr.cliScript)
+		}
 
 		if err != nil {
 			rnr.logger.Error("error get scripts", zap.Error(err))

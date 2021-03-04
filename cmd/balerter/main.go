@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/balerter/balerter/internal/config/scripts"
-	"github.com/balerter/balerter/internal/config/scripts/file"
 	"github.com/balerter/balerter/internal/corestorage"
 	alertModule "github.com/balerter/balerter/internal/modules/alert"
 	"github.com/balerter/balerter/internal/service"
@@ -95,19 +93,6 @@ func run(
 	lgr.Logger().Info("init scripts manager")
 	scriptsMgr := scriptsManager.New()
 
-	if flg.Script != "" {
-		lgr.Logger().Info("rewrite script sources configuration", zap.String("filename", flg.Script))
-		cfg.Scripts = &scripts.Scripts{
-			File: []file.File{
-				{
-					Name:          "cli-script",
-					Filename:      flg.Script,
-					DisableIgnore: true,
-				},
-			},
-		}
-	}
-
 	// log if use a 465 port and an empty secure string for an email channel
 	for idx := range cfg.Channels.Email {
 		if cfg.Channels.Email[idx].Port == "465" && cfg.Channels.Email[idx].Secure == "" {
@@ -189,7 +174,7 @@ func run(
 	// | Runner
 	// |
 	lgr.Logger().Info("init runner")
-	rnr := runner.New(time.Millisecond*time.Duration(cfg.Scripts.UpdateInterval), scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
+	rnr := runner.New(time.Millisecond*time.Duration(cfg.Scripts.UpdateInterval), scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, flg.Script, lgr.Logger())
 
 	lgr.Logger().Info("run runner")
 	go rnr.Watch(ctx, ctxCancel, flg.Once)
