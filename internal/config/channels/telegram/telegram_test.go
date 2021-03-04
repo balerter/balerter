@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"testing"
-	"time"
 )
 
 func TestChannelTelegram_Validate(t *testing.T) {
@@ -10,7 +9,7 @@ func TestChannelTelegram_Validate(t *testing.T) {
 		Name    string
 		Token   string
 		ChatID  int64
-		Timeout time.Duration
+		Timeout int
 	}
 	tests := []struct {
 		name    string

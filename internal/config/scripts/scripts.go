@@ -5,11 +5,10 @@ import (
 	"github.com/balerter/balerter/internal/config/scripts/file"
 	"github.com/balerter/balerter/internal/config/scripts/folder"
 	"github.com/balerter/balerter/internal/util"
-	"time"
 )
 
 type Scripts struct {
-	UpdateInterval time.Duration   `json:"updateInterval" yaml:"updateInterval" hcl:"updateInterval,optional"`
+	UpdateInterval int             `json:"updateInterval" yaml:"updateInterval" hcl:"updateInterval,optional"`
 	Folder         []folder.Folder `json:"folder" yaml:"folder" hcl:"folder,block"`
 	File           []file.File     `json:"file" yaml:"file" hcl:"file,block"`
 }

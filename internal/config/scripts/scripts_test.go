@@ -2,12 +2,11 @@ package scripts
 
 import (
 	"testing"
-	"time"
 )
 
 func TestScripts_Validate(t *testing.T) {
 	type fields struct {
-		UpdateInterval time.Duration
+		UpdateInterval int
 	}
 	tests := []struct {
 		name    string

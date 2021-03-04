@@ -14,6 +14,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	apiManager "github.com/balerter/balerter/internal/api/manager"
 	channelsManager "github.com/balerter/balerter/internal/chmanager"
@@ -188,7 +189,7 @@ func run(
 	// | Runner
 	// |
 	lgr.Logger().Info("init runner")
-	rnr := runner.New(cfg.Scripts.UpdateInterval, scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
+	rnr := runner.New(time.Millisecond*time.Duration(cfg.Scripts.UpdateInterval), scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, lgr.Logger())
 
 	lgr.Logger().Info("run runner")
 	go rnr.Watch(ctx, ctxCancel, flg.Once)
