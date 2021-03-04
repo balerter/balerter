@@ -55,7 +55,7 @@ func TestSend(t *testing.T) {
 			Payload: webhookConfig.PayloadConfig{
 				Body: `{"message": "$text"}`,
 			},
-			Timeout: 5 * time.Second,
+			Timeout: 5000,
 		},
 	}
 

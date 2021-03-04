@@ -22,7 +22,7 @@ func NewCore(cfg webhook.Settings) *Core {
 		t = defaultTimeout
 	}
 
-	timeout := time.Millisecond * t
+	timeout := time.Millisecond * time.Duration(t)
 
 	client := &http.Client{
 		Timeout: timeout,

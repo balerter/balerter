@@ -2,7 +2,6 @@ package webhook
 
 import (
 	"testing"
-	"time"
 )
 
 func TestChannelWebhook_Validate(t *testing.T) {
@@ -12,7 +11,7 @@ func TestChannelWebhook_Validate(t *testing.T) {
 		Method  string
 		Auth    AuthConfig
 		Payload PayloadConfig
-		Timeout time.Duration
+		Timeout int
 	}
 	tests := []struct {
 		name    string

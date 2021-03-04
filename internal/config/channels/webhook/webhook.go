@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 )
 
 type AuthBasicConfig struct {
@@ -96,7 +95,7 @@ type Settings struct {
 	Method  string            `json:"method" yaml:"method"`
 	Auth    AuthConfig        `json:"auth" yaml:"auth"`
 	Payload PayloadConfig     `json:"payload" yaml:"payload"`
-	Timeout time.Duration     `json:"timeout" yaml:"timeout"`
+	Timeout int               `json:"timeout" yaml:"timeout"`
 	Headers map[string]string `json:"headers" yaml:"headers"`
 }
 
