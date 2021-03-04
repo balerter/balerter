@@ -13,7 +13,17 @@ func (p *PostgresAlert) Update(name string, level alert.Level) (*alert.Alert, bo
 		return nil, false, fmt.Errorf("error start tx, %w", err)
 	}
 
-	res, err := tx.Exec(fmt.Sprintf(`INSERT INTO %s (id, level, count, last_change, start) VALUES ($1, $2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT (id) DO NOTHING`, p.table), name, level)
+	query := fmt.Sprintf(`INSERT INTO %s (%s, %s, %s, %s, %s) VALUES ($1, $2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT (%s) DO NOTHING`,
+		p.tableCfg.Table,
+		p.tableCfg.Fields.Name,
+		p.tableCfg.Fields.Level,
+		p.tableCfg.Fields.Count,
+		p.tableCfg.Fields.UpdatedAt,
+		p.tableCfg.Fields.CreatedAt,
+		p.tableCfg.Fields.Name,
+	)
+
+	res, err := tx.Exec(query, name, level)
 	if err != nil {
 		err2 := tx.Rollback()
 		if err2 != nil {
@@ -47,7 +57,16 @@ func (p *PostgresAlert) Update(name string, level alert.Level) (*alert.Alert, bo
 		return a, level != alert.LevelSuccess, nil
 	}
 
-	row := tx.QueryRow(fmt.Sprintf(`SELECT level, count, last_change, start FROM %s WHERE id = $1`, p.table), name)
+	query = fmt.Sprintf(`SELECT %s, %s, %s, %s FROM %s WHERE %s = $1`,
+		p.tableCfg.Fields.Level,
+		p.tableCfg.Fields.Count,
+		p.tableCfg.Fields.UpdatedAt,
+		p.tableCfg.Fields.CreatedAt,
+		p.tableCfg.Table,
+		p.tableCfg.Fields.Name,
+	)
+
+	row := tx.QueryRow(query, name)
 
 	var l int
 	var c int
@@ -82,7 +101,15 @@ func (p *PostgresAlert) Update(name string, level alert.Level) (*alert.Alert, bo
 
 	// if level was not changed
 	if currentLevel == level {
-		_, err = tx.Exec(fmt.Sprintf(`UPDATE %s SET count = count + 1, last_change = CURRENT_TIMESTAMP WHERE id = $1`, p.table), name)
+		query = fmt.Sprintf(`UPDATE %s SET %s = %s + 1, %s = CURRENT_TIMESTAMP WHERE %s = $1`,
+			p.tableCfg.Table,
+			p.tableCfg.Fields.Count,
+			p.tableCfg.Fields.Count,
+			p.tableCfg.Fields.UpdatedAt,
+			p.tableCfg.Fields.Name,
+		)
+
+		_, err = tx.Exec(query, name)
 		if err != nil {
 			err2 := tx.Rollback()
 			if err2 != nil {
@@ -95,7 +122,15 @@ func (p *PostgresAlert) Update(name string, level alert.Level) (*alert.Alert, bo
 		return a, false, tx.Commit()
 	}
 
-	_, err = tx.Exec(fmt.Sprintf(`UPDATE %s SET level = $1, count = 1, last_change = CURRENT_TIMESTAMP WHERE id = $2`, p.table), level, name)
+	query = fmt.Sprintf(`UPDATE %s SET %s = $1, %s = 1, %s = CURRENT_TIMESTAMP WHERE %s = $2`,
+		p.tableCfg.Table,
+		p.tableCfg.Fields.Level,
+		p.tableCfg.Fields.Count,
+		p.tableCfg.Fields.UpdatedAt,
+		p.tableCfg.Fields.Name,
+	)
+
+	_, err = tx.Exec(query, level, name)
 	if err != nil {
 		err2 := tx.Rollback()
 		if err2 != nil {

@@ -9,7 +9,17 @@ import (
 )
 
 func (p *PostgresAlert) Get(alertName string) (*alert.Alert, error) {
-	row := p.db.QueryRow(fmt.Sprintf("SELECT id, level, count, last_change, start FROM %s WHERE id = $1", p.table), alertName)
+	query := fmt.Sprintf("SELECT %s, %s, %s, %s, %s FROM %s WHERE %s = $1",
+		p.tableCfg.Fields.Name,
+		p.tableCfg.Fields.Level,
+		p.tableCfg.Fields.Count,
+		p.tableCfg.Fields.UpdatedAt,
+		p.tableCfg.Fields.CreatedAt,
+		p.tableCfg.Table,
+		p.tableCfg.Fields.Name,
+	)
+
+	row := p.db.QueryRow(query, alertName)
 	if err := row.Err(); err != nil {
 		return nil, fmt.Errorf("error select alert, %w", err)
 	}
@@ -17,14 +27,14 @@ func (p *PostgresAlert) Get(alertName string) (*alert.Alert, error) {
 	var l alert.Level
 	var name string
 	var level, count int
-	var lastChange, start time.Time
+	var updatedAt, createdAt time.Time
 
 	err := row.Scan(
 		&name,
 		&level,
 		&count,
-		&lastChange,
-		&start,
+		&updatedAt,
+		&createdAt,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -41,8 +51,8 @@ func (p *PostgresAlert) Get(alertName string) (*alert.Alert, error) {
 	a := alert.New(name)
 	a.Level = l
 	a.Count = count
-	a.LastChange = lastChange
-	a.Start = start
+	a.LastChange = updatedAt
+	a.Start = createdAt
 
 	return a, nil
 }

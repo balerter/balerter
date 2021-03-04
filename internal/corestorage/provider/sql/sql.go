@@ -2,7 +2,7 @@ package sql
 
 import (
 	"fmt"
-	"strings"
+	"github.com/balerter/balerter/internal/config/storages/core/tables"
 	"time"
 
 	"github.com/balerter/balerter/internal/corestorage"
@@ -19,7 +19,7 @@ type SQL struct {
 	kv     *PostgresKV
 }
 
-func New(name, driver, connectionString, tableAlerts, tableKV string, timeout time.Duration, logger *zap.Logger) (*SQL, error) {
+func New(name, driver, connectionString string, alertsCfg tables.TableAlerts, kvCfg tables.TableKV, timeout time.Duration, logger *zap.Logger) (*SQL, error) {
 	conn, err := sqlx.Connect(driver, connectionString)
 	if err != nil {
 		return nil, err
@@ -35,52 +35,11 @@ func New(name, driver, connectionString, tableAlerts, tableKV string, timeout ti
 	p := &SQL{
 		name:   name,
 		db:     conn,
-		alerts: &PostgresAlert{db: conn, table: tableAlerts, timeout: timeout, logger: logger},
-		kv:     &PostgresKV{db: conn, table: tableKV, timeout: timeout, logger: logger},
-	}
-
-	err = p.createTableAlerts(tableAlerts)
-	if err != nil {
-		return nil, fmt.Errorf("error create alerts table, %w", err)
-	}
-
-	err = p.createTableKV(tableKV)
-	if err != nil {
-		return nil, fmt.Errorf("error create kv table, %w", err)
+		alerts: &PostgresAlert{db: conn, tableCfg: alertsCfg, timeout: timeout, logger: logger},
+		kv:     &PostgresKV{db: conn, tableCfg: kvCfg, timeout: timeout, logger: logger},
 	}
 
 	return p, nil
-}
-
-func (p *SQL) createTableKV(table string) error {
-	query := `create table if not exists {%TABLE%}
-(
-	key varchar not null primary key,
-	value text
-);
-`
-
-	query = strings.Replace(query, "{%TABLE%}", table, -1)
-	_, err := p.db.Exec(query)
-	return err
-}
-
-func (p *SQL) createTableAlerts(table string) error {
-	query := `
-create table if not exists {%TABLE%}
-(
-	id varchar not null primary key,
-	level int4 default 0 not null,
-	count int4 default 0,
-	last_change timestamp default CURRENT_TIMESTAMP,
-	start timestamp default CURRENT_TIMESTAMP
-);
-`
-
-	query = strings.Replace(query, "{%TABLE%}", table, -1)
-
-	_, err := p.db.Exec(query)
-	return err
 }
 
 func (p *SQL) Name() string {

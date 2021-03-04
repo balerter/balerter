@@ -9,13 +9,21 @@ import (
 )
 
 func (p *PostgresAlert) Index(levels []alert.Level) (alert.Alerts, error) {
-	query := fmt.Sprintf("SELECT id, level, count, last_change, start FROM %s", p.table)
+	query := fmt.Sprintf("SELECT %s, %s, %s, %s, %s FROM %s",
+		p.tableCfg.Fields.Name,
+		p.tableCfg.Fields.Level,
+		p.tableCfg.Fields.Count,
+		p.tableCfg.Fields.UpdatedAt,
+		p.tableCfg.Fields.CreatedAt,
+		p.tableCfg.Table,
+	)
+
 	if len(levels) > 0 {
 		var ll []string
 		for _, l := range levels {
 			ll = append(ll, l.NumString())
 		}
-		query += fmt.Sprintf(" WHERE level IN (%s)", strings.Join(ll, ","))
+		query += fmt.Sprintf(" WHERE %s IN (%s)", p.tableCfg.Fields.Level, strings.Join(ll, ","))
 	}
 
 	p.logger.Debug("select alerts index", zap.String("query", query))

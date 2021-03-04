@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/balerter/balerter/internal/config/storages/core/tables"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -15,14 +16,14 @@ var (
 )
 
 type PostgresKV struct {
-	db      *sqlx.DB
-	table   string
-	timeout time.Duration
-	logger  *zap.Logger
+	db       *sqlx.DB
+	tableCfg tables.TableKV
+	timeout  time.Duration
+	logger   *zap.Logger
 }
 
 func (p *PostgresKV) All() (map[string]string, error) {
-	query := fmt.Sprintf(`SELECT key, value FROM %s`, p.table)
+	query := fmt.Sprintf(`SELECT %s, %s FROM %s`, p.tableCfg.Fields.Key, p.tableCfg.Fields.Value, p.tableCfg.Table)
 
 	rows, err := p.db.Query(query)
 	if err != nil {
@@ -52,7 +53,7 @@ func (p *PostgresKV) All() (map[string]string, error) {
 }
 
 func (p *PostgresKV) Put(key, value string) error {
-	query := fmt.Sprintf(`INSERT INTO %s (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`, p.table)
+	query := fmt.Sprintf(`INSERT INTO %s (%s, %s) VALUES ($1, $2) ON CONFLICT (%s) DO NOTHING`, p.tableCfg.Table, p.tableCfg.Fields.Key, p.tableCfg.Fields.Value, p.tableCfg.Fields.Key)
 
 	res, err := p.db.Exec(query, key, value)
 	if err != nil {
@@ -72,7 +73,7 @@ func (p *PostgresKV) Put(key, value string) error {
 }
 
 func (p *PostgresKV) Get(key string) (string, error) {
-	query := fmt.Sprintf(`SELECT value FROM %s WHERE key = $1`, p.table)
+	query := fmt.Sprintf(`SELECT %s FROM %s WHERE key = $1`, p.tableCfg.Fields.Value, p.tableCfg.Table)
 
 	row := p.db.QueryRow(query, key)
 	err := row.Err()
@@ -94,7 +95,7 @@ func (p *PostgresKV) Get(key string) (string, error) {
 }
 
 func (p *PostgresKV) Upsert(key, value string) error {
-	query := fmt.Sprintf(`INSERT INTO %s (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2`, p.table)
+	query := fmt.Sprintf(`INSERT INTO %s (%s, %s) VALUES ($1, $2) ON CONFLICT (%s) DO UPDATE SET value = $2`, p.tableCfg.Table, p.tableCfg.Fields.Key, p.tableCfg.Fields.Value, p.tableCfg.Fields.Key)
 
 	_, err := p.db.Exec(query, key, value)
 	if err != nil {
@@ -105,7 +106,7 @@ func (p *PostgresKV) Upsert(key, value string) error {
 }
 
 func (p *PostgresKV) Delete(key string) error {
-	query := fmt.Sprintf(`DELETE FROM %s WHERE key = $1`, p.table)
+	query := fmt.Sprintf(`DELETE FROM %s WHERE %s = $1`, p.tableCfg.Table, p.tableCfg.Fields.Key)
 
 	row := p.db.QueryRow(query, key)
 	err := row.Err()

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/config/storages/core/tables"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -12,6 +13,19 @@ import (
 	"testing"
 	"time"
 )
+
+func createTableAlertsCfg() tables.TableAlerts {
+	return tables.TableAlerts{
+		Table: "alerts",
+		Fields: tables.AlertFields{
+			Name:      "id",
+			Level:     "level",
+			Count:     "count",
+			UpdatedAt: "last_change",
+			CreatedAt: "start",
+		},
+	}
+}
 
 func TestAlert_Update_begin_error(t *testing.T) {
 	db, sqlm, err := sqlmock.New()
@@ -22,9 +36,9 @@ func TestAlert_Update_begin_error(t *testing.T) {
 	sqlm.ExpectBegin().WillReturnError(fmt.Errorf("err1"))
 
 	pa := &PostgresAlert{
-		table:  "alerts",
-		db:     dbx,
-		logger: zap.NewNop(),
+		tableCfg: createTableAlertsCfg(),
+		db:       dbx,
+		logger:   zap.NewNop(),
 	}
 
 	_, _, err = pa.Update("foo", alert.LevelSuccess)
@@ -43,9 +57,9 @@ func TestAlert_Update_insert_error(t *testing.T) {
 	sqlm.ExpectRollback()
 
 	pa := &PostgresAlert{
-		table:  "alerts",
-		db:     dbx,
-		logger: zap.NewNop(),
+		tableCfg: createTableAlertsCfg(),
+		db:       dbx,
+		logger:   zap.NewNop(),
 	}
 
 	_, _, err = pa.Update("foo", alert.LevelSuccess)
@@ -66,9 +80,9 @@ func TestAlert_Update_affected_rows_error(t *testing.T) {
 	sqlm.ExpectExec(`INSERT INTO alerts \(id, level, count, last_change, start\) VALUES \(\$1, \$2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP\) ON CONFLICT \(id\) DO NOTHING`).WillReturnResult(r)
 
 	pa := &PostgresAlert{
-		table:  "alerts",
-		db:     dbx,
-		logger: zap.NewNop(),
+		tableCfg: createTableAlertsCfg(),
+		db:       dbx,
+		logger:   zap.NewNop(),
 	}
 
 	_, _, err = pa.Update("foo", alert.LevelSuccess)
@@ -90,9 +104,9 @@ func TestAlert_Update_affected_1_error_commit(t *testing.T) {
 	sqlm.ExpectCommit().WillReturnError(fmt.Errorf("err1"))
 
 	pa := &PostgresAlert{
-		table:  "alerts",
-		db:     dbx,
-		logger: zap.NewNop(),
+		tableCfg: createTableAlertsCfg(),
+		db:       dbx,
+		logger:   zap.NewNop(),
 	}
 
 	_, _, err = pa.Update("foo", alert.LevelSuccess)
@@ -114,9 +128,9 @@ func TestAlert_Update_affected_1__not_change(t *testing.T) {
 	sqlm.ExpectCommit()
 
 	pa := &PostgresAlert{
-		table:  "alerts",
-		db:     dbx,
-		logger: zap.NewNop(),
+		tableCfg: createTableAlertsCfg(),
+		db:       dbx,
+		logger:   zap.NewNop(),
 	}
 
 	a, updated, err := pa.Update("foo", alert.LevelSuccess)
@@ -141,9 +155,9 @@ func TestAlert_Update_affected_1__change(t *testing.T) {
 	sqlm.ExpectCommit()
 
 	pa := &PostgresAlert{
-		table:  "alerts",
-		db:     dbx,
-		logger: zap.NewNop(),
+		tableCfg: createTableAlertsCfg(),
+		db:       dbx,
+		logger:   zap.NewNop(),
 	}
 
 	a, updated, err := pa.Update("foo", alert.LevelWarn)
@@ -168,9 +182,9 @@ func TestAlert_Update_error_selectscan(t *testing.T) {
 	sqlm.ExpectQuery(`SELECT`).WillReturnError(fmt.Errorf("err1"))
 
 	pa := &PostgresAlert{
-		table:  "alerts",
-		db:     dbx,
-		logger: zap.NewNop(),
+		tableCfg: createTableAlertsCfg(),
+		db:       dbx,
+		logger:   zap.NewNop(),
 	}
 
 	_, _, err = pa.Update("foo", alert.LevelWarn)
@@ -195,9 +209,9 @@ func TestAlert_Update_error_level_from_int_with_commit_err(t *testing.T) {
 	sqlm.ExpectCommit().WillReturnError(fmt.Errorf("err1"))
 
 	pa := &PostgresAlert{
-		table:  "alerts",
-		db:     dbx,
-		logger: zap.NewNop(),
+		tableCfg: createTableAlertsCfg(),
+		db:       dbx,
+		logger:   zap.NewNop(),
 	}
 
 	_, _, err = pa.Update("foo", alert.LevelWarn)
@@ -222,9 +236,9 @@ func TestAlert_Update_error_level_from_int(t *testing.T) {
 	sqlm.ExpectCommit()
 
 	pa := &PostgresAlert{
-		table:  "alerts",
-		db:     dbx,
-		logger: zap.NewNop(),
+		tableCfg: createTableAlertsCfg(),
+		db:       dbx,
+		logger:   zap.NewNop(),
 	}
 
 	_, _, err = pa.Update("foo", alert.LevelWarn)

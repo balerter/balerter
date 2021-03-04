@@ -2,8 +2,36 @@ package core
 
 import (
 	"github.com/balerter/balerter/internal/config/storages/core/sqlite"
+	"github.com/balerter/balerter/internal/config/storages/core/tables"
 	"testing"
 )
+
+func createSqliteItem(name string) sqlite.Sqlite {
+	item := sqlite.Sqlite{
+		Name:    name,
+		Path:    "1",
+		Timeout: 0,
+		TableAlerts: tables.TableAlerts{
+			Table: "1",
+			Fields: tables.AlertFields{
+				Name:      "1",
+				Level:     "2",
+				Count:     "3",
+				UpdatedAt: "4",
+				CreatedAt: "5",
+			},
+		},
+		TableKV: tables.TableKV{
+			Table: "1",
+			Fields: tables.KVFields{
+				Key:   "1",
+				Value: "2",
+			},
+		},
+	}
+
+	return item
+}
 
 func TestStoragesCore_Validate(t *testing.T) {
 	type fields struct {
@@ -19,8 +47,8 @@ func TestStoragesCore_Validate(t *testing.T) {
 			name: "duplicated storage name",
 			fields: fields{
 				File: []sqlite.Sqlite{
-					{Name: "a", Path: "a", Timeout: 0, Tables: sqlite.Tables{Alerts: "a", KV: "k"}},
-					{Name: "a", Path: "a", Timeout: 0, Tables: sqlite.Tables{Alerts: "a", KV: "k"}},
+					createSqliteItem("a"),
+					createSqliteItem("a"),
 				},
 			},
 			wantErr: true,
@@ -30,8 +58,8 @@ func TestStoragesCore_Validate(t *testing.T) {
 			name: "ok",
 			fields: fields{
 				File: []sqlite.Sqlite{
-					{Name: "a", Path: "a", Timeout: 0, Tables: sqlite.Tables{Alerts: "a", KV: "k"}},
-					{Name: "a2", Path: "a", Timeout: 0, Tables: sqlite.Tables{Alerts: "a", KV: "k"}},
+					createSqliteItem("a1"),
+					createSqliteItem("a2"),
 				},
 			},
 			wantErr: false,
