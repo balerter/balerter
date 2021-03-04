@@ -33,8 +33,10 @@ func New(level string, debugMode bool, opts ...zap.Option) (*Logger, error) {
 	lg.level.SetLevel(convertStringLevelToZap(level))
 
 	config := zap.Config{
-		Level:       lg.level,
-		Development: false,
+		Level:             lg.level,
+		Development:       false,
+		DisableCaller:     true,
+		DisableStacktrace: true,
 		Sampling: &zap.SamplingConfig{
 			Initial:    100,
 			Thereafter: 100,
@@ -43,6 +45,7 @@ func New(level string, debugMode bool, opts ...zap.Option) (*Logger, error) {
 		EncoderConfig:    encoderConfig,
 		OutputPaths:      []string{"stderr"},
 		ErrorOutputPaths: []string{"stderr"},
+		InitialFields:    nil,
 	}
 
 	if debugMode {
@@ -53,6 +56,8 @@ func New(level string, debugMode bool, opts ...zap.Option) (*Logger, error) {
 		config.Encoding = "console"
 		config.Development = true
 		config.Sampling = nil
+		config.DisableCaller = false
+		config.DisableStacktrace = false
 	}
 
 	lg.logger, err = config.Build(opts...)
