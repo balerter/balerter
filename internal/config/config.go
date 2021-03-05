@@ -17,16 +17,12 @@ import (
 	"strings"
 )
 
+// StdIn is default stdin reader
 var StdIn io.Reader = os.Stdin
 
+// New creates new config instance
 func New() (*Config, *Flags, error) {
-	cfg := &Config{
-		//Scripts:     &scripts.Scripts{},
-		//DataSources: &datasources.DataSources{},
-		//Channels:    &channels.Channels{},
-		//Storages:    &storages.Storages{},
-		//Global:      &global.Global{},
-	}
+	cfg := &Config{}
 
 	var data []byte
 	var err error
@@ -73,28 +69,46 @@ func decodeCfg(filename string, data []byte, cfg *Config) error {
 	return fmt.Errorf("unknown format")
 }
 
+// Flags represents CLI flags
 type Flags struct {
+	// ConfigFilePath for CLI flag '-script'
 	ConfigFilePath string
-	LogLevel       string
-	Debug          bool
-	Once           bool
-	Script         string
-	AsJSON         bool
+	// LogLevel for CLI flag '-logLevel'
+	LogLevel string
+	// Debug for CLI flag '-debug'
+	Debug bool
+	// Once for CLI flag '-once'
+	Once bool
+	// Script for CLI flag '-script'
+	Script string
+	// for CLI flag '-asJson' for test tool
+	AsJSON bool
 }
 
+// Config represent balerter configuration
 type Config struct {
-	Scripts        *scripts.Scripts         `json:"scripts" yaml:"scripts" hcl:"scripts,block"`
-	DataSources    *datasources.DataSources `json:"datasources" yaml:"datasources" hcl:"datasources,block"`
-	Channels       *channels.Channels       `json:"channels" yaml:"channels" hcl:"channels,block"`
-	StoragesUpload *upload.Upload           `json:"storagesUpload" yaml:"storagesUpload" hcl:"storagesUpload,block"`
-	StoragesCore   *core.Core               `json:"storagesCore" yaml:"storagesCore" hcl:"storagesCore,block"`
-	API            *api.API                 `json:"api" yaml:"api" hcl:"api,block"`
+	// Scripts section for define script sources
+	Scripts *scripts.Scripts `json:"scripts" yaml:"scripts" hcl:"scripts,block"`
+	// DataSources section for define data sources
+	DataSources *datasources.DataSources `json:"datasources" yaml:"datasources" hcl:"datasources,block"`
+	// Channels section for define channels
+	Channels *channels.Channels `json:"channels" yaml:"channels" hcl:"channels,block"`
+	// StoragesUpload section for define upload storages
+	StoragesUpload *upload.Upload `json:"storagesUpload" yaml:"storagesUpload" hcl:"storagesUpload,block"`
+	// StoragesCore section for define core storages
+	StoragesCore *core.Core `json:"storagesCore" yaml:"storagesCore" hcl:"storagesCore,block"`
+	// API section for define API settings
+	API *api.API `json:"api" yaml:"api" hcl:"api,block"`
 
+	// LuaModulesPath for path to lua modules
 	LuaModulesPath string `json:"luaModulesPath" yaml:"luaModulesPath" hcl:"luaModulesPath,optional"`
-	StorageAlert   string `json:"storageAlert" yaml:"storageAlert" hcl:"storageAlert,optional"`
-	StorageKV      string `json:"storageKV" yaml:"storageKV" hcl:"storageKV,optional"`
+	// StorageAlert item
+	StorageAlert string `json:"storageAlert" yaml:"storageAlert" hcl:"storageAlert,optional"`
+	// StorageKV item
+	StorageKV string `json:"storageKV" yaml:"storageKV" hcl:"storageKV,optional"`
 }
 
+// Validate the config
 func (cfg Config) Validate() error {
 	if cfg.Scripts != nil {
 		if err := cfg.Scripts.Validate(); err != nil {

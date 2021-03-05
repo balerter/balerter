@@ -23,6 +23,7 @@ var (
 	}, []string{"name"})
 )
 
+// Register metrics for expose
 func Register(logger *zap.Logger) {
 	logger.Debug("register metrics")
 
@@ -34,10 +35,12 @@ func Register(logger *zap.Logger) {
 	}
 }
 
+// SetVersion updates data for metrics metricInfoVersion
 func SetVersion(version string) {
 	metricInfoVersion.WithLabelValues(version).Inc()
 }
 
+// SetScriptsActive updates data for metrics metricScripts
 func SetScriptsActive(name string, active bool) {
 	if active {
 		metricScripts.WithLabelValues(name).Set(1)
