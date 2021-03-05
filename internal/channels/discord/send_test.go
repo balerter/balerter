@@ -2,6 +2,9 @@ package discord
 
 import (
 	"bytes"
+	"fmt"
+	"github.com/balerter/balerter/internal/message"
+	"github.com/stretchr/testify/mock"
 	"io/ioutil"
 	"testing"
 
@@ -151,4 +154,43 @@ func User(u discord.User, id discord.Snowflake) discord.User {
 	}
 
 	return u
+}
+
+type sessionMock struct {
+	mock.Mock
+}
+
+func (m *sessionMock) SendMessage(channelID discord.Snowflake, content string, embed *discord.Embed) (*discord.Message, error) {
+	args := m.Called(channelID, content, embed)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*discord.Message), args.Error(1)
+}
+
+func TestTest_error_send(t *testing.T) {
+	m := &sessionMock{}
+	m.On("SendMessage", mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("err1"))
+	d := &Discord{
+		session: m,
+	}
+	mes := &message.Message{
+		Text: "foo",
+	}
+	err := d.Send(mes)
+	assert.Error(t, err)
+	assert.Equal(t, "err1", err.Error())
+}
+
+func TestTest(t *testing.T) {
+	m := &sessionMock{}
+	m.On("SendMessage", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+	d := &Discord{
+		session: m,
+	}
+	mes := &message.Message{
+		Text: "foo",
+	}
+	err := d.Send(mes)
+	assert.NoError(t, err)
 }

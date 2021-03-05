@@ -7,11 +7,15 @@ import (
 	"go.uber.org/zap"
 )
 
+type isession interface {
+	SendMessage(channelID discord.Snowflake, content string, embed *discord.Embed) (*discord.Message, error)
+}
+
 // Discord implements a Provider for discord notifications.
 type Discord struct {
 	logger  *zap.Logger
 	name    string
-	session *session.Session
+	session isession
 	chanID  discord.Snowflake
 }
 
