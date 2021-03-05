@@ -66,10 +66,5 @@ func (a *Alerts) handlerUpdate(rw http.ResponseWriter, req *http.Request) {
 		})
 	}
 
-	_, err = rw.Write(updatedAlert.Marshal())
-	if err != nil {
-		a.logger.Error("error write response", zap.Error(err))
-		http.Error(rw, "error write response", http.StatusInternalServerError)
-		return
-	}
+	rw.Write(updatedAlert.Marshal())
 }
