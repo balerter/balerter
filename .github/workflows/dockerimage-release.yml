@@ -1,60 +1,24 @@
 name: docker release
 on:
-  - release
+  push:
+    tags:
+      - 'v*'
 jobs:
-  test-unit:
-    strategy:
-      matrix:
-        go-version: [1.15]
-        platform: [ubuntu-latest]
-    runs-on: ${{ matrix.platform }}
-    steps:
-      - name: Install Go
-        uses: actions/setup-go@v1
-        with:
-          go-version: ${{ matrix.go-version }}
-      - name: Checkout code
-        uses: actions/checkout@v1
-      - name: Build
-        run: |
-          make test-full
   build:
+    name: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+      - uses: actions/checkout@master
 
-    - name: Publish Balerter to Registry - Release
-      uses: elgohr/Publish-Docker-Github-Action@master
-      with:
-        name: balerter/balerter
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        tag_semver: true
-        dockerfile: ./contrib/balerter.Dockerfile
+      - name: set release env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
-    - name: Publish BalerterTest to Registry - Release
-      uses: elgohr/Publish-Docker-Github-Action@master
-      with:
-        name: balerter/test
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        tag_semver: true
-        dockerfile: ./contrib/test.Dockerfile
+      - name: docker login
+        run: |
+          docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
+          echo ${{ secrets.NEGASUS_PAT }} | docker login ghcr.io -u negasus --password-stdin
 
-    - name: Publish Balerter to Registry - Latest
-      uses: elgohr/Publish-Docker-Github-Action@master
-      with:
-        name: balerter/balerter
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        tags: "latest"
-        dockerfile: ./contrib/balerter.Dockerfile
-
-    - name: Publish BalerterTest to Registry - Latest
-      uses: elgohr/Publish-Docker-Github-Action@master
-      with:
-        name: balerter/test
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        tags: "latest"
-        dockerfile: ./contrib/test.Dockerfile
+      - name: build and push
+        run: |
+          make build TAG=${{ env.RELEASE_VERSION }}
+          make push TAG=${{ env.RELEASE_VERSION }}
