@@ -11,6 +11,8 @@ WORKDIR /build/balerter
 
 ADD . /build/balerter
 
+RUN go test -mod=vendor ./internal/... ./cmd/...
+
 RUN go build -o /balerter -ldflags "-X main.version=${version} -s -w"  ./cmd/balerter
 
 # -----
