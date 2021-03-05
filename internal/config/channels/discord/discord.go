@@ -5,12 +5,17 @@ import (
 	"strings"
 )
 
+// Discord channel config
 type Discord struct {
-	Name      string `json:"name" yaml:"name"`
-	Token     string `json:"token" yaml:"token"`
-	ChannelID int64  `json:"channelId" yaml:"channelId"`
+	// Name of the channel
+	Name string `json:"name" yaml:"name"`
+	// Token is auth token
+	Token string `json:"token" yaml:"token"`
+	// ChannelID of a discord channel
+	ChannelID int64 `json:"channelId" yaml:"channelId"`
 }
 
+// Validate config
 func (cfg Discord) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")

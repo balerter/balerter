@@ -5,24 +5,33 @@ import (
 	"strings"
 )
 
+// ProxyConfig is proxy config
 type ProxyConfig struct {
 	Address string           `json:"address" yaml:"address" hcl:"address"`
 	Auth    *ProxyAuthConfig `json:"auth" yaml:"auth" hcl:"auth,block"`
 }
 
+// ProxyAuthConfig is auth data for proxy
 type ProxyAuthConfig struct {
 	Username string `json:"username" yaml:"username" hcl:"username"`
 	Password string `json:"password" yaml:"password" hcl:"password"`
 }
 
+// Telegram channel config
 type Telegram struct {
-	Name    string       `json:"name" yaml:"name" hcl:"name,label"`
-	Token   string       `json:"token" yaml:"token" hcl:"token"`
-	ChatID  int64        `json:"chatId" yaml:"chatId" hcl:"chatId"`
-	Proxy   *ProxyConfig `json:"proxy" yaml:"proxy" hcl:"proxy,block"`
-	Timeout int          `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	// Name of the channel
+	Name string `json:"name" yaml:"name" hcl:"name,label"`
+	// Token is auth token of telegram bot
+	Token string `json:"token" yaml:"token" hcl:"token"`
+	// ChatID value
+	ChatID int64 `json:"chatId" yaml:"chatId" hcl:"chatId"`
+	// Proxy config, if proxy is needed
+	Proxy *ProxyConfig `json:"proxy" yaml:"proxy" hcl:"proxy,block"`
+	// Timeout value
+	Timeout int `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
 }
 
+// Validate config
 func (cfg Telegram) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")

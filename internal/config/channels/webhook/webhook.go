@@ -7,34 +7,48 @@ import (
 	"strings"
 )
 
+// AuthBasicConfig is basic auth config
 type AuthBasicConfig struct {
-	Login    string `json:"login" yaml:"login"`
+	// Login for basic auth
+	Login string `json:"login" yaml:"login"`
+	// Password for basic auth
 	Password string `json:"password" yaml:"password"`
 }
 
+// AuthBearerConfig is bearer auth config
 type AuthBearerConfig struct {
+	// Token for bearer auth
 	Token string `json:"token" yaml:"token"`
 }
 
+// AuthCustomConfig is custom auth config
 type AuthCustomConfig struct {
 	// TODO (negasus): remove Headers in favor of cfg.Headers option
-	Headers     map[string]string `json:"headers" yaml:"headers"`
+	// Headers is request headers
+	Headers map[string]string `json:"headers" yaml:"headers"`
+	// QueryParams is query params
 	QueryParams map[string]string `json:"queryParams" yaml:"queryParams"`
 }
 
+// AuthConfig for requests with auth
 type AuthConfig struct {
 	AuthBasicConfig
 	AuthBearerConfig
 	AuthCustomConfig
 
+	// Type of the auth
 	Type string `json:"type" yaml:"type"`
 }
 
 // consts
 const (
-	AuthTypeNone   = "none"
-	AuthTypeBasic  = "basic"
+	// AuthTypeNone use for disable auth
+	AuthTypeNone = "none"
+	// AuthTypeBasic use for basic auth
+	AuthTypeBasic = "basic"
+	// AuthTypeBearer use for bearer token auth
 	AuthTypeBearer = "bearer"
+	// AuthTypeCustom use for custom auth
 	AuthTypeCustom = "custom"
 )
 
@@ -66,6 +80,7 @@ func (cfg AuthConfig) Validate() error {
 	}
 }
 
+// PayloadConfig for POST requests
 type PayloadConfig struct {
 	QueryParams map[string]string `json:"queryParams" yaml:"queryParams"`
 	Body        string            `json:"body" yaml:"body"`
@@ -90,6 +105,7 @@ func (cfg PayloadConfig) Validate(method string) error {
 	}
 }
 
+// Settings for webhook config
 type Settings struct {
 	URL     string            `json:"url" yaml:"url"`
 	Method  string            `json:"method" yaml:"method"`
@@ -114,6 +130,7 @@ func (cfg Webhook) Validate() error {
 	return cfg.Settings.Validate()
 }
 
+// Validate settings config
 func (cfg Settings) Validate() error {
 	addr := strings.TrimSpace(cfg.URL)
 	if addr == "" {

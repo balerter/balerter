@@ -6,11 +6,15 @@ import (
 	"strings"
 )
 
+// AlertmanagerReceiver channel config
 type AlertmanagerReceiver struct {
-	Name     string           `json:"name" yaml:"name"`
+	// Name of the channel
+	Name string `json:"name" yaml:"name"`
+	// Settings contains webhook settings
 	Settings webhook.Settings `json:"settings" yaml:"settings"`
 }
 
+// Validate config
 func (cfg AlertmanagerReceiver) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")

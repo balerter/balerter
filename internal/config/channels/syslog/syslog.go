@@ -13,14 +13,21 @@ var (
 		"LOCAL2", "LOCAL3", "LOCAL4", "LOCAL5", "LOCAL6", "LOCAL7"}
 )
 
+// Syslog channel config
 type Syslog struct {
-	Name     string `json:"name" yaml:"name"`
-	Tag      string `json:"tag" yaml:"tag"`
-	Network  string `json:"network" yaml:"network"`
-	Address  string `json:"address" yaml:"address"`
+	// Name of the channel
+	Name string `json:"name" yaml:"name"`
+	// Tag describe syslog tag
+	Tag string `json:"tag" yaml:"tag"`
+	// Network value
+	Network string `json:"network" yaml:"network"`
+	// Address value
+	Address string `json:"address" yaml:"address"`
+	// Priority value, Severity+Facility
 	Priority string `json:"priority" yaml:"priority"`
 }
 
+// Validate config
 func (cfg Syslog) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")

@@ -5,12 +5,17 @@ import (
 	"strings"
 )
 
+// Slack channel config
 type Slack struct {
-	Name    string `json:"name" yaml:"name"`
-	Token   string `json:"token" yaml:"token"`
+	// Name of the channel
+	Name string `json:"name" yaml:"name"`
+	// Token is auth token for slack app
+	Token string `json:"token" yaml:"token"`
+	// Channel name
 	Channel string `json:"channel" yaml:"channel"`
 }
 
+// Validate config
 func (cfg Slack) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")

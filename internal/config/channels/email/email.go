@@ -7,16 +7,26 @@ import (
 
 // Email configures notifications via email.
 type Email struct {
-	Name     string `json:"name" yaml:"name"`
-	From     string `json:"from" yaml:"from"`
-	To       string `json:"to" yaml:"to"`
-	Cc       string `json:"cc" yaml:"cc"`
-	Host     string `json:"host" yaml:"host"`
-	Port     string `json:"port" yaml:"port"`
+	// Name of the channel
+	Name string `json:"name" yaml:"name"`
+	// From field
+	From string `json:"from" yaml:"from"`
+	// To field
+	To string `json:"to" yaml:"to"`
+	// Cc field
+	Cc string `json:"cc" yaml:"cc"`
+	// Host value
+	Host string `json:"host" yaml:"host"`
+	// Port value
+	Port string `json:"port" yaml:"port"`
+	// Username value
 	Username string `json:"username" yaml:"username"`
+	// Password value
 	Password string `json:"password" yaml:"password"`
-	Secure   string `json:"secure" yaml:"secure"`
-	Timeout  int    `json:"timeout" yaml:"timeout"`
+	// Secure value
+	Secure string `json:"secure" yaml:"secure"`
+	// Timeout value
+	Timeout int `json:"timeout" yaml:"timeout"`
 }
 
 // Validate checks the email configuration.

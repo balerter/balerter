@@ -14,18 +14,29 @@ import (
 	"github.com/balerter/balerter/internal/util"
 )
 
+// Channels config for define channels
 type Channels struct {
-	Email                []email.Email                               `json:"email" yaml:"email"`
-	Slack                []slack.Slack                               `json:"slack" yaml:"slack"`
-	Telegram             []telegram.Telegram                         `json:"telegram" yaml:"telegram" hcl:"telegram,block"`
-	Syslog               []syslog.Syslog                             `json:"syslog" yaml:"syslog"`
-	Notify               []notify.Notify                             `json:"notify" yaml:"notify"`
-	Discord              []discord.Discord                           `json:"discord" yaml:"discord"`
-	Webhook              []webhook.Webhook                           `json:"webhook" yaml:"webhook"`
-	Alertmanager         []alertmanager.Alertmanager                 `json:"alertmanager" yaml:"alertmanager"`
+	// Email channel
+	Email []email.Email `json:"email" yaml:"email"`
+	// Slack channel
+	Slack []slack.Slack `json:"slack" yaml:"slack"`
+	// Telegram channel
+	Telegram []telegram.Telegram `json:"telegram" yaml:"telegram" hcl:"telegram,block"`
+	// Syslog channel
+	Syslog []syslog.Syslog `json:"syslog" yaml:"syslog"`
+	// Notify channel
+	Notify []notify.Notify `json:"notify" yaml:"notify"`
+	// Discord channel
+	Discord []discord.Discord `json:"discord" yaml:"discord"`
+	// Webhook channel
+	Webhook []webhook.Webhook `json:"webhook" yaml:"webhook"`
+	// Alertmanager channel
+	Alertmanager []alertmanager.Alertmanager `json:"alertmanager" yaml:"alertmanager"`
+	// AlertmanagerReceiver channel
 	AlertmanagerReceiver []alertmanagerreceiver.AlertmanagerReceiver `json:"alertmanager_receiver" yaml:"alertmanager_receiver"`
 }
 
+// Validate config
 func (cfg Channels) Validate() error {
 	var names []string
 

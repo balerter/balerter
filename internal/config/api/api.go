@@ -8,6 +8,7 @@ type API struct {
 	ServiceAddress string `json:"serviceAddress" yaml:"serviceAddress" hcl:"serviceAddress,optional"`
 }
 
+// Validate config
 func (cfg API) Validate() error {
 	return nil
 }
