@@ -1,4 +1,4 @@
-package alerts
+package kv
 
 import (
 	"github.com/go-chi/chi"

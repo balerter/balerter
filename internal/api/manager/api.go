@@ -18,19 +18,18 @@ type ChManager interface {
 	Send(a *alert.Alert, text string, options *alert.Options)
 }
 
+type httpServer interface {
+	Serve(l net.Listener) error
+	Shutdown(ctx context.Context) error
+}
+
 type API struct {
 	address string
-	server  *http.Server
+	server  httpServer
 	logger  *zap.Logger
 }
 
 func New(address string, coreStorageAlert, coreStorageKV coreStorage.CoreStorage, chManager ChManager, logger *zap.Logger) *API {
-	api := &API{
-		address: address,
-		server:  &http.Server{},
-		logger:  logger,
-	}
-
 	alertsRouter := alerts.New(coreStorageAlert.Alert(), chManager, logger)
 	kvRouter := kv.New(coreStorageKV.KV(), logger)
 
@@ -41,7 +40,13 @@ func New(address string, coreStorageAlert, coreStorageKV coreStorage.CoreStorage
 		r.Route("/kv", kvRouter.Handler)
 	})
 
-	api.server.Handler = router
+	api := &API{
+		address: address,
+		server: &http.Server{
+			Handler: router,
+		},
+		logger: logger,
+	}
 
 	return api
 }
@@ -53,9 +58,10 @@ func (api *API) Run(ctx context.Context, ctxCancel context.CancelFunc, wg *sync.
 		api.logger.Info("serve api server", zap.String("address", api.address))
 		e := api.server.Serve(ln)
 
+		ctxCancel()
+
 		if e != nil && !errors.Is(e, http.ErrServerClosed) {
 			api.logger.Error("error serve api server", zap.Error(e))
-			ctxCancel()
 		}
 	}()
 
