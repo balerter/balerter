@@ -46,7 +46,7 @@ func New(cfg prometheus.Prometheus, logger *zap.Logger) (*Prometheus, error) {
 		name:              ModuleName(cfg.Name),
 		basicAuthUsername: cfg.BasicAuth.Username,
 		basicAuthPassword: cfg.BasicAuth.Password,
-		timeout:           cfg.Timeout,
+		timeout:           time.Millisecond * time.Duration(cfg.Timeout),
 	}
 
 	if m.timeout == 0 {

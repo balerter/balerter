@@ -6,12 +6,17 @@ import (
 	"time"
 )
 
+// Mysql datasource config
 type Mysql struct {
-	Name    string        `json:"name" yaml:"name" hcl:"name,label"`
-	DSN     string        `json:"dsn" yaml:"dsn" hcl:"dsn"`
+	// Name of the datasource
+	Name string `json:"name" yaml:"name" hcl:"name,label"`
+	// DSN connection data
+	DSN string `json:"dsn" yaml:"dsn" hcl:"dsn"`
+	// Timeout value
 	Timeout time.Duration `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
 }
 
+// Validate config
 func (cfg Mysql) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")

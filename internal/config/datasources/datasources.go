@@ -10,14 +10,21 @@ import (
 	"github.com/balerter/balerter/internal/util"
 )
 
+// DataSources config
 type DataSources struct {
+	// Clickhouse for clickhouse data sources
 	Clickhouse []clickhouse.Clickhouse `json:"clickhouse" yaml:"clickhouse" hcl:"clickhouse,block"`
+	// Prometheus for prometheus-like data sources
 	Prometheus []prometheus.Prometheus `json:"prometheus" yaml:"prometheus" hcl:"prometheus,block"`
-	Postgres   []postgres.Postgres     `json:"postgres" yaml:"postgres" hcl:"postgres,block"`
-	MySQL      []mysql.Mysql           `json:"mysql" yaml:"mysql" hcl:"mysql,block"`
-	Loki       []loki.Loki             `json:"loki" yaml:"loki" hcl:"loki,block"`
+	// Postgres for postgres data sources
+	Postgres []postgres.Postgres `json:"postgres" yaml:"postgres" hcl:"postgres,block"`
+	// MySQL for mysql data sources
+	MySQL []mysql.Mysql `json:"mysql" yaml:"mysql" hcl:"mysql,block"`
+	// Loki for Loki data sources
+	Loki []loki.Loki `json:"loki" yaml:"loki" hcl:"loki,block"`
 }
 
+// Validate config
 func (cfg DataSources) Validate() error {
 	var names []string
 
