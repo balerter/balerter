@@ -1,77 +1,79 @@
 package alerts
 
 import (
+	"fmt"
+	alert2 "github.com/balerter/balerter/internal/alert"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
+	"net/http"
+	"net/http/httptest"
 	"testing"
+	"time"
 )
 
-// TODO: wip
+func TestHandlerIndex_bad_levels(t *testing.T) {
+	a := &Alerts{
+		logger: zap.NewNop(),
+	}
 
-func TestHandler_ErrorGetAlerts(t *testing.T) {
-	//var resultData []*alert2.Alert
-	//
-	//am := coreStorage.NewMock("")
-	//am.AlertMock().On("All").Return(resultData, fmt.Errorf("error1"))
-	//
-	//a := &Alerts{
-	//	storage: am.Alert(),
-	//	logger:  zap.NewNop(),
-	//}
-	//
-	//rw := &httpTestify.TestResponseWriter{}
-	//req := &http.Request{URL: &url.URL{}}
-	//
-	//a.handlerIndex(rw, req)
-	//
-	//assert.Equal(t, 500, rw.StatusCode)
-	//assert.Equal(t, "error1", rw.Header().Get("X-Error"))
-	//assert.Equal(t, "", rw.Output)
+	rw := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodGet, "/", nil)
+	require.NoError(t, err)
+
+	req.URL.RawQuery = "levels=success,foo"
+
+	a.handlerIndex(rw, req)
+
+	assert.Equal(t, 400, rw.Code)
+	assert.Equal(t, "error parse level foo, bad level\n", rw.Body.String())
 }
 
-func TestHandler(t *testing.T) {
-	//var resultData []*alert2.Alert
-	//
-	//a1 := alert2.AcquireAlert()
-	//a1.SetName("foo")
-	//a1.UpdateLevel(alert2.LevelError)
-	//a1.Inc()
-	//resultData = append(resultData, a1)
-	//
-	//updatedAt := a1.GetLastChangeTime().Format(time.RFC3339)
-	//
-	//am := coreStorage.NewMock("")
-	//am.AlertMock().On("All").Return(resultData, nil)
-	//
-	//a := &Alerts{
-	//	storage: am.Alert(),
-	//	logger:  zap.NewNop(),
-	//}
-	//
-	//rw := &httpTestify.TestResponseWriter{}
-	//req := &http.Request{URL: &url.URL{}}
-	//
-	//a.handlerIndex(rw, req)
-	//
-	//assert.Equal(t, 200, rw.StatusCode)
-	//assert.Equal(t, `[{"name":"foo","level":"error","count":1,"updated_at":"`+updatedAt+`"}]`, rw.Output)
+func TestHandlerIndex_bad_get_index(t *testing.T) {
+	m := &coreStorageAlertMock{}
+
+	a := &Alerts{
+		alertManager: m,
+		logger:       zap.NewNop(),
+	}
+
+	m.On("Index", mock.Anything).Return(nil, fmt.Errorf("err1"))
+
+	rw := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodGet, "/", nil)
+	require.NoError(t, err)
+
+	a.handlerIndex(rw, req)
+
+	assert.Equal(t, 500, rw.Code)
+	assert.Equal(t, "internal error\n", rw.Body.String())
 }
 
-func TestHandler_BadLevelArgument(t *testing.T) {
-	//var resultData []*alert2.Alert
-	//
-	//am := coreStorage.NewMock("")
-	//am.AlertMock().On("All").Return(resultData, nil)
-	//
-	//a := &Alerts{
-	//	storage: am.Alert(),
-	//	logger:  zap.NewNop(),
-	//}
-	//
-	//rw := &httpTestify.TestResponseWriter{}
-	//req := &http.Request{URL: &url.URL{RawQuery: "level=foo"}}
-	//
-	//a.handlerIndex(rw, req)
-	//
-	//assert.Equal(t, 400, rw.StatusCode)
-	//assert.Equal(t, "bad level value", rw.Header().Get("X-Error"))
-	//assert.Equal(t, "", rw.Output)
+func TestHandlerIndex(t *testing.T) {
+	m := &coreStorageAlertMock{}
+
+	a := &Alerts{
+		alertManager: m,
+		logger:       zap.NewNop(),
+	}
+
+	al := &alert2.Alert{
+		Name:       "1",
+		Level:      2,
+		LastChange: time.Date(2020, 01, 02, 03, 04, 05, 00, time.UTC),
+		Start:      time.Date(2021, 01, 02, 03, 04, 05, 00, time.UTC),
+		Count:      3,
+	}
+
+	m.On("Index", mock.Anything).Return(alert2.Alerts{al}, nil)
+
+	rw := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodGet, "/", nil)
+	require.NoError(t, err)
+
+	a.handlerIndex(rw, req)
+
+	assert.Equal(t, 200, rw.Code)
+	assert.Equal(t, `[{"name":"1","level":"warning","level_num":2,"count":3,"last_change":"2020-01-02T03:04:05Z","start":"2021-01-02T03:04:05Z"}]`, rw.Body.String())
 }

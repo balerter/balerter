@@ -25,10 +25,5 @@ func (a *Alerts) handlerGet(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_, err = rw.Write(alert.Marshal())
-	if err != nil {
-		a.logger.Error("error write response", zap.Error(err))
-		http.Error(rw, "error write response", http.StatusInternalServerError)
-		return
-	}
+	rw.Write(alert.Marshal())
 }

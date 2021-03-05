@@ -40,10 +40,5 @@ func (a *Alerts) handlerIndex(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_, err = rw.Write(data.Marshal())
-	if err != nil {
-		a.logger.Error("error marshal alerts data", zap.Error(err))
-		http.Error(rw, "internal error", http.StatusInternalServerError)
-		return
-	}
+	rw.Write(data.Marshal())
 }
