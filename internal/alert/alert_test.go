@@ -82,3 +82,74 @@ func TestLevelString(t *testing.T) {
 		assert.Equal(t, "", s)
 	})
 }
+
+func TestLevelFromInt(t *testing.T) {
+	type args struct {
+		i int
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    Level
+		wantErr bool
+	}{
+		{
+			name: "success",
+			args: args{
+				i: 1,
+			},
+			want:    LevelSuccess,
+			wantErr: false,
+		},
+		{
+			name: "warn",
+			args: args{
+				i: 2,
+			},
+			want:    LevelWarn,
+			wantErr: false,
+		},
+		{
+			name: "error",
+			args: args{
+				i: 3,
+			},
+			want:    LevelError,
+			wantErr: false,
+		},
+		{
+			name: "bad 1",
+			args: args{
+				i: 0,
+			},
+			want:    0,
+			wantErr: true,
+		},
+		{
+			name: "bad 2",
+			args: args{
+				i: 4,
+			},
+			want:    0,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := LevelFromInt(tt.args.i)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("LevelFromInt() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("LevelFromInt() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestLevelNumString(t *testing.T) {
+	assert.Equal(t, "1", LevelSuccess.NumString())
+	assert.Equal(t, "2", LevelWarn.NumString())
+	assert.Equal(t, "3", LevelError.NumString())
+}
