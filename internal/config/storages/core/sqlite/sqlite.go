@@ -6,15 +6,22 @@ import (
 	"strings"
 )
 
+// Sqlite core storage config
 type Sqlite struct {
-	Name    string `json:"name" yaml:"name" hcl:"name,label"`
-	Path    string `json:"path" yaml:"path" hcl:"path"`
-	Timeout int    `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	// Name of the core storage
+	Name string `json:"name" yaml:"name" hcl:"name,label"`
+	// Path to database file
+	Path string `json:"path" yaml:"path" hcl:"path"`
+	// Timeout value
+	Timeout int `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
 
+	// TableAlerts is config for Alerts table
 	TableAlerts tables.TableAlerts `json:"tableAlerts" yaml:"tableAlerts" hcl:"tableAlerts,block"`
-	TableKV     tables.TableKV     `json:"tableKV" yaml:"tableKV" hcl:"tableKV,block"`
+	// TableKV is config for KV table
+	TableKV tables.TableKV `json:"tableKV" yaml:"tableKV" hcl:"tableKV,block"`
 }
 
+// Validate config
 func (cfg Sqlite) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")

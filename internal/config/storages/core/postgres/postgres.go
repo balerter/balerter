@@ -6,21 +6,34 @@ import (
 	"strings"
 )
 
+// Postgres core storage config
 type Postgres struct {
-	Name        string `json:"name" yaml:"name" hcl:"name,label"`
-	Host        string `json:"host" yaml:"host" hcl:"host"`
-	Port        int    `json:"port" yaml:"port" hcl:"port"`
-	Username    string `json:"username" yaml:"username" hcl:"username"`
-	Password    string `json:"password" yaml:"password" hcl:"password"`
-	Database    string `json:"database" yaml:"database" hcl:"database"`
-	SSLMode     string `json:"sslMode" yaml:"sslMode" hcl:"sslMode,optional"`
+	// Name of the core storage
+	Name string `json:"name" yaml:"name" hcl:"name,label"`
+	// Host value
+	Host string `json:"host" yaml:"host" hcl:"host"`
+	// Port value
+	Port int `json:"port" yaml:"port" hcl:"port"`
+	// Username value
+	Username string `json:"username" yaml:"username" hcl:"username"`
+	// Password value
+	Password string `json:"password" yaml:"password" hcl:"password"`
+	// Database value
+	Database string `json:"database" yaml:"database" hcl:"database"`
+	// SSLMode value
+	SSLMode string `json:"sslMode" yaml:"sslMode" hcl:"sslMode,optional"`
+	// SSLCertPath value
 	SSLCertPath string `json:"sslCertPath" yaml:"sslCertPath" hcl:"sslCertPath,optional"`
-	Timeout     int    `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	// Timeout value
+	Timeout int `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
 
+	// TableAlerts is config for Alerts table
 	TableAlerts tables.TableAlerts `json:"tableAlerts" yaml:"tableAlerts" hcl:"tableAlerts,block"`
-	TableKV     tables.TableKV     `json:"tableKV" yaml:"tableKV" hcl:"tableKV,block"`
+	// TableKV is config for KV table
+	TableKV tables.TableKV `json:"tableKV" yaml:"tableKV" hcl:"tableKV,block"`
 }
 
+// Validate config
 func (cfg Postgres) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")

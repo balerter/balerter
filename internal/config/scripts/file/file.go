@@ -6,11 +6,15 @@ import (
 	"strings"
 )
 
+// File script source config
 type File struct {
-	Name     string `json:"name" yaml:"name" hcl:"name,label"`
+	// Name of the script source
+	Name string `json:"name" yaml:"name" hcl:"name,label"`
+	// Filename of the script
 	Filename string `json:"filename" yaml:"filename" hcl:"filename"`
 }
 
+// Validate config
 func (cfg File) Validate() error {
 	if strings.TrimSpace(cfg.Name) == "" {
 		return fmt.Errorf("name must be not empty")

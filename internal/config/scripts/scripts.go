@@ -8,13 +8,19 @@ import (
 	"github.com/balerter/balerter/internal/util"
 )
 
+// Scripts config
 type Scripts struct {
-	UpdateInterval int                 `json:"updateInterval" yaml:"updateInterval" hcl:"updateInterval,optional"`
-	Folder         []folder.Folder     `json:"folder" yaml:"folder" hcl:"folder,block"`
-	File           []file.File         `json:"file" yaml:"file" hcl:"file,block"`
-	Postgres       []postgres.Postgres `json:"postgres" yaml:"postgres" hcl:"postgres,block"`
+	// UpdateInterval value for update scripts, ms
+	UpdateInterval int `json:"updateInterval" yaml:"updateInterval" hcl:"updateInterval,optional"`
+	// Folder script sources configs
+	Folder []folder.Folder `json:"folder" yaml:"folder" hcl:"folder,block"`
+	// File script sources configs
+	File []file.File `json:"file" yaml:"file" hcl:"file,block"`
+	// Postgres script sources configs
+	Postgres []postgres.Postgres `json:"postgres" yaml:"postgres" hcl:"postgres,block"`
 }
 
+// Validate config
 func (cfg Scripts) Validate() error {
 	if cfg.UpdateInterval < 0 {
 		return fmt.Errorf("updateInterval must be not less than 0")

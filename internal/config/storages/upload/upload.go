@@ -6,10 +6,12 @@ import (
 	"github.com/balerter/balerter/internal/util"
 )
 
+// Upload storage config
 type Upload struct {
 	S3 []s3.S3 `json:"s3" yaml:"s3" hcl:"s3,block"`
 }
 
+// Validate config
 func (cfg Upload) Validate() error {
 	var names []string
 

@@ -7,11 +7,15 @@ import (
 	"github.com/balerter/balerter/internal/util"
 )
 
+// Core storages config
 type Core struct {
-	Sqlite   []sqlite.Sqlite     `json:"sqlite" yaml:"sqlite" hcl:"sqlite,block"`
+	// Sqlite configs
+	Sqlite []sqlite.Sqlite `json:"sqlite" yaml:"sqlite" hcl:"sqlite,block"`
+	// Postgres config
 	Postgres []postgres.Postgres `json:"postgres" yaml:"postgres" hcl:"postgres,block"`
 }
 
+// Validate config
 func (cfg Core) Validate() error {
 	var names []string
 
