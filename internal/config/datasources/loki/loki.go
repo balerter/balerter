@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/balerter/balerter/internal/config/common"
 	"strings"
-	"time"
 )
 
 // Loki datasource config
@@ -16,7 +15,7 @@ type Loki struct {
 	// BasicAuth contains auth data, if needed
 	BasicAuth *common.BasicAuth `json:"basicAuth" yaml:"basicAuth" hcl:"basicAuth,block"`
 	// Timeout value
-	Timeout time.Duration `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	Timeout int `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
 }
 
 // Validate config

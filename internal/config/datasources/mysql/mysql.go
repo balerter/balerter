@@ -3,7 +3,6 @@ package mysql
 import (
 	"fmt"
 	"strings"
-	"time"
 )
 
 // Mysql datasource config
@@ -13,7 +12,7 @@ type Mysql struct {
 	// DSN connection data
 	DSN string `json:"dsn" yaml:"dsn" hcl:"dsn"`
 	// Timeout value
-	Timeout time.Duration `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	Timeout int `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
 }
 
 // Validate config

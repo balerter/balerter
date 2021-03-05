@@ -3,7 +3,6 @@ package clickhouse
 import (
 	"fmt"
 	"strings"
-	"time"
 )
 
 // Clickhouse datasource config
@@ -23,7 +22,7 @@ type Clickhouse struct {
 	// SSLCertPath connection value
 	SSLCertPath string `json:"sslCertPath" yaml:"sslCertPath" hcl:"sslCertPath,optional"`
 	// Timeout connection value
-	Timeout time.Duration `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	Timeout int `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
 }
 
 // Validate config

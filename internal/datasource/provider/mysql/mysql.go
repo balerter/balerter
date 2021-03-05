@@ -37,7 +37,7 @@ func New(cfg mysql.Mysql, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*MySQL, 
 	p := &MySQL{
 		name:    ModuleName(cfg.Name),
 		logger:  logger,
-		timeout: cfg.Timeout,
+		timeout: time.Millisecond * time.Duration(cfg.Timeout),
 	}
 
 	if p.timeout == 0 {

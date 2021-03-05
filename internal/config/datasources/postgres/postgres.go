@@ -3,7 +3,6 @@ package postgres
 import (
 	"fmt"
 	"strings"
-	"time"
 )
 
 // Postgres datasource config
@@ -25,7 +24,7 @@ type Postgres struct {
 	// SSLCertPath value
 	SSLCertPath string `json:"sslCertPath" yaml:"sslCertPath" hcl:"sslCertPath,optional"`
 	// Timeout value
-	Timeout time.Duration `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	Timeout int `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
 }
 
 // Validate config

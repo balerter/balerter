@@ -40,7 +40,7 @@ func New(cfg clickhouseCfg.Clickhouse, logger *zap.Logger) (*Clickhouse, error) 
 	c := &Clickhouse{
 		name:    ModuleName(cfg.Name),
 		logger:  logger,
-		timeout: cfg.Timeout,
+		timeout: time.Millisecond * time.Duration(cfg.Timeout),
 	}
 
 	if c.timeout == 0 {

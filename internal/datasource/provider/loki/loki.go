@@ -44,7 +44,7 @@ func New(cfg loki.Loki, logger *zap.Logger) (*Loki, error) {
 	m := &Loki{
 		logger:  logger,
 		name:    ModuleName(cfg.Name),
-		timeout: cfg.Timeout,
+		timeout: time.Millisecond * time.Duration(cfg.Timeout),
 	}
 
 	if cfg.BasicAuth != nil {

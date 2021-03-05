@@ -2,7 +2,6 @@ package clickhouse
 
 import (
 	"testing"
-	"time"
 )
 
 func TestDataSourceClickhouse_Validate(t *testing.T) {
@@ -14,7 +13,7 @@ func TestDataSourceClickhouse_Validate(t *testing.T) {
 		Password    string
 		Database    string
 		SSLCertPath string
-		Timeout     time.Duration
+		Timeout     int
 	}
 	tests := []struct {
 		name    string

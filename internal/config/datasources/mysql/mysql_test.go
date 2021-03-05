@@ -2,14 +2,13 @@ package mysql
 
 import (
 	"testing"
-	"time"
 )
 
 func TestDataSourceMysql_Validate(t *testing.T) {
 	type fields struct {
 		Name    string
 		DSN     string
-		Timeout time.Duration
+		Timeout int
 	}
 	tests := []struct {
 		name    string

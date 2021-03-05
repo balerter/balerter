@@ -3,7 +3,6 @@ package loki
 import (
 	"github.com/balerter/balerter/internal/config/common"
 	"testing"
-	"time"
 )
 
 func TestDataSourceLoki_Validate(t *testing.T) {
@@ -11,7 +10,7 @@ func TestDataSourceLoki_Validate(t *testing.T) {
 		Name      string
 		URL       string
 		BasicAuth *common.BasicAuth
-		Timeout   time.Duration
+		Timeout   int
 	}
 	tests := []struct {
 		name    string

@@ -19,7 +19,7 @@ func TestNew(t *testing.T) {
 			Username: "user",
 			Password: "secret",
 		},
-		Timeout: time.Second,
+		Timeout: 1000,
 	}, zap.NewNop())
 
 	require.NoError(t, err)

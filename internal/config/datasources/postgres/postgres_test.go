@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"testing"
-	"time"
 )
 
 func TestDataSourcePostgres_Validate(t *testing.T) {
@@ -15,7 +14,7 @@ func TestDataSourcePostgres_Validate(t *testing.T) {
 		Database    string
 		SSLMode     string
 		SSLCertPath string
-		Timeout     time.Duration
+		Timeout     int
 	}
 	tests := []struct {
 		name    string
