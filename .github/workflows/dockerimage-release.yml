@@ -1,6 +1,8 @@
 name: docker release
 on:
-  - release
+  push:
+    tags:
+      - 'v*'
 jobs:
   build:
     name: build
