@@ -25,10 +25,5 @@ func (kv *KV) handlerIndex(rw http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
-	_, err = rw.Write(buf)
-	if err != nil {
-		kv.logger.Error("error write response", zap.Error(err))
-		http.Error(rw, "error write response", http.StatusInternalServerError)
-		return
-	}
+	rw.Write(buf)
 }
