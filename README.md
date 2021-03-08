@@ -35,12 +35,10 @@ docker run \
 Config file `config.yml`
 ```yaml
 scripts:
-  sources:
-    updateInterval: 5s
-    folder:
-      - name: debug-folder
-        path: /opt/scripts
-        mask: '*.lua'
+  folder:
+    - name: debug-folder
+      path: /opt/scripts
+      mask: '*.lua'
 
 datasources:
   clickhouse:
@@ -61,7 +59,7 @@ channels:
 
 Sample script `rps.lua`
 ```
--- @cront */10 * * * *
+-- @cron */10 * * * * *
 -- @name script1
 
 local minRequestsRPS = 100
