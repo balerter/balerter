@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-// check a slice for unique values,
+// CheckUnique checks a slice for unique values,
 // If founded non unique elements, returns a conflict element name. Else returns empty string
 func CheckUnique(data []string) string {
 	m := map[string]struct{}{}
