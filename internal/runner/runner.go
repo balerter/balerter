@@ -146,6 +146,11 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, 
 		default:
 		}
 
+		if s.Ignore {
+			rnr.logger.Debug("script ignored", zap.String("name", s.Name))
+			continue
+		}
+
 		newScripts[s.Hash()] = struct{}{}
 
 		// if script already running
