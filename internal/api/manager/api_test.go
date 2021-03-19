@@ -16,7 +16,7 @@ import (
 func TestNew(t *testing.T) {
 	cm := corestorage.NewMock("")
 
-	a := New("", cm, cm, nil, nil)
+	a := New("", cm, cm, nil, nil, nil)
 	assert.IsType(t, &API{}, a)
 }
 

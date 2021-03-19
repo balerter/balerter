@@ -13,6 +13,7 @@ import (
 
 var (
 	defaultUpdateInterval = time.Minute
+	defaultToRunChanLen   = 64
 )
 
 type storagesManager interface {
@@ -41,6 +42,8 @@ type Runner struct {
 	pool   map[string]*Job
 
 	cron *cron.Cron
+
+	jobs chan *Job
 }
 
 func New(
@@ -62,13 +65,23 @@ func New(
 		coreModules:     coreModules,
 		pool:            make(map[string]*Job),
 		cron:            cron.New(cron.WithSeconds(), cron.WithParser(script.CronParser)),
+		jobs:            make(chan *Job, defaultToRunChanLen),
 	}
 
 	if r.updateInterval == 0 {
 		r.updateInterval = defaultUpdateInterval
 	}
 
+	go r.watchJobs()
+
 	return r
+}
+
+func (rnr *Runner) watchJobs() {
+	for j := range rnr.jobs {
+		rnr.logger.Debug("run job", zap.String("name", j.name))
+		j.Run()
+	}
 }
 
 func (rnr *Runner) filterScripts(ss []*script.Script, name string) []*script.Script {
@@ -143,7 +156,11 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, 
 
 		rnr.logger.Debug("schedule script job", zap.String("hash", s.Hash()), zap.String("script name", s.Name), zap.String("cron", s.CronValue))
 		job := newJob(s, rnr.logger)
-		rnr.createLuaState(job)
+		err = rnr.createLuaState(job, nil)
+		if err != nil {
+			rnr.logger.Debug("error init job", zap.String("name", s.Name), zap.Error(err))
+			continue
+		}
 
 		if once {
 			job.Run()
@@ -152,7 +169,12 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, 
 		}
 
 		metrics.SetScriptsActive(job.script.Name, true)
-		job.entryID, err = rnr.cron.AddJob(s.CronValue, job)
+		f := func(j *Job) func() {
+			return func() {
+				rnr.jobs <- j
+			}
+		}(job)
+		job.entryID, err = rnr.cron.AddFunc(s.CronValue, f)
 		if err != nil {
 			rnr.logger.Error("error schedule script", zap.String("script name", s.Name), zap.Error(err))
 			continue
@@ -191,4 +213,6 @@ func (rnr *Runner) Stop() {
 		job.Stop()
 		delete(rnr.pool, hash)
 	}
+
+	close(rnr.jobs)
 }

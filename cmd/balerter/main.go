@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	apiManager "github.com/balerter/balerter/internal/api/manager"
 	"github.com/balerter/balerter/internal/corestorage"
 	alertModule "github.com/balerter/balerter/internal/modules/alert"
 	"github.com/balerter/balerter/internal/service"
@@ -14,7 +15,6 @@ import (
 	"syscall"
 	"time"
 
-	apiManager "github.com/balerter/balerter/internal/api/manager"
 	channelsManager "github.com/balerter/balerter/internal/chmanager"
 	"github.com/balerter/balerter/internal/config"
 	coreStorageManager "github.com/balerter/balerter/internal/corestorage/manager"
@@ -143,6 +143,18 @@ func run(
 	}
 	// TODO: pass channels manager...
 
+	coreModules := initCoreModules(coreStorageAlert, coreStorageKV, channelsMgr, lgr.Logger(), flg)
+
+	// ---------------------
+	// |
+	// | Runner
+	// |
+	lgr.Logger().Info("init runner")
+	rnr := runner.New(time.Millisecond*time.Duration(cfg.Scripts.UpdateInterval), scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, flg.Script, lgr.Logger())
+
+	lgr.Logger().Info("run runner")
+	go rnr.Watch(ctx, ctxCancel, flg.Once)
+
 	// ---------------------
 	// |
 	// | API
@@ -153,7 +165,7 @@ func run(
 		if err != nil {
 			return fmt.Sprintf("error create api listener, %v", err), 1
 		}
-		apis := apiManager.New(cfg.API.Address, coreStorageAlert, coreStorageKV, channelsMgr, lgr.Logger())
+		apis := apiManager.New(cfg.API.Address, coreStorageAlert, coreStorageKV, channelsMgr, rnr, lgr.Logger())
 		wg.Add(1)
 		go apis.Run(ctx, ctxCancel, wg, ln)
 
@@ -168,18 +180,6 @@ func run(
 			go srv.Run(ctx, ctxCancel, wg, ln)
 		}
 	}
-
-	coreModules := initCoreModules(coreStorageAlert, coreStorageKV, channelsMgr, lgr.Logger(), flg)
-
-	// ---------------------
-	// |
-	// | Runner
-	// |
-	lgr.Logger().Info("init runner")
-	rnr := runner.New(time.Millisecond*time.Duration(cfg.Scripts.UpdateInterval), scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, flg.Script, lgr.Logger())
-
-	lgr.Logger().Info("run runner")
-	go rnr.Watch(ctx, ctxCancel, flg.Once)
 
 	// ---------------------
 	// |
