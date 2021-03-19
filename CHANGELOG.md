@@ -1,3 +1,3 @@
 # Changelog
 
-See https://balerter.com/en/changelog
+See [https://balerter.com](https://balerter.com)
