@@ -1,40 +1,42 @@
 package prometheus
 
 import (
+	"fmt"
 	"github.com/prometheus/common/model"
-	"github.com/yuin/gluamapper"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"strings"
 )
 
-type queryQueryOptions struct {
-	Time string
+func (m *Prometheus) getQuery(luaState *lua.LState) (string, error) {
+	queryV := luaState.Get(1)
+	if queryV.Type() == lua.LTNil {
+		return "", fmt.Errorf("query must be not empty")
+	}
+	query := queryV.String()
+	if query == "" {
+		return "", fmt.Errorf("query must be not empty")
+	}
+	return query, nil
 }
 
 func (m *Prometheus) doQuery(luaState *lua.LState) int {
-	query := strings.TrimSpace(luaState.Get(1).String())
-	if query == "" {
+	query, err := m.getQuery(luaState)
+	if err != nil {
 		luaState.Push(lua.LNil)
-		luaState.Push(lua.LString("query must be not empty"))
+		luaState.Push(lua.LString(err.Error()))
 		return 2
 	}
 
-	options := luaState.Get(2)
-	queryOptions := queryQueryOptions{}
-	if options.Type() == lua.LTTable {
-		err := gluamapper.Map(options.(*lua.LTable), &queryOptions)
-		if err != nil {
-			m.logger.Error("error decode query query options", zap.Error(err))
-			luaState.Push(lua.LNil)
-			luaState.Push(lua.LString("error decode query query options"))
-			return 2
-		}
+	options, err := m.parseQueryOptions(luaState)
+	if err != nil {
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString(err.Error()))
+		return 2
 	}
 
 	m.logger.Debug("call prometheus query", zap.String("name", m.name), zap.String("query", query))
 
-	v, err := m.send(m.sendQuery(query, queryOptions))
+	v, err := m.send(m.sendQuery(query, options))
 	if err != nil {
 		m.logger.Error("error send query to prometheus", zap.Error(err))
 		luaState.Push(lua.LNil)
@@ -42,69 +44,28 @@ func (m *Prometheus) doQuery(luaState *lua.LState) int {
 		return 2
 	}
 
-	switch v.Type() {
-	case model.ValVector:
-		vv := v.(model.Vector)
-
-		tbl := &lua.LTable{}
-		for _, s := range vv {
-			row := &lua.LTable{}
-			metrics := &lua.LTable{}
-			for key, val := range s.Metric {
-				metrics.RawSet(lua.LString(key), lua.LString(val))
-			}
-			row.RawSet(lua.LString("metrics"), metrics)
-
-			value := &lua.LTable{}
-			value.RawSet(lua.LString("timestamp"), lua.LNumber(s.Timestamp.Unix()))
-			value.RawSet(lua.LString("value"), lua.LNumber(s.Value))
-
-			row.RawSet(lua.LString("value"), value)
-			tbl.Append(row)
-		}
-
-		luaState.Push(tbl)
-	default:
-		m.logger.Debug("query error: unexpected prometheus model type")
-		luaState.Push(lua.LNil)
-		luaState.Push(lua.LString("query error: unexpected prometheus model type"))
-		return 2
-	}
-
-	luaState.Push(lua.LNil)
-
-	return 2
-}
-
-type queryRangeOptions struct {
-	Start string
-	End   string
-	Step  string
+	return m.resp(v, luaState)
 }
 
 func (m *Prometheus) doRange(luaState *lua.LState) int {
-	query := strings.TrimSpace(luaState.Get(1).String())
-	if query == "" {
+	query, err := m.getQuery(luaState)
+	if err != nil {
 		luaState.Push(lua.LNil)
-		luaState.Push(lua.LString("query must be not empty"))
+		luaState.Push(lua.LString(err.Error()))
 		return 2
 	}
 
-	options := luaState.Get(2)
-	rangeOptions := queryRangeOptions{}
-	if options.Type() == lua.LTTable {
-		err := gluamapper.Map(options.(*lua.LTable), &rangeOptions)
-		if err != nil {
-			m.logger.Error("error decode query range options", zap.Error(err))
-			luaState.Push(lua.LNil)
-			luaState.Push(lua.LString("error decode query range options"))
-			return 2
-		}
+	options, err := m.parseRangeOptions(luaState)
+	if err != nil {
+		m.logger.Error("error decode query range options", zap.Error(err))
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("error decode query range options"))
+		return 2
 	}
 
 	m.logger.Debug("call prometheus query range", zap.String("name", m.name), zap.String("query", query))
 
-	v, err := m.send(m.sendRange(query, rangeOptions))
+	v, err := m.send(m.sendRange(query, options))
 	if err != nil {
 		m.logger.Error("error send query to prometheus", zap.Error(err))
 		luaState.Push(lua.LNil)
@@ -112,6 +73,10 @@ func (m *Prometheus) doRange(luaState *lua.LState) int {
 		return 2
 	}
 
+	return m.resp(v, luaState)
+}
+
+func (m *Prometheus) resp(v model.Value, luaState *lua.LState) int {
 	switch v.Type() {
 	case model.ValMatrix:
 		tbl := processValMatrixRange(v.(model.Matrix))

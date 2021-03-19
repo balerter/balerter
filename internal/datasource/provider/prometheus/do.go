@@ -18,7 +18,7 @@ const (
 	epQueryRange = apiPrefix + "/query_range"
 )
 
-func (m *Prometheus) sendRange(query string, opts queryRangeOptions) string {
+func (m *Prometheus) sendRange(query string, opts *queryRangeOptions) string {
 	u := *m.url
 
 	q := &url.Values{}
@@ -38,7 +38,7 @@ func (m *Prometheus) sendRange(query string, opts queryRangeOptions) string {
 	return u.String()
 }
 
-func (m *Prometheus) sendQuery(query string, opts queryQueryOptions) string {
+func (m *Prometheus) sendQuery(query string, opts *queryQueryOptions) string {
 	u := *m.url
 
 	q := &url.Values{}

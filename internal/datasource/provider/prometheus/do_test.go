@@ -20,7 +20,7 @@ func Test_sendRange(t *testing.T) {
 		},
 	}
 
-	u := m.sendRange("/foo", queryRangeOptions{
+	u := m.sendRange("/foo", &queryRangeOptions{
 		Start: "1",
 		End:   "2",
 		Step:  "3",
@@ -36,7 +36,7 @@ func Test_sendQuery(t *testing.T) {
 		},
 	}
 
-	u := m.sendQuery("/foo", queryQueryOptions{
+	u := m.sendQuery("/foo", &queryQueryOptions{
 		Time: "1",
 	})
 
