@@ -6,6 +6,7 @@ import (
 	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/api/alerts"
 	"github.com/balerter/balerter/internal/api/kv"
+	"github.com/balerter/balerter/internal/api/runtime"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/go-chi/chi"
 	"go.uber.org/zap"
@@ -23,21 +24,34 @@ type httpServer interface {
 	Shutdown(ctx context.Context) error
 }
 
+type Runner interface {
+	RunScript(name string, req *http.Request) error
+}
+
 type API struct {
 	address string
 	server  httpServer
 	logger  *zap.Logger
 }
 
-func New(address string, coreStorageAlert, coreStorageKV coreStorage.CoreStorage, chManager ChManager, logger *zap.Logger) *API {
+func New(
+	address string,
+	coreStorageAlert,
+	coreStorageKV coreStorage.CoreStorage,
+	chManager ChManager,
+	runner Runner,
+	logger *zap.Logger,
+) *API {
 	alertsRouter := alerts.New(coreStorageAlert.Alert(), chManager, logger)
 	kvRouter := kv.New(coreStorageKV.KV(), logger)
+	runtimeRouter := runtime.New(runner, logger)
 
 	router := chi.NewRouter()
 
 	router.Route("/api/v1", func(r chi.Router) {
 		r.Route("/alerts", alertsRouter.Handler)
 		r.Route("/kv", kvRouter.Handler)
+		r.Route("/runtime", runtimeRouter.Handler)
 	})
 
 	api := &API{

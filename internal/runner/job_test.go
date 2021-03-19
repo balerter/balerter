@@ -3,6 +3,7 @@ package runner
 import (
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
@@ -108,7 +109,8 @@ func TestRunner_createLuaState(t *testing.T) {
 
 	j := &Job{name: "job1"}
 
-	rnr.createLuaState(j)
+	err := rnr.createLuaState(j, nil)
+	assert.NoError(t, err)
 
 	m1.AssertCalled(t, "Name")
 	m1.AssertCalled(t, "GetLoader", mock.Anything)

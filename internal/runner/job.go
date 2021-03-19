@@ -2,10 +2,13 @@ package runner
 
 import (
 	"context"
+	"fmt"
+	"github.com/balerter/balerter/internal/modules/api"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/robfig/cron/v3"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 type Job struct {
@@ -44,7 +47,7 @@ func (j *Job) Run() {
 	}
 }
 
-func (rnr *Runner) createLuaState(j *Job) {
+func (rnr *Runner) createLuaState(j *Job, apiRequest *http.Request) error {
 	rnr.logger.Debug("create job", zap.String("name", j.name))
 
 	L := lua.NewState()
@@ -71,5 +74,14 @@ func (rnr *Runner) createLuaState(j *Job) {
 		L.PreloadModule(moduleName, loader)
 	}
 
+	a := api.New()
+	err := a.FillData(apiRequest)
+	if err != nil {
+		return fmt.Errorf("error init api module, %w", err)
+	}
+	L.PreloadModule(a.Name(), a.GetLoader(j.script))
+
 	j.luaState = L
+
+	return nil
 }
