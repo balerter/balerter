@@ -1,15 +1,28 @@
 SHELL       =   /bin/sh
 PKG_PREFIX  :=  github.com/balerter/balerter
-TAG         ?=  latest
+TAG         ?=  dev
 
 .SUFFIXES:
 .PHONY: help \
+	build-dev push-dev \
 	build push gobuild-balerter \
 	build-tgtool push-tgtool \
 	test-full test-integration
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+build-dev: ## Build balerter/balerter and balerter/test docker images DEV version
+	@echo Build Balerter dev
+	docker build --build-arg version=dev -t ghcr.io/balerter/balerter:dev -t balerter/balerter:dev -f ./contrib/balerter.Dockerfile .
+	docker build --build-arg version=dev -t ghcr.io/balerter/test:dev -t balerter/test:dev -f ./contrib/test.Dockerfile .
+
+push-dev: ## Build balerter/balerter and balerter/test images to docker registry DEV version
+	@echo Push Balerter dev
+	docker push balerter/balerter:dev
+	docker push ghcr.io/balerter/balerter:dev
+	docker push balerter/test:dev
+	docker push ghcr.io/balerter/test:dev
 
 build: ## Build balerter/balerter and balerter/test docker images
 	@echo Build Balerter $(TAG)

@@ -13,7 +13,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v1
         with:
-          go-version: [1.15]
+          go-version: [1.16]
 
       - name: Checkout code
         uses: actions/checkout@master
@@ -27,3 +27,8 @@ jobs:
         with:
           token: ${{secrets.CODECOV_TOKEN}}
           file: ./coverage.txt
+
+      - name: build and push dev version
+        run: |
+          make build-dev
+          make push-dev
