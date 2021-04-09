@@ -17,12 +17,12 @@ RUN go build -o /balerter -ldflags "-X main.version=${version} -s -w"  ./cmd/bal
 
 # -----
 
-FROM  debian:stretch-slim
+FROM  ubuntu:20.10
 COPY --from=build /balerter /
 COPY --from=build /build/balerter/modules /modules
 
 RUN apt-get update \
-     && apt-get install -y --no-install-recommends ca-certificates
+     && apt-get install -y --no-install-recommends ca-certificates tzdata
 
 RUN update-ca-certificates
 
