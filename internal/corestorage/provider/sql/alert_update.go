@@ -3,6 +3,7 @@ package sql
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/metrics"
 	"go.uber.org/zap"
 	"time"
 )
@@ -54,6 +55,7 @@ func (p *PostgresAlert) Update(name string, level alert.Level) (*alert.Alert, bo
 		}
 		a := alert.New(name)
 		a.Level = level
+		metrics.SetAlertLevel(name, level)
 		return a, level != alert.LevelSuccess, nil
 	}
 
@@ -119,7 +121,11 @@ func (p *PostgresAlert) Update(name string, level alert.Level) (*alert.Alert, bo
 			return nil, false, fmt.Errorf("error update row, %w", err)
 		}
 		a.Count++
-		return a, false, tx.Commit()
+		err = tx.Commit()
+		if err == nil {
+			metrics.SetAlertLevel(name, level)
+		}
+		return a, false, err
 	}
 
 	query = fmt.Sprintf(`UPDATE %s SET %s = $1, %s = 1, %s = CURRENT_TIMESTAMP WHERE %s = $2`,
@@ -142,6 +148,9 @@ func (p *PostgresAlert) Update(name string, level alert.Level) (*alert.Alert, bo
 
 	a.Count = 0
 	a.Level = level
-
-	return a, true, tx.Commit()
+	err = tx.Commit()
+	if err == nil {
+		metrics.SetAlertLevel(name, level)
+	}
+	return a, true, err
 }

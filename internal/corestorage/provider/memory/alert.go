@@ -3,6 +3,7 @@ package memory
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/metrics"
 	"time"
 )
 
@@ -31,6 +32,8 @@ func (m *storageAlert) Index(_ []alert.Level) (alert.Alerts, error) {
 }
 
 func (m *storageAlert) Update(name string, level alert.Level) (*alert.Alert, bool, error) {
+	metrics.SetAlertLevel(name, level)
+
 	m.mxAlerts.Lock()
 	defer m.mxAlerts.Unlock()
 
