@@ -20,6 +20,7 @@ import (
 	logModule "github.com/balerter/balerter/internal/modules/log"
 	runtimeModule "github.com/balerter/balerter/internal/modules/runtime"
 	testModule "github.com/balerter/balerter/internal/modules/test"
+	tlsModule "github.com/balerter/balerter/internal/modules/tls"
 	runnerTest "github.com/balerter/balerter/internal/runner/test"
 	scriptsManager "github.com/balerter/balerter/internal/script/manager"
 	uploadStorageManagerTest "github.com/balerter/balerter/internal/upload_storage/manager/test"
@@ -152,6 +153,15 @@ func run(cfg *config.Config, flg *config.Flags) (string, int) {
 	// |
 	httpMod := mock.New(httpModule.ModuleName(), httpModule.Methods(), lgr.Logger())
 	coreModules = append(coreModules, httpMod)
+
+	// ---------------------
+	// |
+	// | Core Modules
+	// |
+	// | tls
+	// |
+	tlsMod := mock.New(tlsModule.ModuleName(), tlsModule.Methods(), lgr.Logger())
+	coreModules = append(coreModules, tlsMod)
 
 	// ---------------------
 	// |

@@ -27,6 +27,7 @@ import (
 	"github.com/balerter/balerter/internal/modules/kv"
 	logModule "github.com/balerter/balerter/internal/modules/log"
 	runtimeModule "github.com/balerter/balerter/internal/modules/runtime"
+	tlsModule "github.com/balerter/balerter/internal/modules/tls"
 	"github.com/balerter/balerter/internal/runner"
 	scriptsManager "github.com/balerter/balerter/internal/script/manager"
 	uploadStorageManager "github.com/balerter/balerter/internal/upload_storage/manager"
@@ -236,6 +237,9 @@ func initCoreModules(
 
 	runtimeMod := runtimeModule.New(flg, logger)
 	coreModules = append(coreModules, runtimeMod)
+
+	tlsMod := tlsModule.New()
+	coreModules = append(coreModules, tlsMod)
 
 	return coreModules
 }
