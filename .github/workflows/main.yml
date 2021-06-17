@@ -28,6 +28,11 @@ jobs:
           token: ${{secrets.CODECOV_TOKEN}}
           file: ./coverage.txt
 
+      - name: docker login
+        run: |
+          echo ${{ secrets.NEGASUS_DOCKER_TOKEN }} | docker login --username negasus --password-stdin
+          echo ${{ secrets.NEGASUS_PAT }} | docker login ghcr.io -u negasus --password-stdin
+
       - name: build and push dev version
         run: |
           make build-dev
