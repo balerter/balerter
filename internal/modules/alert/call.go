@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/script/script"
-	"github.com/yuin/gluamapper"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"strings"
@@ -42,10 +41,70 @@ func (a *Alert) getAlertData(luaState *lua.LState) (alertName, alertText string,
 		return
 	}
 
-	err = gluamapper.Map(alertOptionsLua.(*lua.LTable), &options)
-	if err != nil {
-		err = fmt.Errorf("wrong options format: %v", err)
-		return
+	alertOptions := alertOptionsLua.(*lua.LTable)
+
+	// parse options
+	// channels
+	channelsOpts := alertOptions.RawGetString("channels")
+	if channelsOpts != lua.LNil {
+		if channelsOpts.Type() != lua.LTTable {
+			err = fmt.Errorf("channels options must be a table")
+			return
+		}
+		var channelsErr error
+		channelsOpts.(*lua.LTable).ForEach(func(value lua.LValue, value2 lua.LValue) {
+			if value2.Type() != lua.LTString {
+				channelsErr = fmt.Errorf("wrong channel name %s", value2.String())
+			}
+			options.Channels = append(options.Channels, value2.String())
+		})
+		if channelsErr != nil {
+			err = channelsErr
+			return
+		}
+	}
+
+	// quiet
+	quietVal := alertOptions.RawGetString("quiet")
+	if quietVal.Type() != lua.LTNil {
+		if quietVal.Type() != lua.LTBool {
+			err = fmt.Errorf("quiet must be a bool")
+			return
+		}
+		options.Quiet = bool(quietVal.(lua.LBool))
+	}
+
+	// repeat & resend
+	repeatVal := alertOptions.RawGetString("repeat")
+	if repeatVal.Type() != lua.LTNil {
+		if repeatVal.Type() != lua.LTNumber {
+			err = fmt.Errorf("repeat must be a number")
+			return
+		}
+		options.Repeat = int(repeatVal.(lua.LNumber))
+	}
+
+	resendVal := alertOptions.RawGetString("resend")
+	if resendVal != lua.LNil {
+		if alertOptionsLua.(*lua.LTable).RawGetString("repeat") != lua.LNil {
+			err = fmt.Errorf("you must not use repeat and resend option together")
+			return
+		}
+
+		if resendVal.Type() != lua.LTNumber {
+			err = fmt.Errorf("resend must be a number")
+			return
+		}
+		options.Repeat = int(resendVal.(lua.LNumber))
+	}
+
+	imageVal := alertOptions.RawGetString("image")
+	if imageVal != lua.LNil {
+		if imageVal.Type() != lua.LTString {
+			err = fmt.Errorf("image must be a string")
+			return
+		}
+		options.Image = imageVal.String()
 	}
 
 	return alertName, alertText, options, nil
