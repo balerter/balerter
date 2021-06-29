@@ -31,7 +31,7 @@ func (h *HTTP) parseRequestArgs(luaState *lua.LState) (*requestArgs, error) {
 	}
 	args.URI = argURI.(lua.LString).String()
 
-	argBody := luaState.Get(2)
+	argBody := luaState.Get(2) //nolint:gomnd // param position
 	switch argBody.Type() {
 	case lua.LTString:
 		args.Body = []byte(argBody.(lua.LString).String())
@@ -43,7 +43,7 @@ func (h *HTTP) parseRequestArgs(luaState *lua.LState) (*requestArgs, error) {
 		return nil, fmt.Errorf("first argument must be a string")
 	}
 
-	argHeaders := luaState.Get(3)
+	argHeaders := luaState.Get(3) //nolint:gomnd // param position
 	switch argHeaders.Type() {
 	case lua.LTTable:
 		argHeaders.(*lua.LTable).ForEach(func(value lua.LValue, value2 lua.LValue) {

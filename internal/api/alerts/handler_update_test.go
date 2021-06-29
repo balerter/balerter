@@ -160,7 +160,8 @@ func TestHandlerUpdate_level_was_updated(t *testing.T) {
 	ch.AssertCalled(t, "Send", mock.Anything, mock.Anything, mock.Anything)
 
 	assert.Equal(t, 200, rw.Code)
-	assert.Equal(t, `{"name":"1","level":"warning","level_num":2,"count":3,"last_change":"2020-01-02T03:04:05Z","start":"2021-01-02T03:04:05Z"}`, rw.Body.String())
+	assert.Equal(t, `{"name":"1","level":"warning","level_num":2,"count":3,`+
+		`"last_change":"2020-01-02T03:04:05Z","start":"2021-01-02T03:04:05Z"}`, rw.Body.String())
 
 	ch.AssertExpectations(t)
 }
@@ -197,5 +198,6 @@ func TestHandlerUpdate_level_was_not_updated(t *testing.T) {
 	a.handlerUpdate(rw, req)
 
 	assert.Equal(t, 200, rw.Code)
-	assert.Equal(t, `{"name":"1","level":"warning","level_num":2,"count":3,"last_change":"2020-01-02T03:04:05Z","start":"2021-01-02T03:04:05Z"}`, rw.Body.String())
+	assert.Equal(t, `{"name":"1","level":"warning","level_num":2,"count":3,`+
+		`"last_change":"2020-01-02T03:04:05Z","start":"2021-01-02T03:04:05Z"}`, rw.Body.String())
 }

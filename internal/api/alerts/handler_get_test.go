@@ -137,6 +137,7 @@ func TestHandlerGet(t *testing.T) {
 
 	a.handlerGet(rw, req)
 
-	assert.Equal(t, `{"name":"1","level":"warning","level_num":2,"count":3,"last_change":"2020-01-02T03:04:05Z","start":"2021-01-02T03:04:05Z"}`, rw.Body.String())
+	assert.Equal(t, `{"name":"1","level":"warning","level_num":2,"count":3,`+
+		`"last_change":"2020-01-02T03:04:05Z","start":"2021-01-02T03:04:05Z"}`, rw.Body.String())
 	assert.Equal(t, 200, rw.Code)
 }

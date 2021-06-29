@@ -42,7 +42,6 @@ func (p *PostgresAlert) Index(levels []alert.Level) (alert.Alerts, error) {
 	var lastChange, start time.Time
 
 	for rows.Next() {
-
 		err = rows.Scan(
 			&name,
 			&level,

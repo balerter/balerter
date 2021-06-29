@@ -2,7 +2,6 @@ package corestorage
 
 import (
 	"github.com/balerter/balerter/internal/alert"
-	//alertModule "github.com/balerter/balerter/internal/modules/alert"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -86,9 +85,9 @@ func (m *AlertMock) Update(name string, level alert.Level) (*alert.Alert, bool, 
 	args := m.Called(name, level)
 	a := args.Get(0)
 	if a == nil {
-		return nil, args.Bool(1), args.Error(2)
+		return nil, args.Bool(1), args.Error(2) //nolint:gomnd // arg position
 	}
-	return args.Get(0).(*alert.Alert), args.Bool(1), args.Error(2)
+	return args.Get(0).(*alert.Alert), args.Bool(1), args.Error(2) //nolint:gomnd // arg position
 }
 
 // KVMock represents KV mock storage

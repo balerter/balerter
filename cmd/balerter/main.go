@@ -151,7 +151,15 @@ func run(
 	// | Runner
 	// |
 	lgr.Logger().Info("init runner")
-	rnr := runner.New(time.Millisecond*time.Duration(cfg.Scripts.UpdateInterval), scriptsMgr, dsMgr, uploadStoragesMgr, coreModules, flg.Script, lgr.Logger())
+	rnr := runner.New(
+		time.Millisecond*time.Duration(cfg.Scripts.UpdateInterval),
+		scriptsMgr,
+		dsMgr,
+		uploadStoragesMgr,
+		coreModules,
+		flg.Script,
+		lgr.Logger(),
+	)
 
 	lgr.Logger().Info("run runner")
 	go rnr.Watch(ctx, ctxCancel, flg.Once)
@@ -215,27 +223,27 @@ func initCoreModules(
 	coreStorageAlert corestorage.CoreStorage,
 	coreStorageKV corestorage.CoreStorage,
 	chManager *channelsManager.ChannelsManager,
-	logger *zap.Logger,
+	lgr *zap.Logger,
 	flg *config.Flags,
 ) []modules.Module {
 	coreModules := make([]modules.Module, 0)
 
-	alertMod := alertModule.New(coreStorageAlert.Alert(), chManager, logger)
+	alertMod := alertModule.New(coreStorageAlert.Alert(), chManager, lgr)
 	coreModules = append(coreModules, alertMod)
 
 	kvModule := kv.New(coreStorageKV.KV())
 	coreModules = append(coreModules, kvModule)
 
-	logMod := logModule.New(logger)
+	logMod := logModule.New(lgr)
 	coreModules = append(coreModules, logMod)
 
-	chartMod := chartModule.New(logger)
+	chartMod := chartModule.New(lgr)
 	coreModules = append(coreModules, chartMod)
 
-	httpMod := httpModule.New(logger)
+	httpMod := httpModule.New(lgr)
 	coreModules = append(coreModules, httpMod)
 
-	runtimeMod := runtimeModule.New(flg, logger)
+	runtimeMod := runtimeModule.New(flg, lgr)
 	coreModules = append(coreModules, runtimeMod)
 
 	tlsMod := tlsModule.New()
