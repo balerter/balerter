@@ -1,13 +1,15 @@
 package loki
 
 import (
+	"bytes"
 	"fmt"
-	lokihttp "github.com/grafana/loki/pkg/loghttp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+	"io"
+	"net/http"
 	"net/url"
 	"testing"
 )
@@ -112,13 +114,20 @@ func Test_doRange_error_send_request(t *testing.T) {
 }
 
 func Test_do_unexpected_model_type(t *testing.T) {
+	mm := &httpClientMock{}
+	resp := &http.Response{
+		Body: io.NopCloser(bytes.NewReader([]byte(`{"data":{"resultType": "vector","result":[]}}`))),
+	}
+	mm.On("Do", mock.Anything).Return(resp, nil)
+
 	m := &Loki{
 		logger: zap.NewNop(),
+		client: mm,
 	}
 
 	luaState := lua.NewState()
 
-	n := m.do(&lokihttp.QueryResponse{Data: lokihttp.QueryResponseData{Result: lokihttp.Vector{}}}, luaState)
+	n := m.do(luaState, "")
 
 	assert.Equal(t, 2, n)
 	assert.Equal(t, lua.LTNil, luaState.Get(1).Type())
@@ -127,13 +136,19 @@ func Test_do_unexpected_model_type(t *testing.T) {
 }
 
 func Test_doQuery(t *testing.T) {
+	mm := &httpClientMock{}
+	resp := &http.Response{
+		Body: io.NopCloser(bytes.NewReader([]byte(`{"status": "success","data":{"resultType": "streams","result": [{"stream": {},"values": []}]}}`))),
+	}
+	mm.On("Do", mock.Anything).Return(resp, nil)
 	m := &Loki{
 		logger: zap.NewNop(),
+		client: mm,
 	}
 
 	luaState := lua.NewState()
 
-	n := m.do(&lokihttp.QueryResponse{Data: lokihttp.QueryResponseData{Result: lokihttp.Streams{}}}, luaState)
+	n := m.do(luaState, "")
 
 	assert.Equal(t, 2, n)
 	assert.Equal(t, lua.LTTable, luaState.Get(1).Type())

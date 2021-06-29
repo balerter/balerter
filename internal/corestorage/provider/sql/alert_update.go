@@ -15,7 +15,8 @@ func (p *PostgresAlert) Update(name string, level alert.Level) (*alert.Alert, bo
 		return nil, false, fmt.Errorf("error start tx, %w", err)
 	}
 
-	query := fmt.Sprintf(`INSERT INTO %s (%s, %s, %s, %s, %s) VALUES ($1, $2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT (%s) DO NOTHING`,
+	query := fmt.Sprintf(`INSERT INTO %s (%s, %s, %s, %s, %s) VALUES `+
+		`($1, $2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT (%s) DO NOTHING`,
 		p.tableCfg.Table,
 		p.tableCfg.Fields.Name,
 		p.tableCfg.Fields.Level,

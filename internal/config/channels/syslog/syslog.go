@@ -50,7 +50,7 @@ func validatePriority(p string) error {
 	}
 
 	parts := strings.Split(p, "|")
-	if len(parts) > 2 {
+	if len(parts) > 2 { //nolint:gomnd // parts count
 		return fmt.Errorf("bad priority format")
 	}
 

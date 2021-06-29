@@ -89,7 +89,7 @@ func (ch *Chart) render(_ *script.Script) lua.LGFunction {
 			return 2
 		}
 
-		chartData := luaState.Get(2)
+		chartData := luaState.Get(2) // nolint:gomnd // param position
 		if chartData.Type() != lua.LTTable {
 			luaState.Push(lua.LNil)
 			luaState.Push(lua.LString("chart data table must be defined"))

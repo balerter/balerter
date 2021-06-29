@@ -24,14 +24,14 @@ func (a *Alert) getAlertData(luaState *lua.LState) (alertName, alertText string,
 		return
 	}
 
-	alertTextLua := luaState.Get(2)
+	alertTextLua := luaState.Get(2) // nolint:gomnd // param position
 	if alertTextLua.Type() == lua.LTNil {
 		return
 	}
 
 	alertText = alertTextLua.String()
 
-	alertOptionsLua := luaState.Get(3)
+	alertOptionsLua := luaState.Get(3) // nolint:gomnd // param position
 	if alertOptionsLua.Type() == lua.LTNil {
 		return
 	}

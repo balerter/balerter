@@ -54,7 +54,7 @@ func parsePriority(s string) syslog.Priority {
 
 	priority := getSeverity(parts[0])
 
-	if len(parts) == 2 {
+	if len(parts) == 2 { //nolint:gomnd // parts count
 		priority |= getFacility(parts[1])
 	}
 

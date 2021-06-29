@@ -27,7 +27,8 @@ func (m *Loki) doQuery(luaState *lua.LState) int {
 		return 2
 	}
 
-	queryOptions, err := m.parseQueryOptions(luaState)
+	queryOptions := &queryOptions{}
+	err = m.parseOptions(luaState, queryOptions)
 	if err != nil {
 		m.logger.Error("error parse query options", zap.Error(err))
 		luaState.Push(lua.LNil)
@@ -37,15 +38,7 @@ func (m *Loki) doQuery(luaState *lua.LState) int {
 
 	m.logger.Debug("call loki query", zap.String("name", m.name), zap.String("query", query), zap.Any("options", queryOptions))
 
-	v, err := m.send(m.sendQuery(query, queryOptions))
-	if err != nil {
-		m.logger.Error("error send query to loki", zap.Error(err))
-		luaState.Push(lua.LNil)
-		luaState.Push(lua.LString("error send query to loki: " + err.Error()))
-		return 2
-	}
-
-	return m.do(v, luaState)
+	return m.do(luaState, m.sendQuery(query, queryOptions))
 }
 
 func (m *Loki) doRange(luaState *lua.LState) int {
@@ -53,20 +46,25 @@ func (m *Loki) doRange(luaState *lua.LState) int {
 	if err != nil {
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString(err.Error()))
-		return 2
+		return 2 // nolint:gomnd // params count
 	}
 
-	rangeOptions, err := m.parseRangeOptions(luaState)
+	rangeOptions := &rangeOptions{}
+	err = m.parseOptions(luaState, rangeOptions)
 	if err != nil {
 		m.logger.Error("error parse range options", zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error parse range options"))
-		return 2
+		return 2 // nolint:gomnd // params count
 	}
 
 	m.logger.Debug("call loki query range", zap.String("name", m.name), zap.String("query", query), zap.Any("options", rangeOptions))
 
-	v, err := m.send(m.sendRange(query, rangeOptions))
+	return m.do(luaState, m.sendRange(query, rangeOptions))
+}
+
+func (m *Loki) do(luaState *lua.LState, u string) int {
+	v, err := m.send(u)
 	if err != nil {
 		m.logger.Error("error send query to loki", zap.Error(err))
 		luaState.Push(lua.LNil)
@@ -74,10 +72,13 @@ func (m *Loki) doRange(luaState *lua.LState) int {
 		return 2
 	}
 
-	return m.do(v, luaState)
-}
+	if v == nil || v.Data.Result == nil {
+		m.logger.Error("unexpected response from loki")
+		luaState.Push(lua.LNil)
+		luaState.Push(lua.LString("unexpected response from loki"))
+		return 2
+	}
 
-func (m *Loki) do(v *lokihttp.QueryResponse, luaState *lua.LState) int {
 	switch v.Data.Result.Type() {
 	case lokihttp.ResultTypeStream:
 		vv := v.Data.Result.(lokihttp.Streams)

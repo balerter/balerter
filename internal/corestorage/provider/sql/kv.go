@@ -33,7 +33,7 @@ func (p *PostgresKV) All() (map[string]string, error) {
 		return nil, fmt.Errorf("error sql query, %w", err)
 	}
 
-	if err := rows.Err(); err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("error rows, %w", err)
 	}
 
@@ -57,7 +57,8 @@ func (p *PostgresKV) All() (map[string]string, error) {
 
 // Put is an implementation of the storage interface
 func (p *PostgresKV) Put(key, value string) error {
-	query := fmt.Sprintf(`INSERT INTO %s (%s, %s) VALUES ($1, $2) ON CONFLICT (%s) DO NOTHING`, p.tableCfg.Table, p.tableCfg.Fields.Key, p.tableCfg.Fields.Value, p.tableCfg.Fields.Key)
+	query := fmt.Sprintf(`INSERT INTO %s (%s, %s) VALUES ($1, $2) ON CONFLICT (%s) DO NOTHING`,
+		p.tableCfg.Table, p.tableCfg.Fields.Key, p.tableCfg.Fields.Value, p.tableCfg.Fields.Key)
 
 	res, err := p.db.Exec(query, key, value)
 	if err != nil {
@@ -101,7 +102,8 @@ func (p *PostgresKV) Get(key string) (string, error) {
 
 // Upsert is an implementation of the storage interface
 func (p *PostgresKV) Upsert(key, value string) error {
-	query := fmt.Sprintf(`INSERT INTO %s (%s, %s) VALUES ($1, $2) ON CONFLICT (%s) DO UPDATE SET value = $2`, p.tableCfg.Table, p.tableCfg.Fields.Key, p.tableCfg.Fields.Value, p.tableCfg.Fields.Key)
+	query := fmt.Sprintf(`INSERT INTO %s (%s, %s) VALUES ($1, $2) ON CONFLICT (%s) DO UPDATE SET value = $2`,
+		p.tableCfg.Table, p.tableCfg.Fields.Key, p.tableCfg.Fields.Value, p.tableCfg.Fields.Key)
 
 	_, err := p.db.Exec(query, key, value)
 	if err != nil {

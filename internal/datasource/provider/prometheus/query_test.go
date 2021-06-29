@@ -11,5 +11,4 @@ func TestPrometheus_doQuery_empty_query(t *testing.T) {
 	luaState := lua.NewState()
 	n := m.doQuery(luaState)
 	assert.Equal(t, 2, n)
-
 }

@@ -45,9 +45,9 @@ func (ch *Chart) parseColor(s string) (color.RGBA, error) {
 	s = s[1:]
 
 	switch len(s) {
-	case 6:
+	case 6: // nolint:gomnd // str len
 		return parseColor6(s)
-	case 8:
+	case 8: // nolint:gomnd // str len
 		return parseColor8(s)
 	}
 
@@ -55,7 +55,7 @@ func (ch *Chart) parseColor(s string) (color.RGBA, error) {
 }
 
 func parseGroup(s string) (uint8, error) {
-	if len(s) != 2 {
+	if len(s) != 2 { // nolint:gomnd // parts count
 		return 0, fmt.Errorf("wrong group length")
 	}
 

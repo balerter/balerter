@@ -71,7 +71,7 @@ func (kv *KV) all(luaState *lua.LState) int {
 	if err != nil {
 		luaState.Push(lua.LString(""))
 		luaState.Push(lua.LString(err.Error()))
-		return 2
+		return 2 // nolint:gomnd // params count
 	}
 
 	res := &lua.LTable{}
@@ -83,7 +83,7 @@ func (kv *KV) all(luaState *lua.LState) int {
 	luaState.Push(res)
 	luaState.Push(lua.LNil)
 
-	return 2
+	return 2 // nolint:gomnd // params count
 }
 
 func (kv *KV) get(luaState *lua.LState) int {
@@ -93,18 +93,18 @@ func (kv *KV) get(luaState *lua.LState) int {
 	if err != nil {
 		luaState.Push(lua.LString(""))
 		luaState.Push(lua.LString(err.Error()))
-		return 2
+		return 2 // nolint:gomnd // params count
 	}
 
 	luaState.Push(lua.LString(val))
 	luaState.Push(lua.LNil)
 
-	return 2
+	return 2 // nolint:gomnd // params count
 }
 
 func (kv *KV) put(luaState *lua.LState) int {
 	varName := luaState.Get(1).String()
-	varVal := luaState.Get(2).String()
+	varVal := luaState.Get(2).String() // nolint:gomnd // param position
 
 	err := kv.engine.Put(varName, varVal)
 	if err != nil {
@@ -117,7 +117,7 @@ func (kv *KV) put(luaState *lua.LState) int {
 
 func (kv *KV) upsert(luaState *lua.LState) int {
 	varName := luaState.Get(1).String()
-	varVal := luaState.Get(2).String()
+	varVal := luaState.Get(2).String() // nolint:gomnd // param position
 
 	err := kv.engine.Upsert(varName, varVal)
 	if err != nil {
