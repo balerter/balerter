@@ -7,7 +7,7 @@ TAG         ?=  dev
 	build-dev push-dev \
 	build push gobuild-balerter \
 	build-tgtool push-tgtool \
-	test-full test-integration
+	test-full
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -54,7 +54,3 @@ push-tgtool: ## Build tgtool image to docker registry
 
 test-full: ## Run full tests
 	GO111MODULE=on go test -mod=vendor -coverprofile=coverage.txt -covermode=atomic ./internal/... ./cmd/...
-
-test-integration: ## Run integration tests
-	go build -race -o ./integration/balerter ./cmd/balerter
-	go test ./integration
