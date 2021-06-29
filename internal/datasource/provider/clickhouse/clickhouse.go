@@ -19,16 +19,19 @@ var (
 	defaultTimeout = time.Second * 5
 )
 
+// ModuleName returns the module name
 func ModuleName(name string) string {
 	return "clickhouse." + name
 }
 
+// Methods returns module methods
 func Methods() []string {
 	return []string{
 		"query",
 	}
 }
 
+// Clickhouse represents datasource of type Clickhouse
 type Clickhouse struct {
 	name    string
 	logger  *zap.Logger
@@ -36,6 +39,7 @@ type Clickhouse struct {
 	timeout time.Duration
 }
 
+// New creates new Clickhouse datasource
 func New(cfg clickhouseCfg.Clickhouse, logger *zap.Logger) (*Clickhouse, error) {
 	c := &Clickhouse{
 		name:    ModuleName(cfg.Name),
@@ -92,14 +96,17 @@ func New(cfg clickhouseCfg.Clickhouse, logger *zap.Logger) (*Clickhouse, error) 
 	return c, nil
 }
 
+// Stop the datasource
 func (m *Clickhouse) Stop() error {
 	return m.db.Close()
 }
 
+// Name returns the datasource name
 func (m *Clickhouse) Name() string {
 	return m.name
 }
 
+// GetLoader returns the datasource lua loader
 func (m *Clickhouse) GetLoader(_ *script.Script) lua.LGFunction {
 	return m.loader
 }

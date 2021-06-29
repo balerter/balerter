@@ -5,6 +5,7 @@ import (
 	lua "github.com/yuin/gopher-lua"
 )
 
+// AddAssert add assert for test
 func (r *Registry) AddAssert(method string, args []lua.LValue, called bool) error {
 	e, ok := r.assertEntries[method]
 	if !ok {

@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// Send message to the channel
 func (a *AMReceiver) Send(mes *message.Message) error {
 	data := &template.Data{
 		Receiver:          "balerter",

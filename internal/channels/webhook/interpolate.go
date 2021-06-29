@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	MacrosLevel     = "$level"
-	MacrosAlertName = "$alert_name"
-	MacrosText      = "$text"
-	MacrosImage     = "$image"
+	macrosLevel     = "$level"
+	macrosAlertName = "$alert_name"
+	macrosText      = "$text"
+	macrosImage     = "$image"
 )
 
 func interpolate(s string, m *message.Message) string {
@@ -18,9 +18,9 @@ func interpolate(s string, m *message.Message) string {
 	}
 
 	return strings.NewReplacer(
-		MacrosLevel, m.Level,
-		MacrosAlertName, m.AlertName,
-		MacrosText, m.Text,
-		MacrosImage, m.Image,
+		macrosLevel, m.Level,
+		macrosAlertName, m.AlertName,
+		macrosText, m.Text,
+		macrosImage, m.Image,
 	).Replace(s)
 }

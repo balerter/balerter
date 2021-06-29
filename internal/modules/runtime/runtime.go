@@ -7,10 +7,12 @@ import (
 	"go.uber.org/zap"
 )
 
+// ModuleName returns the module name
 func ModuleName() string {
 	return "runtime"
 }
 
+// Methods returns module methods
 func Methods() []string {
 	return []string{
 		"logLevel",
@@ -21,11 +23,13 @@ func Methods() []string {
 	}
 }
 
+// Runtime represents the Runtime core module
 type Runtime struct {
 	flg    *config.Flags
 	logger *zap.Logger
 }
 
+// New creates new Runtime core module
 func New(flg *config.Flags, logger *zap.Logger) *Runtime {
 	m := &Runtime{
 		flg:    flg,
@@ -35,10 +39,12 @@ func New(flg *config.Flags, logger *zap.Logger) *Runtime {
 	return m
 }
 
+// Name returns the module name
 func (m *Runtime) Name() string {
 	return ModuleName()
 }
 
+// GetLoader returns the lua loader
 func (m *Runtime) GetLoader(_ *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
@@ -58,6 +64,7 @@ func (m *Runtime) GetLoader(_ *script.Script) lua.LGFunction {
 	}()
 }
 
+// Stop the module
 func (m *Runtime) Stop() error {
 	return nil
 }

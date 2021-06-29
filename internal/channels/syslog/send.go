@@ -6,6 +6,7 @@ import (
 	"github.com/balerter/balerter/internal/message"
 )
 
+// Send the message to the channel
 func (sl *Syslog) Send(mes *message.Message) error {
 	data, err := json.Marshal(mes)
 	if err != nil {

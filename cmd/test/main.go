@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/balerter/balerter/internal/modules/api"
 	"io"
 	"log"
 	"os"
@@ -144,6 +145,15 @@ func run(cfg *config.Config, flg *config.Flags) (string, int) {
 	// |
 	chartMod := mock.New(chartModule.ModuleName(), chartModule.Methods(), lgr.Logger())
 	coreModules = append(coreModules, chartMod)
+
+	// ---------------------
+	// |
+	// | Core Modules
+	// |
+	// | API
+	// |
+	apiMod := mock.New(api.ModuleName(), api.Methods(), lgr.Logger())
+	coreModules = append(coreModules, apiMod)
 
 	// ---------------------
 	// |

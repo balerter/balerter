@@ -18,11 +18,13 @@ const (
 	methodSendPhoto   = "sendPhoto"
 )
 
+// API represents the Telegram API
 type API struct {
 	endpoint   string
 	httpClient *http.Client
 }
 
+// New creates new Telegram API
 func New(cfg telegram.Telegram) (*API, error) {
 	a := &API{
 		endpoint: apiEndpoint + cfg.Token + "/",

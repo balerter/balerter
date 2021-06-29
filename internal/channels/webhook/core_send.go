@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// Send the message to the channel
 func (w *Core) Send(body io.Reader, m *message.Message) (*http.Response, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), w.timeout)
 	defer cancel()

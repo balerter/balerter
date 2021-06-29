@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// Index is an implementation of the storage interface
 func (p *PostgresAlert) Index(levels []alert.Level) (alert.Alerts, error) {
 	query := fmt.Sprintf("SELECT %s, %s, %s, %s, %s FROM %s",
 		p.tableCfg.Fields.Name,

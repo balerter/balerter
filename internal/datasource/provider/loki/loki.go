@@ -14,10 +14,12 @@ var (
 	defaultTimeout = time.Second * 5
 )
 
+// ModuleName returns the module name
 func ModuleName(name string) string {
 	return "loki." + name
 }
 
+// Methods returns module methods
 func Methods() []string {
 	return []string{
 		"query",
@@ -30,6 +32,7 @@ type httpClient interface {
 	Do(r *http.Request) (*http.Response, error)
 }
 
+// Loki represents the datasource of type Loki
 type Loki struct {
 	logger            *zap.Logger
 	name              string
@@ -40,6 +43,7 @@ type Loki struct {
 	timeout           time.Duration
 }
 
+// New creates new Loki datasource
 func New(cfg loki.Loki, logger *zap.Logger) (*Loki, error) {
 	m := &Loki{
 		logger:  logger,
@@ -70,15 +74,18 @@ func New(cfg loki.Loki, logger *zap.Logger) (*Loki, error) {
 	return m, nil
 }
 
+// Stop the datasource
 func (m *Loki) Stop() error {
 	m.client.CloseIdleConnections()
 	return nil
 }
 
+// Name returns the datasource name
 func (m *Loki) Name() string {
 	return m.name
 }
 
+// GetLoader returns the datasource lua loader
 func (m *Loki) GetLoader(_ *script.Script) lua.LGFunction {
 	return m.loader
 }

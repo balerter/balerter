@@ -16,6 +16,7 @@ type scriptsManager interface {
 	GetWithTests() ([]*script.Script, error)
 }
 
+// Runner represents the Test runner
 type Runner struct {
 	scriptsManager  scriptsManager
 	dsManager       manager
@@ -25,6 +26,7 @@ type Runner struct {
 	coreModules []modules.ModuleTest
 }
 
+// New creates new test runner
 func New(scriptsManager scriptsManager,
 	dsManager,
 	storagesManager manager,

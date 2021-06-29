@@ -20,6 +20,7 @@ func newPromAlert() *model.Alert {
 	}
 }
 
+// Send a message to AlertManager
 func (a *AlertManager) Send(mes *message.Message) error {
 	promAlert := newPromAlert()
 

@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Notify represents a channel of type Notify
 type Notify struct {
 	name        string
 	iconSuccess string
@@ -14,6 +15,7 @@ type Notify struct {
 	iconWarning string
 }
 
+// New creates new Notify channel
 func New(cfg notify.Notify, _ *zap.Logger) (*Notify, error) {
 	p := &Notify{
 		name:        cfg.Name,
@@ -25,10 +27,12 @@ func New(cfg notify.Notify, _ *zap.Logger) (*Notify, error) {
 	return p, nil
 }
 
+// Name returns the channel name
 func (p *Notify) Name() string {
 	return p.name
 }
 
+// Send message to the channel
 func (p *Notify) Send(mes *message.Message) error {
 	systemNotify.Notify("Balerter", mes.Level, mes.Text, p.getIconByLevel(mes.Level))
 

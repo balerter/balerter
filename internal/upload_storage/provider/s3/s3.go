@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Provider represents S3 upload storage provider
 type Provider struct {
 	name     string
 	region   string
@@ -17,16 +18,19 @@ type Provider struct {
 	logger   *zap.Logger
 }
 
+// Methods returns module methods
 func Methods() []string {
 	return []string{
 		"uploadPNG",
 	}
 }
 
+// ModuleName returns the module name
 func ModuleName(name string) string {
 	return "s3." + name
 }
 
+// New creates new S3 upload storage module
 func New(cfg s3.S3, logger *zap.Logger) (*Provider, error) {
 	p := &Provider{
 		name:     ModuleName(cfg.Name),
@@ -41,14 +45,17 @@ func New(cfg s3.S3, logger *zap.Logger) (*Provider, error) {
 	return p, nil
 }
 
+// Name returns the module name
 func (p *Provider) Name() string {
 	return p.name
 }
 
+// Stop the module
 func (p *Provider) Stop() error {
 	return nil
 }
 
+// GetLoader returns the lua loader
 func (p *Provider) GetLoader(_ *script.Script) lua.LGFunction {
 	return p.loader
 }

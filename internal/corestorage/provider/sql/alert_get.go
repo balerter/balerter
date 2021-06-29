@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// Get is an implementation of the storage interface
 func (p *PostgresAlert) Get(alertName string) (*alert.Alert, error) {
 	query := fmt.Sprintf("SELECT %s, %s, %s, %s, %s FROM %s WHERE %s = $1",
 		p.tableCfg.Fields.Name,

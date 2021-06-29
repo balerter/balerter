@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Send the message to the channel
 func (w *Webhook) Send(m *message.Message) error {
 	body := interpolate(w.body, m)
 
