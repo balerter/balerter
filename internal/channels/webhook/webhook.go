@@ -13,6 +13,7 @@ type Webhook struct {
 	whCore *Core
 }
 
+// New creates new Webhook channel
 func New(cfg webhook.Webhook, logger *zap.Logger) (*Webhook, error) {
 	return &Webhook{
 		body:   cfg.Settings.Payload.Body,
@@ -22,6 +23,7 @@ func New(cfg webhook.Webhook, logger *zap.Logger) (*Webhook, error) {
 	}, nil
 }
 
+// Name returns the channel name
 func (w *Webhook) Name() string {
 	return w.name
 }

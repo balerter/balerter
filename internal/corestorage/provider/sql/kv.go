@@ -12,9 +12,11 @@ import (
 )
 
 var (
+	// ErrNoRow returns if rows is not found
 	ErrNoRow = errors.New("not found")
 )
 
+// PostgresKV represent the Postgres implementation of the KV storage
 type PostgresKV struct {
 	db       *sqlx.DB
 	tableCfg tables.TableKV
@@ -22,6 +24,7 @@ type PostgresKV struct {
 	logger   *zap.Logger
 }
 
+// All is an implementation of the storage interface
 func (p *PostgresKV) All() (map[string]string, error) {
 	query := fmt.Sprintf(`SELECT %s, %s FROM %s`, p.tableCfg.Fields.Key, p.tableCfg.Fields.Value, p.tableCfg.Table)
 
@@ -52,6 +55,7 @@ func (p *PostgresKV) All() (map[string]string, error) {
 	return result, nil
 }
 
+// Put is an implementation of the storage interface
 func (p *PostgresKV) Put(key, value string) error {
 	query := fmt.Sprintf(`INSERT INTO %s (%s, %s) VALUES ($1, $2) ON CONFLICT (%s) DO NOTHING`, p.tableCfg.Table, p.tableCfg.Fields.Key, p.tableCfg.Fields.Value, p.tableCfg.Fields.Key)
 
@@ -72,6 +76,7 @@ func (p *PostgresKV) Put(key, value string) error {
 	return nil
 }
 
+// Get is an implementation of the storage interface
 func (p *PostgresKV) Get(key string) (string, error) {
 	query := fmt.Sprintf(`SELECT %s FROM %s WHERE key = $1`, p.tableCfg.Fields.Value, p.tableCfg.Table)
 
@@ -94,6 +99,7 @@ func (p *PostgresKV) Get(key string) (string, error) {
 	return value, nil
 }
 
+// Upsert is an implementation of the storage interface
 func (p *PostgresKV) Upsert(key, value string) error {
 	query := fmt.Sprintf(`INSERT INTO %s (%s, %s) VALUES ($1, $2) ON CONFLICT (%s) DO UPDATE SET value = $2`, p.tableCfg.Table, p.tableCfg.Fields.Key, p.tableCfg.Fields.Value, p.tableCfg.Fields.Key)
 
@@ -105,6 +111,7 @@ func (p *PostgresKV) Upsert(key, value string) error {
 	return nil
 }
 
+// Delete is an implementation of the storage interface
 func (p *PostgresKV) Delete(key string) error {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE %s = $1`, p.tableCfg.Table, p.tableCfg.Fields.Key)
 

@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// PostgresAlert represent Postgres implementation for Alert storage
 type PostgresAlert struct {
 	db       *sqlx.DB
 	tableCfg tables.TableAlerts

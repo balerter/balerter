@@ -7,6 +7,7 @@ import (
 )
 
 var (
+	// ErrUnsupportedType represents the Unsupported Type error
 	ErrUnsupportedType         = errors.New("unsupported type")
 	ErrTableIsNil              = errors.New("table is nil")
 	ErrKeyMustBeAString        = errors.New("key must be a string")
@@ -19,6 +20,7 @@ const (
 	errorMarshalingString = "__ERROR_MARSHALING__"
 )
 
+// ValuesToStringNoErr converts lua values to the string without fire error
 func ValuesToStringNoErr(values []lua.LValue) string {
 	v, err := ValuesToString(values)
 	if err != nil {
@@ -28,6 +30,7 @@ func ValuesToStringNoErr(values []lua.LValue) string {
 	return v
 }
 
+// ValueToStringNoErr converts lua value to the string without fire error
 func ValueToStringNoErr(value lua.LValue) string {
 	v, err := ValueToString(value)
 	if err != nil {
@@ -37,6 +40,7 @@ func ValueToStringNoErr(value lua.LValue) string {
 	return v
 }
 
+// ValuesToString converts lua values to the string, and error if occurred
 func ValuesToString(values []lua.LValue) (string, error) {
 	s := "["
 	for _, v := range values {
@@ -51,6 +55,7 @@ func ValuesToString(values []lua.LValue) (string, error) {
 	return s, nil
 }
 
+// ValueToString convert lua value to the string, return error of occurred
 func ValueToString(v lua.LValue) (string, error) {
 	switch v.Type() {
 	case lua.LTTable:
@@ -62,6 +67,7 @@ func ValueToString(v lua.LValue) (string, error) {
 	return "", ErrUnsupportedType
 }
 
+// TableToString convert lua table to the string
 func TableToString(table *lua.LTable) (string, error) {
 	if table == nil {
 		return "", ErrTableIsNil

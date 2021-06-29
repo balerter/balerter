@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Options represents Alert options
 type Options struct {
 	Channels []string
 	Quiet    bool
@@ -26,6 +27,7 @@ const (
 )
 
 var (
+	// ErrBadLevel represent an error if user provide the incorrect level value
 	ErrBadLevel = errors.New("bad level")
 )
 
@@ -64,10 +66,12 @@ func LevelFromInt(i int) (Level, error) {
 	return 0, ErrBadLevel
 }
 
+// NumString returns numeric value of the Level as a string
 func (l Level) NumString() string {
 	return strconv.Itoa(int(l))
 }
 
+// String returns string value of the Level
 func (l Level) String() string {
 	switch l {
 	case LevelSuccess:
@@ -81,6 +85,7 @@ func (l Level) String() string {
 	panic("unexpected Level value")
 }
 
+// Alerts contains slice of alerts
 type Alerts []*Alert
 
 // Alert is base struct for store Alert information
@@ -92,6 +97,7 @@ type Alert struct {
 	Count      int       `json:"count"`
 }
 
+// New creates new Alert
 func New(name string) *Alert {
 	now := time.Now()
 

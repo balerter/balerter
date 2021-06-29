@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// SendPhotoMessage send PhotoMessage to the Telegram API
 func (api *API) SendPhotoMessage(mes *PhotoMessage) error {
 	body, err := json.Marshal(mes)
 	if err != nil {
@@ -17,6 +18,7 @@ func (api *API) SendPhotoMessage(mes *PhotoMessage) error {
 	return api.sendMessage(body, methodSendPhoto)
 }
 
+// SendTextMessage send TextMessage to the Telegram API
 func (api *API) SendTextMessage(mes *TextMessage) error {
 	body, err := json.Marshal(mes)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Syslog represents a channel of type Syslog
 type Syslog struct {
 	name   string
 	logger *zap.Logger
@@ -18,6 +19,7 @@ var (
 	defaultPriority = "EMERG"
 )
 
+// New creates new Syslog channel
 func New(cfg syslogCfg.Syslog, logger *zap.Logger) (*Syslog, error) {
 	sl := &Syslog{
 		name:   cfg.Name,
@@ -38,6 +40,7 @@ func New(cfg syslogCfg.Syslog, logger *zap.Logger) (*Syslog, error) {
 	return sl, nil
 }
 
+// Name returns the channel name
 func (sl *Syslog) Name() string {
 	return sl.name
 }

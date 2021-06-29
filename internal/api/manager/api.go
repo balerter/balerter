@@ -15,25 +15,30 @@ import (
 	"sync"
 )
 
+// ChManager is an interface for channel manager
 type ChManager interface {
 	Send(a *alert.Alert, text string, options *alert.Options)
 }
 
+// httpServer is an interface for http server
 type httpServer interface {
 	Serve(l net.Listener) error
 	Shutdown(ctx context.Context) error
 }
 
+// Runner is an interface for scripts runner
 type Runner interface {
 	RunScript(name string, req *http.Request) error
 }
 
+// API represents API manager
 type API struct {
 	address string
 	server  httpServer
 	logger  *zap.Logger
 }
 
+// New creates new API manager
 func New(
 	address string,
 	coreStorageAlert,
@@ -65,6 +70,7 @@ func New(
 	return api
 }
 
+// Run API manager
 func (api *API) Run(ctx context.Context, ctxCancel context.CancelFunc, wg *sync.WaitGroup, ln net.Listener) {
 	defer wg.Done()
 

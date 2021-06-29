@@ -14,16 +14,19 @@ var (
 	defaultTimeout = time.Second * 5
 )
 
+// ModuleName returns the module name
 func ModuleName(name string) string {
 	return "mysql." + name
 }
 
+// Methods returns module methods
 func Methods() []string {
 	return []string{
 		"query",
 	}
 }
 
+// MySQL represent the datasource of type MySQL
 type MySQL struct {
 	name    string
 	logger  *zap.Logger
@@ -31,8 +34,10 @@ type MySQL struct {
 	timeout time.Duration
 }
 
+// SQLConnFunc represent ConnFunc
 type SQLConnFunc func(string, string) (*sqlx.DB, error)
 
+// New creates new MySQL datasource
 func New(cfg mysql.Mysql, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*MySQL, error) {
 	p := &MySQL{
 		name:    ModuleName(cfg.Name),
@@ -59,14 +64,17 @@ func New(cfg mysql.Mysql, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*MySQL, 
 	return p, nil
 }
 
+// Stop the datasource
 func (m *MySQL) Stop() error {
 	return m.db.Close()
 }
 
+// Name returns the datasource name
 func (m *MySQL) Name() string {
 	return m.name
 }
 
+// GetLoader returns the datasource lua loader
 func (m *MySQL) GetLoader(_ *script.Script) lua.LGFunction {
 	return m.loader
 }

@@ -19,6 +19,7 @@ type SQL struct {
 	kv     *PostgresKV
 }
 
+// New creates new SQL storage provider
 func New(name, driver, connectionString string, alertsCfg tables.TableAlerts, kvCfg tables.TableKV, timeout time.Duration, logger *zap.Logger) (*SQL, error) {
 	conn, err := sqlx.Connect(driver, connectionString)
 	if err != nil {
@@ -42,18 +43,22 @@ func New(name, driver, connectionString string, alertsCfg tables.TableAlerts, kv
 	return p, nil
 }
 
+// Name returns the storage name
 func (p *SQL) Name() string {
 	return p.name
 }
 
+// Stop the storage
 func (p *SQL) Stop() error {
 	return p.db.Close()
 }
 
+// KV returns KV storage
 func (p *SQL) KV() corestorage.KV {
 	return p.kv
 }
 
+// Alert returns Alert storage
 func (p *SQL) Alert() corestorage.Alert {
 	return p.alerts
 }

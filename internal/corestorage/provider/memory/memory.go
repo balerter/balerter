@@ -16,11 +16,13 @@ type storageAlert struct {
 	alerts   map[string]*alert.Alert
 }
 
+// Memory represent inMemory storage engine
 type Memory struct {
 	kv    *storageKV
 	alert *storageAlert
 }
 
+// New creates new Memory storage
 func New() *Memory {
 	m := &Memory{
 		kv: &storageKV{
@@ -34,18 +36,22 @@ func New() *Memory {
 	return m
 }
 
+// Name returns the name of the storage
 func (m *Memory) Name() string {
 	return "memory"
 }
 
+// KV returns KV storage
 func (m *Memory) KV() coreStorage.KV {
 	return m.kv
 }
 
+// Alert returns Alert storage
 func (m *Memory) Alert() coreStorage.Alert {
 	return m.alert
 }
 
+// Stop the engine
 func (m *Memory) Stop() error {
 	return nil
 }
