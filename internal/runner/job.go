@@ -11,6 +11,7 @@ import (
 	"net/http"
 )
 
+// Job represents script Job
 type Job struct {
 	entryID  cron.EntryID
 	name     string
@@ -29,10 +30,12 @@ func newJob(s *script.Script, logger *zap.Logger) *Job {
 	return j
 }
 
+// Stop the job
 func (j *Job) Stop() {
 	j.luaState.Close()
 }
 
+// Run the job
 func (j *Job) Run() {
 	j.logger.Debug("run job", zap.String("name", j.name))
 

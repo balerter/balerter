@@ -8,10 +8,12 @@ import (
 	"net/http"
 )
 
+// ModuleName returns the module name
 func ModuleName() string {
 	return "api"
 }
 
+// Methods returns module methods
 func Methods() []string {
 	return []string{
 		"is_api",
@@ -23,6 +25,7 @@ func Methods() []string {
 	}
 }
 
+// API represents API core module
 type API struct {
 	isAPI  bool
 	query  map[string][]string
@@ -32,6 +35,7 @@ type API struct {
 	method string
 }
 
+// New creates new API core module
 func New() *API {
 	a := &API{
 		query: map[string][]string{},
@@ -40,10 +44,12 @@ func New() *API {
 	return a
 }
 
+// Name returns the module name
 func (a *API) Name() string {
 	return ModuleName()
 }
 
+// FillData inits module data
 func (a *API) FillData(req *http.Request) error {
 	if req == nil {
 		return nil
@@ -70,6 +76,7 @@ func (a *API) FillData(req *http.Request) error {
 	return nil
 }
 
+// GetLoader returns the lua loader
 func (a *API) GetLoader(_ *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
@@ -90,6 +97,7 @@ func (a *API) GetLoader(_ *script.Script) lua.LGFunction {
 	}()
 }
 
+// Stop the module
 func (a *API) Stop() error {
 	return nil
 }

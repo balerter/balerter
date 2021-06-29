@@ -8,11 +8,13 @@ import (
 	"strings"
 )
 
+// Provider represents File script provider
 type Provider struct {
 	name     string
 	filename string
 }
 
+// New creates new File script provider
 func New(cfg file.File) *Provider {
 	p := &Provider{
 		name:     "file." + cfg.Name,
@@ -22,6 +24,7 @@ func New(cfg file.File) *Provider {
 	return p
 }
 
+// Get scripts from the provider
 func (p *Provider) Get() ([]*script.Script, error) {
 	ss := make([]*script.Script, 0)
 

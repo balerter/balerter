@@ -9,10 +9,13 @@ import (
 )
 
 const (
+	// DefaultCronValue represents Default Cron Value
 	DefaultCronValue = "0 * * * * *"
-	DefaultTimeout   = time.Hour
+	// DefaultTimeout is the default timeout
+	DefaultTimeout = time.Hour
 )
 
+// New creates new Script
 func New() *Script {
 	s := &Script{
 		CronValue: DefaultCronValue,
@@ -23,9 +26,11 @@ func New() *Script {
 }
 
 var (
+	// CronParser is default cron parser
 	CronParser = cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
 )
 
+// Script represents the Script
 type Script struct {
 	Name       string
 	Body       []byte
@@ -37,6 +42,7 @@ type Script struct {
 	TestTarget string
 }
 
+// Hash returns the hash, based on script name and body
 func (s *Script) Hash() string {
 	return fmt.Sprintf("%x", sha1.Sum(append([]byte(s.Name+"@"), s.Body...)))
 }
@@ -54,6 +60,7 @@ var (
 	}
 )
 
+// ParseMeta parse script meta
 func (s *Script) ParseMeta() error {
 	lines := strings.Split(string(s.Body), "\n")
 	for _, l := range lines {

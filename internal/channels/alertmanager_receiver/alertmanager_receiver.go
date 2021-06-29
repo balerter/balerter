@@ -13,12 +13,14 @@ type webHookCore interface {
 	Send(body io.Reader, m *message.Message) (*http.Response, error)
 }
 
+// AMReceiver represents a channel of type AlertManagerReceiver
 type AMReceiver struct {
 	name   string
 	whCore webHookCore
 	logger *zap.Logger
 }
 
+// New creates new AlertManagerReceiver channel
 func New(cfg alertmanagerreceiver.AlertmanagerReceiver, logger *zap.Logger) (*AMReceiver, error) {
 	//cfg.Settings.Headers["content-type"] = "application/json" // todo(negasus): init headers map?
 
@@ -31,6 +33,7 @@ func New(cfg alertmanagerreceiver.AlertmanagerReceiver, logger *zap.Logger) (*AM
 	return a, nil
 }
 
+// Name returns name of the channel
 func (a *AMReceiver) Name() string {
 	return a.name
 }

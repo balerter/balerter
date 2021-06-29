@@ -9,9 +9,11 @@ import (
 )
 
 const (
+	// AnyValue represents const for any value in tests
 	AnyValue = "__TEST_ANY_VALUE__"
 )
 
+// Registry is an interface for registry
 type Registry interface {
 	Clean()
 	Register(AnyValue, method string, callArgs, retArgs []lua.LValue) error
@@ -21,6 +23,7 @@ type Registry interface {
 	Result() []modules.TestResult
 }
 
+// ModuleMock represents module mock
 type ModuleMock struct {
 	name    string
 	methods []string
@@ -31,6 +34,7 @@ type ModuleMock struct {
 	errors []string
 }
 
+// New creates new ModuleMock
 func New(name string, methods []string, logger *zap.Logger) *ModuleMock {
 	m := &ModuleMock{
 		name:     name,
@@ -42,10 +46,12 @@ func New(name string, methods []string, logger *zap.Logger) *ModuleMock {
 	return m
 }
 
+// Stop the module
 func (m *ModuleMock) Stop() error {
 	return nil
 }
 
+// GetLoader returns lua loader
 func (m *ModuleMock) GetLoader(_ *script.Script) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		exports := map[string]lua.LGFunction{
@@ -66,10 +72,12 @@ func (m *ModuleMock) GetLoader(_ *script.Script) lua.LGFunction {
 	}
 }
 
+// Name returns the module name
 func (m *ModuleMock) Name() string {
 	return m.name
 }
 
+// Clean the registry and errors
 func (m *ModuleMock) Clean() {
 	m.registry.Clean()
 	m.errors = m.errors[:0]

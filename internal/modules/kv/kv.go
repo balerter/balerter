@@ -6,10 +6,12 @@ import (
 	lua "github.com/yuin/gopher-lua"
 )
 
+// ModuleName returns the module name
 func ModuleName() string {
 	return "kv"
 }
 
+// Methods returns module methods
 func Methods() []string {
 	return []string{
 		"all",
@@ -20,10 +22,12 @@ func Methods() []string {
 	}
 }
 
+// KV represents the KV core module
 type KV struct {
 	engine coreStorage.KV
 }
 
+// New creates new KV core module
 func New(engine coreStorage.KV) *KV {
 	kv := &KV{
 		engine: engine,
@@ -32,10 +36,12 @@ func New(engine coreStorage.KV) *KV {
 	return kv
 }
 
+// Name returns the module name
 func (kv *KV) Name() string {
 	return ModuleName()
 }
 
+// GetLoader returns the lua loader
 func (kv *KV) GetLoader(_ *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
@@ -55,6 +61,7 @@ func (kv *KV) GetLoader(_ *script.Script) lua.LGFunction {
 	}()
 }
 
+// Stop the module
 func (kv *KV) Stop() error {
 	return nil
 }

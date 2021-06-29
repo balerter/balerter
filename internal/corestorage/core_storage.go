@@ -1,14 +1,10 @@
 package corestorage
 
 import (
-	"errors"
 	"github.com/balerter/balerter/internal/alert"
 )
 
-var (
-	ErrAlertNotFound = errors.New("alert not found")
-)
-
+// KV is an interface for KV storage
 type KV interface {
 	Put(string, string) error
 	Get(string) (string, error)
@@ -17,6 +13,7 @@ type KV interface {
 	All() (map[string]string, error)
 }
 
+// Alert is an interface for Alert storage
 type Alert interface {
 	// Update exists alert or create new
 	Update(name string, level alert.Level) (*alert.Alert, bool, error)
@@ -24,6 +21,7 @@ type Alert interface {
 	Get(name string) (*alert.Alert, error)
 }
 
+// CoreStorage is an interface for the CoreStorage
 type CoreStorage interface {
 	Name() string
 	KV() KV

@@ -12,11 +12,13 @@ import (
 	"go.uber.org/zap"
 )
 
+// Manager represents DataSource manager
 type Manager struct {
 	logger  *zap.Logger
 	modules map[string]modules.Module
 }
 
+// New creates new DataSource manager
 func New(logger *zap.Logger) *Manager {
 	m := &Manager{
 		logger:  logger,
@@ -26,6 +28,7 @@ func New(logger *zap.Logger) *Manager {
 	return m
 }
 
+// Init the DataSource manager
 func (m *Manager) Init(cfg *datasources.DataSources) error {
 	if cfg == nil {
 		return nil
@@ -74,6 +77,7 @@ func (m *Manager) Init(cfg *datasources.DataSources) error {
 	return nil
 }
 
+// Stop all datasources
 func (m *Manager) Stop() {
 	for _, module := range m.modules {
 		m.logger.Debug("stop module", zap.String("name", module.Name()))
@@ -84,6 +88,7 @@ func (m *Manager) Stop() {
 	}
 }
 
+// Get all datasources
 func (m *Manager) Get() []modules.Module {
 	mm := make([]modules.Module, 0)
 

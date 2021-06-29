@@ -7,11 +7,13 @@ import (
 	"go.uber.org/zap"
 )
 
+// APIer is an interface for Telegram API
 type APIer interface {
 	SendTextMessage(*api.TextMessage) error
 	SendPhotoMessage(*api.PhotoMessage) error
 }
 
+// Telegram represent the channel of the type Telegram
 type Telegram struct {
 	name   string
 	chatID int64
@@ -19,6 +21,7 @@ type Telegram struct {
 	api    APIer
 }
 
+// New creates new Telegram channel
 func New(cfg telegram.Telegram, logger *zap.Logger) (*Telegram, error) {
 	tg := &Telegram{
 		name:   cfg.Name,
@@ -37,6 +40,7 @@ func New(cfg telegram.Telegram, logger *zap.Logger) (*Telegram, error) {
 	return tg, nil
 }
 
+// Name returns the channel name
 func (tg *Telegram) Name() string {
 	return tg.name
 }

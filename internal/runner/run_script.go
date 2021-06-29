@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// RunScript runs the scripts by name
 func (rnr *Runner) RunScript(name string, req *http.Request) error {
 	ss, err := rnr.scriptsManager.Get()
 	if err != nil {

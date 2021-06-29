@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Send the message to the channel
 func (tg *Telegram) Send(mes *message.Message) error {
 	tg.logger.Debug("tg send message")
 

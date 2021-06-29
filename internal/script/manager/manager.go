@@ -8,14 +8,17 @@ import (
 	"github.com/balerter/balerter/internal/script/script"
 )
 
+// Provider is an interface for script provider
 type Provider interface {
 	Get() ([]*script.Script, error)
 }
 
+// Manager represents the script manager
 type Manager struct {
 	providers map[string]Provider
 }
 
+// New creates new script manager
 func New() *Manager {
 	m := &Manager{
 		providers: make(map[string]Provider),
@@ -24,6 +27,7 @@ func New() *Manager {
 	return m
 }
 
+// Init the script manager
 func (m *Manager) Init(cfg *scripts.Scripts) error {
 	if cfg == nil {
 		return nil
@@ -47,6 +51,7 @@ func (m *Manager) Init(cfg *scripts.Scripts) error {
 	return nil
 }
 
+// Get returns scripts obtained from providers
 func (m *Manager) Get() ([]*script.Script, error) {
 	ss := make([]*script.Script, 0)
 
@@ -78,6 +83,7 @@ func removeTests(ss []*script.Script) []*script.Script {
 	return ss
 }
 
+// GetWithTests returns scripts with tests
 func (m *Manager) GetWithTests() ([]*script.Script, error) {
 	ss := make([]*script.Script, 0)
 

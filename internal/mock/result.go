@@ -4,6 +4,7 @@ import (
 	"github.com/balerter/balerter/internal/modules"
 )
 
+// Result returns test results
 func (m *ModuleMock) Result() ([]modules.TestResult, error) {
 	var result []modules.TestResult
 

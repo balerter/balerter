@@ -5,6 +5,7 @@ import (
 	lua "github.com/yuin/gopher-lua"
 )
 
+// Response is register method response
 func (r *Registry) Response(anyValue, method string, args []lua.LValue) ([]lua.LValue, error) {
 	e, ok := r.responseEntries[method]
 	if !ok {

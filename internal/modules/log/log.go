@@ -6,10 +6,12 @@ import (
 	"go.uber.org/zap"
 )
 
+// Log represents the Log core module
 type Log struct {
 	logger *zap.Logger
 }
 
+// New creates new Log core module
 func New(logger *zap.Logger) *Log {
 	l := &Log{
 		logger: logger,
@@ -18,18 +20,22 @@ func New(logger *zap.Logger) *Log {
 	return l
 }
 
+// Name returns the module name
 func (l *Log) Name() string {
 	return ModuleName()
 }
 
+// Stop the module
 func (l *Log) Stop() error {
 	return nil
 }
 
+// ModuleName returns the module name
 func ModuleName() string {
 	return "log"
 }
 
+// Methods returns module methods
 func Methods() []string {
 	return []string{
 		"error",
@@ -39,6 +45,7 @@ func Methods() []string {
 	}
 }
 
+// GetLoader returns the lua laoder
 func (l *Log) GetLoader(s *script.Script) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		var exports = map[string]lua.LGFunction{

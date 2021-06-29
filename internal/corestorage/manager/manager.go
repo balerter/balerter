@@ -10,11 +10,13 @@ import (
 	"time"
 )
 
+// Manager represents CoreStorage manager
 type Manager struct {
 	storages map[string]coreStorage.CoreStorage
 	logger   *zap.Logger
 }
 
+// New creates new CoreStorage manager
 func New(cfg *core.Core, logger *zap.Logger) (*Manager, error) {
 	m := &Manager{
 		storages: map[string]coreStorage.CoreStorage{},
@@ -58,6 +60,7 @@ func New(cfg *core.Core, logger *zap.Logger) (*Manager, error) {
 	return m, nil
 }
 
+// Get the CoreStorage by the name
 func (m *Manager) Get(name string) (coreStorage.CoreStorage, error) {
 	if name == "" {
 		name = "memory"
@@ -71,6 +74,7 @@ func (m *Manager) Get(name string) (coreStorage.CoreStorage, error) {
 	return s, nil
 }
 
+// Stop the manager
 func (m *Manager) Stop() {
 	var err error
 	for name, s := range m.storages {

@@ -5,11 +5,13 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// Logger represents the Logger
 type Logger struct {
 	level  zap.AtomicLevel
 	logger *zap.Logger
 }
 
+// New creates new Logger
 func New(level string, debugMode bool, opts ...zap.Option) (*Logger, error) {
 	var err error
 
@@ -65,6 +67,7 @@ func New(level string, debugMode bool, opts ...zap.Option) (*Logger, error) {
 	return lg, err
 }
 
+// Logger returns the ZAP logger instance
 func (l *Logger) Logger() *zap.Logger {
 	return l.logger
 }

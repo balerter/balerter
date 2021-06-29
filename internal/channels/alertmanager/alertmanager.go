@@ -13,12 +13,14 @@ type webHookCore interface {
 	Send(body io.Reader, m *message.Message) (*http.Response, error)
 }
 
+// AlertManager represents AlertManager
 type AlertManager struct {
 	name   string
 	whCore webHookCore
 	logger *zap.Logger
 }
 
+// New creates new AlertManager
 func New(cfg alertmanager.Alertmanager, logger *zap.Logger) (*AlertManager, error) {
 	a := &AlertManager{
 		name:   cfg.Name,
@@ -29,6 +31,7 @@ func New(cfg alertmanager.Alertmanager, logger *zap.Logger) (*AlertManager, erro
 	return a, nil
 }
 
+// Name returns name of the AlertManager
 func (a *AlertManager) Name() string {
 	return a.name
 }

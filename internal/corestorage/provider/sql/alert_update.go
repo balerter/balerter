@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// Update is an implementation of the storage interface
 func (p *PostgresAlert) Update(name string, level alert.Level) (*alert.Alert, bool, error) {
 	tx, err := p.db.Begin()
 	if err != nil {

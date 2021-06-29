@@ -8,15 +8,14 @@ import (
 	"go.uber.org/zap"
 )
 
-type Provider interface {
-}
-
+// Manager represents the Test upload storage manager
 type Manager struct {
 	logger *zap.Logger
 
 	modules map[string]modules.ModuleTest
 }
 
+// New creates new Test upload storage manager
 func New(logger *zap.Logger) *Manager {
 	m := &Manager{
 		logger:  logger,
@@ -26,6 +25,7 @@ func New(logger *zap.Logger) *Manager {
 	return m
 }
 
+// Init the test upload storage manager
 func (m *Manager) Init(cfg *upload.Upload) error {
 	if cfg == nil {
 		return nil
@@ -39,6 +39,7 @@ func (m *Manager) Init(cfg *upload.Upload) error {
 	return nil
 }
 
+// Get upload storage modules
 func (m *Manager) Get() []modules.ModuleTest {
 	mm := make([]modules.ModuleTest, 0)
 
@@ -49,6 +50,7 @@ func (m *Manager) Get() []modules.ModuleTest {
 	return mm
 }
 
+// Result returns test results
 func (m *Manager) Result() ([]modules.TestResult, error) {
 	var result []modules.TestResult
 	for _, m := range m.modules {
@@ -64,6 +66,7 @@ func (m *Manager) Result() ([]modules.TestResult, error) {
 	return result, nil
 }
 
+// Clean test results
 func (m *Manager) Clean() {
 	for _, m := range m.modules {
 		m.Clean()
