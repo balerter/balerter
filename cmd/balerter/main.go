@@ -142,7 +142,6 @@ func run(
 	if err = channelsMgr.Init(cfg.Channels); err != nil {
 		return fmt.Sprintf("error init channels manager, %v", err), 1
 	}
-	// TODO: pass channels manager...
 
 	coreModules := initCoreModules(coreStorageAlert, coreStorageKV, channelsMgr, lgr.Logger(), flg)
 
