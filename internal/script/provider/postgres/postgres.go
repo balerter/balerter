@@ -61,7 +61,7 @@ func (p *Provider) Get() ([]*script.Script, error) {
 		return nil, fmt.Errorf("error db query, %w", err)
 	}
 
-	if err := rows.Err(); err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 

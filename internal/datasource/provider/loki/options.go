@@ -41,7 +41,7 @@ type options interface {
 }
 
 func (m *Loki) parseOptions(luaState *lua.LState, opts options) error {
-	options := luaState.Get(2)
+	options := luaState.Get(2) // nolint:gomnd // param position
 	if options.Type() == lua.LTNil {
 		return nil
 	}

@@ -46,7 +46,7 @@ func (m *Loki) doRange(luaState *lua.LState) int {
 	if err != nil {
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString(err.Error()))
-		return 2
+		return 2 // nolint:gomnd // params count
 	}
 
 	rangeOptions := &rangeOptions{}
@@ -55,7 +55,7 @@ func (m *Loki) doRange(luaState *lua.LState) int {
 		m.logger.Error("error parse range options", zap.Error(err))
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error parse range options"))
-		return 2
+		return 2 // nolint:gomnd // params count
 	}
 
 	m.logger.Debug("call loki query range", zap.String("name", m.name), zap.String("query", query), zap.Any("options", rangeOptions))
