@@ -27,7 +27,8 @@ func (m *Loki) doQuery(luaState *lua.LState) int {
 		return 2
 	}
 
-	queryOptions, err := m.parseQueryOptions(luaState)
+	queryOptions := &queryOptions{}
+	err = m.parseOptions(luaState, queryOptions)
 	if err != nil {
 		m.logger.Error("error parse query options", zap.Error(err))
 		luaState.Push(lua.LNil)
@@ -56,7 +57,8 @@ func (m *Loki) doRange(luaState *lua.LState) int {
 		return 2
 	}
 
-	rangeOptions, err := m.parseRangeOptions(luaState)
+	rangeOptions := &rangeOptions{}
+	err = m.parseOptions(luaState, rangeOptions)
 	if err != nil {
 		m.logger.Error("error parse range options", zap.Error(err))
 		luaState.Push(lua.LNil)
