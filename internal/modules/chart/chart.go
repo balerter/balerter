@@ -8,21 +8,25 @@ import (
 	"go.uber.org/zap"
 )
 
+// ModuleName returns the module name
 func ModuleName() string {
 	return "chart"
 }
 
+// Methods returns module methods
 func Methods() []string {
 	return []string{
 		"render",
 	}
 }
 
+// DataItem represents data item
 type DataItem struct {
 	Timestamp float64
 	Value     float64
 }
 
+// DataSeries represents data series
 type DataSeries struct {
 	Color      string
 	LineColor  string
@@ -30,15 +34,18 @@ type DataSeries struct {
 	Data       []DataItem
 }
 
+// Data represents chart data
 type Data struct {
 	Title  string
 	Series []DataSeries
 }
 
+// Chart represent Chart core module
 type Chart struct {
 	logger *zap.Logger
 }
 
+// New creates new Chart core module
 func New(logger *zap.Logger) *Chart {
 	l := &Chart{
 		logger: logger,
@@ -47,14 +54,17 @@ func New(logger *zap.Logger) *Chart {
 	return l
 }
 
+// Name returns the module name
 func (ch *Chart) Name() string {
 	return ModuleName()
 }
 
+// Stop the module
 func (ch *Chart) Stop() error {
 	return nil
 }
 
+// GetLoader returns the lua loader
 func (ch *Chart) GetLoader(s *script.Script) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		var exports = map[string]lua.LGFunction{

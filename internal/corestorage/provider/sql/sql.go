@@ -7,7 +7,7 @@ import (
 
 	"github.com/balerter/balerter/internal/corestorage"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // import sqlite driver
 	"go.uber.org/zap"
 )
 

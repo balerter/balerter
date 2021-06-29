@@ -5,6 +5,7 @@ import (
 	lua "github.com/yuin/gopher-lua"
 )
 
+// Register method call
 func (r *Registry) Register(anyValue, method string, callArgs, retArgs []lua.LValue) error {
 	e, ok := r.responseEntries[method]
 	if !ok {

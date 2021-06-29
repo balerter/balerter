@@ -8,11 +8,16 @@ import (
 
 var (
 	// ErrUnsupportedType represents the Unsupported Type error
-	ErrUnsupportedType         = errors.New("unsupported type")
-	ErrTableIsNil              = errors.New("table is nil")
-	ErrKeyMustBeAString        = errors.New("key must be a string")
-	ErrWrongValue              = errors.New("value must be a string, number, boolean or table")
-	ErrUnexpectedDataLoss      = errors.New("unexpected data loss")
+	ErrUnsupportedType = errors.New("unsupported type")
+	// ErrTableIsNil represents TableIsNil error
+	ErrTableIsNil = errors.New("table is nil")
+	// ErrKeyMustBeAString represents KeyMustBeAString error
+	ErrKeyMustBeAString = errors.New("key must be a string")
+	// ErrWrongValue represents WrongValue error
+	ErrWrongValue = errors.New("value must be a string, number, boolean or table")
+	// ErrUnexpectedDataLoss represents UnexpectedDataLoss error
+	ErrUnexpectedDataLoss = errors.New("unexpected data loss")
+	// ErrUnexpectedDuplicatedKey represents UnexpectedDuplicatedKey error
 	ErrUnexpectedDuplicatedKey = errors.New("unexpected duplicated key")
 )
 

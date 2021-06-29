@@ -8,15 +8,14 @@ import (
 	"go.uber.org/zap"
 )
 
-type Provider interface {
-}
-
+// Manager represents the upload storage manager
 type Manager struct {
 	logger *zap.Logger
 
 	modules map[string]modules.Module
 }
 
+// New creates new upload storage manager
 func New(logger *zap.Logger) *Manager {
 	m := &Manager{
 		logger:  logger,
@@ -26,6 +25,7 @@ func New(logger *zap.Logger) *Manager {
 	return m
 }
 
+// Init the upload storage manager
 func (m *Manager) Init(cfg *upload.Upload) error {
 	if cfg == nil {
 		return nil
@@ -42,6 +42,7 @@ func (m *Manager) Init(cfg *upload.Upload) error {
 	return nil
 }
 
+// Get returns the upload storage modules
 func (m *Manager) Get() []modules.Module {
 	mm := make([]modules.Module, 0)
 

@@ -7,20 +7,24 @@ import (
 	"strings"
 )
 
+// ModuleName returns the module name
 func ModuleName() string {
 	return "tls"
 }
 
+// Methods returns module methods
 func Methods() []string {
 	return []string{
 		"get",
 	}
 }
 
+// TLS represents the TLS core module
 type TLS struct {
 	dialFunc func(network, addr string, config *tls.Config) (*tls.Conn, error)
 }
 
+// New creates new TLS core module
 func New() *TLS {
 	a := &TLS{
 		dialFunc: tls.Dial,
@@ -29,10 +33,12 @@ func New() *TLS {
 	return a
 }
 
+// Name returns the module name
 func (a *TLS) Name() string {
 	return ModuleName()
 }
 
+// GetLoader returns the lua module
 func (a *TLS) GetLoader(_ *script.Script) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
@@ -48,6 +54,7 @@ func (a *TLS) GetLoader(_ *script.Script) lua.LGFunction {
 	}()
 }
 
+// Stop the module
 func (a *TLS) Stop() error {
 	return nil
 }

@@ -13,6 +13,7 @@ import (
 	"sync"
 )
 
+// Service represents the Service module
 type Service struct {
 	server *http.Server
 	logger *zap.Logger
@@ -22,6 +23,7 @@ var (
 	livenessResponse = []byte("ok")
 )
 
+// New creates new Service
 func New(logger *zap.Logger) *Service {
 	s := &Service{
 		server: &http.Server{},
@@ -47,6 +49,7 @@ func New(logger *zap.Logger) *Service {
 	return s
 }
 
+// Run the module
 func (s *Service) Run(ctx context.Context, cancel context.CancelFunc, wg *sync.WaitGroup, ln net.Listener) {
 	defer wg.Done()
 

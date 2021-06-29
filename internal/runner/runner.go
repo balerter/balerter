@@ -28,6 +28,7 @@ type dsManager interface {
 	Get() []modules.Module
 }
 
+// Runner represents the script runner
 type Runner struct {
 	scriptsManager  scriptsManager
 	dsManager       dsManager
@@ -46,6 +47,7 @@ type Runner struct {
 	jobs chan *Job
 }
 
+// New creates new script runner
 func New(
 	updateInterval time.Duration,
 	scriptsManager scriptsManager,
@@ -94,6 +96,7 @@ func (rnr *Runner) filterScripts(ss []*script.Script, name string) []*script.Scr
 	return nil
 }
 
+// Watch runs scripts watcher
 func (rnr *Runner) Watch(ctx context.Context, ctxCancel context.CancelFunc, once bool) {
 	rnr.cron.Start()
 
@@ -206,6 +209,7 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, 
 	}
 }
 
+// Stop the module
 func (rnr *Runner) Stop() {
 	rnr.logger.Info("stop jobs")
 

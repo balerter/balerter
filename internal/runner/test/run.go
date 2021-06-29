@@ -41,12 +41,14 @@ func splitScripts(scripts []*script.Script) (map[string]pair, error) {
 	return pairs, nil
 }
 
+// Result represents script test result
 type Result struct {
 	Name string `json:"name"`
 	Text string `json:"text"`
 	Ok   bool   `json:"ok"`
 }
 
+// Run the test runner
 func (rnr *Runner) Run() ([]modules.TestResult, bool, error) {
 	var result []modules.TestResult
 	ok := true

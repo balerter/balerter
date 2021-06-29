@@ -12,12 +12,14 @@ const (
 	defaultTimeout = 3000
 )
 
+// Provider represents Postgres script provider
 type Provider struct {
 	name  string
 	db    *sql.DB
 	query string
 }
 
+// New creates new Postgres script provider
 func New(cfg postgres.Postgres) (*Provider, error) {
 	p := &Provider{
 		name:  "postgres." + cfg.Name,
@@ -52,6 +54,7 @@ func New(cfg postgres.Postgres) (*Provider, error) {
 	return p, nil
 }
 
+// Get returns scripts from the provider
 func (p *Provider) Get() ([]*script.Script, error) {
 	rows, err := p.db.Query(p.query)
 	if err != nil {
@@ -89,6 +92,7 @@ func (p *Provider) Get() ([]*script.Script, error) {
 	return ss, nil
 }
 
+// Stop the provider
 func (p *Provider) Stop() error {
 	return p.db.Close()
 }

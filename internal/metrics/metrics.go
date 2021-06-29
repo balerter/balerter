@@ -47,6 +47,7 @@ func Register(logger *zap.Logger) {
 	}
 }
 
+// SetAlertLevel sets alert level
 func SetAlertLevel(name string, level alert.Level) {
 	metricAlert.WithLabelValues(name).Set(float64(level))
 }

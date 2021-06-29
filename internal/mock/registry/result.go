@@ -6,6 +6,7 @@ import (
 	"github.com/balerter/balerter/internal/modules"
 )
 
+// Result returns registry results
 func (r *Registry) Result() []modules.TestResult {
 	results := make([]modules.TestResult, 0)
 

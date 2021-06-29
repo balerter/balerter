@@ -6,6 +6,7 @@ import (
 )
 
 var (
+	// ErrEntryIsNotRegistered represents EntryIsNotRegistered error
 	ErrEntryIsNotRegistered = errors.New("response entry is not registered")
 )
 
@@ -46,6 +47,7 @@ func newResponseEntry() *responseEntry {
 	return e
 }
 
+// New creates new registry
 func New() *Registry {
 	r := &Registry{
 		responseEntries: map[string]*responseEntry{},
@@ -55,6 +57,7 @@ func New() *Registry {
 	return r
 }
 
+// Clean the registry
 func (r *Registry) Clean() {
 	for key := range r.responseEntries {
 		delete(r.responseEntries, key)

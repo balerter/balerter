@@ -10,12 +10,14 @@ import (
 	"github.com/balerter/balerter/internal/script/script"
 )
 
+// Provider represents Folder script provider
 type Provider struct {
 	name string
 	path string
 	mask string
 }
 
+// New creates new Folder script provider
 func New(cfg folder.Folder) *Provider {
 	p := &Provider{
 		name: "folder." + cfg.Name,
@@ -30,6 +32,7 @@ func New(cfg folder.Folder) *Provider {
 	return p
 }
 
+// Get returns scripts from the provider
 func (p *Provider) Get() ([]*script.Script, error) {
 	ss := make([]*script.Script, 0)
 

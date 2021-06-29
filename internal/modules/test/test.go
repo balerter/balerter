@@ -13,6 +13,7 @@ type modulesManager interface {
 	Get() []modules.ModuleTest
 }
 
+// Test represents the Test core module
 type Test struct {
 	dsManager      modulesManager
 	storageManager modulesManager
@@ -23,6 +24,7 @@ type Test struct {
 	storage    map[string]modules.ModuleTest
 }
 
+// New creates new Test core module
 func New(dsManager, storageManager modulesManager, mods []modules.ModuleTest, logger *zap.Logger) *Test {
 	t := &Test{
 		dsManager:      dsManager,
@@ -45,10 +47,12 @@ func New(dsManager, storageManager modulesManager, mods []modules.ModuleTest, lo
 	return t
 }
 
+// Name returns the module name
 func (t *Test) Name() string {
 	return "test"
 }
 
+// Stop the module
 func (t *Test) Stop() error {
 	return nil
 }
@@ -79,6 +83,7 @@ func (t *Test) getModule(moduleName string, s *script.Script) lua.LGFunction {
 	}
 }
 
+// GetLoader returns the lua loader
 func (t *Test) GetLoader(s *script.Script) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		var exports = map[string]lua.LGFunction{
