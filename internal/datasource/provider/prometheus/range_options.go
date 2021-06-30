@@ -2,7 +2,6 @@ package prometheus
 
 import (
 	"fmt"
-	"github.com/yuin/gluamapper"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -18,15 +17,44 @@ func (o *queryRangeOptions) validate() error {
 
 func (m *Prometheus) parseRangeOptions(luaState *lua.LState) (*queryRangeOptions, error) {
 	options := luaState.Get(2)
-	queryOptions := &queryRangeOptions{}
-	if options.Type() == lua.LTTable {
-		err := gluamapper.Map(options.(*lua.LTable), &queryOptions)
-		if err != nil {
-			return nil, fmt.Errorf("error decode query options, %w", err)
-		}
+	rangeOptions := &queryRangeOptions{}
+
+	if options.Type() == lua.LTNil {
+		return rangeOptions, nil
 	}
-	if err := queryOptions.validate(); err != nil {
+
+	if options.Type() != lua.LTTable {
+		return nil, fmt.Errorf("options must be a table")
+	}
+
+	optionsTable := options.(*lua.LTable)
+
+	v := optionsTable.RawGetString("start")
+	if v.Type() != lua.LTNil {
+		if v.Type() != lua.LTString {
+			return nil, fmt.Errorf("start must be a string")
+		}
+		rangeOptions.Start = string(v.(lua.LString))
+	}
+
+	v = optionsTable.RawGetString("end")
+	if v.Type() != lua.LTNil {
+		if v.Type() != lua.LTString {
+			return nil, fmt.Errorf("end must be a string")
+		}
+		rangeOptions.End = string(v.(lua.LString))
+	}
+
+	v = optionsTable.RawGetString("step")
+	if v.Type() != lua.LTNil {
+		if v.Type() != lua.LTString {
+			return nil, fmt.Errorf("step must be a string")
+		}
+		rangeOptions.Step = string(v.(lua.LString))
+	}
+
+	if err := rangeOptions.validate(); err != nil {
 		return nil, err
 	}
-	return queryOptions, nil
+	return rangeOptions, nil
 }

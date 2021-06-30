@@ -19,13 +19,18 @@ func (m *storageAlert) Get(name string) (*alert.Alert, error) {
 	return a, nil
 }
 
-func (m *storageAlert) Index(_ []alert.Level) (alert.Alerts, error) {
+func (m *storageAlert) Index(l []alert.Level) (alert.Alerts, error) {
 	var result alert.Alerts
 	m.mxAlerts.RLock()
 	defer m.mxAlerts.RUnlock()
 
 	for _, a := range m.alerts {
-		result = append(result, a)
+		for _, l := range l {
+			if a.Level == l {
+				result = append(result, a)
+				break
+			}
+		}
 	}
 
 	return result, nil

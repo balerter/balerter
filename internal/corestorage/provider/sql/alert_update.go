@@ -94,7 +94,7 @@ func (p *PostgresAlert) Update(name string, level alert.Level) (*alert.Alert, bo
 			p.logger.Error("error rollback tx", zap.Error(err))
 		}
 		p.logger.Error("error convert level", zap.Error(err))
-		return nil, false, fmt.Errorf("error convert level, %w", err)
+		return nil, false, fmt.Errorf("error convert level %d, %w", l, err)
 	}
 
 	a := alert.New(name)

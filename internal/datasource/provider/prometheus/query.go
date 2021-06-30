@@ -9,10 +9,10 @@ import (
 
 func (m *Prometheus) getQuery(luaState *lua.LState) (string, error) {
 	queryV := luaState.Get(1)
-	if queryV.Type() == lua.LTNil {
-		return "", fmt.Errorf("query must be not empty")
+	if queryV.Type() != lua.LTString {
+		return "", fmt.Errorf("query must be a string")
 	}
-	query := queryV.String()
+	query := string(queryV.(lua.LString))
 	if query == "" {
 		return "", fmt.Errorf("query must be not empty")
 	}
@@ -59,7 +59,7 @@ func (m *Prometheus) doRange(luaState *lua.LState) int {
 	if err != nil {
 		m.logger.Error("error decode query range options", zap.Error(err))
 		luaState.Push(lua.LNil)
-		luaState.Push(lua.LString("error decode query range options"))
+		luaState.Push(lua.LString("error decode query range options, " + err.Error()))
 		return 2
 	}
 

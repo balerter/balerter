@@ -3,6 +3,7 @@ package metrics
 import (
 	"github.com/balerter/balerter/internal/alert"
 	"github.com/prometheus/client_golang/prometheus"
+	dto "github.com/prometheus/client_model/go"
 	"go.uber.org/zap"
 )
 
@@ -50,6 +51,23 @@ func Register(logger *zap.Logger) {
 // SetAlertLevel sets alert level
 func SetAlertLevel(name string, level alert.Level) {
 	metricAlert.WithLabelValues(name).Set(float64(level))
+}
+
+// GetAlertLevel returns alert level from the metric
+// use for testing purposes
+func GetAlertLevel(name string) (float64, error) {
+	g, err := metricAlert.GetMetricWithLabelValues(name)
+	if err != nil {
+		return 0, err
+	}
+
+	d := &dto.Metric{}
+	err = g.Write(d)
+	if err != nil {
+		return 0, err
+	}
+
+	return *d.Gauge.Value, nil
 }
 
 // SetVersion updates data for metrics metricInfoVersion

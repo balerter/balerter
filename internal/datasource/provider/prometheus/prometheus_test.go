@@ -5,6 +5,7 @@ import (
 	"github.com/balerter/balerter/internal/config/datasources/prometheus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"testing"
 )
@@ -20,6 +21,18 @@ func TestNew(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, "prometheus.prom1", m.name)
+}
+
+func TestNew_fail_url(t *testing.T) {
+	_, err := New(prometheus.Prometheus{
+		Name:      "prom1",
+		URL:       "$% a.a",
+		BasicAuth: common.BasicAuth{},
+		Timeout:   0,
+	}, zap.NewNop())
+
+	require.Error(t, err)
+	assert.Equal(t, "parse \"$% a.a\": invalid URL escape \"% a\"", err.Error())
 }
 
 func TestName(t *testing.T) {
@@ -40,4 +53,31 @@ func TestStop(t *testing.T) {
 
 	mm.AssertCalled(t, "CloseIdleConnections")
 	mm.AssertExpectations(t)
+}
+
+func TestModuleName(t *testing.T) {
+	assert.Equal(t, "prometheus.foo", ModuleName("foo"))
+}
+
+func TestMethods(t *testing.T) {
+	a := Methods()
+	assert.Equal(t, 2, len(a))
+	assert.Equal(t, "query", a[0])
+	assert.Equal(t, "range", a[1])
+}
+
+func TestPrometheus_GetLoader(t *testing.T) {
+	p := &Prometheus{}
+	loader := p.GetLoader(nil)
+
+	luaState := lua.NewState()
+
+	n := loader(luaState)
+	assert.Equal(t, 1, n)
+
+	v := luaState.Get(1).(*lua.LTable)
+
+	for _, method := range Methods() {
+		assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString(method)))
+	}
 }
