@@ -102,21 +102,25 @@ func (m *KVMock) All() (map[string]string, error) {
 }
 
 // Get returns KV pair by name
-func (m *KVMock) Get(_ string) (string, error) {
-	return "", nil
+func (m *KVMock) Get(n string) (string, error) {
+	a := m.Called(n)
+	return a.String(0), a.Error(1)
 }
 
 // Delete KV pair from the storage
-func (m *KVMock) Delete(_ string) error {
-	return nil
+func (m *KVMock) Delete(v string) error {
+	a := m.Called(v)
+	return a.Error(0)
 }
 
 // Put KV pair to the storage
-func (m *KVMock) Put(_, _ string) error {
-	return nil
+func (m *KVMock) Put(v1, v2 string) error {
+	a := m.Called(v1, v2)
+	return a.Error(0)
 }
 
 // Upsert KV pair in the storage
-func (m *KVMock) Upsert(_, _ string) error {
-	return nil
+func (m *KVMock) Upsert(v1, v2 string) error {
+	a := m.Called(v1, v2)
+	return a.Error(0)
 }
