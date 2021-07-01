@@ -36,12 +36,11 @@ func TestStorageAlert_Index(t *testing.T) {
 		alerts: map[string]*alert.Alert{"a1": a1, "a2": a2, "a3": a3},
 	}
 
-	data, err := a.Index([]alert.Level{alert.LevelSuccess, alert.LevelWarn})
+	data, err := a.Index([]alert.Level{alert.LevelWarn})
 	require.NoError(t, err)
-	assert.Equal(t, 2, len(data))
+	assert.Equal(t, 1, len(data))
 
-	assert.Equal(t, a1, data[0])
-	assert.Equal(t, a2, data[1])
+	assert.Equal(t, a2, data[0])
 }
 
 func TestStorageAlert_Update_no_alert_success(t *testing.T) {
