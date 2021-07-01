@@ -8,13 +8,14 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"strings"
 	"testing"
 )
 
 func TestNew_error_connect(t *testing.T) {
 	_, err := New(postgres.Postgres{})
 	require.Error(t, err)
-	assert.Equal(t, "dial tcp [::1]:0: connect: can't assign requested address", err.Error())
+	assert.True(t, strings.HasPrefix(err.Error(), "dial tcp [::1]:0: connect:"))
 }
 
 func TestProvider_Get_error_query(t *testing.T) {
