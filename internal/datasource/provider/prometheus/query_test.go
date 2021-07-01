@@ -3,6 +3,7 @@ package prometheus
 import (
 	"bytes"
 	"fmt"
+	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -185,4 +186,44 @@ func TestPrometheus_doRange_send(t *testing.T) {
 	assert.Equal(t, 2, n)
 	tbl := luaState.Get(2)
 	assert.Equal(t, lua.LTTable, tbl.Type())
+}
+
+func Test_processValVectorRange(t *testing.T) {
+	m := model.Vector{}
+	m = append(m, &model.Sample{
+		Metric:    model.Metric{"a": "b"},
+		Value:     1,
+		Timestamp: 2,
+	})
+	tbl := processValVectorRange(m)
+	assert.Equal(t, lua.LTTable, tbl.Type())
+	row := tbl.RawGetInt(1)
+	require.Equal(t, lua.LTTable, row.Type())
+	metrics := row.(*lua.LTable).RawGetString("metrics")
+	require.Equal(t, lua.LTTable, metrics.Type())
+	assert.Equal(t, "b", metrics.(*lua.LTable).RawGetString("a").String())
+	assert.Equal(t, "1", row.(*lua.LTable).RawGetString("value").String())
+}
+
+func Test_processValMatrixRange(t *testing.T) {
+	m := model.Matrix{}
+	m = append(m, &model.SampleStream{
+		Metric: model.Metric{"a": "b"},
+		Values: []model.SamplePair{
+			{
+				Timestamp: 0,
+				Value:     2,
+			},
+		},
+	})
+	tbl := processValMatrixRange(m)
+	assert.Equal(t, lua.LTTable, tbl.Type())
+	row := tbl.RawGetInt(1)
+	require.Equal(t, lua.LTTable, row.Type())
+	metrics := row.(*lua.LTable).RawGetString("metrics")
+	require.Equal(t, lua.LTTable, metrics.Type())
+	assert.Equal(t, "b", metrics.(*lua.LTable).RawGetString("a").String())
+
+	vv := row.(*lua.LTable).RawGetString("values")
+	assert.Equal(t, "2", vv.(*lua.LTable).RawGetInt(1).(*lua.LTable).RawGetString("value").String())
 }

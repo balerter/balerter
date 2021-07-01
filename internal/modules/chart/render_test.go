@@ -1,10 +1,13 @@
 package chart
 
 import (
+	"bytes"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"image/color"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func Test_parseGroup(t *testing.T) {
@@ -264,4 +267,29 @@ func TestChart_parseColor(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestChart_Render(t *testing.T) {
+	ch := &Chart{}
+
+	data := &Data{
+		Title: "ащщ",
+		Series: []DataSeries{
+			{
+				Color:      "",
+				LineColor:  "",
+				PointColor: "",
+				Data: []DataItem{
+					{
+						Timestamp: float64(time.Now().Unix()),
+						Value:     100,
+					},
+				},
+			},
+		},
+	}
+	buf := bytes.NewBuffer(nil)
+
+	err := ch.Render("title", data, buf)
+	require.NoError(t, err)
 }
