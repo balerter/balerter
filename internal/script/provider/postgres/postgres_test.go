@@ -4,19 +4,17 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/balerter/balerter/internal/config/scripts/postgres"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"strings"
 	"testing"
 )
 
-func TestNew_error_connect(t *testing.T) {
-	_, err := New(postgres.Postgres{})
-	require.Error(t, err)
-	assert.True(t, strings.HasPrefix(err.Error(), "dial tcp [::1]:0: connect:"))
-}
+//func TestNew_error_connect(t *testing.T) {
+//	_, err := New(postgres.Postgres{})
+//	require.Error(t, err)
+//	assert.True(t, strings.HasPrefix(err.Error(), "dial tcp [::1]:0: connect:"))
+//}
 
 func TestProvider_Get_error_query(t *testing.T) {
 	db, dbmock, err := sqlmock.New(sqlmock.MonitorPingsOption(true))
