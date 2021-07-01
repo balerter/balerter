@@ -1,11 +1,11 @@
 package postgres
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/balerter/balerter/internal/config/scripts/postgres"
 	"github.com/balerter/balerter/internal/script/script"
-	_ "github.com/lib/pq" // DB driver
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 const (
@@ -15,7 +15,7 @@ const (
 // Provider represents Postgres script provider
 type Provider struct {
 	name  string
-	db    *sql.DB
+	db    *sqlx.DB
 	query string
 }
 
@@ -41,7 +41,7 @@ func New(cfg postgres.Postgres) (*Provider, error) {
 	)
 	var err error
 
-	p.db, err = sql.Open("postgres", pgConnString)
+	p.db, err = sqlx.Open("postgres", pgConnString)
 	if err != nil {
 		return nil, err
 	}
