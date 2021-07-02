@@ -1,6 +1,11 @@
 package main
 
-import "testing"
+import (
+	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/scripts"
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
 
 func Test_validateLogLevel(t *testing.T) {
 	type args struct {
@@ -54,4 +59,26 @@ func Test_validateLogLevel(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_run(t *testing.T) {
+	cfg := &config.Config{
+		Scripts: &scripts.Scripts{
+			UpdateInterval: 0,
+		},
+	}
+
+	flg := &config.Flags{
+		ConfigFilePath: "config.yml",
+		LogLevel:       "DEBUG",
+		Debug:          false,
+		Once:           true,
+		Script:         "",
+		AsJSON:         false,
+	}
+
+	msg, code := run(cfg, flg)
+
+	assert.Equal(t, "", msg)
+	assert.Equal(t, 0, code)
 }

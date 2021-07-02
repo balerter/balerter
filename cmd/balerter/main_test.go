@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/config/api"
+	"github.com/balerter/balerter/internal/config/scripts"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -57,4 +59,30 @@ func Test_validateLogLevel(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRun_once(t *testing.T) {
+	cfg := &config.Config{
+		Scripts: &scripts.Scripts{
+			UpdateInterval: 0,
+		},
+		API: &api.API{
+			Address:        "127.0.0.1:12001",
+			ServiceAddress: "127.0.0.1:12002",
+		},
+	}
+
+	flg := &config.Flags{
+		ConfigFilePath: "config.yml",
+		LogLevel:       "DEBUG",
+		Debug:          false,
+		Once:           true,
+		Script:         "",
+		AsJSON:         false,
+	}
+
+	msg, code := run(cfg, flg)
+
+	assert.Equal(t, "", msg)
+	assert.Equal(t, 0, code)
 }
