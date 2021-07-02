@@ -40,6 +40,20 @@ func New(name, driver, connectionString string, alertsCfg tables.TableAlerts, kv
 		kv:     &PostgresKV{db: conn, tableCfg: kvCfg, timeout: timeout, logger: logger},
 	}
 
+	if alertsCfg.CreateTable {
+		err = p.alerts.CreateTable()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if kvCfg.CreateTable {
+		err = p.kv.CreateTable()
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return p, nil
 }
 

@@ -19,14 +19,16 @@ type KVFields struct {
 
 // TableKV is config for core storage kv table
 type TableKV struct {
-	Table  string   `json:"table" yaml:"table" hcl:"table"`
-	Fields KVFields `json:"fields" yaml:"fields" hcl:"fields,block"`
+	Table       string   `json:"table" yaml:"table" hcl:"table"`
+	Fields      KVFields `json:"fields" yaml:"fields" hcl:"fields,block"`
+	CreateTable bool     `json:"create" yaml:"create" hcl:"create,optional"`
 }
 
 // TableAlerts is config for core storage alerts table
 type TableAlerts struct {
-	Table  string      `json:"table" yaml:"table" hcl:"table"`
-	Fields AlertFields `json:"fields" yaml:"fields" hcl:"fields,block"`
+	Table       string      `json:"table" yaml:"table" hcl:"table"`
+	Fields      AlertFields `json:"fields" yaml:"fields" hcl:"fields,block"`
+	CreateTable bool        `json:"create" yaml:"create" hcl:"create,optional"`
 }
 
 // Validate config

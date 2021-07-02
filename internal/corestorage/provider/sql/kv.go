@@ -24,6 +24,29 @@ type PostgresKV struct {
 	logger   *zap.Logger
 }
 
+func (p *PostgresKV) CreateTable() error {
+	query := `CREATE TABLE IF NOT EXISTS %s
+(
+	%s varchar not null constraint %s_pk primary key,
+	%s text
+);
+`
+
+	query = fmt.Sprintf(query,
+		p.tableCfg.Table,
+		p.tableCfg.Fields.Key,
+		p.tableCfg.Table,
+		p.tableCfg.Fields.Value,
+	)
+
+	_, err := p.db.Exec(query)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // All is an implementation of the storage interface
 func (p *PostgresKV) All() (map[string]string, error) {
 	query := fmt.Sprintf(`SELECT %s, %s FROM %s`, p.tableCfg.Fields.Key, p.tableCfg.Fields.Value, p.tableCfg.Table)

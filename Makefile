@@ -53,4 +53,6 @@ push-tgtool: ## Build tgtool image to docker registry
 	docker push balerter/tgtool:$(TAG)
 
 test-full: ## Run full tests
+	docker-compose up -d
 	GO111MODULE=on go test -mod=vendor -coverprofile=coverage.txt -covermode=atomic ./internal/... ./cmd/...
+	docker-compose down -v
