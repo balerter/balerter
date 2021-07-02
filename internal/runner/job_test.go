@@ -9,6 +9,7 @@ import (
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"testing"
+	"time"
 )
 
 type alertManagerMock struct {
@@ -118,4 +119,27 @@ func TestRunner_createLuaState(t *testing.T) {
 	require.NotNil(t, j.luaState)
 	m1.AssertExpectations(t)
 	dsManager.AssertExpectations(t)
+}
+
+func TestNew(t *testing.T) {
+	j := newJob(&script.Script{}, zap.NewNop())
+	assert.IsType(t, &Job{}, j)
+}
+
+func TestJob_Stop(t *testing.T) {
+	j := &Job{
+		luaState: lua.NewState(),
+	}
+
+	j.Stop()
+}
+
+func TestJob_Run(t *testing.T) {
+	j := &Job{
+		luaState: lua.NewState(),
+		script:   &script.Script{Timeout: time.Millisecond * 100, Body: []byte("print(1)")},
+		logger:   zap.NewNop(),
+	}
+
+	j.Run()
 }
