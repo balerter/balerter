@@ -118,24 +118,3 @@ func TestProvider_upload_error_upload(t *testing.T) {
 
 	assert.Equal(t, "error upload object: MissingRegion: could not find region configuration", luaState.Get(3).String())
 }
-
-//func TestProvider_upload(t *testing.T) {
-//	p := &Provider{
-//		name:     "",
-//		region:   "local",
-//		endpoint: "http://127.0.0.1:9000",
-//		key:      "key",
-//		secret:   "secret",
-//		bucket:   "bucket",
-//		logger:   zap.NewNop(),
-//	}
-//
-//	luaState := lua.NewState()
-//	luaState.Push(lua.LString("foo"))
-//
-//	n := p.uploadPNG(luaState)
-//	assert.Equal(t, 1, n)
-//
-//	assert.Equal(t, "", luaState.Get(2).String())
-//	assert.Equal(t, "", luaState.Get(3).String())
-//}
