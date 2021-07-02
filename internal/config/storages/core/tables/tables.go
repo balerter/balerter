@@ -81,7 +81,7 @@ func (t KVFields) Validate() error {
 		return fmt.Errorf("field key must be not empty")
 	}
 	if t.Value == "" {
-		return fmt.Errorf("field key must be not empty")
+		return fmt.Errorf("field value must be not empty")
 	}
 	return nil
 }

@@ -1,8 +1,11 @@
 package core
 
 import (
+	"github.com/balerter/balerter/internal/config/storages/core/postgres"
 	"github.com/balerter/balerter/internal/config/storages/core/sqlite"
 	"github.com/balerter/balerter/internal/config/storages/core/tables"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
@@ -80,4 +83,72 @@ func TestStoragesCore_Validate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestName_sqlite(t *testing.T) {
+	f := sqlite.Sqlite{
+		Name:    "1",
+		Path:    "1",
+		Timeout: 0,
+		TableAlerts: tables.TableAlerts{
+			Table: "1",
+			Fields: tables.AlertFields{
+				Name:      "1",
+				Level:     "1",
+				Count:     "1",
+				UpdatedAt: "1",
+				CreatedAt: "1",
+			},
+		},
+		TableKV: tables.TableKV{
+			Table: "1",
+			Fields: tables.KVFields{
+				Key:   "1",
+				Value: "1",
+			},
+			CreateTable: false,
+		},
+	}
+	s := Core{
+		Sqlite: []sqlite.Sqlite{f, f},
+	}
+
+	err := s.Validate()
+	require.Error(t, err)
+	assert.Equal(t, "found duplicated name for core storages 'sqlite': 1", err.Error())
+
+}
+
+func TestName_postgres(t *testing.T) {
+	f := postgres.Postgres{
+		Name:    "1",
+		Host:    "1",
+		Port:    10,
+		Timeout: 0,
+		TableAlerts: tables.TableAlerts{
+			Table: "1",
+			Fields: tables.AlertFields{
+				Name:      "1",
+				Level:     "1",
+				Count:     "1",
+				UpdatedAt: "1",
+				CreatedAt: "1",
+			},
+		},
+		TableKV: tables.TableKV{
+			Table: "1",
+			Fields: tables.KVFields{
+				Key:   "1",
+				Value: "1",
+			},
+			CreateTable: false,
+		},
+	}
+	s := Core{
+		Postgres: []postgres.Postgres{f, f},
+	}
+
+	err := s.Validate()
+	require.Error(t, err)
+	assert.Equal(t, "found duplicated name for core storages 'postgres': 1", err.Error())
 }
