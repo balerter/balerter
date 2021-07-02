@@ -8,3 +8,17 @@ services:
       POSTGRES_DB: db
     ports:
       - 35432:5432
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+    - 1025:1025
+#  s3:
+#    image: adobe/s3mock
+#    environment:
+#      initialBuckets: bucket
+#    ports:
+#    - 9090:9090
+#  s3:
+#    image: minio/minio
+#    ports:
+#    - 9000:9000

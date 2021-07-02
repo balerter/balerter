@@ -1,6 +1,10 @@
 package file
 
-import "testing"
+import (
+	"github.com/stretchr/testify/require"
+	"os"
+	"testing"
+)
 
 func TestScriptSourceFile_Validate(t *testing.T) {
 	type fields struct {
@@ -41,4 +45,27 @@ func TestScriptSourceFile_Validate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestFile_Validate_file_error(t *testing.T) {
+	f := File{
+		Name:     "foo",
+		Filename: "nofile",
+	}
+
+	err := f.Validate()
+	require.Error(t, err)
+}
+
+func TestFile_Validate_file(t *testing.T) {
+	ff, err := os.CreateTemp("", "")
+	require.NoError(t, err)
+
+	f := File{
+		Name:     "foo",
+		Filename: ff.Name(),
+	}
+
+	err = f.Validate()
+	require.NoError(t, err)
 }

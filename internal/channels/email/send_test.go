@@ -18,6 +18,7 @@ func TestSend(t *testing.T) {
 			Name:   "foo",
 			From:   "gopher@example.net",
 			To:     "foo1@example.com;foo2@example.com",
+			Cc:     "foo3@example.com;foo4@example.com",
 			Host:   "localhost",
 			Port:   "1025",
 			Secure: "none",
@@ -30,6 +31,7 @@ func TestSend(t *testing.T) {
 	timeout := time.Second
 	conn, err := net.DialTimeout("tcp", net.JoinHostPort(e.conf.Host, e.conf.Port), timeout)
 	if err != nil {
+		t.Fatalf("error dial, %s", err)
 		return
 	}
 	if conn != nil {

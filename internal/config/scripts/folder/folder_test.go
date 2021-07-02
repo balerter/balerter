@@ -1,6 +1,10 @@
 package folder
 
-import "testing"
+import (
+	"github.com/stretchr/testify/require"
+	"os"
+	"testing"
+)
 
 func TestScriptSourceFolder_Validate(t *testing.T) {
 	type fields struct {
@@ -43,4 +47,26 @@ func TestScriptSourceFolder_Validate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestFolder_Validate_readdir_error(t *testing.T) {
+	f := Folder{
+		Name: "foo",
+		Path: "/tmp/not-exists-path",
+		Mask: "*.lua",
+	}
+
+	err := f.Validate()
+	require.Error(t, err)
+}
+
+func TestFolder_Validate_readdir(t *testing.T) {
+	f := Folder{
+		Name: "foo",
+		Path: os.TempDir(),
+		Mask: "*.lua",
+	}
+
+	err := f.Validate()
+	require.NoError(t, err)
 }
