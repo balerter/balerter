@@ -22,6 +22,12 @@ func TestValueToString(t *testing.T) {
 	s, err = ValueToString(lua.LString("foo"))
 	require.NoError(t, err)
 	assert.Equal(t, "foo", s)
+
+	tt := &lua.LTable{}
+	tt.RawSetString("foo", lua.LString("bar"))
+	s, err = ValueToString(tt)
+	require.NoError(t, err)
+	assert.Equal(t, `{"foo":"bar"}`, s)
 }
 
 func TestTableToString(t *testing.T) {
@@ -67,4 +73,24 @@ func TestTableToString_Errors(t *testing.T) {
 	_, err = TableToString(nil)
 	require.Error(t, err)
 	assert.Equal(t, "table is nil", err.Error())
+}
+
+func TestValuesToStringNoErr_err(t *testing.T) {
+	s := ValuesToStringNoErr([]lua.LValue{lua.LNil})
+	assert.Equal(t, "__ERROR_MARSHALING__", s)
+}
+
+func TestValuesToStringNoErr(t *testing.T) {
+	s := ValuesToStringNoErr([]lua.LValue{lua.LString("1")})
+	assert.Equal(t, "[1]", s)
+}
+
+func TestValueToStringNoErr_err(t *testing.T) {
+	s := ValueToStringNoErr(lua.LNil)
+	assert.Equal(t, "__ERROR_MARSHALING__", s)
+}
+
+func TestValueToStringNoErr(t *testing.T) {
+	s := ValueToStringNoErr(lua.LString("1"))
+	assert.Equal(t, "1", s)
 }
