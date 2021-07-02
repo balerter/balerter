@@ -20,11 +20,11 @@ Full documentation available on https://balerter.com
 
 ## Example
 
-```
+```shell
 docker pull balerter/balerter
 ```
 
-```
+```shell
 docker run \
     -v /path/to/config.yml:/opt/config.yml \
     -v /path/to/scripts:/opt/scripts \ 
@@ -33,6 +33,7 @@ docker run \
 ```
 
 Config file `config.yml`
+
 ```yaml
 scripts:
   folder:
@@ -58,7 +59,8 @@ channels:
 ```
 
 Sample script `rps.lua`
-```
+
+```lua
 -- @cron */10 * * * * *
 -- @name script1
 
@@ -86,7 +88,7 @@ Also, you can to write tests!
 
 An example:
 
-```
+```lua
 -- @test script1
 -- @name script1-test
 
