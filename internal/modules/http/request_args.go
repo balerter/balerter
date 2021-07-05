@@ -85,9 +85,6 @@ func (h *HTTP) parseRequestArgs(luaState *lua.LState) (*requestArgs, error) {
 	default:
 		return nil, fmt.Errorf("body argument must be a string or nil")
 	}
-	if argURI.Type() != lua.LTString {
-		return nil, fmt.Errorf("first argument must be a string")
-	}
 
 	argHeaders := luaState.Get(3) //nolint:gomnd // param position
 	switch argHeaders.Type() {

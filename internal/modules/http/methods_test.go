@@ -145,4 +145,5 @@ func TestHTTP_request(t *testing.T) {
 
 	assert.Equal(t, 1, n)
 	assert.Equal(t, lua.LTTable, ls.Get(2).Type())
+	assert.Equal(t, 1, len(hc.DoCalls()))
 }

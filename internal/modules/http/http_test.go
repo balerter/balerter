@@ -3,6 +3,7 @@ package http
 import (
 	"github.com/stretchr/testify/assert"
 	lua "github.com/yuin/gopher-lua"
+	"go.uber.org/zap"
 	"net/http"
 	"testing"
 )
@@ -32,4 +33,41 @@ func TestHttp_GetLoader(t *testing.T) {
 	assert.Equal(t, http.MethodConnect, v.RawGetString("methodConnect").String())
 	assert.Equal(t, http.MethodOptions, v.RawGetString("methodOptions").String())
 	assert.Equal(t, http.MethodTrace, v.RawGetString("methodTrace").String())
+}
+
+func TestModuleName(t *testing.T) {
+	assert.Equal(t, "http", ModuleName())
+}
+
+func TestMethods(t *testing.T) {
+	assert.Equal(t, []string{
+		"request",
+		"post",
+		"get",
+		"put",
+		"delete",
+	}, Methods())
+}
+
+func TestNew(t *testing.T) {
+	h := New(zap.NewNop())
+	assert.IsType(t, &HTTP{}, h)
+}
+
+func TestName(t *testing.T) {
+	h := &HTTP{}
+	assert.Equal(t, "http", h.Name())
+}
+
+func TestHTTP_Stop(t *testing.T) {
+	hm := &httpClientMock{CloseIdleConnectionsFunc: func() {}}
+
+	h := &HTTP{
+		client: hm,
+	}
+	assert.NoError(t, h.Stop())
+
+	s := hm.CloseIdleConnectionsCalls()
+
+	assert.Equal(t, 1, len(s))
 }
