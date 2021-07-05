@@ -3,6 +3,7 @@ package http
 import (
 	"fmt"
 	lua "github.com/yuin/gopher-lua"
+	"strings"
 )
 
 type requestArgs struct {
@@ -16,6 +17,51 @@ func newRequestArgs() *requestArgs {
 	return &requestArgs{
 		Headers: make(map[string]string),
 	}
+}
+
+func (r *requestArgs) parseFromTable(tbl *lua.LTable) error {
+	methodValue := tbl.RawGetString("method")
+	if methodValue.Type() != lua.LTNil {
+		r.Method = parseMethod(methodValue.String())
+		if r.Method == "" {
+			return fmt.Errorf("bad http method %s", methodValue.String())
+		}
+	}
+
+	uriValue := tbl.RawGetString("uri")
+	if uriValue.Type() != lua.LTNil {
+		if uriValue.Type() != lua.LTString {
+			return fmt.Errorf("uri must be a string")
+		}
+		r.URI = uriValue.String()
+	}
+
+	bodyValue := tbl.RawGetString("body")
+	if bodyValue.Type() != lua.LTNil {
+		r.Body = []byte(bodyValue.String())
+	}
+
+	headersValue := tbl.RawGetString("headers")
+	if headersValue.Type() != lua.LTNil {
+		if headersValue.Type() != lua.LTTable {
+			return fmt.Errorf("headers must be a table")
+		}
+
+		headersValue.(*lua.LTable).ForEach(func(value lua.LValue, value2 lua.LValue) {
+			r.Headers[value.String()] = value2.String()
+		})
+	}
+
+	return nil
+}
+
+func parseMethod(method string) string {
+	for _, m := range []string{"GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "CONNECT", "OPTIONS", "TRACE"} {
+		if strings.ToUpper(method) == m {
+			return m
+		}
+	}
+	return ""
 }
 
 // parseRequestArgs parses arguments for methods http.get, http.post etc

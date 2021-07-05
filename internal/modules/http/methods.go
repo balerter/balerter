@@ -1,7 +1,6 @@
 package http
 
 import (
-	"github.com/yuin/gluamapper"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
@@ -42,7 +41,7 @@ func (h *HTTP) request(luaState *lua.LState) int {
 
 	args := newRequestArgs()
 
-	err := gluamapper.Map(opts.(*lua.LTable), args)
+	err := args.parseFromTable(opts.(*lua.LTable))
 	if err != nil {
 		luaState.Push(lua.LNil)
 		luaState.Push(lua.LString("error parse arguments, " + err.Error()))

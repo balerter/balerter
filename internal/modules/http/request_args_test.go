@@ -159,3 +159,149 @@ func TestHTTP_parseRequestArgs(t *testing.T) {
 		})
 	}
 }
+
+func Test_parseMethod(t *testing.T) {
+	type args struct {
+		method string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "get",
+			args: args{
+				method: "get",
+			},
+			want: "GET",
+		},
+		{
+			name: "bad",
+			args: args{
+				method: "bad",
+			},
+			want: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := parseMethod(tt.args.method); got != tt.want {
+				t.Errorf("parseMethod() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_requestArgs_parseFromTable(t *testing.T) {
+	type fields struct {
+		Method  string
+		URI     string
+		Body    []byte
+		Headers map[string]string
+	}
+	type args struct {
+		tbl func() *lua.LTable
+	}
+	tests := []struct {
+		name     string
+		fields   fields
+		args     args
+		wantErr  bool
+		errValue string
+	}{
+		{
+			name:   "empty",
+			fields: fields{},
+			args: args{
+				tbl: func() *lua.LTable {
+					return &lua.LTable{}
+				},
+			},
+			wantErr:  false,
+			errValue: "",
+		},
+		{
+			name:   "bad method",
+			fields: fields{},
+			args: args{
+				tbl: func() *lua.LTable {
+					tbl := &lua.LTable{}
+					tbl.RawSetString("method", lua.LString("bad"))
+					return tbl
+				},
+			},
+			wantErr:  true,
+			errValue: "bad http method bad",
+		},
+		{
+			name:   "bad uri",
+			fields: fields{},
+			args: args{
+				tbl: func() *lua.LTable {
+					tbl := &lua.LTable{}
+					tbl.RawSetString("method", lua.LString("get"))
+					tbl.RawSetString("uri", lua.LNumber(42))
+					return tbl
+				},
+			},
+			wantErr:  true,
+			errValue: "uri must be a string",
+		},
+		{
+			name:   "bad headers",
+			fields: fields{},
+			args: args{
+				tbl: func() *lua.LTable {
+					tbl := &lua.LTable{}
+					tbl.RawSetString("method", lua.LString("get"))
+					tbl.RawSetString("uri", lua.LString("uri"))
+					tbl.RawSetString("headers", lua.LNumber(42))
+					return tbl
+				},
+			},
+			wantErr:  true,
+			errValue: "headers must be a table",
+		},
+		{
+			name: "ok",
+			fields: fields{
+				Method:  "GET",
+				URI:     "uri",
+				Body:    []byte("foo"),
+				Headers: map[string]string{"a": "b"},
+			},
+			args: args{
+				tbl: func() *lua.LTable {
+					tbl := &lua.LTable{}
+					tbl.RawSetString("method", lua.LString("get"))
+					tbl.RawSetString("uri", lua.LString("uri"))
+					tbl.RawSetString("body", lua.LString("foo"))
+					h := &lua.LTable{}
+					h.RawSetString("a", lua.LString("b"))
+					tbl.RawSetString("headers", h)
+					return tbl
+				},
+			},
+			wantErr:  false,
+			errValue: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &requestArgs{
+				Method:  tt.fields.Method,
+				URI:     tt.fields.URI,
+				Body:    tt.fields.Body,
+				Headers: tt.fields.Headers,
+			}
+			err := r.parseFromTable(tt.args.tbl())
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseFromTable() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if err != nil && tt.wantErr && err.Error() != tt.errValue {
+				t.Errorf("unexpected error value = %s, want %s", err.Error(), tt.errValue)
+			}
+		})
+	}
+}
