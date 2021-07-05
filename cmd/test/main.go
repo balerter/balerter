@@ -38,7 +38,8 @@ var (
 )
 
 func main() {
-	cfg, flg, err := config.New()
+	fs := flag.NewFlagSet("fs", flag.ContinueOnError)
+	cfg, flg, err := config.New(fs, os.Args[1:])
 	if err != nil {
 		log.Printf("error configuration load, %v", err)
 		os.Exit(1)

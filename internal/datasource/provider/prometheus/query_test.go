@@ -227,3 +227,43 @@ func Test_processValMatrixRange(t *testing.T) {
 	vv := row.(*lua.LTable).RawGetString("values")
 	assert.Equal(t, "2", vv.(*lua.LTable).RawGetInt(1).(*lua.LTable).RawGetString("value").String())
 }
+
+func TestQueryResult_UnmarshalJSON_empty(t *testing.T) {
+	r := queryResult{}
+
+	err := r.UnmarshalJSON([]byte(``))
+	require.Error(t, err)
+	assert.Equal(t, "unexpected end of JSON input", err.Error())
+}
+
+func TestQueryResult_UnmarshalJSON_unexpected_type(t *testing.T) {
+	r := queryResult{}
+
+	err := r.UnmarshalJSON([]byte(`{"type":"foo"}`))
+	require.Error(t, err)
+	assert.Equal(t, "unexpected value type \"<ValNone>\"", err.Error())
+}
+
+func TestQueryResult_UnmarshalJSON_scalar(t *testing.T) {
+	r := queryResult{}
+
+	err := r.UnmarshalJSON([]byte(`{"resultType":"scalar","result":[1,"2"]}`))
+	require.NoError(t, err)
+	assert.Equal(t, "scalar: 2 @[1]", r.v.String())
+}
+
+func TestQueryResult_UnmarshalJSON_vector(t *testing.T) {
+	r := queryResult{}
+
+	err := r.UnmarshalJSON([]byte(`{"resultType":"vector","result":[{"metric":{},"value":[1,"2"]}]}`))
+	require.NoError(t, err)
+	assert.Equal(t, "{} => 2 @[1]", r.v.String())
+}
+
+func TestQueryResult_UnmarshalJSON_matrix(t *testing.T) {
+	r := queryResult{}
+
+	err := r.UnmarshalJSON([]byte(`{"resultType":"matrix","result":[{"metric":{},"values":[[1,"2"]]}]}`))
+	require.NoError(t, err)
+	assert.Equal(t, "{} =>\n2 @[1]", r.v.String())
+}

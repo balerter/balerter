@@ -1,6 +1,9 @@
 package clickhouse
 
 import (
+	"context"
+	"database/sql"
+	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
@@ -69,4 +72,25 @@ func TestQuery(t *testing.T) {
 			}
 		})
 	})
+}
+
+func Test_query_err_query_context(t *testing.T) {
+	m := &dbConnectionMock{
+		QueryContextFunc: func(_ context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+			assert.Equal(t, "query", query)
+			return nil, fmt.Errorf("err1")
+		},
+	}
+	ch := &Clickhouse{
+		db:     m,
+		logger: zap.NewNop(),
+	}
+
+	ls := lua.NewState()
+	ls.Push(lua.LString("query"))
+
+	n := ch.query(ls)
+	assert.Equal(t, 2, n)
+	assert.Equal(t, "err1", ls.Get(3).String())
+	assert.Equal(t, 1, len(m.QueryContextCalls()))
 }

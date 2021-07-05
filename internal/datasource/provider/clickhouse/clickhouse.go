@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"database/sql"
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
 	clickhouseCfg "github.com/balerter/balerter/internal/config/datasources/clickhouse"
@@ -14,6 +15,8 @@ import (
 	"io/ioutil"
 	"time"
 )
+
+//go:generate moq -out clickhouse_client_mock.go -skip-ensure -fmt goimports . dbConnection
 
 var (
 	defaultTimeout = time.Second * 5
@@ -31,11 +34,17 @@ func Methods() []string {
 	}
 }
 
+type dbConnection interface {
+	Ping() error
+	Close() error
+	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
+}
+
 // Clickhouse represents datasource of type Clickhouse
 type Clickhouse struct {
 	name    string
 	logger  *zap.Logger
-	db      *sqlx.DB
+	db      dbConnection
 	timeout time.Duration
 }
 

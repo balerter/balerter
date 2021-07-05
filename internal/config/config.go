@@ -21,7 +21,7 @@ import (
 var StdIn io.Reader = os.Stdin
 
 // New creates new config instance
-func New() (*Config, *Flags, error) {
+func New(fs *flag.FlagSet, args []string) (*Config, *Flags, error) {
 	cfg := &Config{}
 
 	var data []byte
@@ -29,13 +29,16 @@ func New() (*Config, *Flags, error) {
 
 	flg := &Flags{}
 
-	flag.StringVar(&flg.ConfigFilePath, "config", "config.yml", "configuration source. Currently supports only path to yaml file and 'stdin'.")
-	flag.StringVar(&flg.LogLevel, "logLevel", "INFO", "log level. ERROR, INFO or DEBUG")
-	flag.BoolVar(&flg.Debug, "debug", false, "debug mode")
-	flag.BoolVar(&flg.Once, "once", false, "once run scripts and exit")
-	flag.StringVar(&flg.Script, "script", "", "ignore all script sources and runs only one script. Meta-tag @ignore will be ignored")
-	flag.BoolVar(&flg.AsJSON, "json", false, "output json format")
-	flag.Parse()
+	fs.StringVar(&flg.ConfigFilePath, "config", "config.yml", "configuration source. Currently supports only path to yaml file and 'stdin'.")
+	fs.StringVar(&flg.LogLevel, "logLevel", "INFO", "log level. ERROR, INFO or DEBUG")
+	fs.BoolVar(&flg.Debug, "debug", false, "debug mode")
+	fs.BoolVar(&flg.Once, "once", false, "once run scripts and exit")
+	fs.StringVar(&flg.Script, "script", "", "ignore all script sources and runs only one script. Meta-tag @ignore will be ignored")
+	fs.BoolVar(&flg.AsJSON, "json", false, "output json format")
+	err = fs.Parse(args)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error parse falgs, %w", err)
+	}
 
 	if flg.ConfigFilePath == "stdin" {
 		data, err = ioutil.ReadAll(StdIn)

@@ -1,5 +1,9 @@
 version: '3'
 services:
+  clickhouse:
+    image: yandex/clickhouse-server
+    ports:
+    - 9000:9000
   postgres:
     image: postgres
     environment:
