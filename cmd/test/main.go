@@ -34,7 +34,7 @@ var (
 )
 
 var (
-	defaultLuaModulesPath = "./?.lua;./modules/?.lua;./modules/?/init.lua"
+	defaultLuaModulesPath = "./?.lua;./modules/?.lua;./modules/?/init.lua;/modules/?.lua;/modules/?/init.lua"
 )
 
 func main() {
