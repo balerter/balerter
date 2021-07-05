@@ -20,7 +20,7 @@ func (h *HTTP) sendRequest(args *requestArgs) (*response, error) {
 
 	resp, err := h.client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error send request, %w", err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 

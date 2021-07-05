@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+//go:generate moq -out http_client_mock.go -skip-ensure -fmt goimports . httpClient
+
 const (
 	defaultTimeout = time.Second * 30
 )
@@ -28,10 +30,15 @@ func Methods() []string {
 	}
 }
 
+type httpClient interface {
+	CloseIdleConnections()
+	Do(r *http.Request) (*http.Response, error)
+}
+
 // HTTP represents the HTTP core module
 type HTTP struct {
 	logger *zap.Logger
-	client *http.Client
+	client httpClient
 }
 
 // New creates HTTP core module
