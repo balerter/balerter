@@ -125,12 +125,6 @@ func run(cfg *config.Config, flg *config.Flags) (string, int) {
 
 	// ---------------------
 	// |
-	// | API
-	// |
-	// module is not used in the test environment
-
-	// ---------------------
-	// |
 	// | Core Modules
 	// |
 	// | Log
