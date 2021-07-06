@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+//go:generate moq -out job_mock.go -skip-ensure -fmt goimports . job
+
 var (
 	defaultUpdateInterval = time.Minute
 	defaultToRunChanLen   = 64
@@ -44,7 +46,12 @@ type Runner struct {
 
 	cron *cron.Cron
 
-	jobs chan *Job
+	jobs chan job
+}
+
+type job interface {
+	Run()
+	Name() string
 }
 
 // New creates new script runner
@@ -67,7 +74,7 @@ func New(
 		coreModules:     coreModules,
 		pool:            make(map[string]*Job),
 		cron:            cron.New(cron.WithSeconds(), cron.WithParser(script.CronParser)),
-		jobs:            make(chan *Job, defaultToRunChanLen),
+		jobs:            make(chan job, defaultToRunChanLen),
 	}
 
 	if r.updateInterval == 0 {
@@ -81,7 +88,7 @@ func New(
 
 func (rnr *Runner) watchJobs() {
 	for j := range rnr.jobs {
-		rnr.logger.Debug("run job", zap.String("name", j.name))
+		rnr.logger.Debug("run job", zap.String("name", j.Name()))
 		j.Run()
 	}
 }

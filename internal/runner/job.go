@@ -35,6 +35,10 @@ func (j *Job) Stop() {
 	j.luaState.Close()
 }
 
+func (j *Job) Name() string {
+	return j.name
+}
+
 // Run the job
 func (j *Job) Run() {
 	j.logger.Debug("run job", zap.String("name", j.name))

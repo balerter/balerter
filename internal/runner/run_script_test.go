@@ -86,7 +86,7 @@ func TestRunner_RunScript_error_create_luaState(t *testing.T) {
 		storagesManager: s,
 		dsManager:       d,
 		logger:          zap.NewNop(),
-		jobs:            make(chan *Job, 1),
+		jobs:            make(chan job, 1),
 	}
 
 	r := &badReader{}
@@ -107,7 +107,7 @@ func TestRunner_RunScript_script_not_found(t *testing.T) {
 	rnr := &Runner{
 		scriptsManager: m,
 		logger:         zap.NewNop(),
-		jobs:           make(chan *Job, 1),
+		jobs:           make(chan job, 1),
 	}
 
 	req, err := http.NewRequest("POST", "localhost", nil)
@@ -140,7 +140,7 @@ func TestRunner_RunScript(t *testing.T) {
 		storagesManager: s,
 		dsManager:       d,
 		logger:          zap.NewNop(),
-		jobs:            make(chan *Job, 1),
+		jobs:            make(chan job, 1),
 	}
 
 	req, err := http.NewRequest("POST", "localhost", bytes.NewBuffer([]byte("bar")))
@@ -149,7 +149,7 @@ func TestRunner_RunScript(t *testing.T) {
 	err = rnr.RunScript("foo", req)
 	require.NoError(t, err)
 
-	var j *Job
+	var j job
 
 	select {
 	case j = <-rnr.jobs:
@@ -157,5 +157,5 @@ func TestRunner_RunScript(t *testing.T) {
 		t.Fatalf("error read job from the channel")
 	}
 
-	assert.Equal(t, "foo", j.name)
+	assert.Equal(t, "foo", j.Name())
 }
