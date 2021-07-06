@@ -10,6 +10,7 @@ import (
 	"github.com/balerter/balerter/internal/config/channels/slack"
 	"github.com/balerter/balerter/internal/config/channels/syslog"
 	"github.com/balerter/balerter/internal/config/channels/telegram"
+	"github.com/balerter/balerter/internal/config/channels/twiliovoice"
 	"github.com/balerter/balerter/internal/config/channels/webhook"
 	"testing"
 
@@ -31,11 +32,12 @@ func TestManager_Init(t *testing.T) {
 		Webhook:              []webhook.Webhook{{Name: "wh1"}},
 		Alertmanager:         []alertmanager.Alertmanager{{Name: "am1"}},
 		AlertmanagerReceiver: []alertmanagerreceiver.AlertmanagerReceiver{{Name: "amr1"}},
+		TwilioVoice:          []twiliovoice.Twilio{{Name: "tw1"}},
 	}
 
 	err := m.Init(cfg)
 	require.NoError(t, err)
-	require.Equal(t, 9, len(m.channels))
+	require.Equal(t, 10, len(m.channels))
 
 	c, ok := m.channels["email1"]
 	require.True(t, ok)
@@ -72,4 +74,8 @@ func TestManager_Init(t *testing.T) {
 	c, ok = m.channels["amr1"]
 	require.True(t, ok)
 	assert.Equal(t, "amr1", c.Name())
+
+	c, ok = m.channels["tw1"]
+	require.True(t, ok)
+	assert.Equal(t, "tw1", c.Name())
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/balerter/balerter/internal/config/channels/slack"
 	"github.com/balerter/balerter/internal/config/channels/syslog"
 	"github.com/balerter/balerter/internal/config/channels/telegram"
-	"github.com/balerter/balerter/internal/config/channels/twilio"
+	"github.com/balerter/balerter/internal/config/channels/twiliovoice"
 	"github.com/balerter/balerter/internal/config/channels/webhook"
 	"github.com/balerter/balerter/internal/util"
 )
@@ -36,7 +36,7 @@ type Channels struct {
 	// AlertmanagerReceiver channel
 	AlertmanagerReceiver []alertmanagerreceiver.AlertmanagerReceiver `json:"alertmanager_receiver" yaml:"alertmanager_receiver"`
 
-	Twilio []twilio.Twilio `json:"twilio" yaml:"twilio"`
+	TwilioVoice []twiliovoice.Twilio `json:"twilioVoice" yaml:"twilioVoice" hcl:"twilioVoice,block"`
 }
 
 // Validate config
@@ -142,7 +142,7 @@ func (cfg Channels) Validate() error {
 	}
 
 	names = names[:0]
-	for _, c := range cfg.Twilio {
+	for _, c := range cfg.TwilioVoice {
 		names = append(names, c.Name)
 		if err := c.Validate(); err != nil {
 			return fmt.Errorf("validate channel twilio: %w", err)

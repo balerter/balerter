@@ -1,16 +1,17 @@
-package twilio
+package twiliovoice
 
 import "testing"
 
 func TestTwilio_Validate(t *testing.T) {
 	type fields struct {
-		Name   string
-		SID    string
-		Token  string
-		From   string
-		To     string
-		TwiML  string
-		Ignore bool
+		Name    string
+		SID     string
+		Token   string
+		From    string
+		To      string
+		TwiML   string
+		Ignore  bool
+		Timeout int
 	}
 	tests := []struct {
 		name     string
@@ -81,6 +82,19 @@ func TestTwilio_Validate(t *testing.T) {
 			errValue: "to must be not empty",
 		},
 		{
+			name: "wrong timeout",
+			fields: fields{
+				Name:    "1",
+				SID:     "1",
+				Token:   "1",
+				From:    "1",
+				To:      "1",
+				Timeout: -1,
+			},
+			wantErr:  true,
+			errValue: "timeout must be greater or equals zero",
+		},
+		{
 			name: "ok",
 			fields: fields{
 				Name:   "1",
@@ -98,13 +112,14 @@ func TestTwilio_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tw := Twilio{
-				Name:   tt.fields.Name,
-				SID:    tt.fields.SID,
-				Token:  tt.fields.Token,
-				From:   tt.fields.From,
-				To:     tt.fields.To,
-				TwiML:  tt.fields.TwiML,
-				Ignore: tt.fields.Ignore,
+				Name:    tt.fields.Name,
+				SID:     tt.fields.SID,
+				Token:   tt.fields.Token,
+				From:    tt.fields.From,
+				To:      tt.fields.To,
+				TwiML:   tt.fields.TwiML,
+				Ignore:  tt.fields.Ignore,
+				Timeout: tt.fields.Timeout,
 			}
 			err := tw.Validate()
 			if (err != nil) != tt.wantErr {
