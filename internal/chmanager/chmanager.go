@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/balerter/balerter/internal/channels/alertmanager"
 	alertmanagerreceiver "github.com/balerter/balerter/internal/channels/alertmanager_receiver"
-	"github.com/balerter/balerter/internal/channels/twilio"
+	"github.com/balerter/balerter/internal/channels/twiliovoice"
 	"github.com/balerter/balerter/internal/channels/webhook"
 	"github.com/balerter/balerter/internal/config/channels"
 
@@ -141,7 +141,7 @@ func (m *ChannelsManager) Init(cfg *channels.Channels) error {
 	}
 
 	for idx := range cfg.TwilioVoice {
-		module, err := twilio.New(cfg.TwilioVoice[idx], m.logger)
+		module, err := twiliovoice.New(cfg.TwilioVoice[idx], m.logger)
 		if err != nil {
 			return fmt.Errorf("error init twilio channel %s, %w", cfg.AlertmanagerReceiver[idx].Name, err)
 		}

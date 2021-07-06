@@ -1,4 +1,4 @@
-package twilio
+package twiliovoice
 
 import (
 	"github.com/balerter/balerter/internal/config/channels/twiliovoice"
