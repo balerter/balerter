@@ -10,6 +10,7 @@ import (
 	"github.com/balerter/balerter/internal/config/channels/slack"
 	"github.com/balerter/balerter/internal/config/channels/syslog"
 	"github.com/balerter/balerter/internal/config/channels/telegram"
+	"github.com/balerter/balerter/internal/config/channels/twiliovoice"
 	"github.com/balerter/balerter/internal/config/channels/webhook"
 	"github.com/balerter/balerter/internal/util"
 )
@@ -34,6 +35,8 @@ type Channels struct {
 	Alertmanager []alertmanager.Alertmanager `json:"alertmanager" yaml:"alertmanager"`
 	// AlertmanagerReceiver channel
 	AlertmanagerReceiver []alertmanagerreceiver.AlertmanagerReceiver `json:"alertmanager_receiver" yaml:"alertmanager_receiver"`
+
+	TwilioVoice []twiliovoice.Twilio `json:"twilioVoice" yaml:"twilioVoice" hcl:"twilioVoice,block"`
 }
 
 // Validate config
@@ -136,6 +139,17 @@ func (cfg Channels) Validate() error {
 	}
 	if name := util.CheckUnique(names); name != "" {
 		return fmt.Errorf("found duplicated name for channels 'alertmanager_receiver': %s", name)
+	}
+
+	names = names[:0]
+	for _, c := range cfg.TwilioVoice {
+		names = append(names, c.Name)
+		if err := c.Validate(); err != nil {
+			return fmt.Errorf("validate channel twilio: %w", err)
+		}
+	}
+	if name := util.CheckUnique(names); name != "" {
+		return fmt.Errorf("found duplicated name for channels 'twilio': %s", name)
 	}
 
 	return nil

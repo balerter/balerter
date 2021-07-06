@@ -34,7 +34,7 @@ var (
 )
 
 var (
-	defaultLuaModulesPath = "./?.lua;./modules/?.lua;./modules/?/init.lua"
+	defaultLuaModulesPath = "./?.lua;./modules/?.lua;./modules/?/init.lua;/modules/?.lua;/modules/?/init.lua"
 )
 
 func main() {
@@ -122,12 +122,6 @@ func run(cfg *config.Config, flg *config.Flags) (string, int) {
 	// |
 	kvModule := mock.New(kv.ModuleName(), kv.Methods(), lgr.Logger())
 	coreModules = append(coreModules, kvModule)
-
-	// ---------------------
-	// |
-	// | API
-	// |
-	// module is not used in the test environment
 
 	// ---------------------
 	// |

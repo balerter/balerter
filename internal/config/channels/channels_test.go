@@ -7,6 +7,7 @@ import (
 	"github.com/balerter/balerter/internal/config/channels/slack"
 	"github.com/balerter/balerter/internal/config/channels/syslog"
 	"github.com/balerter/balerter/internal/config/channels/telegram"
+	"github.com/balerter/balerter/internal/config/channels/twiliovoice"
 	"github.com/balerter/balerter/internal/config/channels/webhook"
 	"testing"
 )
@@ -20,6 +21,7 @@ func TestChannels_Validate(t *testing.T) {
 		Notify   []notify.Notify
 		Discord  []discord.Discord
 		Webhook  []webhook.Webhook
+		Twilio   []twiliovoice.Twilio
 	}
 	tests := []struct {
 		name    string
@@ -104,6 +106,22 @@ func TestChannels_Validate(t *testing.T) {
 			errText: "found duplicated name for channels 'webhook': foo",
 		},
 		{
+			name: "twilio validation",
+			fields: fields{
+				Twilio: []twiliovoice.Twilio{{Name: "1"}},
+			},
+			wantErr: true,
+			errText: "validate channel twilio: sid must be not empty",
+		},
+		{
+			name: "duplicated twilio",
+			fields: fields{
+				Twilio: []twiliovoice.Twilio{{Name: "1", SID: "1", Token: "1", From: "1", To: "1"}, {Name: "1", SID: "1", Token: "1", From: "1", To: "1"}},
+			},
+			wantErr: true,
+			errText: "found duplicated name for channels 'twilio': 1",
+		},
+		{
 			name: "ok",
 			fields: fields{
 				Email: []email.Email{{Name: "foo", From: "gopher@example.net", To: "foo@example.com",
@@ -133,13 +151,14 @@ func TestChannels_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := Channels{
-				Email:    tt.fields.Email,
-				Slack:    tt.fields.Slack,
-				Telegram: tt.fields.Telegram,
-				Syslog:   tt.fields.Syslog,
-				Notify:   tt.fields.Notify,
-				Discord:  tt.fields.Discord,
-				Webhook:  tt.fields.Webhook,
+				Email:       tt.fields.Email,
+				Slack:       tt.fields.Slack,
+				Telegram:    tt.fields.Telegram,
+				Syslog:      tt.fields.Syslog,
+				Notify:      tt.fields.Notify,
+				Discord:     tt.fields.Discord,
+				Webhook:     tt.fields.Webhook,
+				TwilioVoice: tt.fields.Twilio,
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {
