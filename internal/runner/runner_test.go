@@ -346,3 +346,164 @@ func TestRunner_updateScripts_once(t *testing.T) {
 	assert.Equal(t, 1, len(dsModule.GetLoaderCalls()))
 	assert.Equal(t, 1, len(dsManager.GetCalls()))
 }
+
+func TestRunner_updateScripts(t *testing.T) {
+	coreModule := &moduleMock{
+		NameFunc: func() string {
+			return "m1"
+		},
+		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+			return func(ls *lua.LState) int {
+				return 0
+			}
+		},
+	}
+
+	storagesModule := &moduleMock{
+		NameFunc: func() string {
+			return "m2"
+		},
+		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+			return func(ls *lua.LState) int {
+				return 0
+			}
+		},
+	}
+
+	storagesManager := &storagesManagerMock{GetFunc: func() []modules.Module {
+		return []modules.Module{storagesModule}
+	}}
+
+	dsModule := &moduleMock{
+		NameFunc: func() string {
+			return "m3"
+		},
+		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+			return func(ls *lua.LState) int {
+				return 0
+			}
+		},
+	}
+
+	dsManager := &dsManagerMock{GetFunc: func() []modules.Module {
+		return []modules.Module{dsModule}
+	}}
+
+	j := &jobMock{
+		NameFunc: func() string {
+			return "foo"
+		},
+		ScriptFunc: func() *script.Script {
+			return &script.Script{}
+		},
+		SetLuaStateFunc: func(ls *lua.LState) {
+			preload := ls.GetField(ls.GetField(ls.Get(lua.EnvironIndex), "package"), "preload")
+			tbl, ok := preload.(*lua.LTable)
+			require.True(t, ok)
+
+			assert.Equal(t, lua.LTFunction, tbl.RawGetString("m1").Type())
+			assert.Equal(t, lua.LTFunction, tbl.RawGetString("storage.m2").Type())
+			assert.Equal(t, lua.LTFunction, tbl.RawGetString("datasource.m3").Type())
+			assert.Equal(t, lua.LTFunction, tbl.RawGetString("api").Type())
+		},
+		RunFunc: func() {
+
+		},
+		SetEntryIDFunc: func(_ cron.EntryID) {
+
+		},
+	}
+
+	crn := cron.New()
+	s1EntryID, err := crn.AddFunc("1 1 1 1 1", func() {})
+	require.NoError(t, err)
+
+	// Hash 1dab309881b4ce59a311b1fe1f1bb33306b43c28
+	s1Hash := "1dab309881b4ce59a311b1fe1f1bb33306b43c28"
+	s1 := &script.Script{
+		Name: "bar",
+	}
+	j1 := &jobMock{
+		ScriptFunc: func() *script.Script {
+			return s1
+		},
+		StopFunc: func() {
+
+		},
+		EntryIDFunc: func() cron.EntryID {
+			return s1EntryID
+		},
+	}
+
+	// Hash 1dab309881b4ce59a311b1fe1f1bb33306b43c28
+	s2 := &script.Script{
+		Name:      "foo",
+		CronValue: "1 1 1 1 1",
+	}
+
+	rnr := &Runner{
+		coreModules:     []modules.Module{coreModule},
+		storagesManager: storagesManager,
+		dsManager:       dsManager,
+
+		cron:   crn,
+		logger: zap.NewNop(),
+		pool:   map[string]job{s1Hash: j1},
+		newJobFunc: func(s *script.Script, logger *zap.Logger) job {
+			return j
+		},
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	rnr.updateScripts(ctx, []*script.Script{s2}, false)
+
+	assert.Equal(t, 1, len(j.SetLuaStateCalls()))
+	assert.Equal(t, 1, len(j.NameCalls()))
+	assert.Equal(t, 1, len(j.SetEntryIDCalls()))
+	assert.Equal(t, 1, len(coreModule.NameCalls()))
+	assert.Equal(t, 1, len(coreModule.GetLoaderCalls()))
+	assert.Equal(t, 1, len(storagesModule.NameCalls()))
+	assert.Equal(t, 1, len(storagesModule.GetLoaderCalls()))
+	assert.Equal(t, 1, len(storagesManager.GetCalls()))
+	assert.Equal(t, 1, len(dsModule.NameCalls()))
+	assert.Equal(t, 1, len(dsModule.GetLoaderCalls()))
+	assert.Equal(t, 1, len(dsManager.GetCalls()))
+
+	assert.Equal(t, 1, len(rnr.pool))
+}
+
+func TestRunner_Stop(t *testing.T) {
+	crn := cron.New()
+	entryID, err := crn.AddFunc("1 1 1 1 1", func() {})
+	require.NoError(t, err)
+
+	j := &jobMock{
+		ScriptFunc: func() *script.Script {
+			return &script.Script{
+				Name: "s1",
+			}
+		},
+		StopFunc: func() {
+
+		},
+		EntryIDFunc: func() cron.EntryID {
+			return entryID
+		},
+	}
+
+	rnr := &Runner{
+		jobs:   make(chan job),
+		cron:   crn,
+		logger: zap.NewNop(),
+		pool:   map[string]job{"1": j},
+	}
+
+	rnr.Stop()
+
+	assert.Equal(t, 1, len(j.StopCalls()))
+	assert.Equal(t, 1, len(j.EntryIDCalls()))
+	assert.Equal(t, 1, len(j.ScriptCalls()))
+	assert.Equal(t, 0, len(crn.Entries()))
+}
