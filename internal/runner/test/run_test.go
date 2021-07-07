@@ -88,44 +88,58 @@ func Test_Run_error_split_scripts(t *testing.T) {
 	assert.Equal(t, "error select tests, main script for test 's1' not found", err.Error())
 }
 
-type managerMock struct {
-	mock.Mock
-}
-
-func (m *managerMock) Get() []modules.ModuleTest {
-	args := m.Called()
-	return args.Get(0).([]modules.ModuleTest)
-}
-
-func (m *managerMock) Result() ([]modules.TestResult, error) {
-	args := m.Called()
-	return args.Get(0).([]modules.TestResult), args.Error(1)
-}
-
-func (m *managerMock) Clean() {
-
-}
-
 func Test_runPair(t *testing.T) {
-	mTest1 := &modules.ModuleMock{}
-	mTest1.On("Name").Return("mt1")
-	mTest1.On("GetLoader", mock.Anything).Return(getLGFunc())
-	mTest1.On("Result").Return([]modules.TestResult{}, nil)
-	mTest1.On("Clean").Return()
+	mTest1 := &modules.ModuleTestMock{
+		NameFunc: func() string {
+			return "mt1"
+		},
+		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+			return getLGFunc()
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {},
+	}
 
-	storageManagerMock := &managerMock{}
-	storageManagerMock.On("Get").Return([]modules.ModuleTest{mTest1})
-	storageManagerMock.On("Result").Return([]modules.TestResult{{Ok: true, Message: "PASS"}}, nil)
+	storageManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{mTest1}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{{Ok: true, Message: "PASS"}}, nil
+		},
+		CleanFunc: func() {
 
-	dsManagerMock := &managerMock{}
-	dsManagerMock.On("Get").Return([]modules.ModuleTest{mTest1})
-	dsManagerMock.On("Result").Return([]modules.TestResult{{Ok: true, Message: "PASS"}}, nil)
+		},
+	}
 
-	coreModule1 := &modules.ModuleMock{}
-	coreModule1.On("Name").Return("m1")
-	coreModule1.On("GetLoader", mock.Anything).Return(getLGFunc())
-	coreModule1.On("Result").Return([]modules.TestResult{{Ok: true, Message: "PASS"}}, nil)
-	coreModule1.On("Clean").Return()
+	dsManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{mTest1}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{{Ok: true, Message: "PASS"}}, nil
+		},
+		CleanFunc: func() {
+
+		},
+	}
+
+	coreModule1 := &modules.ModuleTestMock{
+		NameFunc: func() string {
+			return "m1"
+		},
+		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+			return getLGFunc()
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{{Ok: true, Message: "PASS"}}, nil
+		},
+		CleanFunc: func() {
+
+		},
+	}
 
 	rnr := &Runner{
 		logger:          zap.NewNop(),
@@ -162,13 +176,29 @@ func Test_runPair(t *testing.T) {
 }
 
 func Test_runPair_with_fail_result(t *testing.T) {
-	storageManagerMock := &managerMock{}
-	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
-	storageManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+	storageManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {
 
-	dsManagerMock := &managerMock{}
-	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
-	dsManagerMock.On("Result").Return([]modules.TestResult{{Ok: false, Message: "FAIL"}}, nil)
+		},
+	}
+
+	dsManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{{Ok: false, Message: "FAIL"}}, nil
+		},
+		CleanFunc: func() {
+
+		},
+	}
 
 	rnr := &Runner{
 		logger:          zap.NewNop(),
@@ -207,13 +237,29 @@ func Test_runPair_with_fail_result(t *testing.T) {
 }
 
 func Test_runPair_error_run_test(t *testing.T) {
-	storageManagerMock := &managerMock{}
-	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
-	storageManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+	storageManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {
 
-	dsManagerMock := &managerMock{}
-	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
-	dsManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+		},
+	}
+
+	dsManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {
+
+		},
+	}
 
 	rnr := &Runner{
 		logger:          zap.NewNop(),
@@ -236,13 +282,29 @@ func Test_runPair_error_run_test(t *testing.T) {
 }
 
 func Test_runPair_error_run_main(t *testing.T) {
-	storageManagerMock := &managerMock{}
-	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
-	storageManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+	storageManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {
 
-	dsManagerMock := &managerMock{}
-	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
-	dsManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+		},
+	}
+
+	dsManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {
+
+		},
+	}
 
 	rnr := &Runner{
 		logger:          zap.NewNop(),
@@ -270,13 +332,29 @@ func Test_runPair_error_run_main(t *testing.T) {
 }
 
 func Test_runPair_error_get_ds_results(t *testing.T) {
-	storageManagerMock := &managerMock{}
-	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
-	storageManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+	storageManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {
 
-	dsManagerMock := &managerMock{}
-	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
-	dsManagerMock.On("Result").Return([]modules.TestResult{}, fmt.Errorf("error1"))
+		},
+	}
+
+	dsManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, fmt.Errorf("error1")
+		},
+		CleanFunc: func() {
+
+		},
+	}
 
 	rnr := &Runner{
 		logger:          zap.NewNop(),
@@ -304,13 +382,29 @@ func Test_runPair_error_get_ds_results(t *testing.T) {
 }
 
 func Test_runPair_error_get_storages_results(t *testing.T) {
-	storageManagerMock := &managerMock{}
-	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
-	storageManagerMock.On("Result").Return([]modules.TestResult{}, fmt.Errorf("error1"))
+	storageManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, fmt.Errorf("error1")
+		},
+		CleanFunc: func() {
 
-	dsManagerMock := &managerMock{}
-	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
-	dsManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+		},
+	}
+
+	dsManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {
+
+		},
+	}
 
 	rnr := &Runner{
 		logger:          zap.NewNop(),
@@ -344,18 +438,41 @@ func getLGFunc() lua.LGFunction {
 }
 
 func Test_runPair_error_get_core_module_results(t *testing.T) {
-	storageManagerMock := &managerMock{}
-	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
-	storageManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+	storageManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {
 
-	dsManagerMock := &managerMock{}
-	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
-	dsManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+		},
+	}
 
-	coreModule1 := &modules.ModuleMock{}
-	coreModule1.On("Name").Return("m1")
-	coreModule1.On("GetLoader", mock.Anything).Return(getLGFunc())
-	coreModule1.On("Result").Return([]modules.TestResult{}, fmt.Errorf("error1"))
+	dsManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {
+
+		},
+	}
+
+	coreModule1 := &modules.ModuleTestMock{
+		NameFunc: func() string {
+			return "m1"
+		},
+		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+			return getLGFunc()
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, fmt.Errorf("error1")
+		},
+	}
 
 	rnr := &Runner{
 		logger:          zap.NewNop(),
@@ -386,13 +503,29 @@ func Test_runPair_error_get_core_module_results(t *testing.T) {
 }
 
 func Test_Run(t *testing.T) {
-	storageManagerMock := &managerMock{}
-	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
-	storageManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+	storageManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {
 
-	dsManagerMock := &managerMock{}
-	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
-	dsManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+		},
+	}
+
+	dsManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {
+
+		},
+	}
 
 	scriptMgrMock := &scriptManagerMock{}
 	scriptMgrMock.On("GetWithTests").Return([]*script.Script{
@@ -415,13 +548,29 @@ func Test_Run(t *testing.T) {
 }
 
 func Test_Run_error_runPair(t *testing.T) {
-	storageManagerMock := &managerMock{}
-	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
-	storageManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+	storageManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {
 
-	dsManagerMock := &managerMock{}
-	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
-	dsManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+		},
+	}
+
+	dsManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {
+
+		},
+	}
 
 	scriptMgrMock := &scriptManagerMock{}
 	scriptMgrMock.On("GetWithTests").Return([]*script.Script{
@@ -443,13 +592,29 @@ func Test_Run_error_runPair(t *testing.T) {
 }
 
 func Test_Run_fail_tests(t *testing.T) {
-	storageManagerMock := &managerMock{}
-	storageManagerMock.On("Get").Return([]modules.ModuleTest{})
-	storageManagerMock.On("Result").Return([]modules.TestResult{{Ok: false, Message: "FAIL"}}, nil)
+	storageManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{{Ok: false, Message: "FAIL"}}, nil
+		},
+		CleanFunc: func() {
 
-	dsManagerMock := &managerMock{}
-	dsManagerMock.On("Get").Return([]modules.ModuleTest{})
-	dsManagerMock.On("Result").Return([]modules.TestResult{}, nil)
+		},
+	}
+
+	dsManagerMock := &managerMock{
+		GetFunc: func() []modules.ModuleTest {
+			return []modules.ModuleTest{}
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {
+
+		},
+	}
 
 	scriptMgrMock := &scriptManagerMock{}
 	scriptMgrMock.On("GetWithTests").Return([]*script.Script{

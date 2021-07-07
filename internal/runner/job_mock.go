@@ -5,6 +5,10 @@ package runner
 
 import (
 	"sync"
+
+	"github.com/balerter/balerter/internal/script/script"
+	"github.com/robfig/cron/v3"
+	lua "github.com/yuin/gopher-lua"
 )
 
 // jobMock is a mock implementation of job.
@@ -13,11 +17,26 @@ import (
 //
 // 		// make and configure a mocked job
 // 		mockedjob := &jobMock{
+// 			EntryIDFunc: func() cron.EntryID {
+// 				panic("mock out the EntryID method")
+// 			},
 // 			NameFunc: func() string {
 // 				panic("mock out the Name method")
 // 			},
 // 			RunFunc: func()  {
 // 				panic("mock out the Run method")
+// 			},
+// 			ScriptFunc: func() *script.Script {
+// 				panic("mock out the Script method")
+// 			},
+// 			SetEntryIDFunc: func(entryID cron.EntryID)  {
+// 				panic("mock out the SetEntryID method")
+// 			},
+// 			SetLuaStateFunc: func(ls *lua.LState)  {
+// 				panic("mock out the SetLuaState method")
+// 			},
+// 			StopFunc: func()  {
+// 				panic("mock out the Stop method")
 // 			},
 // 		}
 //
@@ -26,23 +45,88 @@ import (
 //
 // 	}
 type jobMock struct {
+	// EntryIDFunc mocks the EntryID method.
+	EntryIDFunc func() cron.EntryID
+
 	// NameFunc mocks the Name method.
 	NameFunc func() string
 
 	// RunFunc mocks the Run method.
 	RunFunc func()
 
+	// ScriptFunc mocks the Script method.
+	ScriptFunc func() *script.Script
+
+	// SetEntryIDFunc mocks the SetEntryID method.
+	SetEntryIDFunc func(entryID cron.EntryID)
+
+	// SetLuaStateFunc mocks the SetLuaState method.
+	SetLuaStateFunc func(ls *lua.LState)
+
+	// StopFunc mocks the Stop method.
+	StopFunc func()
+
 	// calls tracks calls to the methods.
 	calls struct {
+		// EntryID holds details about calls to the EntryID method.
+		EntryID []struct {
+		}
 		// Name holds details about calls to the Name method.
 		Name []struct {
 		}
 		// Run holds details about calls to the Run method.
 		Run []struct {
 		}
+		// Script holds details about calls to the Script method.
+		Script []struct {
+		}
+		// SetEntryID holds details about calls to the SetEntryID method.
+		SetEntryID []struct {
+			// EntryID is the entryID argument value.
+			EntryID cron.EntryID
+		}
+		// SetLuaState holds details about calls to the SetLuaState method.
+		SetLuaState []struct {
+			// Ls is the ls argument value.
+			Ls *lua.LState
+		}
+		// Stop holds details about calls to the Stop method.
+		Stop []struct {
+		}
 	}
-	lockName sync.RWMutex
-	lockRun  sync.RWMutex
+	lockEntryID     sync.RWMutex
+	lockName        sync.RWMutex
+	lockRun         sync.RWMutex
+	lockScript      sync.RWMutex
+	lockSetEntryID  sync.RWMutex
+	lockSetLuaState sync.RWMutex
+	lockStop        sync.RWMutex
+}
+
+// EntryID calls EntryIDFunc.
+func (mock *jobMock) EntryID() cron.EntryID {
+	if mock.EntryIDFunc == nil {
+		panic("jobMock.EntryIDFunc: method is nil but job.EntryID was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockEntryID.Lock()
+	mock.calls.EntryID = append(mock.calls.EntryID, callInfo)
+	mock.lockEntryID.Unlock()
+	return mock.EntryIDFunc()
+}
+
+// EntryIDCalls gets all the calls that were made to EntryID.
+// Check the length with:
+//     len(mockedjob.EntryIDCalls())
+func (mock *jobMock) EntryIDCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockEntryID.RLock()
+	calls = mock.calls.EntryID
+	mock.lockEntryID.RUnlock()
+	return calls
 }
 
 // Name calls NameFunc.
@@ -94,5 +178,119 @@ func (mock *jobMock) RunCalls() []struct {
 	mock.lockRun.RLock()
 	calls = mock.calls.Run
 	mock.lockRun.RUnlock()
+	return calls
+}
+
+// Script calls ScriptFunc.
+func (mock *jobMock) Script() *script.Script {
+	if mock.ScriptFunc == nil {
+		panic("jobMock.ScriptFunc: method is nil but job.Script was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockScript.Lock()
+	mock.calls.Script = append(mock.calls.Script, callInfo)
+	mock.lockScript.Unlock()
+	return mock.ScriptFunc()
+}
+
+// ScriptCalls gets all the calls that were made to Script.
+// Check the length with:
+//     len(mockedjob.ScriptCalls())
+func (mock *jobMock) ScriptCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockScript.RLock()
+	calls = mock.calls.Script
+	mock.lockScript.RUnlock()
+	return calls
+}
+
+// SetEntryID calls SetEntryIDFunc.
+func (mock *jobMock) SetEntryID(entryID cron.EntryID) {
+	if mock.SetEntryIDFunc == nil {
+		panic("jobMock.SetEntryIDFunc: method is nil but job.SetEntryID was just called")
+	}
+	callInfo := struct {
+		EntryID cron.EntryID
+	}{
+		EntryID: entryID,
+	}
+	mock.lockSetEntryID.Lock()
+	mock.calls.SetEntryID = append(mock.calls.SetEntryID, callInfo)
+	mock.lockSetEntryID.Unlock()
+	mock.SetEntryIDFunc(entryID)
+}
+
+// SetEntryIDCalls gets all the calls that were made to SetEntryID.
+// Check the length with:
+//     len(mockedjob.SetEntryIDCalls())
+func (mock *jobMock) SetEntryIDCalls() []struct {
+	EntryID cron.EntryID
+} {
+	var calls []struct {
+		EntryID cron.EntryID
+	}
+	mock.lockSetEntryID.RLock()
+	calls = mock.calls.SetEntryID
+	mock.lockSetEntryID.RUnlock()
+	return calls
+}
+
+// SetLuaState calls SetLuaStateFunc.
+func (mock *jobMock) SetLuaState(ls *lua.LState) {
+	if mock.SetLuaStateFunc == nil {
+		panic("jobMock.SetLuaStateFunc: method is nil but job.SetLuaState was just called")
+	}
+	callInfo := struct {
+		Ls *lua.LState
+	}{
+		Ls: ls,
+	}
+	mock.lockSetLuaState.Lock()
+	mock.calls.SetLuaState = append(mock.calls.SetLuaState, callInfo)
+	mock.lockSetLuaState.Unlock()
+	mock.SetLuaStateFunc(ls)
+}
+
+// SetLuaStateCalls gets all the calls that were made to SetLuaState.
+// Check the length with:
+//     len(mockedjob.SetLuaStateCalls())
+func (mock *jobMock) SetLuaStateCalls() []struct {
+	Ls *lua.LState
+} {
+	var calls []struct {
+		Ls *lua.LState
+	}
+	mock.lockSetLuaState.RLock()
+	calls = mock.calls.SetLuaState
+	mock.lockSetLuaState.RUnlock()
+	return calls
+}
+
+// Stop calls StopFunc.
+func (mock *jobMock) Stop() {
+	if mock.StopFunc == nil {
+		panic("jobMock.StopFunc: method is nil but job.Stop was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockStop.Lock()
+	mock.calls.Stop = append(mock.calls.Stop, callInfo)
+	mock.lockStop.Unlock()
+	mock.StopFunc()
+}
+
+// StopCalls gets all the calls that were made to Stop.
+// Check the length with:
+//     len(mockedjob.StopCalls())
+func (mock *jobMock) StopCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockStop.RLock()
+	calls = mock.calls.Stop
+	mock.lockStop.RUnlock()
 	return calls
 }
