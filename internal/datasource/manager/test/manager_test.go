@@ -23,44 +23,41 @@ func TestNew(t *testing.T) {
 
 func TestClean(t *testing.T) {
 	m := New(zap.NewNop())
-	m1 := &modules.ModuleMock{}
-	m2 := &modules.ModuleMock{}
+	m1 := &modules.ModuleTestMock{CleanFunc: func() {}}
+	m2 := &modules.ModuleTestMock{CleanFunc: func() {}}
 	m.modules["m1"] = m1
 	m.modules["m2"] = m2
 
-	m1.On("Clean")
-	m2.On("Clean")
-
 	m.Clean()
 
-	m1.AssertCalled(t, "Clean")
-	m2.AssertCalled(t, "Clean")
-
-	m1.AssertExpectations(t)
-	m2.AssertExpectations(t)
+	assert.Equal(t, 1, len(m1.CleanCalls()))
+	assert.Equal(t, 1, len(m2.CleanCalls()))
 }
 
 func TestResult(t *testing.T) {
 	m := New(zap.NewNop())
-	m1 := &modules.ModuleMock{}
-	m2 := &modules.ModuleMock{}
-	m.modules["m1"] = m1
-	m.modules["m2"] = m2
 
 	r1 := modules.TestResult{ModuleName: "r1"}
 	r2 := modules.TestResult{ModuleName: "r2"}
 
-	m1.On("Result").Return([]modules.TestResult{r1}, nil)
-	m2.On("Result").Return([]modules.TestResult{r2}, nil)
+	m1 := &modules.ModuleTestMock{
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{r1}, nil
+		},
+	}
+	m2 := &modules.ModuleTestMock{
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{r2}, nil
+		},
+	}
+	m.modules["m1"] = m1
+	m.modules["m2"] = m2
 
 	res, err := m.Result()
 	require.NoError(t, err)
 
-	m1.AssertCalled(t, "Result")
-	m2.AssertCalled(t, "Result")
-
-	m1.AssertExpectations(t)
-	m2.AssertExpectations(t)
+	assert.Equal(t, 1, len(m1.ResultCalls()))
+	assert.Equal(t, 1, len(m2.ResultCalls()))
 
 	r1expect := modules.TestResult{ModuleName: "datasource.r1"}
 	r2expect := modules.TestResult{ModuleName: "datasource.r2"}
@@ -71,17 +68,18 @@ func TestResult(t *testing.T) {
 
 func TestResult_error(t *testing.T) {
 	m := New(zap.NewNop())
-	m1 := &modules.ModuleMock{}
+	m1 := &modules.ModuleTestMock{
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return nil, fmt.Errorf("error1")
+		},
+	}
 	m.modules["m1"] = m1
-
-	m1.On("Result").Return(nil, fmt.Errorf("error1"))
 
 	_, err := m.Result()
 	require.Error(t, err)
 	assert.Equal(t, "error1", err.Error())
 
-	m1.AssertCalled(t, "Result")
-	m1.AssertExpectations(t)
+	assert.Equal(t, 1, len(m1.ResultCalls()))
 }
 
 func TestInit(t *testing.T) {
@@ -129,8 +127,8 @@ func TestInit(t *testing.T) {
 func TestGet(t *testing.T) {
 	m := &Manager{
 		modules: map[string]modules.ModuleTest{
-			"m1": &modules.ModuleMock{},
-			"m2": &modules.ModuleMock{},
+			"m1": &modules.ModuleTestMock{},
+			"m2": &modules.ModuleTestMock{},
 		},
 	}
 

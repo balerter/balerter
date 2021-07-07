@@ -10,13 +10,23 @@ import (
 )
 
 func TestManager_Stop(t *testing.T) {
-	m1 := &modules.ModuleMock{}
-	m1.On("Stop").Return(nil)
-	m1.On("Name").Return("m1")
+	m1 := &modules.ModuleMock{
+		StopFunc: func() error {
+			return nil
+		},
+		NameFunc: func() string {
+			return "m1"
+		},
+	}
 
-	m2 := &modules.ModuleMock{}
-	m2.On("Stop").Return(nil)
-	m2.On("Name").Return("m2")
+	m2 := &modules.ModuleMock{
+		StopFunc: func() error {
+			return nil
+		},
+		NameFunc: func() string {
+			return "m2"
+		},
+	}
 
 	m := New(zap.NewNop())
 	m.modules["m1"] = m1
@@ -24,19 +34,23 @@ func TestManager_Stop(t *testing.T) {
 
 	m.Stop()
 
-	m1.AssertCalled(t, "Stop")
-	m2.AssertCalled(t, "Stop")
-
-	m1.AssertExpectations(t)
-	m2.AssertExpectations(t)
+	assert.Equal(t, 1, len(m1.StopCalls()))
+	assert.Equal(t, 1, len(m1.NameCalls()))
+	assert.Equal(t, 1, len(m2.StopCalls()))
+	assert.Equal(t, 1, len(m2.NameCalls()))
 }
 
 func TestManager_Stop_Error(t *testing.T) {
 	e := fmt.Errorf("error1")
 
-	m1 := &modules.ModuleMock{}
-	m1.On("Stop").Return(e)
-	m1.On("Name").Return("m1")
+	m1 := &modules.ModuleMock{
+		StopFunc: func() error {
+			return e
+		},
+		NameFunc: func() string {
+			return "m1"
+		},
+	}
 
 	core, logs := observer.New(zap.ErrorLevel)
 	logger := zap.New(core)
@@ -48,9 +62,8 @@ func TestManager_Stop_Error(t *testing.T) {
 
 	assert.Equal(t, 1, logs.FilterMessage("error stop module").FilterField(zap.String("name", "m1")).FilterField(zap.Error(e)).Len())
 
-	m1.AssertCalled(t, "Stop")
-
-	m1.AssertExpectations(t)
+	assert.Equal(t, 1, len(m1.StopCalls()))
+	assert.Equal(t, 2, len(m1.NameCalls()))
 }
 
 func TestGet(t *testing.T) {

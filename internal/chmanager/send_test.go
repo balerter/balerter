@@ -25,6 +25,11 @@ func (m *alertChannelMock) Send(mes *message.Message) error {
 	return args.Error(0)
 }
 
+func TestManager_Send_quiet(t *testing.T) {
+	m := &ChannelsManager{}
+	m.Send(alert.New("alertName"), "alertText", &alert.Options{Quiet: true})
+}
+
 func TestManager_Send_no_channels(t *testing.T) {
 	core, logger := observer.New(zap.DebugLevel)
 	m := &ChannelsManager{
@@ -79,6 +84,34 @@ func TestManager_Send_ok(t *testing.T) {
 	assert.Equal(t, 0, logs.Len())
 
 	chan1.AssertExpectations(t)
+}
+
+func TestManager_Send_ok_with_channels(t *testing.T) {
+	core, logs := observer.New(zap.DebugLevel)
+	logger := zap.New(core)
+
+	chan1 := &alertChannelMock{}
+
+	chan2 := &alertChannelMock{}
+	chan2.On("Send", mock.Anything).Return(nil)
+
+	m := &ChannelsManager{
+		logger: logger,
+		channels: map[string]alertChannel{
+			"chan1": chan1,
+			"chan2": chan2,
+		},
+	}
+
+	m.Send(alert.New("alertName"), "alertText", &alert.Options{Channels: []string{"chan2"}})
+
+	chan1.AssertNotCalled(t, "Send", mock.Anything)
+	chan2.AssertCalled(t, "Send", mock.Anything)
+
+	assert.Equal(t, 0, logs.Len())
+
+	chan1.AssertExpectations(t)
+	chan2.AssertExpectations(t)
 }
 
 func TestManager_Send_error(t *testing.T) {
