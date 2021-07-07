@@ -20,7 +20,7 @@ type Job struct {
 	luaState *lua.LState
 }
 
-func newJob(s *script.Script, logger *zap.Logger) *Job {
+func newJob(s *script.Script, logger *zap.Logger) job {
 	j := &Job{
 		name:   s.Name,
 		script: s,
@@ -33,6 +33,26 @@ func newJob(s *script.Script, logger *zap.Logger) *Job {
 // Stop the job
 func (j *Job) Stop() {
 	j.luaState.Close()
+}
+
+func (j *Job) Name() string {
+	return j.name
+}
+
+func (j *Job) Script() *script.Script {
+	return j.script
+}
+
+func (j *Job) SetLuaState(ls *lua.LState) {
+	j.luaState = ls
+}
+
+func (j *Job) SetEntryID(id cron.EntryID) {
+	j.entryID = id
+}
+
+func (j *Job) EntryID() cron.EntryID {
+	return j.entryID
 }
 
 // Run the job
@@ -50,13 +70,13 @@ func (j *Job) Run() {
 	}
 }
 
-func (rnr *Runner) createLuaState(j *Job, apiRequest *http.Request) error {
-	rnr.logger.Debug("create job", zap.String("name", j.name))
+func (rnr *Runner) createLuaState(j job, apiRequest *http.Request) error {
+	rnr.logger.Debug("create job", zap.String("name", j.Name()))
 
 	L := lua.NewState()
 
 	for _, m := range rnr.coreModules {
-		L.PreloadModule(m.Name(), m.GetLoader(j.script))
+		L.PreloadModule(m.Name(), m.GetLoader(j.Script()))
 	}
 
 	// Init storages
@@ -64,7 +84,7 @@ func (rnr *Runner) createLuaState(j *Job, apiRequest *http.Request) error {
 		moduleName := "storage." + module.Name()
 		rnr.logger.Debug("add storage module", zap.String("name", moduleName))
 
-		loader := module.GetLoader(j.script)
+		loader := module.GetLoader(j.Script())
 		L.PreloadModule(moduleName, loader)
 	}
 
@@ -73,7 +93,7 @@ func (rnr *Runner) createLuaState(j *Job, apiRequest *http.Request) error {
 		moduleName := "datasource." + module.Name()
 		rnr.logger.Debug("add datasource module", zap.String("name", moduleName))
 
-		loader := module.GetLoader(j.script)
+		loader := module.GetLoader(j.Script())
 		L.PreloadModule(moduleName, loader)
 	}
 
@@ -82,9 +102,9 @@ func (rnr *Runner) createLuaState(j *Job, apiRequest *http.Request) error {
 	if err != nil {
 		return fmt.Errorf("error init api module, %w", err)
 	}
-	L.PreloadModule(a.Name(), a.GetLoader(j.script))
+	L.PreloadModule(a.Name(), a.GetLoader(j.Script()))
 
-	j.luaState = L
+	j.SetLuaState(L)
 
 	return nil
 }

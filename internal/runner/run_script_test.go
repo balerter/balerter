@@ -6,42 +6,18 @@ import (
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"net/http"
 	"testing"
 )
 
-type scriptManagerMock struct {
-	mock.Mock
-}
-
-func (m *scriptManagerMock) Get() ([]*script.Script, error) {
-	a := m.Called()
-	v := a.Get(0)
-	if v == nil {
-		return nil, a.Error(1)
-	}
-	return v.([]*script.Script), a.Error(1)
-}
-
-type storageManagerMock struct {
-	mock.Mock
-}
-
-func (m *storageManagerMock) Get() []modules.Module {
-	a := m.Called()
-	v := a.Get(0)
-	if v == nil {
-		return nil
-	}
-	return v.([]modules.Module)
-}
-
 func TestRunner_RunScript_error_get_script(t *testing.T) {
-	m := &scriptManagerMock{}
-	m.On("Get").Return(nil, fmt.Errorf("err1"))
+	m := &scriptsManagerMock{
+		GetFunc: func() ([]*script.Script, error) {
+			return nil, fmt.Errorf("err1")
+		},
+	}
 
 	rnr := &Runner{
 		scriptsManager: m,
@@ -56,41 +32,47 @@ func TestRunner_RunScript_error_get_script(t *testing.T) {
 }
 
 type badReader struct {
-	mock.Mock
 }
 
-func (m *badReader) Read(b []byte) (int, error) {
-	a := m.Called(b)
-	return a.Int(0), a.Error(1)
+func (m *badReader) Read(_ []byte) (int, error) {
+	return 0, fmt.Errorf("err1")
 }
 
 func TestRunner_RunScript_error_create_luaState(t *testing.T) {
-	s := &storageManagerMock{}
-	s.On("Get").Return(nil)
-	d := &storageManagerMock{}
-	d.On("Get").Return(nil)
-	m := &scriptManagerMock{}
-	m.On("Get").Return([]*script.Script{{
-		Name:       "foo",
-		Body:       nil,
-		CronValue:  "",
-		Timeout:    0,
-		Ignore:     false,
-		Channels:   nil,
-		IsTest:     false,
-		TestTarget: "",
-	}}, nil)
+	s := &storagesManagerMock{
+		GetFunc: func() []modules.Module {
+			return nil
+		},
+	}
+	d := &storagesManagerMock{
+		GetFunc: func() []modules.Module {
+			return nil
+		},
+	}
+	m := &scriptsManagerMock{
+		GetFunc: func() ([]*script.Script, error) {
+			return []*script.Script{{
+				Name:       "foo",
+				Body:       nil,
+				CronValue:  "",
+				Timeout:    0,
+				Ignore:     false,
+				Channels:   nil,
+				IsTest:     false,
+				TestTarget: "",
+			}}, nil
+		},
+	}
 
 	rnr := &Runner{
 		scriptsManager:  m,
 		storagesManager: s,
 		dsManager:       d,
 		logger:          zap.NewNop(),
-		jobs:            make(chan *Job, 1),
+		jobs:            make(chan job, 1),
 	}
 
 	r := &badReader{}
-	r.On("Read", mock.Anything).Return(0, fmt.Errorf("err1"))
 
 	req, err := http.NewRequest("POST", "localhost", r)
 	require.NoError(t, err)
@@ -101,13 +83,16 @@ func TestRunner_RunScript_error_create_luaState(t *testing.T) {
 }
 
 func TestRunner_RunScript_script_not_found(t *testing.T) {
-	m := &scriptManagerMock{}
-	m.On("Get").Return(nil, nil)
+	m := &scriptsManagerMock{
+		GetFunc: func() ([]*script.Script, error) {
+			return nil, nil
+		},
+	}
 
 	rnr := &Runner{
 		scriptsManager: m,
 		logger:         zap.NewNop(),
-		jobs:           make(chan *Job, 1),
+		jobs:           make(chan job, 1),
 	}
 
 	req, err := http.NewRequest("POST", "localhost", nil)
@@ -119,28 +104,37 @@ func TestRunner_RunScript_script_not_found(t *testing.T) {
 }
 
 func TestRunner_RunScript(t *testing.T) {
-	s := &storageManagerMock{}
-	s.On("Get").Return(nil)
-	d := &storageManagerMock{}
-	d.On("Get").Return(nil)
-	m := &scriptManagerMock{}
-	m.On("Get").Return([]*script.Script{{
-		Name:       "foo",
-		Body:       nil,
-		CronValue:  "",
-		Timeout:    0,
-		Ignore:     false,
-		Channels:   nil,
-		IsTest:     false,
-		TestTarget: "",
-	}}, nil)
+	s := &storagesManagerMock{
+		GetFunc: func() []modules.Module {
+			return nil
+		},
+	}
+	d := &storagesManagerMock{
+		GetFunc: func() []modules.Module {
+			return nil
+		},
+	}
+	m := &scriptsManagerMock{
+		GetFunc: func() ([]*script.Script, error) {
+			return []*script.Script{{
+				Name:       "foo",
+				Body:       nil,
+				CronValue:  "",
+				Timeout:    0,
+				Ignore:     false,
+				Channels:   nil,
+				IsTest:     false,
+				TestTarget: "",
+			}}, nil
+		},
+	}
 
 	rnr := &Runner{
 		scriptsManager:  m,
 		storagesManager: s,
 		dsManager:       d,
 		logger:          zap.NewNop(),
-		jobs:            make(chan *Job, 1),
+		jobs:            make(chan job, 1),
 	}
 
 	req, err := http.NewRequest("POST", "localhost", bytes.NewBuffer([]byte("bar")))
@@ -149,7 +143,7 @@ func TestRunner_RunScript(t *testing.T) {
 	err = rnr.RunScript("foo", req)
 	require.NoError(t, err)
 
-	var j *Job
+	var j job
 
 	select {
 	case j = <-rnr.jobs:
@@ -157,5 +151,5 @@ func TestRunner_RunScript(t *testing.T) {
 		t.Fatalf("error read job from the channel")
 	}
 
-	assert.Equal(t, "foo", j.name)
+	assert.Equal(t, "foo", j.Name())
 }

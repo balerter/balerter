@@ -6,6 +6,8 @@ import (
 	"go.uber.org/zap"
 )
 
+//go:generate moq -out manager_mock.go -skip-ensure -fmt goimports . manager
+
 type manager interface {
 	Get() []modules.ModuleTest
 	Result() ([]modules.TestResult, error)
