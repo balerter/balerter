@@ -9,10 +9,13 @@ import (
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"net/http"
+	"sync/atomic"
 )
 
 // Job represents script Job
 type Job struct {
+	running int64
+
 	entryID  cron.EntryID
 	name     string
 	logger   *zap.Logger
@@ -57,6 +60,12 @@ func (j *Job) EntryID() cron.EntryID {
 
 // Run the job
 func (j *Job) Run() {
+	if !atomic.CompareAndSwapInt64(&j.running, 0, 1) {
+		j.logger.Debug("job already running", zap.String("name", j.name))
+		return
+	}
+	defer atomic.StoreInt64(&j.running, 0)
+
 	j.logger.Debug("run job", zap.String("name", j.name))
 
 	ctx, cancel := context.WithTimeout(context.Background(), j.script.Timeout)
@@ -71,7 +80,7 @@ func (j *Job) Run() {
 }
 
 func (rnr *Runner) createLuaState(j job, apiRequest *http.Request) error {
-	rnr.logger.Debug("create job", zap.String("name", j.Name()))
+	rnr.logger.Debug("create job luaState", zap.String("name", j.Name()))
 
 	L := lua.NewState()
 

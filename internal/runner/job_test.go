@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest/observer"
 	"testing"
 	"time"
 )
@@ -89,4 +90,17 @@ func TestJob_Run(t *testing.T) {
 	}
 
 	j.Run()
+}
+
+func TestJob_Run_already_running(t *testing.T) {
+	core, logger := observer.New(zap.DebugLevel)
+
+	j := &Job{
+		running: 1,
+		logger:  zap.New(core),
+	}
+
+	j.Run()
+
+	assert.Equal(t, 1, logger.FilterMessage("job already running").Len())
 }

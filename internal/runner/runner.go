@@ -20,6 +20,7 @@ import (
 var (
 	defaultUpdateInterval = time.Minute
 	defaultToRunChanLen   = 64
+	watchersCount         = 32
 )
 
 type storagesManager interface {
@@ -95,7 +96,9 @@ func New(
 		r.updateInterval = defaultUpdateInterval
 	}
 
-	go r.watchJobs()
+	for i := 0; i < watchersCount; i++ {
+		go r.watchJobs()
+	}
 
 	return r
 }
