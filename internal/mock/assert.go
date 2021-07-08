@@ -16,7 +16,7 @@ func (m *ModuleMock) assert(called bool) lua.LGFunction {
 
 		nameL := luaState.Get(1)
 		if nameL.Type() != lua.LTString {
-			err := "method name be a string"
+			err := "method name must be a string"
 			m.logger.Error(err)
 			m.errors = append(m.errors, err)
 			return 0
@@ -24,7 +24,7 @@ func (m *ModuleMock) assert(called bool) lua.LGFunction {
 
 		name := strings.TrimSpace(nameL.String())
 		if name == "" {
-			err := "method name be a not empty"
+			err := "method name must be a not empty"
 			m.logger.Error(err)
 			m.errors = append(m.errors, err)
 			return 0
