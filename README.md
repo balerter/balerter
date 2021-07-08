@@ -16,7 +16,29 @@ In your script you may:
 In the example bellow we create one Clickhouse datasource, one scripts source and one alert channel.
 In the script we run query to clickhouse, check the value and fire the alert (or switch off it)   
 
-Full documentation available on https://balerter.com
+## Notification channels
+
+- Slack
+- Telegram
+- Syslog
+- Desktop Notify
+- Email
+- Discord
+- Webhook
+- Prometheus Alertmanager
+- Prometheus AlertmanagerReceiver
+- Twilio Voice (phone calls)
+
+## Datasources
+
+- Clickhouse
+- Prometheus
+- Postgres
+- MySQL
+- Loki
+- Any external API with `http` lua module
+
+> Full documentation available on https://balerter.com
 
 ## Example
 
