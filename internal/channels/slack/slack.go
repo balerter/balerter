@@ -17,6 +17,7 @@ type Slack struct {
 	name    string
 	channel string
 	api     API
+	ignore  bool
 }
 
 // New creates new Slack channel
@@ -25,6 +26,7 @@ func New(cfg slackCfg.Slack, logger *zap.Logger) (*Slack, error) {
 		logger:  logger,
 		name:    cfg.Name,
 		channel: cfg.Channel,
+		ignore:  cfg.Ignore,
 	}
 
 	m.api = slack.New(cfg.Token)
@@ -35,4 +37,8 @@ func New(cfg slackCfg.Slack, logger *zap.Logger) (*Slack, error) {
 // Name returns the channel name
 func (m *Slack) Name() string {
 	return m.name
+}
+
+func (m *Slack) Ignore() bool {
+	return m.ignore
 }

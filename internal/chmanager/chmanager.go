@@ -26,6 +26,7 @@ Channels Manager is sending messages to channels
 type alertChannel interface {
 	Name() string
 	Send(*message.Message) error
+	Ignore() bool
 }
 
 // ChannelsManager represents the Alert manager struct

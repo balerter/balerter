@@ -19,3 +19,8 @@ func TestName(t *testing.T) {
 	tg := &Telegram{name: "foo"}
 	assert.Equal(t, "foo", tg.Name())
 }
+
+func TestTelegram_Ignore(t *testing.T) {
+	tg := &Telegram{ignore: true}
+	assert.True(t, tg.Ignore())
+}

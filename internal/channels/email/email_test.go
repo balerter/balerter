@@ -19,3 +19,8 @@ func TestNew(t *testing.T) {
 	require.NoError(t, err)
 	assert.IsType(t, &Email{}, e)
 }
+
+func TestEmail_Ignore(t *testing.T) {
+	e := &Email{ignore: true}
+	assert.True(t, e.Ignore())
+}

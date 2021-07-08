@@ -19,6 +19,7 @@ type Telegram struct {
 	chatID int64
 	logger *zap.Logger
 	api    APIer
+	ignore bool
 }
 
 // New creates new Telegram channel
@@ -27,6 +28,7 @@ func New(cfg telegram.Telegram, logger *zap.Logger) (*Telegram, error) {
 		name:   cfg.Name,
 		chatID: cfg.ChatID,
 		logger: logger,
+		ignore: cfg.Ignore,
 	}
 
 	var err error
@@ -43,4 +45,8 @@ func New(cfg telegram.Telegram, logger *zap.Logger) (*Telegram, error) {
 // Name returns the channel name
 func (tg *Telegram) Name() string {
 	return tg.name
+}
+
+func (tg *Telegram) Ignore() bool {
+	return tg.ignore
 }

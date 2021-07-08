@@ -13,6 +13,7 @@ type Email struct {
 	hostname string
 	logger   *zap.Logger
 	name     string
+	ignore   bool
 }
 
 // New returns the new Email instance
@@ -28,4 +29,8 @@ func New(cfg email.Email, logger *zap.Logger) (*Email, error) {
 // Name returns the Email channel name
 func (e *Email) Name() string {
 	return e.name
+}
+
+func (e *Email) Ignore() bool {
+	return e.ignore
 }

@@ -83,3 +83,8 @@ func TestNotify_getIconByLevel(t *testing.T) {
 		})
 	}
 }
+
+func TestNotify_Ignore(t *testing.T) {
+	n := &Notify{ignore: true}
+	assert.True(t, n.Ignore())
+}

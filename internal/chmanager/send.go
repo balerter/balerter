@@ -24,7 +24,11 @@ func (m *ChannelsManager) Send(a *alert.Alert, text string, options *alert.Optio
 			chs[channelName] = ch
 		}
 	} else {
-		chs = m.channels
+		for _, ch := range m.channels {
+			if !ch.Ignore() {
+				chs[ch.Name()] = ch
+			}
+		}
 	}
 
 	if len(chs) == 0 {

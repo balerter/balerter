@@ -18,3 +18,8 @@ func TestName(t *testing.T) {
 	tw := &TwilioVoice{name: "tw"}
 	assert.Equal(t, "tw", tw.Name())
 }
+
+func TestTwilioVoice_Ignore(t *testing.T) {
+	tw := &TwilioVoice{ignore: true}
+	assert.True(t, tw.Ignore())
+}

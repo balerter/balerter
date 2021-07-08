@@ -13,6 +13,7 @@ type Slack struct {
 	Token string `json:"token" yaml:"token" hcl:"token"`
 	// Channel name
 	Channel string `json:"channel" yaml:"channel"  hcl:"channel"`
+	Ignore  bool   `json:"ignore" yaml:"ignore" hcl:"ignore,optional"`
 }
 
 // Validate config
