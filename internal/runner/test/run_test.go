@@ -234,6 +234,10 @@ func Test_runPair_with_fail_result(t *testing.T) {
 	r = res[1]
 	assert.Equal(t, false, r.Ok)
 	assert.Equal(t, "FAIL", r.Message)
+
+	assert.Equal(t, 1, len(dsManagerMock.CleanCalls()))
+	assert.Equal(t, 1, len(dsManagerMock.ResultCalls()))
+	assert.Equal(t, 2, len(dsManagerMock.GetCalls()))
 }
 
 func Test_runPair_error_run_test(t *testing.T) {
