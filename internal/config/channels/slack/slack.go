@@ -8,11 +8,11 @@ import (
 // Slack channel config
 type Slack struct {
 	// Name of the channel
-	Name string `json:"name" yaml:"name"`
+	Name string `json:"name" yaml:"name" hcl:"name,label"`
 	// Token is auth token for slack app
-	Token string `json:"token" yaml:"token"`
+	Token string `json:"token" yaml:"token" hcl:"token"`
 	// Channel name
-	Channel string `json:"channel" yaml:"channel"`
+	Channel string `json:"channel" yaml:"channel"  hcl:"channel"`
 }
 
 // Validate config

@@ -9,9 +9,9 @@ import (
 // AlertmanagerReceiver channel config
 type AlertmanagerReceiver struct {
 	// Name of the channel
-	Name string `json:"name" yaml:"name"`
+	Name string `json:"name" yaml:"name" hcl:"name,label"`
 	// Settings contains webhook settings
-	Settings webhook.Settings `json:"settings" yaml:"settings"`
+	Settings webhook.Settings `json:"settings" yaml:"settings,block"`
 }
 
 // Validate config

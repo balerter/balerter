@@ -18,23 +18,23 @@ import (
 // Channels config for define channels
 type Channels struct {
 	// Email channel
-	Email []email.Email `json:"email" yaml:"email"`
+	Email []email.Email `json:"email" yaml:"email" hcl:"email,block"`
 	// Slack channel
-	Slack []slack.Slack `json:"slack" yaml:"slack"`
+	Slack []slack.Slack `json:"slack" yaml:"slack" hcl:"slack,block"`
 	// Telegram channel
 	Telegram []telegram.Telegram `json:"telegram" yaml:"telegram" hcl:"telegram,block"`
 	// Syslog channel
-	Syslog []syslog.Syslog `json:"syslog" yaml:"syslog"`
+	Syslog []syslog.Syslog `json:"syslog" yaml:"syslog" hcl:"syslog,block"`
 	// Notify channel
-	Notify []notify.Notify `json:"notify" yaml:"notify"`
+	Notify []notify.Notify `json:"notify" yaml:"notify" hcl:"notify,block"`
 	// Discord channel
-	Discord []discord.Discord `json:"discord" yaml:"discord"`
+	Discord []discord.Discord `json:"discord" yaml:"discord" hcl:"discord,block"`
 	// Webhook channel
-	Webhook []webhook.Webhook `json:"webhook" yaml:"webhook"`
+	Webhook []webhook.Webhook `json:"webhook" yaml:"webhook" hcl:"webhook,block"`
 	// Alertmanager channel
-	Alertmanager []alertmanager.Alertmanager `json:"alertmanager" yaml:"alertmanager"`
+	Alertmanager []alertmanager.Alertmanager `json:"alertmanager" yaml:"alertmanager" hcl:"alertmanager,block"`
 	// AlertmanagerReceiver channel
-	AlertmanagerReceiver []alertmanagerreceiver.AlertmanagerReceiver `json:"alertmanager_receiver" yaml:"alertmanager_receiver"`
+	AlertmanagerReceiver []alertmanagerreceiver.AlertmanagerReceiver `json:"alertmanager_receiver" yaml:"alertmanager_receiver" hcl:"alertmanager_receiver,block"`
 
 	TwilioVoice []twiliovoice.Twilio `json:"twilioVoice" yaml:"twilioVoice" hcl:"twilioVoice,block"`
 }

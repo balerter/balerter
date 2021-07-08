@@ -8,11 +8,11 @@ import (
 // Discord channel config
 type Discord struct {
 	// Name of the channel
-	Name string `json:"name" yaml:"name"`
+	Name string `json:"name" yaml:"name" hcl:"name,label"`
 	// Token is auth token
-	Token string `json:"token" yaml:"token"`
+	Token string `json:"token" yaml:"token" hcl:"token"`
 	// ChannelID of a discord channel
-	ChannelID int64 `json:"channelId" yaml:"channelId"`
+	ChannelID int64 `json:"channelId" yaml:"channelId" hcl:"channelId"`
 }
 
 // Validate config

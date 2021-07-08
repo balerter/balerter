@@ -10,24 +10,24 @@ import (
 // AuthBasicConfig is basic auth config
 type AuthBasicConfig struct {
 	// Login for basic auth
-	Login string `json:"login" yaml:"login"`
+	Login string `json:"login" yaml:"login" hcl:"login"`
 	// Password for basic auth
-	Password string `json:"password" yaml:"password"`
+	Password string `json:"password" yaml:"password" hcl:"password"`
 }
 
 // AuthBearerConfig is bearer auth config
 type AuthBearerConfig struct {
 	// Token for bearer auth
-	Token string `json:"token" yaml:"token"`
+	Token string `json:"token" yaml:"token" hcl:"token"`
 }
 
 // AuthCustomConfig is custom auth config
 type AuthCustomConfig struct {
 	// TODO (negasus): remove Headers in favor of cfg.Headers option
 	// Headers is request headers
-	Headers map[string]string `json:"headers" yaml:"headers"`
+	Headers map[string]string `json:"headers" yaml:"headers" hcl:"headers,optional"`
 	// QueryParams is query params
-	QueryParams map[string]string `json:"queryParams" yaml:"queryParams"`
+	QueryParams map[string]string `json:"queryParams" yaml:"queryParams" hcl:"queryParams,optional"`
 }
 
 // AuthConfig for requests with auth
@@ -37,7 +37,7 @@ type AuthConfig struct {
 	AuthCustomConfig
 
 	// Type of the auth
-	Type string `json:"type" yaml:"type"`
+	Type string `json:"type" yaml:"type" hcl:"type"`
 }
 
 // consts
@@ -82,8 +82,8 @@ func (cfg AuthConfig) Validate() error {
 
 // PayloadConfig for POST requests
 type PayloadConfig struct {
-	QueryParams map[string]string `json:"queryParams" yaml:"queryParams"`
-	Body        string            `json:"body" yaml:"body"`
+	QueryParams map[string]string `json:"queryParams" yaml:"queryParams" hcl:"queryParams,optional"`
+	Body        string            `json:"body" yaml:"body" hcl:"body,optional"`
 }
 
 // Validate checks the payload configuration.
@@ -107,18 +107,18 @@ func (cfg PayloadConfig) Validate(method string) error {
 
 // Settings for webhook config
 type Settings struct {
-	URL     string            `json:"url" yaml:"url"`
-	Method  string            `json:"method" yaml:"method"`
-	Auth    AuthConfig        `json:"auth" yaml:"auth"`
-	Payload PayloadConfig     `json:"payload" yaml:"payload"`
-	Timeout int               `json:"timeout" yaml:"timeout"`
-	Headers map[string]string `json:"headers" yaml:"headers"`
+	URL     string            `json:"url" yaml:"url"  hcl:"url"`
+	Method  string            `json:"method" yaml:"method" hcl:"method"`
+	Auth    AuthConfig        `json:"auth" yaml:"auth" hcl:"auth,block"`
+	Payload PayloadConfig     `json:"payload" yaml:"payload" hcl:"payload,block"`
+	Timeout int               `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	Headers map[string]string `json:"headers" yaml:"headers" hcl:"headers,optional"`
 }
 
 // Webhook configures notifications via webhook.
 type Webhook struct {
-	Name     string   `json:"name" yaml:"name"`
-	Settings Settings `json:"settings" yaml:"settings"`
+	Name     string   `json:"name" yaml:"name" hcl:"name,label"`
+	Settings Settings `json:"settings" yaml:"settings" hcl:"settings,block"`
 }
 
 // Validate checks the webhook configuration.

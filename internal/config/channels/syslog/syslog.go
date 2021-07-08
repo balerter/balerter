@@ -16,15 +16,15 @@ var (
 // Syslog channel config
 type Syslog struct {
 	// Name of the channel
-	Name string `json:"name" yaml:"name"`
+	Name string `json:"name" yaml:"name" hcl:"name,label"`
 	// Tag describe syslog tag
-	Tag string `json:"tag" yaml:"tag"`
+	Tag string `json:"tag" yaml:"tag" hcl:"tag,optional"`
 	// Network value
-	Network string `json:"network" yaml:"network"`
+	Network string `json:"network" yaml:"network" hcl:"network"`
 	// Address value
-	Address string `json:"address" yaml:"address"`
+	Address string `json:"address" yaml:"address" hcl:"address"`
 	// Priority value, Severity+Facility
-	Priority string `json:"priority" yaml:"priority"`
+	Priority string `json:"priority" yaml:"priority" hcl:"priority"`
 }
 
 // Validate config
