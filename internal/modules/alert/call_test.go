@@ -1,7 +1,12 @@
 package alert
 
 import (
+	"fmt"
 	alert2 "github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/corestorage"
+	"github.com/balerter/balerter/internal/script/script"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"reflect"
@@ -388,4 +393,99 @@ func TestManager_getAlertData(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAlert_call_error_get_alertData(t *testing.T) {
+	a := &Alert{
+		logger: zap.NewNop(),
+	}
+
+	f := a.call(nil, alert2.LevelError)
+
+	ls := lua.NewState()
+
+	n := f(ls)
+	assert.Equal(t, 1, n)
+	assert.Equal(t, "error get arguments: alert name must be provided", ls.Get(1).String())
+}
+
+func TestAlert_call_error_update(t *testing.T) {
+	am := &corestorage.AlertMock{}
+	am.On("Update", mock.Anything, mock.Anything).Return(nil, false, fmt.Errorf("err1"))
+
+	a := &Alert{
+		logger:  zap.NewNop(),
+		storage: am,
+	}
+
+	s := &script.Script{}
+
+	f := a.call(s, alert2.LevelError)
+
+	ls := lua.NewState()
+	ls.Push(lua.LString("foo"))
+
+	n := f(ls)
+	assert.Equal(t, 1, n)
+	assert.Equal(t, "error update an alert: err1", ls.Get(2).String())
+}
+
+func TestAlert_call_level_was_updated(t *testing.T) {
+	ra := &alert2.Alert{}
+
+	am := &corestorage.AlertMock{}
+	am.On("Update", mock.Anything, mock.Anything).Return(ra, true, nil)
+
+	chManager := &chManagerMock{
+		SendFunc: func(_ *alert2.Alert, _ string, _ *alert2.Options) {
+
+		},
+	}
+
+	a := &Alert{
+		logger:    zap.NewNop(),
+		storage:   am,
+		chManager: chManager,
+	}
+
+	s := &script.Script{}
+
+	f := a.call(s, alert2.LevelError)
+
+	ls := lua.NewState()
+	ls.Push(lua.LString("foo"))
+
+	n := f(ls)
+	assert.Equal(t, 0, n)
+	assert.Equal(t, 1, len(chManager.SendCalls()))
+}
+
+func TestAlert_call_level_was_not_updated(t *testing.T) {
+	ra := &alert2.Alert{}
+
+	am := &corestorage.AlertMock{}
+	am.On("Update", mock.Anything, mock.Anything).Return(ra, false, nil)
+
+	chManager := &chManagerMock{
+		SendFunc: func(_ *alert2.Alert, _ string, _ *alert2.Options) {
+
+		},
+	}
+
+	a := &Alert{
+		logger:    zap.NewNop(),
+		storage:   am,
+		chManager: chManager,
+	}
+
+	s := &script.Script{}
+
+	f := a.call(s, alert2.LevelError)
+
+	ls := lua.NewState()
+	ls.Push(lua.LString("foo"))
+
+	n := f(ls)
+	assert.Equal(t, 0, n)
+	assert.Equal(t, 0, len(chManager.SendCalls()))
 }
