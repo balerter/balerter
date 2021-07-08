@@ -12,6 +12,15 @@ services:
       POSTGRES_DB: db
     ports:
       - 35432:5432
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_USER: mysql
+      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: db
+    ports:
+    - 3306:3306
   mailhog:
     image: mailhog/mailhog
     ports:
