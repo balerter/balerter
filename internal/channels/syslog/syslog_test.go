@@ -61,3 +61,8 @@ func Test_parsePriority(t *testing.T) {
 		})
 	}
 }
+
+func TestSyslog_Ignore(t *testing.T) {
+	sl := &Syslog{ignore: true}
+	assert.True(t, sl.Ignore())
+}

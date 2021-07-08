@@ -20,6 +20,11 @@ func (m *alertChannelMock) Name() string {
 	return args.String(0)
 }
 
+func (m *alertChannelMock) Ignore() bool {
+	args := m.Called()
+	return args.Bool(0)
+}
+
 func (m *alertChannelMock) Send(mes *message.Message) error {
 	args := m.Called(mes)
 	return args.Error(0)
@@ -69,6 +74,8 @@ func TestManager_Send_ok(t *testing.T) {
 
 	chan1 := &alertChannelMock{}
 	chan1.On("Send", mock.Anything).Return(nil)
+	chan1.On("Name").Return("foo")
+	chan1.On("Ignore").Return(false)
 
 	m := &ChannelsManager{
 		logger: logger,
@@ -117,6 +124,8 @@ func TestManager_Send_ok_with_channels(t *testing.T) {
 func TestManager_Send_error(t *testing.T) {
 	chan1 := &alertChannelMock{}
 	chan1.On("Send", mock.Anything).Return(fmt.Errorf("err1"))
+	chan1.On("Name").Return("foo")
+	chan1.On("Ignore").Return(false)
 
 	core, logger := observer.New(zap.DebugLevel)
 	m := &ChannelsManager{
@@ -133,4 +142,22 @@ func TestManager_Send_error(t *testing.T) {
 	chan1.AssertExpectations(t)
 
 	assert.Equal(t, 1, logger.FilterMessage("error send the message to the channel").Len())
+}
+
+func TestChannelsManager_Send_ignore(t *testing.T) {
+	chan1 := &alertChannelMock{}
+	chan1.On("Send", mock.Anything).Return(fmt.Errorf("err1"))
+	chan1.On("Ignore").Return(true)
+
+	core, logger := observer.New(zap.DebugLevel)
+	m := &ChannelsManager{
+		channels: map[string]alertChannel{
+			"chan1": chan1,
+		},
+		logger: zap.New(core),
+	}
+
+	m.Send(alert.New("alertName"), "alertText", &alert.Options{})
+
+	assert.Equal(t, 1, logger.FilterMessage("the message was not sent, empty channels").Len())
 }

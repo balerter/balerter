@@ -13,6 +13,7 @@ type Notify struct {
 	iconSuccess string
 	iconError   string
 	iconWarning string
+	ignore      bool
 }
 
 // New creates new Notify channel
@@ -22,6 +23,7 @@ func New(cfg notify.Notify, _ *zap.Logger) (*Notify, error) {
 		iconSuccess: cfg.Icons.Success,
 		iconError:   cfg.Icons.Error,
 		iconWarning: cfg.Icons.Warning,
+		ignore:      cfg.Ignore,
 	}
 
 	return p, nil
@@ -50,4 +52,8 @@ func (p *Notify) getIconByLevel(l string) string {
 	}
 
 	return ""
+}
+
+func (p *Notify) Ignore() bool {
+	return p.ignore
 }

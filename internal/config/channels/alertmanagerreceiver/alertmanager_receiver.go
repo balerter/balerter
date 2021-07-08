@@ -12,6 +12,7 @@ type AlertmanagerReceiver struct {
 	Name string `json:"name" yaml:"name" hcl:"name,label"`
 	// Settings contains webhook settings
 	Settings webhook.Settings `json:"settings" yaml:"settings,block"`
+	Ignore   bool             `json:"ignore" yaml:"ignore" hcl:"ignore,optional"`
 }
 
 // Validate config

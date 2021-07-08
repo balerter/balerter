@@ -26,7 +26,8 @@ type Email struct {
 	// Secure value
 	Secure string `json:"secure" yaml:"secure" hcl:"secure"`
 	// Timeout value
-	Timeout int `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	Timeout int  `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	Ignore  bool `json:"ignore" yaml:"ignore" hcl:"ignore,optional"`
 }
 
 // Validate checks the email configuration.

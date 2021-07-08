@@ -20,3 +20,8 @@ func TestName(t *testing.T) {
 	d := &Discord{name: "foo"}
 	assert.Equal(t, "foo", d.Name())
 }
+
+func TestDiscord_Ignore(t *testing.T) {
+	d := &Discord{ignore: true}
+	assert.True(t, d.Ignore())
+}

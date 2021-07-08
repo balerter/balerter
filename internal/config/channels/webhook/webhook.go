@@ -119,6 +119,7 @@ type Settings struct {
 type Webhook struct {
 	Name     string   `json:"name" yaml:"name" hcl:"name,label"`
 	Settings Settings `json:"settings" yaml:"settings" hcl:"settings,block"`
+	Ignore   bool     `json:"ignore" yaml:"ignore" hcl:"ignore,optional"`
 }
 
 // Validate checks the webhook configuration.

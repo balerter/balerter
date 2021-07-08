@@ -25,6 +25,7 @@ type Syslog struct {
 	Address string `json:"address" yaml:"address" hcl:"address"`
 	// Priority value, Severity+Facility
 	Priority string `json:"priority" yaml:"priority" hcl:"priority"`
+	Ignore   bool   `json:"ignore" yaml:"ignore" hcl:"ignore,optional"`
 }
 
 // Validate config

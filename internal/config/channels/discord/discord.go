@@ -13,6 +13,7 @@ type Discord struct {
 	Token string `json:"token" yaml:"token" hcl:"token"`
 	// ChannelID of a discord channel
 	ChannelID int64 `json:"channelId" yaml:"channelId" hcl:"channelId"`
+	Ignore    bool  `json:"ignore" yaml:"ignore" hcl:"ignore,optional"`
 }
 
 // Validate config

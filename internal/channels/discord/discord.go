@@ -17,6 +17,7 @@ type Discord struct {
 	name    string
 	session isession
 	chanID  discord.Snowflake
+	ignore  bool
 }
 
 // New returns the new Discord instance
@@ -31,6 +32,7 @@ func New(cfg discordCfg.Discord, logger *zap.Logger) (*Discord, error) {
 		name:    cfg.Name,
 		session: s,
 		chanID:  discord.Snowflake(cfg.ChannelID),
+		ignore:  cfg.Ignore,
 	}
 
 	return d, nil
@@ -39,4 +41,8 @@ func New(cfg discordCfg.Discord, logger *zap.Logger) (*Discord, error) {
 // Name returns the Discord channel name
 func (d *Discord) Name() string {
 	return d.name
+}
+
+func (d *Discord) Ignore() bool {
+	return d.ignore
 }

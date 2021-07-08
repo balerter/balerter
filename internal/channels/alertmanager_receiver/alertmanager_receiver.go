@@ -18,6 +18,7 @@ type AMReceiver struct {
 	name   string
 	whCore webHookCore
 	logger *zap.Logger
+	ignore bool
 }
 
 // New creates new AlertManagerReceiver channel
@@ -28,6 +29,7 @@ func New(cfg alertmanagerreceiver.AlertmanagerReceiver, logger *zap.Logger) (*AM
 		name:   cfg.Name,
 		logger: logger,
 		whCore: webhook.NewCore(cfg.Settings),
+		ignore: cfg.Ignore,
 	}
 
 	return a, nil
@@ -36,4 +38,8 @@ func New(cfg alertmanagerreceiver.AlertmanagerReceiver, logger *zap.Logger) (*AM
 // Name returns name of the channel
 func (a *AMReceiver) Name() string {
 	return a.name
+}
+
+func (a *AMReceiver) Ignore() bool {
+	return a.ignore
 }

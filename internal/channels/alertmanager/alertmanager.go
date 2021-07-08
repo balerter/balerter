@@ -18,6 +18,7 @@ type AlertManager struct {
 	name   string
 	whCore webHookCore
 	logger *zap.Logger
+	ignore bool
 }
 
 // New creates new AlertManager
@@ -26,6 +27,7 @@ func New(cfg alertmanager.Alertmanager, logger *zap.Logger) (*AlertManager, erro
 		name:   cfg.Name,
 		logger: logger,
 		whCore: webhook.NewCore(cfg.Settings),
+		ignore: cfg.Ignore,
 	}
 
 	return a, nil
@@ -34,4 +36,8 @@ func New(cfg alertmanager.Alertmanager, logger *zap.Logger) (*AlertManager, erro
 // Name returns name of the AlertManager
 func (a *AlertManager) Name() string {
 	return a.name
+}
+
+func (a *AlertManager) Ignore() bool {
+	return a.ignore
 }

@@ -60,3 +60,7 @@ func New(cfg twiliovoice.Twilio, logger *zap.Logger) (*TwilioVoice, error) {
 func (tw *TwilioVoice) Name() string {
 	return tw.name
 }
+
+func (tw *TwilioVoice) Ignore() bool {
+	return tw.ignore
+}

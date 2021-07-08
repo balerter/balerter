@@ -13,6 +13,7 @@ type Syslog struct {
 	name   string
 	logger *zap.Logger
 	w      io.Writer
+	ignore bool
 }
 
 var (
@@ -24,6 +25,7 @@ func New(cfg syslogCfg.Syslog, logger *zap.Logger) (*Syslog, error) {
 	sl := &Syslog{
 		name:   cfg.Name,
 		logger: logger,
+		ignore: cfg.Ignore,
 	}
 
 	var err error
@@ -43,6 +45,10 @@ func New(cfg syslogCfg.Syslog, logger *zap.Logger) (*Syslog, error) {
 // Name returns the channel name
 func (sl *Syslog) Name() string {
 	return sl.name
+}
+
+func (sl *Syslog) Ignore() bool {
+	return sl.ignore
 }
 
 func parsePriority(s string) syslog.Priority {

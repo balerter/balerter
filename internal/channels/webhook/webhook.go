@@ -11,6 +11,7 @@ type Webhook struct {
 	name   string
 	body   string
 	whCore *Core
+	ignore bool
 }
 
 // New creates new Webhook channel
@@ -20,10 +21,15 @@ func New(cfg webhook.Webhook, logger *zap.Logger) (*Webhook, error) {
 		logger: logger,
 		name:   cfg.Name,
 		whCore: NewCore(cfg.Settings),
+		ignore: cfg.Ignore,
 	}, nil
 }
 
 // Name returns the channel name
 func (w *Webhook) Name() string {
 	return w.name
+}
+
+func (w *Webhook) Ignore() bool {
+	return w.ignore
 }

@@ -28,7 +28,8 @@ type Telegram struct {
 	// Proxy config, if proxy is needed
 	Proxy *ProxyConfig `json:"proxy" yaml:"proxy" hcl:"proxy,block"`
 	// Timeout value
-	Timeout int `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	Timeout int  `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
+	Ignore  bool `json:"ignore" yaml:"ignore" hcl:"ignore,optional"`
 }
 
 // Validate config
