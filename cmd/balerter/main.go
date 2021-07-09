@@ -159,6 +159,7 @@ func run(
 		uploadStoragesMgr,
 		coreModules,
 		flg.Script,
+		cfg.System,
 		lgr.Logger(),
 	)
 

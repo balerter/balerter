@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"github.com/balerter/balerter/internal/config/system"
 	"github.com/balerter/balerter/internal/metrics"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
@@ -18,9 +19,9 @@ import (
 //go:generate moq -out ds_manager_mock.go -skip-ensure -fmt goimports . dsManager
 
 var (
-	defaultUpdateInterval = time.Minute
-	defaultToRunChanLen   = 64
-	watchersCount         = 32
+	defaultUpdateInterval  = time.Minute
+	defaultToRunChanLen    = 64
+	defaultJobWorkersCount = 32
 )
 
 type storagesManager interface {
@@ -74,6 +75,7 @@ func New(
 	storagesManager storagesManager,
 	coreModules []modules.Module,
 	cliScript string,
+	systemCfg *system.System,
 	logger *zap.Logger,
 ) *Runner {
 	r := &Runner{
@@ -96,7 +98,12 @@ func New(
 		r.updateInterval = defaultUpdateInterval
 	}
 
-	for i := 0; i < watchersCount; i++ {
+	jobWorkersCount := defaultJobWorkersCount
+	if systemCfg != nil && systemCfg.JobWorkersCount > 0 {
+		jobWorkersCount = systemCfg.JobWorkersCount
+	}
+
+	for i := 0; i < jobWorkersCount; i++ {
 		go r.watchJobs()
 	}
 

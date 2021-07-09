@@ -17,7 +17,7 @@ import (
 
 func TestNewRunner(t *testing.T) {
 	r := New(0, nil, nil,
-		nil, nil, "", nil)
+		nil, nil, "", nil, nil)
 	assert.IsType(t, &Runner{}, r)
 }
 

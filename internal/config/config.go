@@ -9,6 +9,7 @@ import (
 	"github.com/balerter/balerter/internal/config/scripts"
 	"github.com/balerter/balerter/internal/config/storages/core"
 	"github.com/balerter/balerter/internal/config/storages/upload"
+	"github.com/balerter/balerter/internal/config/system"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	"gopkg.in/yaml.v2"
 	"io"
@@ -109,6 +110,8 @@ type Config struct {
 	StorageAlert string `json:"storageAlert" yaml:"storageAlert" hcl:"storageAlert,optional"`
 	// StorageKV item
 	StorageKV string `json:"storageKV" yaml:"storageKV" hcl:"storageKV,optional"`
+
+	System *system.System `json:"system" yaml:"system" hcl:"system,block"`
 }
 
 // Validate the config
@@ -141,6 +144,11 @@ func (cfg Config) Validate() error {
 	if cfg.API != nil {
 		if err := cfg.API.Validate(); err != nil {
 			return fmt.Errorf("error api validation, %w", err)
+		}
+	}
+	if cfg.System != nil {
+		if err := cfg.System.Validate(); err != nil {
+			return fmt.Errorf("error system validation, %w", err)
 		}
 	}
 
