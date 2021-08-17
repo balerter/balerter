@@ -19,7 +19,7 @@ type PostgresAlert struct {
 func (p *PostgresAlert) CreateTable() error {
 	query := `CREATE TABLE IF NOT EXISTS %s
 (
-	%s varchar not null,
+	%s varchar not null constraint %s_pk primary key,
 	%s integer default 0 not null,
 	%s integer default 0,
 	%s timestamp default CURRENT_TIMESTAMP,
@@ -30,6 +30,7 @@ func (p *PostgresAlert) CreateTable() error {
 	query = fmt.Sprintf(query,
 		p.tableCfg.Table,
 		p.tableCfg.Fields.Name,
+		p.tableCfg.Table,
 		p.tableCfg.Fields.Level,
 		p.tableCfg.Fields.Count,
 		p.tableCfg.Fields.UpdatedAt,
