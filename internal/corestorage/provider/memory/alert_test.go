@@ -12,9 +12,9 @@ func TestStorageAlert_Get_not_found(t *testing.T) {
 		alerts: map[string]*alert.Alert{},
 	}
 
-	_, err := a.Get("k")
-	require.Error(t, err)
-	assert.Equal(t, "alert not found", err.Error())
+	v, err := a.Get("k")
+	require.NoError(t, err)
+	require.Nil(t, v)
 }
 
 func TestStorageAlert_Get(t *testing.T) {
@@ -104,5 +104,5 @@ func TestStorageAlert_Update_exists_change_level(t *testing.T) {
 	assert.True(t, updated)
 	assert.Equal(t, alert.LevelSuccess, ae.Level)
 	assert.Equal(t, "a2", ae.Name)
-	assert.Equal(t, 0, ae.Count)
+	assert.Equal(t, 1, ae.Count)
 }
