@@ -1,7 +1,6 @@
 package memory
 
 import (
-	"fmt"
 	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/metrics"
 	"time"
@@ -13,7 +12,7 @@ func (m *storageAlert) Get(name string) (*alert.Alert, error) {
 
 	a, ok := m.alerts[name]
 	if !ok {
-		return nil, fmt.Errorf("alert not found")
+		return nil, nil
 	}
 
 	return a, nil
@@ -25,12 +24,16 @@ func (m *storageAlert) Index(l []alert.Level) (alert.Alerts, error) {
 	defer m.mxAlerts.RUnlock()
 
 	for _, a := range m.alerts {
-		for _, l := range l {
-			if a.Level == l {
-				result = append(result, a)
-				break
+		if len(l) > 0 {
+			for _, l := range l {
+				if a.Level == l {
+					result = append(result, a)
+					break
+				}
 			}
+			continue
 		}
+		result = append(result, a)
 	}
 
 	return result, nil
@@ -55,6 +58,7 @@ func (m *storageAlert) Update(name string, level alert.Level) (*alert.Alert, boo
 		return a, false, nil
 	}
 
+	a.Count = 1
 	a.Level = level
 	a.LastChange = time.Now()
 

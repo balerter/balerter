@@ -1,11 +1,11 @@
 version: '3'
 services:
   clickhouse:
-    image: yandex/clickhouse-server
+    image: yandex/clickhouse-server:21.7.5.29-alpine
     ports:
-    - 9000:9000
+      - 9000:9000
   postgres:
-    image: postgres
+    image: postgres:9.6.22-stretch
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: secret
@@ -13,15 +13,21 @@ services:
     ports:
       - 35432:5432
   mysql:
-    image: mysql
+    image: mysql:8.0.26
     environment:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_USER: mysql
       MYSQL_PASSWORD: secret
       MYSQL_DATABASE: db
     ports:
-    - 3306:3306
+      - 3306:3306
   mailhog:
-    image: mailhog/mailhog
+    image: mailhog/mailhog:v1.0.1
     ports:
-    - 1025:1025
+      - 1025:1025
+  vault:
+    image: vault:1.8.0
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=ABCDEF
+    ports:
+      - 18200:8200

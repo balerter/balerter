@@ -1,8 +1,17 @@
 package config
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"github.com/balerter/balerter/internal/config/secrets/env"
+	"github.com/balerter/balerter/internal/config/secrets/vault"
+	"io"
+	"io/ioutil"
+	"os"
+	"regexp"
+	"strings"
+
 	"github.com/balerter/balerter/internal/config/api"
 	"github.com/balerter/balerter/internal/config/channels"
 	"github.com/balerter/balerter/internal/config/datasources"
@@ -10,12 +19,9 @@ import (
 	"github.com/balerter/balerter/internal/config/storages/core"
 	"github.com/balerter/balerter/internal/config/storages/upload"
 	"github.com/balerter/balerter/internal/config/system"
+
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	"gopkg.in/yaml.v2"
-	"io"
-	"io/ioutil"
-	"os"
-	"strings"
 )
 
 // StdIn is default stdin reader
@@ -49,6 +55,13 @@ func New(fs *flag.FlagSet, args []string) (*Config, *Flags, error) {
 
 	if err != nil {
 		return nil, nil, fmt.Errorf("error read config file, %w", err)
+	}
+
+	var errDecodeSecrets error
+
+	data, errDecodeSecrets = decodeSecrets(data)
+	if errDecodeSecrets != nil {
+		return nil, nil, fmt.Errorf("error decode secrets, %w", errDecodeSecrets)
 	}
 
 	if err := decodeCfg(flg.ConfigFilePath, data, cfg); err != nil {
@@ -153,4 +166,40 @@ func (cfg Config) Validate() error {
 	}
 
 	return nil
+}
+
+var (
+	reSecrets = regexp.MustCompile(`{secret:(vault|env):((?U).+)}`)
+)
+
+func decodeSecrets(data []byte) ([]byte, error) {
+	secrets := reSecrets.FindAllSubmatch(data, -1)
+
+	for _, secret := range secrets {
+		if len(secret) != 3 {
+			return nil, fmt.Errorf("unexpected secret RE submatch len = %d", len(secret))
+		}
+
+		var v []byte
+		var err error
+
+		switch string(secret[1]) {
+		case "env":
+			v, err = env.DecodeSecret(secret[2])
+			if err != nil {
+				return nil, err
+			}
+		case "vault":
+			v, err = vault.DecodeSecret(secret[2])
+			if err != nil {
+				return nil, err
+			}
+		default:
+			return nil, fmt.Errorf("unsupported secret engine = %s", secret[1])
+		}
+
+		data = bytes.Replace(data, secret[0], v, 1)
+	}
+
+	return data, nil
 }
