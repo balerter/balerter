@@ -46,11 +46,14 @@ type Prometheus struct {
 // New creates new Prometheus datasource
 func New(cfg prometheus.Prometheus, logger *zap.Logger) (*Prometheus, error) {
 	m := &Prometheus{
-		logger:            logger,
-		name:              ModuleName(cfg.Name),
-		basicAuthUsername: cfg.BasicAuth.Username,
-		basicAuthPassword: cfg.BasicAuth.Password,
-		timeout:           time.Millisecond * time.Duration(cfg.Timeout),
+		logger:  logger,
+		name:    ModuleName(cfg.Name),
+		timeout: time.Millisecond * time.Duration(cfg.Timeout),
+	}
+
+	if cfg.BasicAuth != nil {
+		m.basicAuthUsername = cfg.BasicAuth.Username
+		m.basicAuthPassword = cfg.BasicAuth.Password
 	}
 
 	if m.timeout == 0 {

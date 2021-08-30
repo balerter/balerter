@@ -13,7 +13,7 @@ type Prometheus struct {
 	// URL value
 	URL string `json:"url" yaml:"url" hcl:"url"`
 	// BasicAuth contains auth data, if needed
-	BasicAuth common.BasicAuth `json:"basicAuth" yaml:"basicAuth" hcl:"basicAuth,block"`
+	BasicAuth *common.BasicAuth `json:"basicAuth" yaml:"basicAuth" hcl:"basicAuth,block"`
 	// Timeout value
 	Timeout int `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
 }

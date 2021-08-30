@@ -19,11 +19,14 @@ type Notify struct {
 // New creates new Notify channel
 func New(cfg notify.Notify, _ *zap.Logger) (*Notify, error) {
 	p := &Notify{
-		name:        cfg.Name,
-		iconSuccess: cfg.Icons.Success,
-		iconError:   cfg.Icons.Error,
-		iconWarning: cfg.Icons.Warning,
-		ignore:      cfg.Ignore,
+		name:   cfg.Name,
+		ignore: cfg.Ignore,
+	}
+
+	if cfg.Icons != nil {
+		p.iconSuccess = cfg.Icons.Success
+		p.iconError = cfg.Icons.Error
+		p.iconWarning = cfg.Icons.Warning
 	}
 
 	return p, nil

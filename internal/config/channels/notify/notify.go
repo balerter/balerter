@@ -10,8 +10,8 @@ type Notify struct {
 	// Name of the channel
 	Name string `json:"name" yaml:"name" hcl:"name,label"`
 	// Icons settings
-	Icons  ChannelNotifyIcons `json:"icons" yaml:"icons" hcl:"icons,block"`
-	Ignore bool               `json:"ignore" yaml:"ignore" hcl:"ignore"`
+	Icons  *ChannelNotifyIcons `json:"icons" yaml:"icons" hcl:"icons,block"`
+	Ignore bool                `json:"ignore" yaml:"ignore" hcl:"ignore,optional"`
 }
 
 // ChannelNotifyIcons is icon settings
