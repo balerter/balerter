@@ -7,3 +7,5 @@ coverage.txt
 main
 .vscode
 balerter.hcl
+
+dist/
