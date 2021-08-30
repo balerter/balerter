@@ -3,7 +3,7 @@ services:
   clickhouse:
     image: yandex/clickhouse-server:21.7.5.29-alpine
     ports:
-    - 9000:9000
+      - 9000:9000
   postgres:
     image: postgres:9.6.22-stretch
     environment:
@@ -20,8 +20,14 @@ services:
       MYSQL_PASSWORD: secret
       MYSQL_DATABASE: db
     ports:
-    - 3306:3306
+      - 3306:3306
   mailhog:
     image: mailhog/mailhog:v1.0.1
     ports:
-    - 1025:1025
+      - 1025:1025
+  vault:
+    image: vault:1.8.0
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=ABCDEF
+    ports:
+      - 18200:8200

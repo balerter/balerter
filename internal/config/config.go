@@ -169,7 +169,7 @@ func (cfg Config) Validate() error {
 }
 
 var (
-	reSecrets = regexp.MustCompile(`{secret:(vault|env):(.+)}`)
+	reSecrets = regexp.MustCompile(`{secret:(vault|env):((?U).+)}`)
 )
 
 func decodeSecrets(data []byte) ([]byte, error) {

@@ -26,7 +26,7 @@ func DecodeSecret(key []byte) ([]byte, error) {
 	vaultToken := os.Getenv("BALERTER_VAULT_TOKEN")
 	vaultNS := os.Getenv("BALERTER_VAULT_NAMESPACE")
 
-	vaultURL += "/" + pair[0]
+	vaultURL += "/v1/" + pair[0]
 
 	req, errRequest := http.NewRequest(http.MethodGet, vaultURL, http.NoBody)
 	if errRequest != nil {
@@ -45,6 +45,9 @@ func DecodeSecret(key []byte) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("vault secret '%s' not found", key)
+	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected response status code = %d", resp.StatusCode)
 	}
@@ -58,7 +61,7 @@ func DecodeSecret(key []byte) ([]byte, error) {
 
 	result, ok := r.Data.Data[pair[1]]
 	if !ok {
-		return nil, fmt.Errorf("secret not found")
+		return nil, fmt.Errorf("vault secret '%s' not found", key)
 	}
 
 	return []byte(result), nil

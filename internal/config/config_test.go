@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"github.com/balerter/balerter/internal/config/api"
@@ -17,6 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"math/rand"
+	"net/http"
 	"os"
 	"path"
 	"strconv"
@@ -328,4 +330,51 @@ func TestConfig_Validate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_decodeSecrets(t *testing.T) {
+	err := os.Setenv("BALERTER_VAULT_URL", "http://127.0.0.1:18200")
+	require.NoError(t, err)
+	err = os.Setenv("BALERTER_VAULT_TOKEN", "ABCDEF")
+	require.NoError(t, err)
+
+	err = addEnvSecret("BALERTER_TEST_FOO", "BAZ")
+	require.NoError(t, err)
+
+	err = addVaultSecret("http://127.0.0.1:18200", "ABCDEF", "foo", "a", "b")
+	require.NoError(t, err)
+
+	config := []byte(`foo {secret:env:BALERTER_TEST_FOO} bar [{secret:env:NOT_EXISTS}] v {secret:vault:secret/data/foo@a}`)
+
+	data, err := decodeSecrets(config)
+	require.NoError(t, err)
+
+	assert.Equal(t, "foo BAZ bar [] v b", string(data))
+}
+
+func addEnvSecret(key, value string) error {
+	return os.Setenv(key, value)
+}
+
+func addVaultSecret(host, token, secretName, key, value string) error {
+	payload := []byte(`{"data":{"` + key + `":"` + value + `"}}`)
+	u := host + "/v1/secret/data/" + secretName
+
+	req, err := http.NewRequest(http.MethodPost, u, bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+	req.Header.Add("X-Vault-Token", token)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("unexpected status code = %d", resp.StatusCode)
+	}
+
+	return nil
 }
