@@ -48,7 +48,7 @@ func TestDataSourcePrometheus_Validate(t *testing.T) {
 			cfg := Prometheus{
 				Name:      tt.fields.Name,
 				URL:       tt.fields.URL,
-				BasicAuth: tt.fields.BasicAuth,
+				BasicAuth: &tt.fields.BasicAuth,
 				Timeout:   tt.fields.Timeout,
 			}
 			err := cfg.Validate()

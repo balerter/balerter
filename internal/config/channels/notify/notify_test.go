@@ -31,7 +31,7 @@ func TestChannelNotify_Validate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := Notify{
 				Name:  tt.fields.Name,
-				Icons: tt.fields.Icons,
+				Icons: &tt.fields.Icons,
 			}
 			if err := cfg.Validate(); (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)

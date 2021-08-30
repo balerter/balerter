@@ -187,7 +187,7 @@ func TestManager_Init(t *testing.T) {
 					Prometheus: []prometheus.Prometheus{{
 						Name:      "foo",
 						URL:       "http://127.0.0.1",
-						BasicAuth: common.BasicAuth{},
+						BasicAuth: &common.BasicAuth{},
 						Timeout:   0,
 					}},
 					Postgres: []postgres.Postgres{{

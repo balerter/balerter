@@ -14,7 +14,7 @@ func TestNew(t *testing.T) {
 	m, err := New(prometheus.Prometheus{
 		Name:      "prom1",
 		URL:       "http://domain.com",
-		BasicAuth: common.BasicAuth{},
+		BasicAuth: &common.BasicAuth{},
 		Timeout:   0,
 	}, zap.NewNop())
 
@@ -27,7 +27,7 @@ func TestNew_fail_url(t *testing.T) {
 	_, err := New(prometheus.Prometheus{
 		Name:      "prom1",
 		URL:       "$% a.a",
-		BasicAuth: common.BasicAuth{},
+		BasicAuth: &common.BasicAuth{},
 		Timeout:   0,
 	}, zap.NewNop())
 

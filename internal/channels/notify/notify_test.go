@@ -10,7 +10,7 @@ import (
 func TestNew(t *testing.T) {
 	p, err := New(notify.Notify{
 		Name: "foo",
-		Icons: notify.ChannelNotifyIcons{
+		Icons: &notify.ChannelNotifyIcons{
 			Success: "icon1",
 			Error:   "icon2",
 			Warning: "icon3",
