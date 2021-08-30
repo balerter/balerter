@@ -14,8 +14,8 @@ help:
 
 build-dev: ## Build balerter/balerter and balerter/test docker images DEV version
 	@echo Build Balerter dev
-	docker build --build-arg version=dev -t ghcr.io/balerter/balerter:dev -t balerter/balerter:dev -f ./contrib/balerter.Dockerfile .
-	docker build --build-arg version=dev -t ghcr.io/balerter/test:dev -t balerter/test:dev -f ./contrib/test.Dockerfile .
+	docker build --progress=plain --build-arg version=dev -t ghcr.io/balerter/balerter:dev -t balerter/balerter:dev -f ./contrib/balerter.Dockerfile .
+	docker build --progress=plain --build-arg version=dev -t ghcr.io/balerter/test:dev -t balerter/test:dev -f ./contrib/test.Dockerfile .
 
 push-dev: ## Build balerter/balerter and balerter/test images to docker registry DEV version
 	@echo Push Balerter dev
@@ -26,8 +26,8 @@ push-dev: ## Build balerter/balerter and balerter/test images to docker registry
 
 build: ## Build balerter/balerter and balerter/test docker images
 	@echo Build Balerter $(TAG)
-	docker build --build-arg version=$(TAG) -t ghcr.io/balerter/balerter:$(TAG) -t ghcr.io/balerter/balerter:latest -t balerter/balerter:$(TAG) -t balerter/balerter:latest -f ./contrib/balerter.Dockerfile .
-	docker build --build-arg version=$(TAG) -t ghcr.io/balerter/test:$(TAG) -t ghcr.io/balerter/test:latest -t balerter/test:$(TAG) -t balerter/test:latest -f ./contrib/test.Dockerfile .
+	docker build --progress=plain --build-arg version=$(TAG) -t ghcr.io/balerter/balerter:$(TAG) -t ghcr.io/balerter/balerter:latest -t balerter/balerter:$(TAG) -t balerter/balerter:latest -f ./contrib/balerter.Dockerfile .
+	docker build --progress=plain --build-arg version=$(TAG) -t ghcr.io/balerter/test:$(TAG) -t ghcr.io/balerter/test:latest -t balerter/test:$(TAG) -t balerter/test:latest -f ./contrib/test.Dockerfile .
 
 push: ## Build balerter/balerter and balerter/test images to docker registry
 	@echo Push Balerter $(TAG)
