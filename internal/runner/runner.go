@@ -65,6 +65,7 @@ type job interface {
 	Stop()
 	SetEntryID(cron.EntryID)
 	EntryID() cron.EntryID
+	GetPriorExecutionTime() time.Duration
 }
 
 // New creates new script runner

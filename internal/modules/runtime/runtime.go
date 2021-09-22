@@ -2,7 +2,7 @@ package runtime
 
 import (
 	"github.com/balerter/balerter/internal/config"
-	"github.com/balerter/balerter/internal/script/script"
+	"github.com/balerter/balerter/internal/modules"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
@@ -45,7 +45,7 @@ func (m *Runtime) Name() string {
 }
 
 // GetLoader returns the lua loader
-func (m *Runtime) GetLoader(_ *script.Script) lua.LGFunction {
+func (m *Runtime) GetLoader(_ modules.Job) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{

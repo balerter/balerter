@@ -7,6 +7,7 @@ import (
 	apiManager "github.com/balerter/balerter/internal/api/manager"
 	"github.com/balerter/balerter/internal/corestorage"
 	alertModule "github.com/balerter/balerter/internal/modules/alert"
+	"github.com/balerter/balerter/internal/modules/meta"
 	"github.com/balerter/balerter/internal/service"
 	"log"
 	"net"
@@ -250,6 +251,9 @@ func initCoreModules(
 
 	tlsMod := tlsModule.New()
 	coreModules = append(coreModules, tlsMod)
+
+	metaMod := meta.New(lgr)
+	coreModules = append(coreModules, metaMod)
 
 	return coreModules
 }

@@ -3,7 +3,6 @@ package mock
 import (
 	"github.com/balerter/balerter/internal/mock/registry"
 	"github.com/balerter/balerter/internal/modules"
-	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
@@ -52,7 +51,7 @@ func (m *ModuleMock) Stop() error {
 }
 
 // GetLoader returns lua loader
-func (m *ModuleMock) GetLoader(_ *script.Script) lua.LGFunction {
+func (m *ModuleMock) GetLoader(_ modules.Job) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		exports := map[string]lua.LGFunction{
 			"on":              m.on,

@@ -3,7 +3,6 @@ package alert
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert"
-	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"strings"
@@ -110,7 +109,7 @@ func (a *Alert) getAlertData(luaState *lua.LState) (alertName, alertText string,
 	return alertName, alertText, options, nil
 }
 
-func (a *Alert) call(s *script.Script, alertLevel alert.Level) lua.LGFunction {
+func (a *Alert) call(scriptChannels []string, alertLevel alert.Level) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		name, text, options, err := a.getAlertData(luaState)
 		if err != nil {
@@ -120,7 +119,7 @@ func (a *Alert) call(s *script.Script, alertLevel alert.Level) lua.LGFunction {
 		}
 
 		if len(options.Channels) == 0 {
-			options.Channels = s.Channels
+			options.Channels = scriptChannels
 		}
 
 		updatedAlert, levelWasUpdated, err := a.storage.Update(name, alertLevel)

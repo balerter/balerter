@@ -2,7 +2,7 @@ package loki
 
 import (
 	"github.com/balerter/balerter/internal/config/datasources/loki"
-	"github.com/balerter/balerter/internal/script/script"
+	"github.com/balerter/balerter/internal/modules"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"net/http"
@@ -86,7 +86,7 @@ func (m *Loki) Name() string {
 }
 
 // GetLoader returns the datasource lua loader
-func (m *Loki) GetLoader(_ *script.Script) lua.LGFunction {
+func (m *Loki) GetLoader(_ modules.Job) lua.LGFunction {
 	return m.loader
 }
 

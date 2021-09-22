@@ -1,12 +1,15 @@
 package log
 
 import (
+	"testing"
+
+	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
+
 	"github.com/stretchr/testify/assert"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
-	"testing"
 )
 
 func TestLog_Loader(t *testing.T) {
@@ -14,18 +17,21 @@ func TestLog_Loader(t *testing.T) {
 
 	L := lua.NewState()
 
-	f := logger.GetLoader(&script.Script{Name: "scriptName"})
+	j := &modules.JobMock{
+		ScriptFunc: func() *script.Script {
+			return &script.Script{Name: "scriptName"}
+		},
+	}
+
+	f := logger.GetLoader(j)
 	n := f(L)
 	assert.Equal(t, 1, n)
 
 	v := L.Get(1).(*lua.LTable)
 
-	assert.IsType(t, &lua.LNilType{}, v.RawGet(lua.LString("wrong-name")))
-
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("error")))
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("warn")))
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("info")))
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("debug")))
+	for _, method := range Methods() {
+		assert.Equal(t, lua.LTFunction, v.RawGetString(method).Type())
+	}
 }
 
 func TestLog_levels(t *testing.T) {

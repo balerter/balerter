@@ -49,7 +49,7 @@ func TestChart_render_without_title(t *testing.T) {
 		logger: zap.NewNop(),
 	}
 
-	f := ch.render(nil)
+	f := ch.render()
 
 	luaState := lua.NewState()
 	n := f(luaState)
@@ -65,7 +65,7 @@ func TestChart_render_without_params(t *testing.T) {
 		logger: zap.NewNop(),
 	}
 
-	f := ch.render(nil)
+	f := ch.render()
 
 	luaState := lua.NewState()
 	luaState.Push(lua.LString("title"))
@@ -82,7 +82,7 @@ func TestChart_render_wrong_params(t *testing.T) {
 		logger: zap.NewNop(),
 	}
 
-	f := ch.render(nil)
+	f := ch.render()
 
 	luaState := lua.NewState()
 	luaState.Push(lua.LString("title"))

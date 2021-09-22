@@ -3,7 +3,7 @@ package alert
 import (
 	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/corestorage"
-	"github.com/balerter/balerter/internal/script/script"
+	"github.com/balerter/balerter/internal/modules"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
@@ -57,20 +57,20 @@ func (a *Alert) Name() string {
 }
 
 // GetLoader returns the lua loader
-func (a *Alert) GetLoader(s *script.Script) lua.LGFunction {
+func (a *Alert) GetLoader(j modules.Job) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
-				"warn":    a.call(s, alert.LevelWarn),
-				"warning": a.call(s, alert.LevelWarn),
+				"warn":    a.call(j.Script().Channels, alert.LevelWarn),
+				"warning": a.call(j.Script().Channels, alert.LevelWarn),
 
-				"error": a.call(s, alert.LevelError),
-				"fail":  a.call(s, alert.LevelError),
+				"error": a.call(j.Script().Channels, alert.LevelError),
+				"fail":  a.call(j.Script().Channels, alert.LevelError),
 
-				"success": a.call(s, alert.LevelSuccess),
-				"ok":      a.call(s, alert.LevelSuccess),
+				"success": a.call(j.Script().Channels, alert.LevelSuccess),
+				"ok":      a.call(j.Script().Channels, alert.LevelSuccess),
 
-				"get": a.get(s),
+				"get": a.get(),
 			}
 
 			mod := luaState.SetFuncs(luaState.NewTable(), exports)

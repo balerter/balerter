@@ -6,6 +6,7 @@ import (
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+	"time"
 )
 
 type pair struct {
@@ -157,13 +158,30 @@ func (rnr *Runner) runPair(result []modules.TestResult, name string, pair pair) 
 	return result, nil
 }
 
+type testJob struct {
+	s                  *script.Script
+	priorExecutionTime time.Duration
+}
+
+func (j *testJob) Script() *script.Script {
+	return j.s
+}
+
+func (j *testJob) GetPriorExecutionTime() time.Duration {
+	return j.priorExecutionTime
+}
+
 func (rnr *Runner) createLuaState(s *script.Script) *lua.LState {
 	rnr.logger.Debug("create job", zap.String("name", s.Name))
+
+	j := &testJob{
+		s: s,
+	}
 
 	L := lua.NewState()
 
 	for _, m := range rnr.coreModules {
-		L.PreloadModule(m.Name(), m.GetLoader(s))
+		L.PreloadModule(m.Name(), m.GetLoader(j))
 	}
 
 	// Init storages
@@ -171,7 +189,7 @@ func (rnr *Runner) createLuaState(s *script.Script) *lua.LState {
 		moduleName := "storage." + module.Name()
 		rnr.logger.Debug("add storage module", zap.String("name", moduleName))
 
-		loader := module.GetLoader(s)
+		loader := module.GetLoader(j)
 		L.PreloadModule(moduleName, loader)
 	}
 
@@ -180,7 +198,7 @@ func (rnr *Runner) createLuaState(s *script.Script) *lua.LState {
 		moduleName := "datasource." + module.Name()
 		rnr.logger.Debug("add datasource module", zap.String("name", moduleName))
 
-		loader := module.GetLoader(s)
+		loader := module.GetLoader(j)
 		L.PreloadModule(moduleName, loader)
 	}
 

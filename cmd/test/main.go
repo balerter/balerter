@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/balerter/balerter/internal/modules/api"
+	"github.com/balerter/balerter/internal/modules/meta"
 	"io"
 	"log"
 	"os"
@@ -57,8 +58,6 @@ func run(cfg *config.Config, flg *config.Flags) (string, int) {
 	lua.LuaPathDefault = defaultLuaModulesPath
 
 	coreModules := make([]modules.ModuleTest, 0)
-
-	flag.Parse()
 
 	var err error
 
@@ -167,6 +166,15 @@ func run(cfg *config.Config, flg *config.Flags) (string, int) {
 	// |
 	tlsMod := mock.New(tlsModule.ModuleName(), tlsModule.Methods(), lgr.Logger())
 	coreModules = append(coreModules, tlsMod)
+
+	// ---------------------
+	// |
+	// | Core Modules
+	// |
+	// | meta
+	// |
+	metaMod := mock.New(meta.ModuleName(), meta.Methods(), lgr.Logger())
+	coreModules = append(coreModules, metaMod)
 
 	// ---------------------
 	// |

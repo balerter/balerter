@@ -14,7 +14,7 @@ import (
 func TestGet_NoArgs(t *testing.T) {
 	m := &Alert{}
 
-	f := m.get(nil)
+	f := m.get()
 
 	L := lua.NewState()
 
@@ -32,7 +32,7 @@ func TestGet_NoArgs(t *testing.T) {
 func TestGet_AlertNameNotString(t *testing.T) {
 	m := &Alert{}
 
-	f := m.get(nil)
+	f := m.get()
 
 	L := lua.NewState()
 	L.Push(lua.LNumber(42))
@@ -58,7 +58,7 @@ func TestGet_ErrorGet(t *testing.T) {
 		storage: mgrMock,
 	}
 
-	f := m.get(nil)
+	f := m.get()
 
 	L := lua.NewState()
 	L.Push(lua.LString("foo"))
@@ -86,7 +86,7 @@ func TestGet(t *testing.T) {
 		storage: mgrMock,
 	}
 
-	f := m.get(nil)
+	f := m.get()
 
 	L := lua.NewState()
 	L.Push(lua.LString("foo"))

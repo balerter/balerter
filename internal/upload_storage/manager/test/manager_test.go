@@ -5,7 +5,6 @@ import (
 	"github.com/balerter/balerter/internal/config/storages/upload"
 	"github.com/balerter/balerter/internal/config/storages/upload/s3"
 	"github.com/balerter/balerter/internal/modules"
-	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -24,7 +23,7 @@ func (m *moduleTestMock) Name() string {
 	return ""
 }
 
-func (m *moduleTestMock) GetLoader(_ *script.Script) lua.LGFunction {
+func (m *moduleTestMock) GetLoader(_ modules.Job) lua.LGFunction {
 	m.Called()
 	return nil
 }

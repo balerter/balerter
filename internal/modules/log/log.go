@@ -1,7 +1,7 @@
 package log
 
 import (
-	"github.com/balerter/balerter/internal/script/script"
+	"github.com/balerter/balerter/internal/modules"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
@@ -45,14 +45,14 @@ func Methods() []string {
 	}
 }
 
-// GetLoader returns the lua laoder
-func (l *Log) GetLoader(s *script.Script) lua.LGFunction {
+// GetLoader returns the lua loader
+func (l *Log) GetLoader(j modules.Job) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		var exports = map[string]lua.LGFunction{
-			"error": l.error(s.Name),
-			"warn":  l.warn(s.Name),
-			"info":  l.info(s.Name),
-			"debug": l.debug(s.Name),
+			"error": l.error(j.Script().Name),
+			"warn":  l.warn(j.Script().Name),
+			"info":  l.info(j.Script().Name),
+			"debug": l.debug(j.Script().Name),
 		}
 
 		mod := luaState.SetFuncs(luaState.NewTable(), exports)
