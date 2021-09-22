@@ -59,8 +59,6 @@ func run(cfg *config.Config, flg *config.Flags) (string, int) {
 
 	coreModules := make([]modules.ModuleTest, 0)
 
-	flag.Parse()
-
 	var err error
 
 	if err = validateLogLevel(flg.LogLevel); err != nil {
