@@ -4,6 +4,7 @@ import (
 	"fmt"
 	alert2 "github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/corestorage"
+	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -418,9 +419,13 @@ func TestAlert_call_error_update(t *testing.T) {
 		storage: am,
 	}
 
-	s := &script.Script{}
+	j := &modules.JobMock{
+		ScriptFunc: func() *script.Script {
+			return &script.Script{}
+		},
+	}
 
-	f := a.call(s, alert2.LevelError)
+	f := a.call(j.Script().Channels, alert2.LevelError)
 
 	ls := lua.NewState()
 	ls.Push(lua.LString("foo"))
@@ -448,9 +453,13 @@ func TestAlert_call_level_was_updated(t *testing.T) {
 		chManager: chManager,
 	}
 
-	s := &script.Script{}
+	j := &modules.JobMock{
+		ScriptFunc: func() *script.Script {
+			return &script.Script{}
+		},
+	}
 
-	f := a.call(s, alert2.LevelError)
+	f := a.call(j.Script().Channels, alert2.LevelError)
 
 	ls := lua.NewState()
 	ls.Push(lua.LString("foo"))
@@ -478,9 +487,13 @@ func TestAlert_call_level_was_not_updated(t *testing.T) {
 		chManager: chManager,
 	}
 
-	s := &script.Script{}
+	j := &modules.JobMock{
+		ScriptFunc: func() *script.Script {
+			return &script.Script{}
+		},
+	}
 
-	f := a.call(s, alert2.LevelError)
+	f := a.call(j.Script().Channels, alert2.LevelError)
 
 	ls := lua.NewState()
 	ls.Push(lua.LString("foo"))

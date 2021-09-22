@@ -93,7 +93,7 @@ func Test_runPair(t *testing.T) {
 		NameFunc: func() string {
 			return "mt1"
 		},
-		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
 			return getLGFunc()
 		},
 		ResultFunc: func() ([]modules.TestResult, error) {
@@ -130,7 +130,7 @@ func Test_runPair(t *testing.T) {
 		NameFunc: func() string {
 			return "m1"
 		},
-		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
 			return getLGFunc()
 		},
 		ResultFunc: func() ([]modules.TestResult, error) {
@@ -470,7 +470,7 @@ func Test_runPair_error_get_core_module_results(t *testing.T) {
 		NameFunc: func() string {
 			return "m1"
 		},
-		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
 			return getLGFunc()
 		},
 		ResultFunc: func() ([]modules.TestResult, error) {

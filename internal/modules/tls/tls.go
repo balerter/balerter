@@ -2,7 +2,7 @@ package tls
 
 import (
 	"crypto/tls"
-	"github.com/balerter/balerter/internal/script/script"
+	"github.com/balerter/balerter/internal/modules"
 	lua "github.com/yuin/gopher-lua"
 	"strings"
 )
@@ -39,7 +39,7 @@ func (a *TLS) Name() string {
 }
 
 // GetLoader returns the lua module
-func (a *TLS) GetLoader(_ *script.Script) lua.LGFunction {
+func (a *TLS) GetLoader(_ modules.Job) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{

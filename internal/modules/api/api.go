@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/script/script"
+	"github.com/balerter/balerter/internal/modules"
 	lua "github.com/yuin/gopher-lua"
 	"io"
 	"net/http"
@@ -77,7 +77,7 @@ func (a *API) FillData(req *http.Request) error {
 }
 
 // GetLoader returns the lua loader
-func (a *API) GetLoader(_ *script.Script) lua.LGFunction {
+func (a *API) GetLoader(_ modules.Job) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{

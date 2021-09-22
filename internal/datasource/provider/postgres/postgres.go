@@ -3,7 +3,7 @@ package postgres
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/config/datasources/postgres"
-	"github.com/balerter/balerter/internal/script/script"
+	"github.com/balerter/balerter/internal/modules"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // DB driver
 	lua "github.com/yuin/gopher-lua"
@@ -85,7 +85,7 @@ func (m *Postgres) Name() string {
 }
 
 // GetLoader returns the datasource lua loader
-func (m *Postgres) GetLoader(_ *script.Script) lua.LGFunction {
+func (m *Postgres) GetLoader(_ modules.Job) lua.LGFunction {
 	return m.loader
 }
 

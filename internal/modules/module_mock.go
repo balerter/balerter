@@ -6,7 +6,6 @@ package modules
 import (
 	"sync"
 
-	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -16,7 +15,7 @@ import (
 //
 // 		// make and configure a mocked Module
 // 		mockedModule := &ModuleMock{
-// 			GetLoaderFunc: func(scriptMoqParam *script.Script) lua.LGFunction {
+// 			GetLoaderFunc: func(j Job) lua.LGFunction {
 // 				panic("mock out the GetLoader method")
 // 			},
 // 			NameFunc: func() string {
@@ -33,7 +32,7 @@ import (
 // 	}
 type ModuleMock struct {
 	// GetLoaderFunc mocks the GetLoader method.
-	GetLoaderFunc func(scriptMoqParam *script.Script) lua.LGFunction
+	GetLoaderFunc func(j Job) lua.LGFunction
 
 	// NameFunc mocks the Name method.
 	NameFunc func() string
@@ -45,8 +44,8 @@ type ModuleMock struct {
 	calls struct {
 		// GetLoader holds details about calls to the GetLoader method.
 		GetLoader []struct {
-			// ScriptMoqParam is the scriptMoqParam argument value.
-			ScriptMoqParam *script.Script
+			// J is the j argument value.
+			J Job
 		}
 		// Name holds details about calls to the Name method.
 		Name []struct {
@@ -61,29 +60,29 @@ type ModuleMock struct {
 }
 
 // GetLoader calls GetLoaderFunc.
-func (mock *ModuleMock) GetLoader(scriptMoqParam *script.Script) lua.LGFunction {
+func (mock *ModuleMock) GetLoader(j Job) lua.LGFunction {
 	if mock.GetLoaderFunc == nil {
 		panic("ModuleMock.GetLoaderFunc: method is nil but Module.GetLoader was just called")
 	}
 	callInfo := struct {
-		ScriptMoqParam *script.Script
+		J Job
 	}{
-		ScriptMoqParam: scriptMoqParam,
+		J: j,
 	}
 	mock.lockGetLoader.Lock()
 	mock.calls.GetLoader = append(mock.calls.GetLoader, callInfo)
 	mock.lockGetLoader.Unlock()
-	return mock.GetLoaderFunc(scriptMoqParam)
+	return mock.GetLoaderFunc(j)
 }
 
 // GetLoaderCalls gets all the calls that were made to GetLoader.
 // Check the length with:
 //     len(mockedModule.GetLoaderCalls())
 func (mock *ModuleMock) GetLoaderCalls() []struct {
-	ScriptMoqParam *script.Script
+	J Job
 } {
 	var calls []struct {
-		ScriptMoqParam *script.Script
+		J Job
 	}
 	mock.lockGetLoader.RLock()
 	calls = mock.calls.GetLoader

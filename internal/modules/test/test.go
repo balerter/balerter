@@ -3,7 +3,6 @@ package test
 import (
 	"github.com/balerter/balerter/internal/mock"
 	"github.com/balerter/balerter/internal/modules"
-	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"strings"
@@ -57,7 +56,7 @@ func (t *Test) Stop() error {
 	return nil
 }
 
-func (t *Test) getModule(moduleName string, s *script.Script) lua.LGFunction {
+func (t *Test) getModule(moduleName string, j modules.Job) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		nameL := luaState.Get(1)
 		if nameL.Type() == lua.LTNil {
@@ -77,22 +76,22 @@ func (t *Test) getModule(moduleName string, s *script.Script) lua.LGFunction {
 			return 0
 		}
 
-		m.GetLoader(s)(luaState)
+		m.GetLoader(j)(luaState)
 
 		return 1
 	}
 }
 
 // GetLoader returns the lua loader
-func (t *Test) GetLoader(s *script.Script) lua.LGFunction {
+func (t *Test) GetLoader(j modules.Job) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		var exports = map[string]lua.LGFunction{
-			"datasource": t.getModule("test.datasource", s),
-			"storage":    t.getModule("test.storage", s),
+			"datasource": t.getModule("test.datasource", j),
+			"storage":    t.getModule("test.storage", j),
 		}
 
 		for _, mod := range t.mods {
-			exports[mod.Name()] = mod.GetLoader(s)
+			exports[mod.Name()] = mod.GetLoader(j)
 		}
 
 		mod := luaState.SetFuncs(luaState.NewTable(), exports)

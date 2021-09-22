@@ -21,8 +21,8 @@ func (m *moduleTestMock) Name() string {
 	return a.String(0)
 }
 
-func (m *moduleTestMock) GetLoader(s *script.Script) lua.LGFunction {
-	a := m.Called(s)
+func (m *moduleTestMock) GetLoader(j modules.Job) lua.LGFunction {
+	a := m.Called(j)
 	v := a.Get(0)
 	if v == nil {
 		return nil
@@ -105,9 +105,13 @@ func TestTest_Clean(t *testing.T) {
 func TestTest_GetLoader(t *testing.T) {
 	tst := &Test{}
 
-	s := &script.Script{}
+	j := &modules.JobMock{
+		ScriptFunc: func() *script.Script {
+			return &script.Script{}
+		},
+	}
 
-	f := tst.GetLoader(s)
+	f := tst.GetLoader(j)
 
 	L := lua.NewState()
 	n := f(L)
@@ -125,8 +129,14 @@ func Test_getModule_no_arg(t *testing.T) {
 	tst := &Test{
 		logger: zap.New(core),
 	}
-	s := &script.Script{}
-	f := tst.getModule("foo", s)
+
+	j := &modules.JobMock{
+		ScriptFunc: func() *script.Script {
+			return &script.Script{}
+		},
+	}
+
+	f := tst.getModule("foo", j)
 
 	luaState := lua.NewState()
 	n := f(luaState)
@@ -140,8 +150,12 @@ func Test_getModule_empty_arg(t *testing.T) {
 	tst := &Test{
 		logger: zap.New(core),
 	}
-	s := &script.Script{}
-	f := tst.getModule("foo", s)
+	j := &modules.JobMock{
+		ScriptFunc: func() *script.Script {
+			return &script.Script{}
+		},
+	}
+	f := tst.getModule("foo", j)
 
 	luaState := lua.NewState()
 	luaState.Push(lua.LString(" "))
@@ -156,8 +170,12 @@ func Test_getModule_no_storage(t *testing.T) {
 	tst := &Test{
 		logger: zap.New(core),
 	}
-	s := &script.Script{}
-	f := tst.getModule("foo", s)
+	j := &modules.JobMock{
+		ScriptFunc: func() *script.Script {
+			return &script.Script{}
+		},
+	}
+	f := tst.getModule("foo", j)
 
 	luaState := lua.NewState()
 	luaState.Push(lua.LString("bar"))
@@ -179,8 +197,12 @@ func Test_getModule(t *testing.T) {
 		logger:  zap.NewNop(),
 		storage: map[string]modules.ModuleTest{"bar": mt},
 	}
-	s := &script.Script{}
-	f := tst.getModule("foo", s)
+	j := &modules.JobMock{
+		ScriptFunc: func() *script.Script {
+			return &script.Script{}
+		},
+	}
+	f := tst.getModule("foo", j)
 
 	luaState := lua.NewState()
 	luaState.Push(lua.LString("bar"))

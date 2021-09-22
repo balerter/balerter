@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/balerter/balerter/internal/script/script"
+	"github.com/balerter/balerter/internal/modules"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"net/http"
@@ -60,7 +60,7 @@ func (h *HTTP) Name() string {
 }
 
 // GetLoader returns the lua loader
-func (h *HTTP) GetLoader(_ *script.Script) lua.LGFunction {
+func (h *HTTP) GetLoader(_ modules.Job) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{

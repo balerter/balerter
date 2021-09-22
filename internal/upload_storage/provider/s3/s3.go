@@ -2,7 +2,7 @@ package s3
 
 import (
 	"github.com/balerter/balerter/internal/config/storages/upload/s3"
-	"github.com/balerter/balerter/internal/script/script"
+	"github.com/balerter/balerter/internal/modules"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
@@ -56,7 +56,7 @@ func (p *Provider) Stop() error {
 }
 
 // GetLoader returns the lua loader
-func (p *Provider) GetLoader(_ *script.Script) lua.LGFunction {
+func (p *Provider) GetLoader(_ modules.Job) lua.LGFunction {
 	return p.loader
 }
 

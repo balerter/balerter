@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/ClickHouse/clickhouse-go"
 	clickhouseCfg "github.com/balerter/balerter/internal/config/datasources/clickhouse"
-	"github.com/balerter/balerter/internal/script/script"
+	"github.com/balerter/balerter/internal/modules"
 	"github.com/jmoiron/sqlx"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -116,7 +116,7 @@ func (m *Clickhouse) Name() string {
 }
 
 // GetLoader returns the datasource lua loader
-func (m *Clickhouse) GetLoader(_ *script.Script) lua.LGFunction {
+func (m *Clickhouse) GetLoader(_ modules.Job) lua.LGFunction {
 	return m.loader
 }
 

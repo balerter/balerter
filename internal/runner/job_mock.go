@@ -5,6 +5,7 @@ package runner
 
 import (
 	"sync"
+	"time"
 
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/robfig/cron/v3"
@@ -19,6 +20,9 @@ import (
 // 		mockedjob := &jobMock{
 // 			EntryIDFunc: func() cron.EntryID {
 // 				panic("mock out the EntryID method")
+// 			},
+// 			GetPriorExecutionTimeFunc: func() time.Duration {
+// 				panic("mock out the GetPriorExecutionTime method")
 // 			},
 // 			NameFunc: func() string {
 // 				panic("mock out the Name method")
@@ -48,6 +52,9 @@ type jobMock struct {
 	// EntryIDFunc mocks the EntryID method.
 	EntryIDFunc func() cron.EntryID
 
+	// GetPriorExecutionTimeFunc mocks the GetPriorExecutionTime method.
+	GetPriorExecutionTimeFunc func() time.Duration
+
 	// NameFunc mocks the Name method.
 	NameFunc func() string
 
@@ -70,6 +77,9 @@ type jobMock struct {
 	calls struct {
 		// EntryID holds details about calls to the EntryID method.
 		EntryID []struct {
+		}
+		// GetPriorExecutionTime holds details about calls to the GetPriorExecutionTime method.
+		GetPriorExecutionTime []struct {
 		}
 		// Name holds details about calls to the Name method.
 		Name []struct {
@@ -94,13 +104,14 @@ type jobMock struct {
 		Stop []struct {
 		}
 	}
-	lockEntryID     sync.RWMutex
-	lockName        sync.RWMutex
-	lockRun         sync.RWMutex
-	lockScript      sync.RWMutex
-	lockSetEntryID  sync.RWMutex
-	lockSetLuaState sync.RWMutex
-	lockStop        sync.RWMutex
+	lockEntryID               sync.RWMutex
+	lockGetPriorExecutionTime sync.RWMutex
+	lockName                  sync.RWMutex
+	lockRun                   sync.RWMutex
+	lockScript                sync.RWMutex
+	lockSetEntryID            sync.RWMutex
+	lockSetLuaState           sync.RWMutex
+	lockStop                  sync.RWMutex
 }
 
 // EntryID calls EntryIDFunc.
@@ -126,6 +137,32 @@ func (mock *jobMock) EntryIDCalls() []struct {
 	mock.lockEntryID.RLock()
 	calls = mock.calls.EntryID
 	mock.lockEntryID.RUnlock()
+	return calls
+}
+
+// GetPriorExecutionTime calls GetPriorExecutionTimeFunc.
+func (mock *jobMock) GetPriorExecutionTime() time.Duration {
+	if mock.GetPriorExecutionTimeFunc == nil {
+		panic("jobMock.GetPriorExecutionTimeFunc: method is nil but job.GetPriorExecutionTime was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockGetPriorExecutionTime.Lock()
+	mock.calls.GetPriorExecutionTime = append(mock.calls.GetPriorExecutionTime, callInfo)
+	mock.lockGetPriorExecutionTime.Unlock()
+	return mock.GetPriorExecutionTimeFunc()
+}
+
+// GetPriorExecutionTimeCalls gets all the calls that were made to GetPriorExecutionTime.
+// Check the length with:
+//     len(mockedjob.GetPriorExecutionTimeCalls())
+func (mock *jobMock) GetPriorExecutionTimeCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockGetPriorExecutionTime.RLock()
+	calls = mock.calls.GetPriorExecutionTime
+	mock.lockGetPriorExecutionTime.RUnlock()
 	return calls
 }
 

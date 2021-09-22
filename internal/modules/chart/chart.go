@@ -2,7 +2,7 @@ package chart
 
 import (
 	"bytes"
-	"github.com/balerter/balerter/internal/script/script"
+	"github.com/balerter/balerter/internal/modules"
 	"github.com/yuin/gluamapper"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -65,10 +65,10 @@ func (ch *Chart) Stop() error {
 }
 
 // GetLoader returns the lua loader
-func (ch *Chart) GetLoader(s *script.Script) lua.LGFunction {
+func (ch *Chart) GetLoader(_ modules.Job) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		var exports = map[string]lua.LGFunction{
-			"render": ch.render(s),
+			"render": ch.render(),
 		}
 
 		mod := luaState.SetFuncs(luaState.NewTable(), exports)
@@ -78,7 +78,7 @@ func (ch *Chart) GetLoader(s *script.Script) lua.LGFunction {
 	}
 }
 
-func (ch *Chart) render(_ *script.Script) lua.LGFunction {
+func (ch *Chart) render() lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		ch.logger.Debug("Chart.Render")
 

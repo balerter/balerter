@@ -1,11 +1,10 @@
 package alert
 
 import (
-	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 )
 
-func (a *Alert) get(_ *script.Script) lua.LGFunction {
+func (a *Alert) get() lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		name := luaState.Get(1)
 		if name.Type() != lua.LTString {

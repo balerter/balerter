@@ -2,7 +2,7 @@ package kv
 
 import (
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
-	"github.com/balerter/balerter/internal/script/script"
+	"github.com/balerter/balerter/internal/modules"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -42,7 +42,7 @@ func (kv *KV) Name() string {
 }
 
 // GetLoader returns the lua loader
-func (kv *KV) GetLoader(_ *script.Script) lua.LGFunction {
+func (kv *KV) GetLoader(_ modules.Job) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{

@@ -3,142 +3,142 @@
 
 package runner
 
-import (
-	"sync"
-
-	"github.com/balerter/balerter/internal/script/script"
-	lua "github.com/yuin/gopher-lua"
-)
-
-// moduleMock is a mock implementation of module.
+//import (
+//	"sync"
 //
-// 	func TestSomethingThatUsesmodule(t *testing.T) {
+//	"github.com/balerter/balerter/internal/script/script"
+//	lua "github.com/yuin/gopher-lua"
+//)
 //
-// 		// make and configure a mocked module
-// 		mockedmodule := &moduleMock{
-// 			GetLoaderFunc: func(scriptMoqParam *script.Script) lua.LGFunction {
-// 				panic("mock out the GetLoader method")
-// 			},
-// 			NameFunc: func() string {
-// 				panic("mock out the Name method")
-// 			},
-// 			StopFunc: func() error {
-// 				panic("mock out the Stop method")
-// 			},
-// 		}
+//// moduleMock is a mock implementation of module.
+////
+//// 	func TestSomethingThatUsesmodule(t *testing.T) {
+////
+//// 		// make and configure a mocked module
+//// 		mockedmodule := &moduleMock{
+//// 			GetLoaderFunc: func(scriptMoqParam *script.Script) lua.LGFunction {
+//// 				panic("mock out the GetLoader method")
+//// 			},
+//// 			NameFunc: func() string {
+//// 				panic("mock out the Name method")
+//// 			},
+//// 			StopFunc: func() error {
+//// 				panic("mock out the Stop method")
+//// 			},
+//// 		}
+////
+//// 		// use mockedmodule in code that requires module
+//// 		// and then make assertions.
+////
+//// 	}
+//type moduleMock struct {
+//	// GetLoaderFunc mocks the GetLoader method.
+//	GetLoaderFunc func(scriptMoqParam *script.Script) lua.LGFunction
 //
-// 		// use mockedmodule in code that requires module
-// 		// and then make assertions.
+//	// NameFunc mocks the Name method.
+//	NameFunc func() string
 //
-// 	}
-type moduleMock struct {
-	// GetLoaderFunc mocks the GetLoader method.
-	GetLoaderFunc func(scriptMoqParam *script.Script) lua.LGFunction
-
-	// NameFunc mocks the Name method.
-	NameFunc func() string
-
-	// StopFunc mocks the Stop method.
-	StopFunc func() error
-
-	// calls tracks calls to the methods.
-	calls struct {
-		// GetLoader holds details about calls to the GetLoader method.
-		GetLoader []struct {
-			// ScriptMoqParam is the scriptMoqParam argument value.
-			ScriptMoqParam *script.Script
-		}
-		// Name holds details about calls to the Name method.
-		Name []struct {
-		}
-		// Stop holds details about calls to the Stop method.
-		Stop []struct {
-		}
-	}
-	lockGetLoader sync.RWMutex
-	lockName      sync.RWMutex
-	lockStop      sync.RWMutex
-}
-
-// GetLoader calls GetLoaderFunc.
-func (mock *moduleMock) GetLoader(scriptMoqParam *script.Script) lua.LGFunction {
-	if mock.GetLoaderFunc == nil {
-		panic("moduleMock.GetLoaderFunc: method is nil but module.GetLoader was just called")
-	}
-	callInfo := struct {
-		ScriptMoqParam *script.Script
-	}{
-		ScriptMoqParam: scriptMoqParam,
-	}
-	mock.lockGetLoader.Lock()
-	mock.calls.GetLoader = append(mock.calls.GetLoader, callInfo)
-	mock.lockGetLoader.Unlock()
-	return mock.GetLoaderFunc(scriptMoqParam)
-}
-
-// GetLoaderCalls gets all the calls that were made to GetLoader.
-// Check the length with:
-//     len(mockedmodule.GetLoaderCalls())
-func (mock *moduleMock) GetLoaderCalls() []struct {
-	ScriptMoqParam *script.Script
-} {
-	var calls []struct {
-		ScriptMoqParam *script.Script
-	}
-	mock.lockGetLoader.RLock()
-	calls = mock.calls.GetLoader
-	mock.lockGetLoader.RUnlock()
-	return calls
-}
-
-// Name calls NameFunc.
-func (mock *moduleMock) Name() string {
-	if mock.NameFunc == nil {
-		panic("moduleMock.NameFunc: method is nil but module.Name was just called")
-	}
-	callInfo := struct {
-	}{}
-	mock.lockName.Lock()
-	mock.calls.Name = append(mock.calls.Name, callInfo)
-	mock.lockName.Unlock()
-	return mock.NameFunc()
-}
-
-// NameCalls gets all the calls that were made to Name.
-// Check the length with:
-//     len(mockedmodule.NameCalls())
-func (mock *moduleMock) NameCalls() []struct {
-} {
-	var calls []struct {
-	}
-	mock.lockName.RLock()
-	calls = mock.calls.Name
-	mock.lockName.RUnlock()
-	return calls
-}
-
-// Stop calls StopFunc.
-func (mock *moduleMock) Stop() error {
-	if mock.StopFunc == nil {
-		panic("moduleMock.StopFunc: method is nil but module.Stop was just called")
-	}
-	callInfo := struct {
-	}{}
-	mock.lockStop.Lock()
-	mock.calls.Stop = append(mock.calls.Stop, callInfo)
-	mock.lockStop.Unlock()
-	return mock.StopFunc()
-}
-
-// StopCalls gets all the calls that were made to Stop.
-// Check the length with:
-//     len(mockedmodule.StopCalls())
-func (mock *moduleMock) StopCalls() []struct {
-} {
-	var calls []struct {
-	}
-	mock.lockStop.RLock()
-	calls = mock.calls.Stop
-	mock.lockStop.RUnlock()
-	return calls
-}
+//	// StopFunc mocks the Stop method.
+//	StopFunc func() error
+//
+//	// calls tracks calls to the methods.
+//	calls struct {
+//		// GetLoader holds details about calls to the GetLoader method.
+//		GetLoader []struct {
+//			// ScriptMoqParam is the scriptMoqParam argument value.
+//			ScriptMoqParam *script.Script
+//		}
+//		// Name holds details about calls to the Name method.
+//		Name []struct {
+//		}
+//		// Stop holds details about calls to the Stop method.
+//		Stop []struct {
+//		}
+//	}
+//	lockGetLoader sync.RWMutex
+//	lockName      sync.RWMutex
+//	lockStop      sync.RWMutex
+//}
+//
+//// GetLoader calls GetLoaderFunc.
+//func (mock *moduleMock) GetLoader(scriptMoqParam *script.Script) lua.LGFunction {
+//	if mock.GetLoaderFunc == nil {
+//		panic("moduleMock.GetLoaderFunc: method is nil but module.GetLoader was just called")
+//	}
+//	callInfo := struct {
+//		ScriptMoqParam *script.Script
+//	}{
+//		ScriptMoqParam: scriptMoqParam,
+//	}
+//	mock.lockGetLoader.Lock()
+//	mock.calls.GetLoader = append(mock.calls.GetLoader, callInfo)
+//	mock.lockGetLoader.Unlock()
+//	return mock.GetLoaderFunc(scriptMoqParam)
+//}
+//
+//// GetLoaderCalls gets all the calls that were made to GetLoader.
+//// Check the length with:
+////     len(mockedmodule.GetLoaderCalls())
+//func (mock *moduleMock) GetLoaderCalls() []struct {
+//	ScriptMoqParam *script.Script
+//} {
+//	var calls []struct {
+//		ScriptMoqParam *script.Script
+//	}
+//	mock.lockGetLoader.RLock()
+//	calls = mock.calls.GetLoader
+//	mock.lockGetLoader.RUnlock()
+//	return calls
+//}
+//
+//// Name calls NameFunc.
+//func (mock *moduleMock) Name() string {
+//	if mock.NameFunc == nil {
+//		panic("moduleMock.NameFunc: method is nil but module.Name was just called")
+//	}
+//	callInfo := struct {
+//	}{}
+//	mock.lockName.Lock()
+//	mock.calls.Name = append(mock.calls.Name, callInfo)
+//	mock.lockName.Unlock()
+//	return mock.NameFunc()
+//}
+//
+//// NameCalls gets all the calls that were made to Name.
+//// Check the length with:
+////     len(mockedmodule.NameCalls())
+//func (mock *moduleMock) NameCalls() []struct {
+//} {
+//	var calls []struct {
+//	}
+//	mock.lockName.RLock()
+//	calls = mock.calls.Name
+//	mock.lockName.RUnlock()
+//	return calls
+//}
+//
+//// Stop calls StopFunc.
+//func (mock *moduleMock) Stop() error {
+//	if mock.StopFunc == nil {
+//		panic("moduleMock.StopFunc: method is nil but module.Stop was just called")
+//	}
+//	callInfo := struct {
+//	}{}
+//	mock.lockStop.Lock()
+//	mock.calls.Stop = append(mock.calls.Stop, callInfo)
+//	mock.lockStop.Unlock()
+//	return mock.StopFunc()
+//}
+//
+//// StopCalls gets all the calls that were made to Stop.
+//// Check the length with:
+////     len(mockedmodule.StopCalls())
+//func (mock *moduleMock) StopCalls() []struct {
+//} {
+//	var calls []struct {
+//	}
+//	mock.lockStop.RLock()
+//	calls = mock.calls.Stop
+//	mock.lockStop.RUnlock()
+//	return calls
+//}

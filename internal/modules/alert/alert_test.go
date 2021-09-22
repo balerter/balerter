@@ -1,6 +1,8 @@
 package alert
 
 import (
+	"github.com/balerter/balerter/internal/modules"
+	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
 	lua "github.com/yuin/gopher-lua"
 	"testing"
@@ -35,7 +37,13 @@ func TestName(t *testing.T) {
 func TestAlert_GetLoader(t *testing.T) {
 	a := &Alert{}
 
-	f := a.GetLoader(nil)
+	j := &modules.JobMock{
+		ScriptFunc: func() *script.Script {
+			return &script.Script{}
+		},
+	}
+
+	f := a.GetLoader(j)
 
 	ls := lua.NewState()
 	n := f(ls)

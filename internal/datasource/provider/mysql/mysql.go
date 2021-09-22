@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"github.com/balerter/balerter/internal/config/datasources/mysql"
-	"github.com/balerter/balerter/internal/script/script"
+	"github.com/balerter/balerter/internal/modules"
 	_ "github.com/go-sql-driver/mysql" // import DB driver
 	"github.com/jmoiron/sqlx"
 	lua "github.com/yuin/gopher-lua"
@@ -75,7 +75,7 @@ func (m *MySQL) Name() string {
 }
 
 // GetLoader returns the datasource lua loader
-func (m *MySQL) GetLoader(_ *script.Script) lua.LGFunction {
+func (m *MySQL) GetLoader(_ modules.Job) lua.LGFunction {
 	return m.loader
 }
 

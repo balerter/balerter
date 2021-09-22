@@ -253,22 +253,22 @@ func TestRunner_updateScripts_already_running(t *testing.T) {
 func TestRunner_updateScripts_once(t *testing.T) {
 	crn := cron.New()
 
-	coreModule := &moduleMock{
+	coreModule := &modules.ModuleMock{
 		NameFunc: func() string {
 			return "m1"
 		},
-		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
 			return func(ls *lua.LState) int {
 				return 0
 			}
 		},
 	}
 
-	storagesModule := &moduleMock{
+	storagesModule := &modules.ModuleMock{
 		NameFunc: func() string {
 			return "m2"
 		},
-		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
 			return func(ls *lua.LState) int {
 				return 0
 			}
@@ -279,11 +279,11 @@ func TestRunner_updateScripts_once(t *testing.T) {
 		return []modules.Module{storagesModule}
 	}}
 
-	dsModule := &moduleMock{
+	dsModule := &modules.ModuleMock{
 		NameFunc: func() string {
 			return "m3"
 		},
-		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
 			return func(ls *lua.LState) int {
 				return 0
 			}
@@ -348,22 +348,22 @@ func TestRunner_updateScripts_once(t *testing.T) {
 }
 
 func TestRunner_updateScripts(t *testing.T) {
-	coreModule := &moduleMock{
+	coreModule := &modules.ModuleMock{
 		NameFunc: func() string {
 			return "m1"
 		},
-		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
 			return func(ls *lua.LState) int {
 				return 0
 			}
 		},
 	}
 
-	storagesModule := &moduleMock{
+	storagesModule := &modules.ModuleMock{
 		NameFunc: func() string {
 			return "m2"
 		},
-		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
 			return func(ls *lua.LState) int {
 				return 0
 			}
@@ -374,11 +374,11 @@ func TestRunner_updateScripts(t *testing.T) {
 		return []modules.Module{storagesModule}
 	}}
 
-	dsModule := &moduleMock{
+	dsModule := &modules.ModuleMock{
 		NameFunc: func() string {
 			return "m3"
 		},
-		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
 			return func(ls *lua.LState) int {
 				return 0
 			}

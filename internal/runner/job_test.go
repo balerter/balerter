@@ -1,23 +1,25 @@
 package runner
 
 import (
+	"testing"
+	"time"
+
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
-	"testing"
-	"time"
 )
 
 func TestRunner_createLuaState(t *testing.T) {
-	m1 := &moduleMock{
+	m1 := &modules.ModuleMock{
 		NameFunc: func() string {
 			return "module1"
 		},
-		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
 			return func() lua.LGFunction {
 				return func(state *lua.LState) int {
 					return 0
@@ -38,11 +40,11 @@ func TestRunner_createLuaState(t *testing.T) {
 		},
 	}
 
-	alertManager := &moduleMock{
+	alertManager := &modules.ModuleMock{
 		NameFunc: func() string {
 			return "alert1"
 		},
-		GetLoaderFunc: func(_ *script.Script) lua.LGFunction {
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
 			return func() lua.LGFunction {
 				return func(state *lua.LState) int {
 					return 0
