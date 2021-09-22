@@ -29,12 +29,9 @@ func TestLog_Loader(t *testing.T) {
 
 	v := L.Get(1).(*lua.LTable)
 
-	assert.IsType(t, &lua.LNilType{}, v.RawGet(lua.LString("wrong-name")))
-
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("error")))
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("warn")))
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("info")))
-	assert.IsType(t, &lua.LFunction{}, v.RawGet(lua.LString("debug")))
+	for _, method := range Methods() {
+		assert.Equal(t, lua.LTFunction, v.RawGetString(method).Type())
+	}
 }
 
 func TestLog_levels(t *testing.T) {
