@@ -2,7 +2,6 @@ package meta
 
 import (
 	"github.com/balerter/balerter/internal/modules"
-	"time"
 
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -18,10 +17,6 @@ func Methods() []string {
 	return []string{
 		"priorExecutionTime",
 	}
-}
-
-type job interface {
-	GetPriorExecutionTime() time.Duration
 }
 
 // Meta represents the Meta core module
@@ -66,7 +61,7 @@ func (m *Meta) Stop() error {
 
 func (m *Meta) priorExecutionTime(j modules.Job) lua.LGFunction {
 	return func(luaState *lua.LState) int {
-		luaState.Push(lua.LNumber(j.GetPriorExecutionTime().Milliseconds()))
+		luaState.Push(lua.LNumber(j.GetPriorExecutionTime().Seconds()))
 		return 1
 	}
 }
