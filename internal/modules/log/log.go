@@ -45,7 +45,7 @@ func Methods() []string {
 	}
 }
 
-// GetLoader returns the lua laoder
+// GetLoader returns the lua loader
 func (l *Log) GetLoader(j modules.Job) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		var exports = map[string]lua.LGFunction{
