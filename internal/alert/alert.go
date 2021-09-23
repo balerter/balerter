@@ -12,6 +12,13 @@ type Options struct {
 	Quiet    bool
 	Repeat   int
 	Image    string
+	Fields   map[string]string
+}
+
+func NewOptions() *Options {
+	return &Options{
+		Fields: map[string]string{},
+	}
 }
 
 // Level is the type for describe an Alert Level

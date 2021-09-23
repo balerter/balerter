@@ -366,6 +366,92 @@ func TestManager_getAlertData(t *testing.T) {
 			wantErr:          false,
 			wantErrString:    "",
 		},
+		{
+			name:   "fields ok",
+			fields: defaultFields,
+			args: args{
+				luaState: func() *lua.LState {
+					L := lua.NewState()
+					L.Push(lua.LString("alertName1"))
+					L.Push(lua.LString("alertText1"))
+					fields := &lua.LTable{}
+					fields.RawSetString("foo", lua.LString("bar"))
+					opts := &lua.LTable{}
+					opts.RawSet(lua.LString("fields"), fields)
+					L.Push(opts)
+					return L
+				}(),
+			},
+			wantAlertName:    "alertName1",
+			wantAlertText:    "alertText1",
+			wantAlertOptions: &alert2.Options{Fields: map[string]string{"foo": "bar"}},
+			wantErr:          false,
+			wantErrString:    "",
+		},
+		{
+			name:   "fields wrong key type",
+			fields: defaultFields,
+			args: args{
+				luaState: func() *lua.LState {
+					L := lua.NewState()
+					L.Push(lua.LString("alertName1"))
+					L.Push(lua.LString("alertText1"))
+					fields := &lua.LTable{}
+					fields.RawSet(lua.LNumber(42), lua.LString("bar"))
+					opts := &lua.LTable{}
+					opts.RawSet(lua.LString("fields"), fields)
+					L.Push(opts)
+					return L
+				}(),
+			},
+			wantAlertName:    "alertName1",
+			wantAlertText:    "alertText1",
+			wantAlertOptions: &alert2.Options{Fields: map[string]string{"foo": "bar"}},
+			wantErr:          true,
+			wantErrString:    "option key must be a string, 42",
+		},
+		{
+			name:   "fields wrong value type",
+			fields: defaultFields,
+			args: args{
+				luaState: func() *lua.LState {
+					L := lua.NewState()
+					L.Push(lua.LString("alertName1"))
+					L.Push(lua.LString("alertText1"))
+					fields := &lua.LTable{}
+					fields.RawSetString("foo", lua.LNumber(42))
+					opts := &lua.LTable{}
+					opts.RawSet(lua.LString("fields"), fields)
+					L.Push(opts)
+					return L
+				}(),
+			},
+			wantAlertName:    "alertName1",
+			wantAlertText:    "alertText1",
+			wantAlertOptions: &alert2.Options{Fields: map[string]string{"foo": "bar"}},
+			wantErr:          true,
+			wantErrString:    "option value must be a string, 42",
+		},
+		{
+			name:   "fields not a table",
+			fields: defaultFields,
+			args: args{
+				luaState: func() *lua.LState {
+					L := lua.NewState()
+					L.Push(lua.LString("alertName1"))
+					L.Push(lua.LString("alertText1"))
+					opts := &lua.LTable{}
+					opts.RawSet(lua.LString("fields"), lua.LNumber(42))
+					L.Push(opts)
+					return L
+				}(),
+			},
+			wantAlertName:    "alertName1",
+			wantAlertText:    "alertText1",
+			wantAlertOptions: &alert2.Options{Fields: map[string]string{"foo": "bar"}},
+			wantErr:          true,
+			wantErrString:    "fields option must be a table",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -389,11 +475,42 @@ func TestManager_getAlertData(t *testing.T) {
 			if gotAlertText != tt.wantAlertText {
 				t.Errorf("getAlertData() gotAlertText = %v, want %v", gotAlertText, tt.wantAlertText)
 			}
-			if !reflect.DeepEqual(gotAlertOptions, tt.wantAlertOptions) {
+			if !optionsAreEqual(*gotAlertOptions, *tt.wantAlertOptions) {
 				t.Errorf("getAlertData() gotAlertOptions = %v, want %v", gotAlertOptions, tt.wantAlertOptions)
 			}
 		})
 	}
+}
+
+func optionsAreEqual(got, want alert2.Options) bool {
+	if !reflect.DeepEqual(got.Channels, want.Channels) {
+		return false
+	}
+	if got.Quiet != want.Quiet {
+		return false
+	}
+	if got.Repeat != want.Repeat {
+		return false
+	}
+	if got.Image != want.Image {
+		return false
+	}
+	for k, v := range got.Fields {
+		wantV, ok := want.Fields[k]
+		if !ok {
+			return false
+		}
+		if wantV != v {
+			return false
+		}
+		delete(want.Fields, k)
+	}
+
+	if len(want.Fields) > 0 {
+		return false
+	}
+
+	return true
 }
 
 func TestAlert_call_error_get_alertData(t *testing.T) {
