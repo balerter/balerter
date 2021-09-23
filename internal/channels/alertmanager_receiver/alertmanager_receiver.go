@@ -22,13 +22,13 @@ type AMReceiver struct {
 }
 
 // New creates new AlertManagerReceiver channel
-func New(cfg alertmanagerreceiver.AlertmanagerReceiver, logger *zap.Logger) (*AMReceiver, error) {
+func New(cfg alertmanagerreceiver.AlertmanagerReceiver, version string, logger *zap.Logger) (*AMReceiver, error) {
 	//cfg.Settings.Headers["content-type"] = "application/json" // todo(negasus): init headers map?
 
 	a := &AMReceiver{
 		name:   cfg.Name,
 		logger: logger,
-		whCore: webhook.NewCore(cfg.Settings),
+		whCore: webhook.NewCore(cfg.Settings, version),
 		ignore: cfg.Ignore,
 	}
 

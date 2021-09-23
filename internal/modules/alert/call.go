@@ -9,7 +9,7 @@ import (
 )
 
 func (a *Alert) getAlertData(luaState *lua.LState) (alertName, alertText string, options *alert.Options, err error) {
-	options = &alert.Options{}
+	options = alert.NewOptions()
 
 	alertNameLua := luaState.Get(1)
 	if alertNameLua.Type() == lua.LTNil {
@@ -59,6 +59,31 @@ func (a *Alert) getAlertData(luaState *lua.LState) (alertName, alertText string,
 		})
 		if channelsErr != nil {
 			err = channelsErr
+			return
+		}
+	}
+
+	// fields
+	fieldsOpts := alertOptions.RawGetString("fields")
+	if fieldsOpts != lua.LNil {
+		if fieldsOpts.Type() != lua.LTTable {
+			err = fmt.Errorf("fields option must be a table")
+			return
+		}
+		var fieldsErr error
+		fieldsOpts.(*lua.LTable).ForEach(func(value lua.LValue, value2 lua.LValue) {
+			if value.Type() != lua.LTString {
+				fieldsErr = fmt.Errorf("option key must be a string, %s", value.String())
+				return
+			}
+			if value2.Type() != lua.LTString {
+				fieldsErr = fmt.Errorf("option value must be a string, %s", value2.String())
+				return
+			}
+			options.Fields[value.String()] = value2.String()
+		})
+		if fieldsErr != nil {
+			err = fieldsErr
 			return
 		}
 	}

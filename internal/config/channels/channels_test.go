@@ -88,7 +88,7 @@ func TestChannels_Validate(t *testing.T) {
 						Name: "foo",
 						Settings: webhook.Settings{
 							URL:     "https://foo.bar/baz",
-							Auth:    webhook.AuthConfig{Type: "bearer", AuthBearerConfig: webhook.AuthBearerConfig{Token: "token"}},
+							Auth:    &webhook.AuthConfig{Type: "bearer", AuthBearerConfig: webhook.AuthBearerConfig{Token: "token"}},
 							Payload: webhook.PayloadConfig{Body: `{}`},
 						},
 					},
@@ -96,7 +96,7 @@ func TestChannels_Validate(t *testing.T) {
 						Name: "foo",
 						Settings: webhook.Settings{
 							URL:     "https://foo.bar/baz",
-							Auth:    webhook.AuthConfig{Type: "bearer", AuthBearerConfig: webhook.AuthBearerConfig{Token: "token"}},
+							Auth:    &webhook.AuthConfig{Type: "bearer", AuthBearerConfig: webhook.AuthBearerConfig{Token: "token"}},
 							Payload: webhook.PayloadConfig{Body: `{}`},
 						},
 					},
@@ -138,10 +138,10 @@ func TestChannels_Validate(t *testing.T) {
 					{Name: "foo2", Token: "a", ChannelID: 1}},
 				Webhook: []webhook.Webhook{
 					{Name: "foo", Settings: webhook.Settings{URL: "https://foo.bar/baz",
-						Auth:    webhook.AuthConfig{Type: "bearer", AuthBearerConfig: webhook.AuthBearerConfig{Token: "token"}},
+						Auth:    &webhook.AuthConfig{Type: "bearer", AuthBearerConfig: webhook.AuthBearerConfig{Token: "token"}},
 						Payload: webhook.PayloadConfig{Body: `{}`}}},
 					{Name: "foo2", Settings: webhook.Settings{URL: "https://foo.bar/baz",
-						Auth:    webhook.AuthConfig{Type: "bearer", AuthBearerConfig: webhook.AuthBearerConfig{Token: "token"}},
+						Auth:    &webhook.AuthConfig{Type: "bearer", AuthBearerConfig: webhook.AuthBearerConfig{Token: "token"}},
 						Payload: webhook.PayloadConfig{Body: `{}`}}}},
 			},
 			wantErr: false,

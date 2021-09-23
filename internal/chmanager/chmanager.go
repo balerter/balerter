@@ -55,7 +55,7 @@ func New(logger *zap.Logger) *ChannelsManager {
 }
 
 // Init the Alert manager
-func (m *ChannelsManager) Init(cfg *channels.Channels) error {
+func (m *ChannelsManager) Init(cfg *channels.Channels, version string) error {
 	if cfg == nil {
 		return nil
 	}
@@ -115,7 +115,7 @@ func (m *ChannelsManager) Init(cfg *channels.Channels) error {
 	}
 
 	for idx := range cfg.Webhook {
-		module, err := webhook.New(cfg.Webhook[idx], m.logger)
+		module, err := webhook.New(cfg.Webhook[idx], version, m.logger)
 		if err != nil {
 			return fmt.Errorf("error init webhook channel %s, %w", cfg.Webhook[idx].Name, err)
 		}
@@ -124,7 +124,7 @@ func (m *ChannelsManager) Init(cfg *channels.Channels) error {
 	}
 
 	for idx := range cfg.Alertmanager {
-		module, err := alertmanager.New(cfg.Alertmanager[idx], m.logger)
+		module, err := alertmanager.New(cfg.Alertmanager[idx], version, m.logger)
 		if err != nil {
 			return fmt.Errorf("error init alertmanager channel %s, %w", cfg.Alertmanager[idx].Name, err)
 		}
@@ -133,7 +133,7 @@ func (m *ChannelsManager) Init(cfg *channels.Channels) error {
 	}
 
 	for idx := range cfg.AlertmanagerReceiver {
-		module, err := alertmanagerreceiver.New(cfg.AlertmanagerReceiver[idx], m.logger)
+		module, err := alertmanagerreceiver.New(cfg.AlertmanagerReceiver[idx], version, m.logger)
 		if err != nil {
 			return fmt.Errorf("error init alertmanager_receiver channel %s, %w", cfg.AlertmanagerReceiver[idx].Name, err)
 		}

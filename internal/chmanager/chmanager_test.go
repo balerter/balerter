@@ -35,7 +35,7 @@ func TestManager_Init(t *testing.T) {
 		TwilioVoice:          []twiliovoice.Twilio{{Name: "tw1"}},
 	}
 
-	err := m.Init(cfg)
+	err := m.Init(cfg, "")
 	require.NoError(t, err)
 	require.Equal(t, 10, len(m.channels))
 

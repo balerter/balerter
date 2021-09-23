@@ -142,7 +142,7 @@ func run(
 	// ChannelsManager
 	lgr.Logger().Info("init channels manager")
 	channelsMgr := channelsManager.New(lgr.Logger())
-	if err = channelsMgr.Init(cfg.Channels); err != nil {
+	if err = channelsMgr.Init(cfg.Channels, version); err != nil {
 		return fmt.Sprintf("error init channels manager, %v", err), 1
 	}
 

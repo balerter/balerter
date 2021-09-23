@@ -9,7 +9,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	a, err := New(alertmanagerreceiver.AlertmanagerReceiver{Settings: webhook.Settings{Headers: map[string]string{}}}, nil)
+	a, err := New(alertmanagerreceiver.AlertmanagerReceiver{Settings: webhook.Settings{Headers: map[string]string{}}}, "", nil)
 	require.NoError(t, err)
 	assert.IsType(t, &AMReceiver{}, a)
 }

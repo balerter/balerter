@@ -86,30 +86,11 @@ type PayloadConfig struct {
 	Body        string            `json:"body" yaml:"body" hcl:"body,optional"`
 }
 
-// Validate checks the payload configuration.
-func (cfg PayloadConfig) Validate(method string) error {
-	switch method {
-	case http.MethodPost:
-		if strings.TrimSpace(cfg.Body) == "" {
-			return fmt.Errorf("body must be not empty")
-		}
-		return nil
-	case http.MethodGet:
-		if len(cfg.QueryParams) == 0 {
-			return fmt.Errorf("queryParams must be not empty")
-		}
-		return nil
-
-	default:
-		return fmt.Errorf("method must be set to post or get")
-	}
-}
-
 // Settings for webhook config
 type Settings struct {
 	URL     string            `json:"url" yaml:"url"  hcl:"url"`
 	Method  string            `json:"method" yaml:"method" hcl:"method"`
-	Auth    AuthConfig        `json:"auth" yaml:"auth" hcl:"auth,block"`
+	Auth    *AuthConfig       `json:"auth" yaml:"auth" hcl:"auth,block"`
 	Payload PayloadConfig     `json:"payload" yaml:"payload" hcl:"payload,block"`
 	Timeout int               `json:"timeout" yaml:"timeout" hcl:"timeout,optional"`
 	Headers map[string]string `json:"headers" yaml:"headers" hcl:"headers,optional"`
@@ -151,11 +132,10 @@ func (cfg Settings) Validate() error {
 		return fmt.Errorf("timeout must be greater or equals 0")
 	}
 
-	if err := cfg.Auth.Validate(); err != nil {
-		return fmt.Errorf("error validate auth: %w", err)
-	}
-	if err := cfg.Payload.Validate(cfg.Method); err != nil {
-		return fmt.Errorf("error validate payload: %w", err)
+	if cfg.Auth != nil {
+		if err := cfg.Auth.Validate(); err != nil {
+			return fmt.Errorf("error validate auth: %w", err)
+		}
 	}
 	return nil
 }

@@ -22,11 +22,11 @@ type AlertManager struct {
 }
 
 // New creates new AlertManager
-func New(cfg alertmanager.Alertmanager, logger *zap.Logger) (*AlertManager, error) {
+func New(cfg alertmanager.Alertmanager, version string, logger *zap.Logger) (*AlertManager, error) {
 	a := &AlertManager{
 		name:   cfg.Name,
 		logger: logger,
-		whCore: webhook.NewCore(cfg.Settings),
+		whCore: webhook.NewCore(cfg.Settings, version),
 		ignore: cfg.Ignore,
 	}
 

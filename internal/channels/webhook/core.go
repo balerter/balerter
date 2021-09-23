@@ -15,10 +15,11 @@ type Core struct {
 	cfg     webhook.Settings
 	client  *http.Client
 	timeout time.Duration
+	version string
 }
 
 // NewCore creates new Core channel
-func NewCore(cfg webhook.Settings) *Core {
+func NewCore(cfg webhook.Settings, version string) *Core {
 	t := cfg.Timeout
 	if t == 0 {
 		t = defaultTimeout
@@ -34,6 +35,7 @@ func NewCore(cfg webhook.Settings) *Core {
 		cfg:     cfg,
 		client:  client,
 		timeout: timeout,
+		version: version,
 	}
 
 	return c

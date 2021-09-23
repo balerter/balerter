@@ -15,12 +15,12 @@ type Webhook struct {
 }
 
 // New creates new Webhook channel
-func New(cfg webhook.Webhook, logger *zap.Logger) (*Webhook, error) {
+func New(cfg webhook.Webhook, version string, logger *zap.Logger) (*Webhook, error) {
 	return &Webhook{
 		body:   cfg.Settings.Payload.Body,
 		logger: logger,
 		name:   cfg.Name,
-		whCore: NewCore(cfg.Settings),
+		whCore: NewCore(cfg.Settings, version),
 		ignore: cfg.Ignore,
 	}, nil
 }
