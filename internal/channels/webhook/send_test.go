@@ -15,7 +15,7 @@ import (
 )
 
 func webhookSend(conf webhookConfig.Webhook, msg *message.Message) error {
-	webhook, err := New(conf, zap.NewNop())
+	webhook, err := New(conf, "", zap.NewNop())
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func TestSend(t *testing.T) {
 		Name: "foo",
 		Settings: webhookConfig.Settings{
 			Method: http.MethodPost,
-			Auth: webhookConfig.AuthConfig{
+			Auth: &webhookConfig.AuthConfig{
 				Type: webhookConfig.AuthTypeNone,
 			},
 			Payload: webhookConfig.PayloadConfig{
@@ -93,7 +93,7 @@ func TestSend(t *testing.T) {
 		a := require.New(t)
 
 		login, pass := "login", "pass"
-		conf.Settings.Auth = webhookConfig.AuthConfig{
+		conf.Settings.Auth = &webhookConfig.AuthConfig{
 			Type: webhookConfig.AuthTypeBasic,
 			AuthBasicConfig: webhookConfig.AuthBasicConfig{
 				Login:    login,
@@ -111,7 +111,7 @@ func TestSend(t *testing.T) {
 	t.Run("bearer", func(t *testing.T) {
 		a := require.New(t)
 
-		conf.Settings.Auth = webhookConfig.AuthConfig{
+		conf.Settings.Auth = &webhookConfig.AuthConfig{
 			Type: webhookConfig.AuthTypeBearer,
 			AuthBearerConfig: webhookConfig.AuthBearerConfig{
 				Token: "test-token",
@@ -127,7 +127,7 @@ func TestSend(t *testing.T) {
 
 	t.Run("custom", func(t *testing.T) {
 		a := require.New(t)
-		conf.Settings.Auth = webhookConfig.AuthConfig{
+		conf.Settings.Auth = &webhookConfig.AuthConfig{
 			Type: webhookConfig.AuthTypeCustom,
 			AuthCustomConfig: webhookConfig.AuthCustomConfig{
 				Headers: map[string]string{

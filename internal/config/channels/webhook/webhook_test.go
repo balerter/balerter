@@ -66,12 +66,6 @@ func TestChannelWebhook_Validate(t *testing.T) {
 			errText: "error validate auth: token must be not empty",
 		},
 		{
-			name:    "empty body",
-			fields:  fields{Name: "foo", URL: "https://foo.bar/baz"},
-			wantErr: true,
-			errText: "error validate payload: body must be not empty",
-		},
-		{
 			name: "post basic ok",
 			fields: fields{
 				Name: "foo",
@@ -132,7 +126,7 @@ func TestChannelWebhook_Validate(t *testing.T) {
 				Settings: Settings{
 					URL:     tt.fields.URL,
 					Method:  tt.fields.Method,
-					Auth:    tt.fields.Auth,
+					Auth:    &tt.fields.Auth,
 					Payload: tt.fields.Payload,
 					Timeout: tt.fields.Timeout,
 				},

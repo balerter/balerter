@@ -8,7 +8,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	a, err := New(alertmanager.Alertmanager{}, nil)
+	a, err := New(alertmanager.Alertmanager{}, "", nil)
 	require.NoError(t, err)
 	assert.IsType(t, &AlertManager{}, a)
 }
