@@ -2,7 +2,6 @@ package meta
 
 import (
 	"github.com/balerter/balerter/internal/modules"
-
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
@@ -44,6 +43,7 @@ func (m *Meta) GetLoader(j modules.Job) lua.LGFunction {
 		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
 				"priorExecutionTime": m.priorExecutionTime(j),
+				"cronLocation":       m.getCronLocation(j),
 			}
 
 			mod := luaState.SetFuncs(luaState.NewTable(), exports)
@@ -62,6 +62,13 @@ func (m *Meta) Stop() error {
 func (m *Meta) priorExecutionTime(j modules.Job) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		luaState.Push(lua.LNumber(j.GetPriorExecutionTime().Seconds()))
+		return 1
+	}
+}
+
+func (m *Meta) getCronLocation(j modules.Job) lua.LGFunction {
+	return func(luaState *lua.LState) int {
+		luaState.Push(lua.LString(j.GetCronLocation().String()))
 		return 1
 	}
 }

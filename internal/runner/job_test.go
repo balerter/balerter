@@ -72,7 +72,7 @@ func TestRunner_createLuaState(t *testing.T) {
 }
 
 func TestNew(t *testing.T) {
-	j := newJob(&script.Script{}, zap.NewNop())
+	j := newJob(&script.Script{}, nil, zap.NewNop())
 	assert.IsType(t, &Job{}, j)
 }
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/balerter/balerter/internal/modules/api"
-	"github.com/balerter/balerter/internal/modules/meta"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/robfig/cron/v3"
 	lua "github.com/yuin/gopher-lua"
@@ -24,17 +23,23 @@ type Job struct {
 	script   *script.Script
 	luaState *lua.LState
 
+	cronLocation       *time.Location
 	priorExecutionTime time.Duration
 }
 
-func newJob(s *script.Script, logger *zap.Logger) job {
+func newJob(s *script.Script, cronLocation *time.Location, logger *zap.Logger) job {
 	j := &Job{
-		name:   s.Name,
-		script: s,
-		logger: logger,
+		name:         s.Name,
+		script:       s,
+		logger:       logger,
+		cronLocation: cronLocation,
 	}
 
 	return j
+}
+
+func (j *Job) GetCronLocation() *time.Location {
+	return j.cronLocation
 }
 
 // Stop the job
@@ -118,8 +123,8 @@ func (rnr *Runner) createLuaState(j job, apiRequest *http.Request) error {
 		L.PreloadModule(moduleName, loader)
 	}
 
-	moduleMeta := meta.New(rnr.logger)
-	L.PreloadModule(moduleMeta.Name(), moduleMeta.GetLoader(j))
+	//moduleMeta := meta.New(rnr.cron.Location(), rnr.logger)
+	//L.PreloadModule(moduleMeta.Name(), moduleMeta.GetLoader(j))
 
 	a := api.New()
 	err := a.FillData(apiRequest)

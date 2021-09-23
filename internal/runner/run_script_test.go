@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
+	"github.com/robfig/cron/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -70,6 +71,7 @@ func TestRunner_RunScript_error_create_luaState(t *testing.T) {
 		dsManager:       d,
 		logger:          zap.NewNop(),
 		jobs:            make(chan job, 1),
+		cron:            cron.New(),
 	}
 
 	r := &badReader{}
@@ -135,6 +137,7 @@ func TestRunner_RunScript(t *testing.T) {
 		dsManager:       d,
 		logger:          zap.NewNop(),
 		jobs:            make(chan job, 1),
+		cron:            cron.New(),
 	}
 
 	req, err := http.NewRequest("POST", "localhost", bytes.NewBuffer([]byte("bar")))

@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"fmt"
 	"github.com/balerter/balerter/internal/config/system"
 	"github.com/balerter/balerter/internal/metrics"
 	"github.com/balerter/balerter/internal/modules"
@@ -22,6 +23,7 @@ var (
 	defaultUpdateInterval  = time.Minute
 	defaultToRunChanLen    = 64
 	defaultJobWorkersCount = 32
+	defaultCronLocation    = "Local"
 )
 
 type storagesManager interface {
@@ -54,7 +56,7 @@ type Runner struct {
 
 	jobs              chan job
 	updateScriptsFunc func(ctx context.Context, scripts []*script.Script, once bool)
-	newJobFunc        func(s *script.Script, logger *zap.Logger) job
+	newJobFunc        func(s *script.Script, cronLocation *time.Location, logger *zap.Logger) job
 }
 
 type job interface {
@@ -66,6 +68,7 @@ type job interface {
 	SetEntryID(cron.EntryID)
 	EntryID() cron.EntryID
 	GetPriorExecutionTime() time.Duration
+	GetCronLocation() *time.Location
 }
 
 // New creates new script runner
@@ -78,7 +81,7 @@ func New(
 	cliScript string,
 	systemCfg *system.System,
 	logger *zap.Logger,
-) *Runner {
+) (*Runner, error) {
 	r := &Runner{
 		scriptsManager:  scriptsManager,
 		dsManager:       dsManager,
@@ -88,9 +91,23 @@ func New(
 		logger:          logger,
 		coreModules:     coreModules,
 		pool:            make(map[string]job),
-		cron:            cron.New(cron.WithSeconds(), cron.WithParser(script.CronParser)),
 		jobs:            make(chan job, defaultToRunChanLen),
 	}
+
+	tz, errTz := getLocation(systemCfg)
+	if errTz != nil {
+		return nil, fmt.Errorf("error get cron location, %w", errTz)
+	}
+
+	cronOptions := []cron.Option{
+		cron.WithSeconds(),
+		cron.WithParser(script.CronParser),
+		cron.WithLocation(tz),
+	}
+
+	r.logger.Debug("use cron location", zap.String("location", tz.String()))
+
+	r.cron = cron.New(cronOptions...)
 
 	r.updateScriptsFunc = r.updateScripts
 	r.newJobFunc = newJob
@@ -108,7 +125,17 @@ func New(
 		go r.watchJobs()
 	}
 
-	return r
+	return r, nil
+}
+
+func getLocation(systemCfg *system.System) (*time.Location, error) {
+	tzStr := defaultCronLocation
+
+	if systemCfg != nil && systemCfg.CronLocation != "" {
+		tzStr = systemCfg.CronLocation
+	}
+
+	return time.LoadLocation(tzStr)
 }
 
 func (rnr *Runner) watchJobs() {
@@ -195,7 +222,7 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, 
 		}
 
 		rnr.logger.Debug("schedule script job", zap.String("hash", s.Hash()), zap.String("script name", s.Name), zap.String("cron", s.CronValue))
-		j := rnr.newJobFunc(s, rnr.logger)
+		j := rnr.newJobFunc(s, rnr.cron.Location(), rnr.logger)
 		err = rnr.createLuaState(j, nil)
 		if err != nil {
 			rnr.logger.Debug("error init job", zap.String("name", s.Name), zap.Error(err))

@@ -161,6 +161,7 @@ func (rnr *Runner) runPair(result []modules.TestResult, name string, pair pair) 
 type testJob struct {
 	s                  *script.Script
 	priorExecutionTime time.Duration
+	cronLocation       *time.Location
 }
 
 func (j *testJob) Script() *script.Script {
@@ -169,6 +170,10 @@ func (j *testJob) Script() *script.Script {
 
 func (j *testJob) GetPriorExecutionTime() time.Duration {
 	return j.priorExecutionTime
+}
+
+func (j *testJob) GetCronLocation() *time.Location {
+	return j.cronLocation
 }
 
 func (rnr *Runner) createLuaState(s *script.Script) *lua.LState {

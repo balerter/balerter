@@ -3,6 +3,7 @@ package runner
 import (
 	"context"
 	"fmt"
+	"github.com/balerter/balerter/internal/config/system"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/robfig/cron/v3"
@@ -16,9 +17,10 @@ import (
 )
 
 func TestNewRunner(t *testing.T) {
-	r := New(0, nil, nil,
-		nil, nil, "", nil, nil)
+	r, err := New(0, nil, nil,
+		nil, nil, "", nil, zap.NewNop())
 	assert.IsType(t, &Runner{}, r)
+	require.NoError(t, err)
 }
 
 func TestRunner_filterScripts(t *testing.T) {
@@ -324,7 +326,7 @@ func TestRunner_updateScripts_once(t *testing.T) {
 		cron:   crn,
 		logger: zap.NewNop(),
 		pool:   map[string]job{},
-		newJobFunc: func(s *script.Script, logger *zap.Logger) job {
+		newJobFunc: func(s *script.Script, cronLocation *time.Location, logger *zap.Logger) job {
 			return j
 		},
 	}
@@ -449,7 +451,7 @@ func TestRunner_updateScripts(t *testing.T) {
 		cron:   crn,
 		logger: zap.NewNop(),
 		pool:   map[string]job{s1Hash: j1},
-		newJobFunc: func(s *script.Script, logger *zap.Logger) job {
+		newJobFunc: func(s *script.Script, cronLocation *time.Location, logger *zap.Logger) job {
 			return j
 		},
 	}
@@ -506,4 +508,56 @@ func TestRunner_Stop(t *testing.T) {
 	assert.Equal(t, 1, len(j.EntryIDCalls()))
 	assert.Equal(t, 1, len(j.ScriptCalls()))
 	assert.Equal(t, 0, len(crn.Entries()))
+}
+
+func Test_getLocation(t *testing.T) {
+	type args struct {
+		systemCfg *system.System
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "no config",
+			args: args{
+				systemCfg: nil,
+			},
+			want:    "Local",
+			wantErr: false,
+		},
+		{
+			name: "set tz",
+			args: args{
+				systemCfg: &system.System{CronLocation: "Europe/Berlin"},
+			},
+			want:    "Europe/Berlin",
+			wantErr: false,
+		},
+		{
+			name: "wrong tz",
+			args: args{
+				systemCfg: &system.System{CronLocation: "foobar"},
+			},
+			want:    "",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := getLocation(tt.args.systemCfg)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getLocation() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if err != nil {
+				return
+			}
+			if got.String() != tt.want {
+				t.Errorf("getLocation() got = '%v', want '%v'", got, tt.want)
+			}
+		})
+	}
 }

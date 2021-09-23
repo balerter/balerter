@@ -21,6 +21,9 @@ import (
 // 			EntryIDFunc: func() cron.EntryID {
 // 				panic("mock out the EntryID method")
 // 			},
+// 			GetCronLocationFunc: func() *time.Location {
+// 				panic("mock out the GetCronLocation method")
+// 			},
 // 			GetPriorExecutionTimeFunc: func() time.Duration {
 // 				panic("mock out the GetPriorExecutionTime method")
 // 			},
@@ -52,6 +55,9 @@ type jobMock struct {
 	// EntryIDFunc mocks the EntryID method.
 	EntryIDFunc func() cron.EntryID
 
+	// GetCronLocationFunc mocks the GetCronLocation method.
+	GetCronLocationFunc func() *time.Location
+
 	// GetPriorExecutionTimeFunc mocks the GetPriorExecutionTime method.
 	GetPriorExecutionTimeFunc func() time.Duration
 
@@ -77,6 +83,9 @@ type jobMock struct {
 	calls struct {
 		// EntryID holds details about calls to the EntryID method.
 		EntryID []struct {
+		}
+		// GetCronLocation holds details about calls to the GetCronLocation method.
+		GetCronLocation []struct {
 		}
 		// GetPriorExecutionTime holds details about calls to the GetPriorExecutionTime method.
 		GetPriorExecutionTime []struct {
@@ -105,6 +114,7 @@ type jobMock struct {
 		}
 	}
 	lockEntryID               sync.RWMutex
+	lockGetCronLocation       sync.RWMutex
 	lockGetPriorExecutionTime sync.RWMutex
 	lockName                  sync.RWMutex
 	lockRun                   sync.RWMutex
@@ -137,6 +147,32 @@ func (mock *jobMock) EntryIDCalls() []struct {
 	mock.lockEntryID.RLock()
 	calls = mock.calls.EntryID
 	mock.lockEntryID.RUnlock()
+	return calls
+}
+
+// GetCronLocation calls GetCronLocationFunc.
+func (mock *jobMock) GetCronLocation() *time.Location {
+	if mock.GetCronLocationFunc == nil {
+		panic("jobMock.GetCronLocationFunc: method is nil but job.GetCronLocation was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockGetCronLocation.Lock()
+	mock.calls.GetCronLocation = append(mock.calls.GetCronLocation, callInfo)
+	mock.lockGetCronLocation.Unlock()
+	return mock.GetCronLocationFunc()
+}
+
+// GetCronLocationCalls gets all the calls that were made to GetCronLocation.
+// Check the length with:
+//     len(mockedjob.GetCronLocationCalls())
+func (mock *jobMock) GetCronLocationCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockGetCronLocation.RLock()
+	calls = mock.calls.GetCronLocation
+	mock.lockGetCronLocation.RUnlock()
 	return calls
 }
 

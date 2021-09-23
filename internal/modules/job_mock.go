@@ -16,6 +16,9 @@ import (
 //
 // 		// make and configure a mocked Job
 // 		mockedJob := &JobMock{
+// 			GetCronLocationFunc: func() *time.Location {
+// 				panic("mock out the GetCronLocation method")
+// 			},
 // 			GetPriorExecutionTimeFunc: func() time.Duration {
 // 				panic("mock out the GetPriorExecutionTime method")
 // 			},
@@ -29,6 +32,9 @@ import (
 //
 // 	}
 type JobMock struct {
+	// GetCronLocationFunc mocks the GetCronLocation method.
+	GetCronLocationFunc func() *time.Location
+
 	// GetPriorExecutionTimeFunc mocks the GetPriorExecutionTime method.
 	GetPriorExecutionTimeFunc func() time.Duration
 
@@ -37,6 +43,9 @@ type JobMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// GetCronLocation holds details about calls to the GetCronLocation method.
+		GetCronLocation []struct {
+		}
 		// GetPriorExecutionTime holds details about calls to the GetPriorExecutionTime method.
 		GetPriorExecutionTime []struct {
 		}
@@ -44,8 +53,35 @@ type JobMock struct {
 		Script []struct {
 		}
 	}
+	lockGetCronLocation       sync.RWMutex
 	lockGetPriorExecutionTime sync.RWMutex
 	lockScript                sync.RWMutex
+}
+
+// GetCronLocation calls GetCronLocationFunc.
+func (mock *JobMock) GetCronLocation() *time.Location {
+	if mock.GetCronLocationFunc == nil {
+		panic("JobMock.GetCronLocationFunc: method is nil but Job.GetCronLocation was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockGetCronLocation.Lock()
+	mock.calls.GetCronLocation = append(mock.calls.GetCronLocation, callInfo)
+	mock.lockGetCronLocation.Unlock()
+	return mock.GetCronLocationFunc()
+}
+
+// GetCronLocationCalls gets all the calls that were made to GetCronLocation.
+// Check the length with:
+//     len(mockedJob.GetCronLocationCalls())
+func (mock *JobMock) GetCronLocationCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockGetCronLocation.RLock()
+	calls = mock.calls.GetCronLocation
+	mock.lockGetCronLocation.RUnlock()
+	return calls
 }
 
 // GetPriorExecutionTime calls GetPriorExecutionTimeFunc.
