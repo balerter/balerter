@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"fmt"
 	"github.com/balerter/balerter/internal/config/system"
 	"github.com/balerter/balerter/internal/metrics"
 	"github.com/balerter/balerter/internal/modules"
@@ -78,7 +79,7 @@ func New(
 	cliScript string,
 	systemCfg *system.System,
 	logger *zap.Logger,
-) *Runner {
+) (*Runner, error) {
 	r := &Runner{
 		scriptsManager:  scriptsManager,
 		dsManager:       dsManager,
@@ -88,9 +89,23 @@ func New(
 		logger:          logger,
 		coreModules:     coreModules,
 		pool:            make(map[string]job),
-		cron:            cron.New(cron.WithSeconds(), cron.WithParser(script.CronParser)),
 		jobs:            make(chan job, defaultToRunChanLen),
 	}
+
+	tz, errTz := getLocation(systemCfg)
+	if errTz != nil {
+		return nil, fmt.Errorf("error get cron location, %w", errTz)
+	}
+
+	cronOptions := []cron.Option{
+		cron.WithSeconds(),
+		cron.WithParser(script.CronParser),
+		cron.WithLocation(tz),
+	}
+
+	r.logger.Debug("use cron location", zap.String("location", tz.String()))
+
+	r.cron = cron.New(cronOptions...)
 
 	r.updateScriptsFunc = r.updateScripts
 	r.newJobFunc = newJob
@@ -108,7 +123,17 @@ func New(
 		go r.watchJobs()
 	}
 
-	return r
+	return r, nil
+}
+
+func getLocation(systemCfg *system.System) (*time.Location, error) {
+	tzStr := "Local"
+
+	if systemCfg != nil && systemCfg.CronLocation != "" {
+		tzStr = systemCfg.CronLocation
+	}
+
+	return time.LoadLocation(tzStr)
 }
 
 func (rnr *Runner) watchJobs() {

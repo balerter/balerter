@@ -153,7 +153,7 @@ func run(
 	// | Runner
 	// |
 	lgr.Logger().Info("init runner")
-	rnr := runner.New(
+	rnr, errCreateRunner := runner.New(
 		time.Millisecond*time.Duration(cfg.Scripts.UpdateInterval),
 		scriptsMgr,
 		dsMgr,
@@ -163,6 +163,9 @@ func run(
 		cfg.System,
 		lgr.Logger(),
 	)
+	if errCreateRunner != nil {
+		return fmt.Sprintf("error create runner, %v", errCreateRunner), 1
+	}
 
 	lgr.Logger().Info("run runner")
 	go rnr.Watch(ctx, ctxCancel, flg.Once)
