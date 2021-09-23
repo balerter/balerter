@@ -14,7 +14,7 @@ func (rnr *Runner) RunScript(name string, req *http.Request) error {
 
 	for _, sc := range ss {
 		if sc.Name == name {
-			j := newJob(sc, rnr.logger)
+			j := newJob(sc, rnr.cron.Location(), rnr.logger)
 			err = rnr.createLuaState(j, req)
 			if err != nil {
 				return err

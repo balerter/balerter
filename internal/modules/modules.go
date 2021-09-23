@@ -21,6 +21,7 @@ type TestResult struct {
 type Job interface {
 	Script() *script.Script
 	GetPriorExecutionTime() time.Duration
+	GetCronLocation() *time.Location
 }
 
 // Module is an interface for core module

@@ -23,6 +23,7 @@ var (
 	defaultUpdateInterval  = time.Minute
 	defaultToRunChanLen    = 64
 	defaultJobWorkersCount = 32
+	defaultCronLocation    = "Local"
 )
 
 type storagesManager interface {
@@ -55,7 +56,7 @@ type Runner struct {
 
 	jobs              chan job
 	updateScriptsFunc func(ctx context.Context, scripts []*script.Script, once bool)
-	newJobFunc        func(s *script.Script, logger *zap.Logger) job
+	newJobFunc        func(s *script.Script, cronLocation *time.Location, logger *zap.Logger) job
 }
 
 type job interface {
@@ -67,6 +68,7 @@ type job interface {
 	SetEntryID(cron.EntryID)
 	EntryID() cron.EntryID
 	GetPriorExecutionTime() time.Duration
+	GetCronLocation() *time.Location
 }
 
 // New creates new script runner
@@ -127,7 +129,7 @@ func New(
 }
 
 func getLocation(systemCfg *system.System) (*time.Location, error) {
-	tzStr := "Local"
+	tzStr := defaultCronLocation
 
 	if systemCfg != nil && systemCfg.CronLocation != "" {
 		tzStr = systemCfg.CronLocation
@@ -220,7 +222,7 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, 
 		}
 
 		rnr.logger.Debug("schedule script job", zap.String("hash", s.Hash()), zap.String("script name", s.Name), zap.String("cron", s.CronValue))
-		j := rnr.newJobFunc(s, rnr.logger)
+		j := rnr.newJobFunc(s, rnr.cron.Location(), rnr.logger)
 		err = rnr.createLuaState(j, nil)
 		if err != nil {
 			rnr.logger.Debug("error init job", zap.String("name", s.Name), zap.Error(err))

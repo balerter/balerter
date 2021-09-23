@@ -65,3 +65,21 @@ func Test_priorExecutionTime(t *testing.T) {
 	assert.Equal(t, lua.LTNumber, v.Type())
 	assert.Equal(t, "1", v.String())
 }
+
+func Test_cronLocation(t *testing.T) {
+	m := &Meta{}
+
+	j := &modules.JobMock{
+		GetCronLocationFunc: func() *time.Location {
+			return time.UTC
+		},
+	}
+
+	L := lua.NewState()
+	f := m.getCronLocation(j)
+	n := f(L)
+	assert.Equal(t, 1, n)
+	v := L.Get(1)
+	assert.Equal(t, lua.LTString, v.Type())
+	assert.Equal(t, "UTC", v.String())
+}

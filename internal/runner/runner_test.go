@@ -326,7 +326,7 @@ func TestRunner_updateScripts_once(t *testing.T) {
 		cron:   crn,
 		logger: zap.NewNop(),
 		pool:   map[string]job{},
-		newJobFunc: func(s *script.Script, logger *zap.Logger) job {
+		newJobFunc: func(s *script.Script, cronLocation *time.Location, logger *zap.Logger) job {
 			return j
 		},
 	}
@@ -451,7 +451,7 @@ func TestRunner_updateScripts(t *testing.T) {
 		cron:   crn,
 		logger: zap.NewNop(),
 		pool:   map[string]job{s1Hash: j1},
-		newJobFunc: func(s *script.Script, logger *zap.Logger) job {
+		newJobFunc: func(s *script.Script, cronLocation *time.Location, logger *zap.Logger) job {
 			return j
 		},
 	}
