@@ -58,6 +58,13 @@ func (e *Email) Send(mes *message.Message) error {
 		email.AddCc(cc...)
 	}
 
+	if len(mes.Fields) > 0 {
+		mes.Text += "\n\n"
+		for k, v := range mes.Fields {
+			mes.Text += fmt.Sprintf("%s = %s\n", k, v)
+		}
+	}
+
 	email.SetBody(mail.TextHTML, mes.Text)
 
 	if len(mes.Image) > 0 {
