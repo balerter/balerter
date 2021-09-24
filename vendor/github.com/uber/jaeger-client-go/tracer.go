@@ -41,7 +41,7 @@ type Tracer struct {
 	sampler  SamplerV2
 	reporter Reporter
 	metrics  Metrics
-	logger   log.Logger
+	logger   log.DebugLogger
 
 	timeNow      func() time.Time
 	randomNumber func() uint64
@@ -52,6 +52,7 @@ type Tracer struct {
 		highTraceIDGenerator        func() uint64 // custom high trace ID generator
 		maxTagValueLength           int
 		noDebugFlagOnForcedSampling bool
+		maxLogsPerSpan              int
 		// more options to come
 	}
 	// allocator of Span objects
@@ -215,10 +216,10 @@ func (t *Tracer) startSpanWithOptions(
 		options.StartTime = t.timeNow()
 	}
 
-	// Predicate whether the given span context is a valid reference
-	// which may be used as parent / debug ID / baggage items source
-	isValidReference := func(ctx SpanContext) bool {
-		return ctx.IsValid() || ctx.isDebugIDContainerOnly() || len(ctx.baggage) != 0
+	// Predicate whether the given span context is an empty reference
+	// or may be used as parent / debug ID / baggage items source
+	isEmptyReference := func(ctx SpanContext) bool {
+		return !ctx.IsValid() && !ctx.isDebugIDContainerOnly() && len(ctx.baggage) == 0
 	}
 
 	var references []Reference
@@ -234,7 +235,7 @@ func (t *Tracer) startSpanWithOptions(
 				reflect.ValueOf(ref.ReferencedContext)))
 			continue
 		}
-		if !isValidReference(ctxRef) {
+		if isEmptyReference(ctxRef) {
 			continue
 		}
 
@@ -244,14 +245,17 @@ func (t *Tracer) startSpanWithOptions(
 			continue
 		}
 
-		references = append(references, Reference{Type: ref.Type, Context: ctxRef})
+		if ctxRef.IsValid() {
+			// we don't want empty context that contains only debug-id or baggage
+			references = append(references, Reference{Type: ref.Type, Context: ctxRef})
+		}
 
 		if !hasParent {
 			parent = ctxRef
 			hasParent = ref.Type == opentracing.ChildOfRef
 		}
 	}
-	if !hasParent && isValidReference(parent) {
+	if !hasParent && !isEmptyReference(parent) {
 		// If ChildOfRef wasn't found but a FollowFromRef exists, use the context from
 		// the FollowFromRef as the parent
 		hasParent = true
@@ -365,6 +369,7 @@ func (t *Tracer) Extract(
 
 // Close releases all resources used by the Tracer and flushes any remaining buffered spans.
 func (t *Tracer) Close() error {
+	t.logger.Debugf("closing tracer")
 	t.reporter.Close()
 	t.sampler.Close()
 	if mgr, ok := t.baggageRestrictionManager.(io.Closer); ok {

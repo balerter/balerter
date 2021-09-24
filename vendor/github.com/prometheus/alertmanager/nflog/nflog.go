@@ -27,8 +27,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/matttproud/golang_protobuf_extensions/pbutil"
 	"github.com/prometheus/alertmanager/cluster"
 	pb "github.com/prometheus/alertmanager/nflog/nflogpb"
@@ -39,7 +39,7 @@ import (
 var ErrNotFound = errors.New("not found")
 
 // ErrInvalidState is returned if the state isn't valid.
-var ErrInvalidState = fmt.Errorf("invalid state")
+var ErrInvalidState = errors.New("invalid state")
 
 // query currently allows filtering by and/or receiver group key.
 // It is configured via QueryParameter functions.
@@ -193,7 +193,7 @@ func WithMetrics(r prometheus.Registerer) Option {
 func WithMaintenance(d time.Duration, stopc chan struct{}, done func()) Option {
 	return func(l *Log) error {
 		if d == 0 {
-			return fmt.Errorf("maintenance interval must not be 0")
+			return errors.New("maintenance interval must not be 0")
 		}
 		l.runInterval = d
 		l.stopc = stopc

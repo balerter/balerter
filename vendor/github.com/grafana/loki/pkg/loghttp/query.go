@@ -8,15 +8,18 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/grafana/loki/pkg/logproto"
 	json "github.com/json-iterator/go"
 	"github.com/prometheus/common/model"
+
+	"github.com/grafana/loki/pkg/logproto"
+	"github.com/grafana/loki/pkg/logql/stats"
 )
 
 var (
-	errEndBeforeStart = errors.New("end timestamp must not be before start time")
-	errNegativeStep   = errors.New("zero or negative query resolution step widths are not accepted. Try a positive integer")
-	errStepTooSmall   = errors.New("exceeded maximum resolution of 11,000 points per timeseries. Try decreasing the query resolution (?step=XX)")
+	errEndBeforeStart   = errors.New("end timestamp must not be before or equal to start time")
+	errNegativeStep     = errors.New("zero or negative query resolution step widths are not accepted. Try a positive integer")
+	errStepTooSmall     = errors.New("exceeded maximum resolution of 11,000 points per timeseries. Try decreasing the query resolution (?step=XX)")
+	errNegativeInterval = errors.New("interval must be >= 0")
 )
 
 // QueryStatus holds the status of a query
@@ -25,6 +28,7 @@ type QueryStatus string
 // QueryStatus values
 const (
 	QueryStatusSuccess = "success"
+	QueryStatusFail    = "fail"
 )
 
 //QueryResponse represents the http json response to a label query
@@ -44,6 +48,7 @@ type ResultType string
 // ResultType values
 const (
 	ResultTypeStream = "streams"
+	ResultTypeScalar = "scalar"
 	ResultTypeVector = "vector"
 	ResultTypeMatrix = "matrix"
 )
@@ -55,12 +60,16 @@ type ResultValue interface {
 
 //QueryResponseData represents the http json response to a label query
 type QueryResponseData struct {
-	ResultType ResultType  `json:"resultType"`
-	Result     ResultValue `json:"result"`
+	ResultType ResultType   `json:"resultType"`
+	Result     ResultValue  `json:"result"`
+	Statistics stats.Result `json:"stats"`
 }
 
 // Type implements the promql.Value interface
 func (Streams) Type() ResultType { return ResultTypeStream }
+
+// Type implements the promql.Value interface
+func (Scalar) Type() ResultType { return ResultTypeScalar }
 
 // Type implements the promql.Value interface
 func (Vector) Type() ResultType { return ResultTypeVector }
@@ -98,8 +107,9 @@ type Entry struct {
 // UnmarshalJSON implements the json.Unmarshaler interface.
 func (q *QueryResponseData) UnmarshalJSON(data []byte) error {
 	unmarshal := struct {
-		Type   ResultType      `json:"resultType"`
-		Result json.RawMessage `json:"result"`
+		Type       ResultType      `json:"resultType"`
+		Result     json.RawMessage `json:"result"`
+		Statistics stats.Result    `json:"stats"`
 	}{}
 
 	err := json.Unmarshal(data, &unmarshal)
@@ -123,6 +133,10 @@ func (q *QueryResponseData) UnmarshalJSON(data []byte) error {
 		var v Vector
 		err = json.Unmarshal(unmarshal.Result, &v)
 		value = v
+	case ResultTypeScalar:
+		var v Scalar
+		err = json.Unmarshal(unmarshal.Result, &v)
+		value = v
 	default:
 		return fmt.Errorf("unknown type: %s", unmarshal.Type)
 	}
@@ -133,6 +147,7 @@ func (q *QueryResponseData) UnmarshalJSON(data []byte) error {
 
 	q.ResultType = unmarshal.Type
 	q.Result = value
+	q.Statistics = unmarshal.Statistics
 
 	return nil
 }
@@ -163,6 +178,22 @@ func (e *Entry) UnmarshalJSON(data []byte) error {
 	e.Timestamp = time.Unix(0, t)
 	e.Line = unmarshal[1]
 
+	return nil
+}
+
+// Scalar is a single timestamp/float with no labels
+type Scalar model.Scalar
+
+func (s Scalar) MarshalJSON() ([]byte, error) {
+	return model.Scalar(s).MarshalJSON()
+}
+
+func (s *Scalar) UnmarshalJSON(b []byte) error {
+	var v model.Scalar
+	if err := v.UnmarshalJSON(b); err != nil {
+		return err
+	}
+	*s = Scalar(v)
 	return nil
 }
 
@@ -209,9 +240,11 @@ type RangeQuery struct {
 	Start     time.Time
 	End       time.Time
 	Step      time.Duration
+	Interval  time.Duration
 	Query     string
 	Direction logproto.Direction
 	Limit     uint32
+	Shards    []string
 }
 
 // ParseRangeQuery parses a RangeQuery request from an http request.
@@ -225,7 +258,7 @@ func ParseRangeQuery(r *http.Request) (*RangeQuery, error) {
 		return nil, err
 	}
 
-	if result.End.Before(result.Start) {
+	if result.End.Before(result.Start) || result.Start.Equal(result.End) {
 		return nil, errEndBeforeStart
 	}
 
@@ -248,10 +281,21 @@ func ParseRangeQuery(r *http.Request) (*RangeQuery, error) {
 		return nil, errNegativeStep
 	}
 
+	result.Shards = shards(r)
+
 	// For safety, limit the number of returned points per timeseries.
 	// This is sufficient for 60s resolution for a week or 1h resolution for a year.
 	if (result.End.Sub(result.Start) / result.Step) > 11000 {
 		return nil, errStepTooSmall
+	}
+
+	result.Interval, err = interval(r)
+	if err != nil {
+		return nil, err
+	}
+
+	if result.Interval < 0 {
+		return nil, errNegativeInterval
 	}
 
 	return &result, nil

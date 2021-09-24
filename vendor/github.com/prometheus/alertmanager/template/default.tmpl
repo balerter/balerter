@@ -1,4 +1,4 @@
-{{ define "__alertmanager" }}AlertManager{{ end }}
+{{ define "__alertmanager" }}Alertmanager{{ end }}
 {{ define "__alertmanagerURL" }}{{ .ExternalURL }}/#/alerts?receiver={{ .Receiver | urlquery }}{{ end }}
 
 {{ define "__subject" }}[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .GroupLabels.SortedPairs.Values | join " " }} {{ if gt (len .CommonLabels) (len .GroupLabels) }}({{ with .CommonLabels.Remove .GroupLabels.Names }}{{ .Values | join " " }}{{ end }}){{ end }}{{ end }}
@@ -22,10 +22,6 @@
 {{ define "slack.default.iconurl" }}{{ end }}
 {{ define "slack.default.text" }}{{ end }}
 {{ define "slack.default.footer" }}{{ end }}
-
-
-{{ define "hipchat.default.from" }}{{ template "__alertmanager" . }}{{ end }}
-{{ define "hipchat.default.message" }}{{ template "__subject" . }}{{ end }}
 
 
 {{ define "pagerduty.default.description" }}{{ template "__subject" . }}{{ end }}
@@ -221,3 +217,15 @@ Alerts Resolved:
 {{ end }}
 {{ end }}
 {{ define "pushover.default.url" }}{{ template "__alertmanagerURL" . }}{{ end }}
+
+{{ define "sns.default.subject" }}{{ template "__subject" . }}{{ end }}
+{{ define "sns.default.message" }}{{ .CommonAnnotations.SortedPairs.Values | join " " }}
+{{ if gt (len .Alerts.Firing) 0 }}
+Alerts Firing:
+{{ template "__text_alert_list" .Alerts.Firing }}
+{{ end }}
+{{ if gt (len .Alerts.Resolved) 0 }}
+Alerts Resolved:
+{{ template "__text_alert_list" .Alerts.Resolved }}
+{{ end }}
+{{ end }}
