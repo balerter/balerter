@@ -16,13 +16,20 @@
 
 package config
 
+import (
+	"encoding/json"
+	"path/filepath"
+)
+
+const secretToken = "<secret>"
+
 // Secret special type for storing secrets.
 type Secret string
 
 // MarshalYAML implements the yaml.Marshaler interface for Secrets.
 func (s Secret) MarshalYAML() (interface{}, error) {
 	if s != "" {
-		return "<secret>", nil
+		return secretToken, nil
 	}
 	return nil, nil
 }
@@ -31,4 +38,29 @@ func (s Secret) MarshalYAML() (interface{}, error) {
 func (s *Secret) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type plain Secret
 	return unmarshal((*plain)(s))
+}
+
+// MarshalJSON implements the json.Marshaler interface for Secret.
+func (s Secret) MarshalJSON() ([]byte, error) {
+	if len(s) == 0 {
+		return json.Marshal("")
+	}
+	return json.Marshal(secretToken)
+}
+
+// DirectorySetter is a config type that contains file paths that may
+// be relative to the file containing the config.
+type DirectorySetter interface {
+	// SetDirectory joins any relative file paths with dir.
+	// Any paths that are empty or absolute remain unchanged.
+	SetDirectory(dir string)
+}
+
+// JoinDir joins dir and path if path is relative.
+// If path is empty or absolute, it is returned unchanged.
+func JoinDir(dir, path string) string {
+	if path == "" || filepath.IsAbs(path) {
+		return path
+	}
+	return filepath.Join(dir, path)
 }

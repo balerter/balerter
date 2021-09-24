@@ -1,6 +1,77 @@
 Changes by Version
 ==================
 
+2.25.0 (2020-07-13)
+-------------------
+## Breaking changes
+- [feat] Periodically re-resolve UDP server address, with opt-out (#520) -- Trevor Foster
+
+  The re-resolving of UDP address is now enabled by default, to make the client more robust in Kubernetes deployments.
+  The old resolve-once behavior can be restored by setting DisableAttemptReconnecting=true in the Configuration struct,
+  or via JAEGER_REPORTER_ATTEMPT_RECONNECTING_DISABLED=true environment variable.
+
+## Bug fixes
+- Do not add invalid context to references (#521) -- Yuri Shkuro
+
+
+2.24.0 (2020-06-14)
+-------------------
+- Mention FromEnv() in the README, docs, and examples (#518) -- Martin Lercher
+- Serialize access to RemotelyControlledSampler.sampler (#515) -- Dima
+- Override reporter config only when agent host/port is set in env (#513) -- ilylia
+- Converge on JAEGER_SAMPLING_ENDPOINT env variable (#511) -- Eundoo Song
+
+
+2.23.1 (2020-04-28)
+-------------------
+- Fix regression by handling nil logger correctly ([#507](https://github.com/jaegertracing/jaeger-client-go/pull/507)) -- Prithvi Raj
+
+
+2.23.0 (2020-04-22)
+-------------------
+
+- Add the ability to log all span interactions at a new debug log level([#502](https://github.com/jaegertracing/jaeger-client-go/pull/502), [#503](https://github.com/jaegertracing/jaeger-client-go/pull/503), [#504](https://github.com/jaegertracing/jaeger-client-go/pull/504)) -- Prithvi Raj
+- Chore (docs): fix typos ([#496](https://github.com/jaegertracing/jaeger-client-go/pull/496), [#498](https://github.com/jaegertracing/jaeger-client-go/pull/498)) -- Febrian Setianto and Ivan Babrou
+- Unset highest bit of traceID in probabilistic sampler ([#490](https://github.com/jaegertracing/jaeger-client-go/pull/490)) -- Sokolov Yura
+
+2.22.1 (2020-01-16)
+-------------------
+
+- Increase UDP batch overhead to account for data loss metrics ([#488](https://github.com/jaegertracing/jaeger-client-go/pull/488)) -- Yuri Shkuro
+
+
+2.22.0 (2020-01-15)
+-------------------
+
+- Report data loss stats to Jaeger backend ([#482](https://github.com/jaegertracing/jaeger-client-go/pull/482)) -- Yuri Shkuro
+- Add limit on log records per span ([#483](https://github.com/jaegertracing/jaeger-client-go/pull/483)) -- Sokolov Yura
+
+
+2.21.1 (2019-12-20)
+-------------------
+
+- Update version correctly.
+
+
+2.21.0 (2019-12-20)
+-------------------
+
+- Clarify reporting error logs ([#469](https://github.com/jaegertracing/jaeger-client-go/pull/469)) -- Yuri Shkuro
+- Do not strip leading zeros from trace IDs ([#472](https://github.com/jaegertracing/jaeger-client-go/pull/472)) -- Yuri Shkuro
+- Chore (docs): fixed a couple of typos ([#475](https://github.com/jaegertracing/jaeger-client-go/pull/475)) -- Marc Bramaud
+- Support custom HTTP headers when reporting spans over HTTP ([#479](https://github.com/jaegertracing/jaeger-client-go/pull/479)) -- Albert Teoh
+
+
+2.20.1 (2019-11-08)
+-------------------
+
+Minor patch via https://github.com/jaegertracing/jaeger-client-go/pull/468
+
+- Make `AdaptiveSamplerUpdater` usable with default values; Resolves #467
+- Create `OperationNameLateBinding` sampler option and config option
+- Make `SamplerOptions` var of public type, so that its functions are discoverable via godoc
+
+
 2.20.0 (2019-11-06)
 -------------------
 

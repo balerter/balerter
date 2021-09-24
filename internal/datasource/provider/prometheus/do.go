@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/prometheus/common/model"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 )
@@ -79,7 +79,7 @@ func (m *Prometheus) send(u string) (model.Value, error) {
 		return nil, fmt.Errorf("unexpected response code %d", res.StatusCode)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}

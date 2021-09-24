@@ -2,7 +2,7 @@ package folder
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -25,7 +25,7 @@ func (cfg Folder) Validate() error {
 		return fmt.Errorf("path must be not empty")
 	}
 
-	_, err := ioutil.ReadDir(cfg.Path)
+	_, err := os.ReadDir(cfg.Path)
 	if err != nil {
 		return fmt.Errorf("error read folder '%s', %w", cfg.Path, err)
 	}

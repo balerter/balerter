@@ -2,7 +2,7 @@ package file
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -23,7 +23,7 @@ func (cfg File) Validate() error {
 		return fmt.Errorf("filename must be not empty")
 	}
 
-	_, err := ioutil.ReadFile(cfg.Filename)
+	_, err := os.ReadFile(cfg.Filename)
 	if err != nil {
 		return fmt.Errorf("error read file '%s', %w", cfg.Filename, err)
 	}

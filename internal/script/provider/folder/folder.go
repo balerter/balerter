@@ -2,7 +2,7 @@ package folder
 
 import (
 	"github.com/balerter/balerter/internal/config/scripts/folder"
-	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -44,7 +44,7 @@ func (p *Provider) Get() ([]*script.Script, error) {
 	}
 
 	for _, filename := range matches {
-		body, err := ioutil.ReadFile(path.Join(filename))
+		body, err := os.ReadFile(path.Join(filename))
 		if err != nil {
 			return nil, err
 		}

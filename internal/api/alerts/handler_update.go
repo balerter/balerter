@@ -6,7 +6,7 @@ import (
 	"github.com/balerter/balerter/internal/alert"
 	"github.com/go-chi/chi"
 	"go.uber.org/zap"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -28,7 +28,7 @@ func (a *Alerts) handlerUpdate(rw http.ResponseWriter, req *http.Request) {
 
 	defer req.Body.Close()
 
-	buf, err := ioutil.ReadAll(req.Body)
+	buf, err := io.ReadAll(req.Body)
 	if err != nil {
 		a.logger.Error("error read body", zap.Error(err))
 		http.Error(rw, "error read body", http.StatusInternalServerError)
