@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"go.uber.org/zap"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -28,7 +28,7 @@ func (h *HTTP) sendRequest(args *requestArgs) (*response, error) {
 
 	res.StatusCode = resp.StatusCode
 
-	res.Body, err = ioutil.ReadAll(resp.Body)
+	res.Body, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error read body, %w", err)
 	}

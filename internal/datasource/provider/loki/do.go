@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	lokihttp "github.com/grafana/loki/pkg/loghttp"
 	"go.uber.org/zap"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -90,7 +90,7 @@ func (m *Loki) send(u string) (*lokihttp.QueryResponse, error) {
 
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}

@@ -7,7 +7,6 @@ import (
 	"github.com/balerter/balerter/internal/config/secrets/env"
 	"github.com/balerter/balerter/internal/config/secrets/vault"
 	"io"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -48,9 +47,9 @@ func New(fs *flag.FlagSet, args []string) (*Config, *Flags, error) {
 	}
 
 	if flg.ConfigFilePath == "stdin" {
-		data, err = ioutil.ReadAll(StdIn)
+		data, err = io.ReadAll(StdIn)
 	} else {
-		data, err = ioutil.ReadFile(flg.ConfigFilePath)
+		data, err = os.ReadFile(flg.ConfigFilePath)
 	}
 
 	if err != nil {

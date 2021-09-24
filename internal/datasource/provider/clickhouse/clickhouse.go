@@ -12,7 +12,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"io/ioutil"
+	"os"
 	"time"
 )
 
@@ -64,7 +64,7 @@ func New(cfg clickhouseCfg.Clickhouse, logger *zap.Logger) (*Clickhouse, error) 
 
 	if cfg.SSLCertPath != "" {
 		caCertPool := x509.NewCertPool()
-		caCert, err := ioutil.ReadFile(cfg.SSLCertPath)
+		caCert, err := os.ReadFile(cfg.SSLCertPath)
 		if err != nil {
 			return nil, fmt.Errorf("error load clickhouse cert file, %v", err)
 		}

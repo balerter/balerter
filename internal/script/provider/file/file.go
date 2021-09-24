@@ -1,11 +1,12 @@
 package folder
 
 import (
-	"github.com/balerter/balerter/internal/config/scripts/file"
-	"github.com/balerter/balerter/internal/script/script"
-	"io/ioutil"
+	"os"
 	"path"
 	"strings"
+
+	"github.com/balerter/balerter/internal/config/scripts/file"
+	"github.com/balerter/balerter/internal/script/script"
 )
 
 // Provider represents File script provider
@@ -28,7 +29,7 @@ func New(cfg file.File) *Provider {
 func (p *Provider) Get() ([]*script.Script, error) {
 	ss := make([]*script.Script, 0)
 
-	body, err := ioutil.ReadFile(path.Join(p.filename))
+	body, err := os.ReadFile(path.Join(p.filename))
 	if err != nil {
 		return nil, err
 	}
