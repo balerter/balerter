@@ -70,9 +70,18 @@ func (t *Test) getModule(moduleName string, j modules.Job) lua.LGFunction {
 			return 0
 		}
 
-		m, ok := t.storage[name]
+		var m modules.ModuleTest
+		var ok bool
+
+		switch moduleName {
+		case "test.datasource":
+			m, ok = t.datasource[name]
+		case "test.storage":
+			m, ok = t.storage[name]
+		}
+
 		if !ok {
-			t.logger.Error("storage not found", zap.String("name", name))
+			t.logger.Error("module not found", zap.String("module name", moduleName), zap.String("name", name))
 			return 0
 		}
 
