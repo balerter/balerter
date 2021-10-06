@@ -12,6 +12,15 @@ import (
 	"testing"
 )
 
+var (
+	testFileBody = []byte(`
+local function a(test)
+	a = 10
+end
+return {a = a}
+`)
+)
+
 func Test_splitScripts(t *testing.T) {
 	src := []*script.Script{
 		{Name: "s1", IsTest: false},
@@ -91,7 +100,7 @@ func Test_Run_error_split_scripts(t *testing.T) {
 func Test_runPair(t *testing.T) {
 	mTest1 := &modules.ModuleTestMock{
 		NameFunc: func() string {
-			return "mt1"
+			return "test"
 		},
 		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
 			return getLGFunc()
@@ -145,7 +154,7 @@ func Test_runPair(t *testing.T) {
 		logger:          zap.NewNop(),
 		storagesManager: storageManagerMock,
 		dsManager:       dsManagerMock,
-		coreModules:     []modules.ModuleTest{coreModule1},
+		coreModules:     []modules.ModuleTest{coreModule1, mTest1},
 	}
 
 	p := pair{
@@ -156,7 +165,7 @@ func Test_runPair(t *testing.T) {
 		},
 		test: &script.Script{
 			Name:       "s1_test",
-			Body:       []byte("a = 10"),
+			Body:       testFileBody,
 			IsTest:     true,
 			TestTarget: "s1",
 		},
@@ -200,10 +209,24 @@ func Test_runPair_with_fail_result(t *testing.T) {
 		},
 	}
 
+	mTest1 := &modules.ModuleTestMock{
+		NameFunc: func() string {
+			return "test"
+		},
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
+			return getLGFunc()
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {},
+	}
+
 	rnr := &Runner{
 		logger:          zap.NewNop(),
 		storagesManager: storageManagerMock,
 		dsManager:       dsManagerMock,
+		coreModules:     []modules.ModuleTest{mTest1},
 	}
 
 	p := pair{
@@ -214,7 +237,7 @@ func Test_runPair_with_fail_result(t *testing.T) {
 		},
 		test: &script.Script{
 			Name:       "s1_test",
-			Body:       []byte("a = 10"),
+			Body:       testFileBody,
 			IsTest:     true,
 			TestTarget: "s1",
 		},
@@ -237,7 +260,8 @@ func Test_runPair_with_fail_result(t *testing.T) {
 
 	assert.Equal(t, 1, len(dsManagerMock.CleanCalls()))
 	assert.Equal(t, 1, len(dsManagerMock.ResultCalls()))
-	assert.Equal(t, 2, len(dsManagerMock.GetCalls()))
+
+	assert.Equal(t, 3, len(dsManagerMock.GetCalls()))
 }
 
 func Test_runPair_error_run_test(t *testing.T) {
@@ -310,10 +334,24 @@ func Test_runPair_error_run_main(t *testing.T) {
 		},
 	}
 
+	mTest1 := &modules.ModuleTestMock{
+		NameFunc: func() string {
+			return "test"
+		},
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
+			return getLGFunc()
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {},
+	}
+
 	rnr := &Runner{
 		logger:          zap.NewNop(),
 		storagesManager: storageManagerMock,
 		dsManager:       dsManagerMock,
+		coreModules:     []modules.ModuleTest{mTest1},
 	}
 
 	p := pair{
@@ -324,7 +362,7 @@ func Test_runPair_error_run_main(t *testing.T) {
 		},
 		test: &script.Script{
 			Name:       "s1_test",
-			Body:       []byte("a = 10"),
+			Body:       testFileBody,
 			IsTest:     true,
 			TestTarget: "s1",
 		},
@@ -360,10 +398,24 @@ func Test_runPair_error_get_ds_results(t *testing.T) {
 		},
 	}
 
+	mTest1 := &modules.ModuleTestMock{
+		NameFunc: func() string {
+			return "test"
+		},
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
+			return getLGFunc()
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {},
+	}
+
 	rnr := &Runner{
 		logger:          zap.NewNop(),
 		storagesManager: storageManagerMock,
 		dsManager:       dsManagerMock,
+		coreModules:     []modules.ModuleTest{mTest1},
 	}
 
 	p := pair{
@@ -374,7 +426,7 @@ func Test_runPair_error_get_ds_results(t *testing.T) {
 		},
 		test: &script.Script{
 			Name:       "s1_test",
-			Body:       []byte("a = 10"),
+			Body:       testFileBody,
 			IsTest:     true,
 			TestTarget: "s1",
 		},
@@ -410,10 +462,24 @@ func Test_runPair_error_get_storages_results(t *testing.T) {
 		},
 	}
 
+	mTest1 := &modules.ModuleTestMock{
+		NameFunc: func() string {
+			return "test"
+		},
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
+			return getLGFunc()
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {},
+	}
+
 	rnr := &Runner{
 		logger:          zap.NewNop(),
 		storagesManager: storageManagerMock,
 		dsManager:       dsManagerMock,
+		coreModules:     []modules.ModuleTest{mTest1},
 	}
 
 	p := pair{
@@ -424,7 +490,7 @@ func Test_runPair_error_get_storages_results(t *testing.T) {
 		},
 		test: &script.Script{
 			Name:       "s1_test",
-			Body:       []byte("a = 10"),
+			Body:       testFileBody,
 			IsTest:     true,
 			TestTarget: "s1",
 		},
@@ -478,12 +544,26 @@ func Test_runPair_error_get_core_module_results(t *testing.T) {
 		},
 	}
 
+	mTest1 := &modules.ModuleTestMock{
+		NameFunc: func() string {
+			return "test"
+		},
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
+			return getLGFunc()
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {},
+	}
+
 	rnr := &Runner{
 		logger:          zap.NewNop(),
 		storagesManager: storageManagerMock,
 		dsManager:       dsManagerMock,
 		coreModules: []modules.ModuleTest{
 			coreModule1,
+			mTest1,
 		},
 	}
 
@@ -495,7 +575,7 @@ func Test_runPair_error_get_core_module_results(t *testing.T) {
 		},
 		test: &script.Script{
 			Name:       "s1_test",
-			Body:       []byte("a = 10"),
+			Body:       testFileBody,
 			IsTest:     true,
 			TestTarget: "s1",
 		},
@@ -534,14 +614,28 @@ func Test_Run(t *testing.T) {
 	scriptMgrMock := &scriptManagerMock{}
 	scriptMgrMock.On("GetWithTests").Return([]*script.Script{
 		{Name: "s1", Body: []byte("a = 10"), IsTest: false},
-		{Name: "s1_test", Body: []byte("a = 10"), IsTest: true, TestTarget: "s1"},
+		{Name: "s1_test", Body: testFileBody, IsTest: true, TestTarget: "s1"},
 	}, nil)
+
+	mTest1 := &modules.ModuleTestMock{
+		NameFunc: func() string {
+			return "test"
+		},
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
+			return getLGFunc()
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {},
+	}
 
 	rnr := &Runner{
 		logger:          zap.NewNop(),
 		storagesManager: storageManagerMock,
 		dsManager:       dsManagerMock,
 		scriptsManager:  scriptMgrMock,
+		coreModules:     []modules.ModuleTest{mTest1},
 	}
 
 	res, ok, err := rnr.Run()
@@ -576,10 +670,23 @@ func Test_Run_error_runPair(t *testing.T) {
 		},
 	}
 
+	mTest1 := &modules.ModuleTestMock{
+		NameFunc: func() string {
+			return "test"
+		},
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
+			return getLGFunc()
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {},
+	}
+
 	scriptMgrMock := &scriptManagerMock{}
 	scriptMgrMock.On("GetWithTests").Return([]*script.Script{
 		{Name: "s1", Body: []byte{0x00}, IsTest: false},
-		{Name: "s1_test", Body: []byte("a = 10"), IsTest: true, TestTarget: "s1"},
+		{Name: "s1_test", Body: testFileBody, IsTest: true, TestTarget: "s1"},
 	}, nil)
 
 	rnr := &Runner{
@@ -587,6 +694,7 @@ func Test_Run_error_runPair(t *testing.T) {
 		storagesManager: storageManagerMock,
 		dsManager:       dsManagerMock,
 		scriptsManager:  scriptMgrMock,
+		coreModules:     []modules.ModuleTest{mTest1},
 	}
 
 	_, ok, err := rnr.Run()
@@ -620,10 +728,23 @@ func Test_Run_fail_tests(t *testing.T) {
 		},
 	}
 
+	mTest1 := &modules.ModuleTestMock{
+		NameFunc: func() string {
+			return "test"
+		},
+		GetLoaderFunc: func(_ modules.Job) lua.LGFunction {
+			return getLGFunc()
+		},
+		ResultFunc: func() ([]modules.TestResult, error) {
+			return []modules.TestResult{}, nil
+		},
+		CleanFunc: func() {},
+	}
+
 	scriptMgrMock := &scriptManagerMock{}
 	scriptMgrMock.On("GetWithTests").Return([]*script.Script{
 		{Name: "s1", Body: []byte("a = 10"), IsTest: false},
-		{Name: "s1_test", Body: []byte("a = 10"), IsTest: true, TestTarget: "s1"},
+		{Name: "s1_test", Body: testFileBody, IsTest: true, TestTarget: "s1"},
 	}, nil)
 
 	rnr := &Runner{
@@ -631,6 +752,7 @@ func Test_Run_fail_tests(t *testing.T) {
 		storagesManager: storageManagerMock,
 		dsManager:       dsManagerMock,
 		scriptsManager:  scriptMgrMock,
+		coreModules:     []modules.ModuleTest{mTest1},
 	}
 
 	res, ok, err := rnr.Run()

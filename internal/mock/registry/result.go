@@ -12,7 +12,7 @@ func (r *Registry) Result() []modules.TestResult {
 
 	// iterate over calls
 	for _, call := range r.calls {
-		// an assert for this call is not registered
+		// an assert for this call is not register
 		e, ok := r.getAssert(call)
 		if !ok {
 			continue

@@ -3,9 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/balerter/balerter/internal/modules"
-	"github.com/fatih/color"
 	"io"
+
+	"github.com/balerter/balerter/internal/modules"
+
+	"github.com/fatih/color"
 )
 
 func output(results []modules.TestResult, w io.Writer, asJSON bool) error {
@@ -29,7 +31,10 @@ func outputPlainColored(results []modules.TestResult, w io.Writer) error {
 		}
 
 		line += "\t[" + r.ScriptName + "]"
-		line += "\t[" + r.ModuleName + "]"
+		if r.TestFuncName != "" {
+			line += "\t[" + r.TestFuncName + "]"
+			line += "\t[" + r.ModuleName + "]"
+		}
 		line += "\t" + r.Message
 
 		_, err := fmt.Fprintf(w, "%s\n", line)
