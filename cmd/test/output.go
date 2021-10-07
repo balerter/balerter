@@ -33,9 +33,19 @@ func outputPlainColored(results []modules.TestResult, w io.Writer) error {
 		line += "\t[" + r.ScriptName + "]"
 		if r.TestFuncName != "" {
 			line += "\t[" + r.TestFuncName + "]"
-			line += "\t[" + r.ModuleName + "]"
+			if r.ModuleName != "" {
+				line += "\t[" + r.ModuleName + "]"
+			}
 		}
-		line += "\t" + r.Message
+
+		switch r.Message {
+		case "PASS":
+			line += "\t" + colorOk.Sprint("PASS")
+		case "FAIL":
+			line += "\t" + colorFail.Sprint("FAIL")
+		default:
+			line += "\t" + r.Message
+		}
 
 		_, err := fmt.Fprintf(w, "%s\n", line)
 		if err != nil {

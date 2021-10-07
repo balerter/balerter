@@ -176,7 +176,7 @@ func Test_runPair(t *testing.T) {
 	res, err := rnr.runPair(res, "pair", p)
 	require.NoError(t, err)
 
-	assert.Equal(t, 4, len(res))
+	assert.Equal(t, 5, len(res))
 
 	for _, r := range res {
 		assert.Equal(t, true, r.Ok)
@@ -248,7 +248,7 @@ func Test_runPair_with_fail_result(t *testing.T) {
 	res, err := rnr.runPair(res, "pair", p)
 	require.NoError(t, err)
 
-	assert.Equal(t, 2, len(res))
+	assert.Equal(t, 3, len(res))
 
 	r := res[0]
 	assert.Equal(t, false, r.Ok)
@@ -642,7 +642,7 @@ func Test_Run(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.True(t, ok)
-	assert.Equal(t, 1, len(res))
+	assert.Equal(t, 2, len(res))
 }
 
 func Test_Run_error_runPair(t *testing.T) {
@@ -758,5 +758,5 @@ func Test_Run_fail_tests(t *testing.T) {
 	res, ok, err := rnr.Run()
 	require.NoError(t, err)
 	assert.False(t, ok)
-	assert.Equal(t, 2, len(res))
+	assert.Equal(t, 3, len(res))
 }

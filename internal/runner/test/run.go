@@ -125,10 +125,30 @@ func (rnr *Runner) runPair(result []modules.TestResult, name string, pair pair) 
 			return nil, errRunTestFunc
 		}
 
+		funcTotalResult := true
+
 		for _, r := range funcResults {
+			if !r.Ok {
+				funcTotalResult = false
+			}
 			r.TestFuncName = fName
 			result = append(result, r)
 		}
+
+		funcResult := modules.TestResult{
+			ScriptName:   pair.test.Name,
+			TestFuncName: fName,
+			ModuleName:   "",
+			Message:      "PASS",
+			Ok:           true,
+		}
+
+		if !funcTotalResult {
+			funcResult.Ok = false
+			funcResult.Message = "FAIL"
+		}
+
+		result = append(result, funcResult)
 	}
 
 	// total script result
