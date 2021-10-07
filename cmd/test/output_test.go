@@ -13,15 +13,16 @@ func Test_outputJSON(t *testing.T) {
 
 	err := outputJSON([]modules.TestResult{
 		{
-			ScriptName: "a",
-			ModuleName: "b",
-			Message:    "c",
-			Ok:         true,
+			ScriptName:   "a",
+			TestFuncName: "z",
+			ModuleName:   "b",
+			Message:      "c",
+			Ok:           true,
 		},
 	}, buf)
 	require.NoError(t, err)
 
-	assert.Equal(t, `[{"script":"a","module":"b","message":"c","ok":true}]`, buf.String())
+	assert.Equal(t, `[{"script":"a","test":"z","module":"b","message":"c","ok":true}]`, buf.String())
 }
 
 func Test_outputPlainColored(t *testing.T) {
@@ -29,15 +30,16 @@ func Test_outputPlainColored(t *testing.T) {
 
 	err := outputPlainColored([]modules.TestResult{
 		{
-			ScriptName: "a",
-			ModuleName: "b",
-			Message:    "c",
-			Ok:         true,
+			ScriptName:   "a",
+			TestFuncName: "z",
+			ModuleName:   "b",
+			Message:      "c",
+			Ok:           true,
 		},
 	}, buf)
 	require.NoError(t, err)
 
-	assert.Equal(t, "[PASS]\t[a]\t[b]\tc\n", buf.String())
+	assert.Equal(t, "[PASS]\t[a]\t[z]\t[b]\tc\n", buf.String())
 }
 
 func Test_output(t *testing.T) {

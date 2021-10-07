@@ -6,6 +6,7 @@ import (
 	"github.com/balerter/balerter/internal/script/script"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+	"strings"
 	"time"
 )
 
@@ -86,21 +87,112 @@ func (rnr *Runner) runPair(result []modules.TestResult, name string, pair pair) 
 
 	// run test file
 	LTest := rnr.createLuaState(pair.test)
+	defer LTest.Close()
+
 	err := LTest.DoString(string(pair.test.Body))
 	if err != nil {
-		LTest.Close()
 		return nil, fmt.Errorf("error run test job, %w", err)
 	}
-	LTest.Close()
+
+	funcs := map[string]*lua.LFunction{}
+
+	var errLoadFuncs []string
+
+	testFuncs := LTest.Get(1)
+	if testFuncs.Type() != lua.LTTable {
+		return nil, fmt.Errorf("error parse test file, you must return a table with name/function values")
+	}
+
+	testFuncs.(*lua.LTable).ForEach(func(name lua.LValue, fn lua.LValue) {
+		if name.Type() != lua.LTString {
+			errLoadFuncs = append(errLoadFuncs, fmt.Sprintf("key must be a string, got '%s' in '%s'", name.Type().String(), name.String()))
+			return
+		}
+		if fn.Type() != lua.LTFunction {
+			errLoadFuncs = append(errLoadFuncs, fmt.Sprintf("value must be a function, got '%s' in '%s'", fn.Type().String(), fn.String()))
+			return
+		}
+		funcs[name.String()] = fn.(*lua.LFunction)
+	})
+
+	if len(errLoadFuncs) > 0 {
+		return nil, fmt.Errorf("error parse test file, %s", strings.Join(errLoadFuncs, ","))
+	}
+
+	for fName, f := range funcs {
+		funcResults, errRunTestFunc := rnr.runTestFunc(pair, f)
+		if errRunTestFunc != nil {
+			return nil, errRunTestFunc
+		}
+
+		funcTotalResult := true
+
+		for _, r := range funcResults {
+			if !r.Ok {
+				funcTotalResult = false
+			}
+			r.TestFuncName = fName
+			result = append(result, r)
+		}
+
+		funcResult := modules.TestResult{
+			ScriptName:   pair.test.Name,
+			TestFuncName: fName,
+			ModuleName:   "",
+			Message:      "PASS",
+			Ok:           true,
+		}
+
+		if !funcTotalResult {
+			funcResult.Ok = false
+			funcResult.Message = "FAIL"
+		}
+
+		result = append(result, funcResult)
+	}
+
+	// total script result
+	scriptResult := modules.TestResult{
+		ScriptName:   pair.test.Name,
+		TestFuncName: "",
+		ModuleName:   "",
+		Message:      "PASS",
+		Ok:           true,
+	}
+
+	for _, r := range result {
+		if !r.Ok {
+			scriptResult.Ok = false
+			scriptResult.Message = "FAIL"
+			break
+		}
+	}
+
+	result = append(result, scriptResult)
+
+	return result, nil
+}
+
+func (rnr *Runner) runTestFunc(pair pair, f *lua.LFunction) ([]modules.TestResult, error) {
+	var result []modules.TestResult
+
+	LTest := rnr.createLuaState(pair.test)
+	defer LTest.Close()
+
+	LTest.SetGlobal("__testfunc", f)
+	errRunTest := LTest.DoString("test = require('test')\n__testfunc(test)")
+	if errRunTest != nil {
+		return nil, fmt.Errorf("error run test %w", errRunTest)
+	}
 
 	// run main file
 	LMain := rnr.createLuaState(pair.main)
-	err = LMain.DoString(string(pair.main.Body))
-	if err != nil {
-		LMain.Close()
-		return nil, fmt.Errorf("error run main job, %w", err)
+	defer LMain.Close()
+
+	errRunMain := LMain.DoString(string(pair.main.Body))
+	if errRunMain != nil {
+		return nil, fmt.Errorf("error run main job, %w", errRunMain)
 	}
-	LMain.Close()
 
 	// collect datasources results
 	results, err := rnr.dsManager.Result()
@@ -136,24 +228,6 @@ func (rnr *Runner) runPair(result []modules.TestResult, name string, pair pair) 
 		}
 		mod.Clean()
 	}
-
-	// total script result
-	scriptResult := modules.TestResult{
-		ScriptName: pair.test.Name,
-		ModuleName: "RESULT",
-		Message:    "PASS",
-		Ok:         true,
-	}
-
-	for _, r := range result {
-		if !r.Ok {
-			scriptResult.Ok = false
-			scriptResult.Message = "FAIL"
-			break
-		}
-	}
-
-	result = append(result, scriptResult)
 
 	return result, nil
 }

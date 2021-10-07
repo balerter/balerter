@@ -182,7 +182,7 @@ func Test_getModule_no_storage(t *testing.T) {
 	n := f(luaState)
 	assert.Equal(t, 0, n)
 
-	assert.Equal(t, 1, logs.FilterMessage("storage not found").Len())
+	assert.Equal(t, 1, logs.FilterMessage("module not found").Len())
 }
 
 func Test_getModule(t *testing.T) {
@@ -202,7 +202,7 @@ func Test_getModule(t *testing.T) {
 			return &script.Script{}
 		},
 	}
-	f := tst.getModule("foo", j)
+	f := tst.getModule("test.storage", j)
 
 	luaState := lua.NewState()
 	luaState.Push(lua.LString("bar"))

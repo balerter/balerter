@@ -12,10 +12,11 @@ import (
 
 // TestResult represents test result
 type TestResult struct {
-	ScriptName string `json:"script"`
-	ModuleName string `json:"module"`
-	Message    string `json:"message"`
-	Ok         bool   `json:"ok"`
+	ScriptName   string `json:"script"`
+	TestFuncName string `json:"test"`
+	ModuleName   string `json:"module"`
+	Message      string `json:"message"`
+	Ok           bool   `json:"ok"`
 }
 
 type Job interface {
