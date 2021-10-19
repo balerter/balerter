@@ -1,14 +1,19 @@
 package postgres
 
+//go:generate moq -out dbpool_mock.go -skip-ensure -fmt goimports . dbpool
+
 import (
+	"context"
 	"fmt"
+	"github.com/jackc/pgx/v4/pgxpool"
+	"time"
+
 	"github.com/balerter/balerter/internal/config/datasources/postgres"
 	"github.com/balerter/balerter/internal/modules"
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq" // DB driver
+
+	"github.com/jackc/pgx/v4"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"time"
 )
 
 var (
@@ -27,19 +32,23 @@ func Methods() []string {
 	}
 }
 
+type dbpool interface {
+	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
+	Close()
+}
+
 // Postgres represents the datasource of the type Postgres
 type Postgres struct {
 	name    string
 	logger  *zap.Logger
-	db      *sqlx.DB
+	db      dbpool
 	timeout time.Duration
 }
 
-// SQLConnFunc represent SQL connection func
-type SQLConnFunc func(string, string) (*sqlx.DB, error)
+type SQLConnectFunc func(ctx context.Context, connString string) (*pgxpool.Pool, error)
 
 // New creates new Postgres datasource
-func New(cfg postgres.Postgres, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*Postgres, error) {
+func New(cfg postgres.Postgres, connFunc SQLConnectFunc, logger *zap.Logger) (*Postgres, error) {
 	p := &Postgres{
 		name:    ModuleName(cfg.Name),
 		logger:  logger,
@@ -59,24 +68,21 @@ func New(cfg postgres.Postgres, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*P
 		cfg.SSLMode,
 		cfg.SSLCertPath,
 	)
-	var err error
 
-	p.db, err = sqlConnFunc("postgres", pgConnString)
-	if err != nil {
-		return nil, err
+	db, errConnect := connFunc(context.Background(), pgConnString)
+	if errConnect != nil {
+		return nil, fmt.Errorf("error connect to to postgres, %w", errConnect)
 	}
 
-	if err := p.db.Ping(); err != nil {
-		p.db.Close()
-		return nil, err
-	}
+	p.db = db
 
 	return p, nil
 }
 
 // Stop the datasource
 func (m *Postgres) Stop() error {
-	return m.db.Close()
+	m.db.Close()
+	return nil
 }
 
 // Name returns the datasource name

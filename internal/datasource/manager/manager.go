@@ -9,6 +9,7 @@ import (
 	"github.com/balerter/balerter/internal/datasource/provider/prometheus"
 	"github.com/balerter/balerter/internal/modules"
 
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 )
@@ -52,7 +53,7 @@ func (m *Manager) Init(cfg *datasources.DataSources) error {
 	}
 
 	for idx := range cfg.Postgres {
-		module, err := postgres.New(cfg.Postgres[idx], sqlx.Connect, m.logger)
+		module, err := postgres.New(cfg.Postgres[idx], pgxpool.Connect, m.logger)
 		if err != nil {
 			return err
 		}

@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"context"
-	"github.com/balerter/balerter/internal/datasource/converter"
+	"fmt"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
@@ -15,7 +15,7 @@ func (m *Postgres) query(luaState *lua.LState) int {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), m.timeout)
 	defer ctxCancel()
 
-	rows, err := m.db.QueryContext(ctx, q)
+	rows, err := m.db.Query(ctx, q)
 	if err != nil {
 		m.logger.Error("error postgres query", zap.String("query", q), zap.Error(err))
 		luaState.Push(lua.LNil)
@@ -24,31 +24,21 @@ func (m *Postgres) query(luaState *lua.LState) int {
 	}
 	defer rows.Close()
 
-	cct, _ := rows.ColumnTypes()
-
-	dest := make([]interface{}, 0)
-	ffs := make([]func(v interface{}) lua.LValue, 0)
-
-	for range cct {
-		dest = append(dest, new([]byte))
-		ffs = append(ffs, converter.FromDateBytes)
-	}
-
 	result := &lua.LTable{}
 
 	for rows.Next() {
-		if err := rows.Scan(dest...); err != nil {
-			m.logger.Error("error scan", zap.Error(err))
+		values, errValues := rows.Values()
+		if errValues != nil {
+			m.logger.Error("error get values", zap.Error(errValues))
 			luaState.Push(lua.LNil)
-			luaState.Push(lua.LString("error scan: " + err.Error()))
+			luaState.Push(lua.LString("error get values: " + errValues.Error()))
 			return 2
 		}
 
 		row := &lua.LTable{}
 
-		for idx, c := range cct {
-			v := ffs[idx](dest[idx])
-			row.RawSet(lua.LString(c.Name()), v)
+		for idx, fd := range rows.FieldDescriptions() {
+			row.RawSet(lua.LString(fd.Name), lua.LString(fmt.Sprintf("%v", values[idx])))
 		}
 
 		result.Append(row)
