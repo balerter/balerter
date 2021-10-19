@@ -1,10 +1,12 @@
 package postgres
 
 import (
+	"context"
 	"fmt"
-	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/balerter/balerter/internal/config/datasources/postgres"
 	"github.com/balerter/balerter/internal/luaformatter"
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
@@ -14,19 +16,20 @@ import (
 )
 
 func TestQuery_ErrorQuery(t *testing.T) {
+	query := "simple query"
+
+	dbmock := &dbpoolMock{
+		QueryFunc: func(_ context.Context, sql string, args ...interface{}) (pgx.Rows, error) {
+			require.Equal(t, query, sql)
+			return nil, fmt.Errorf("err1")
+		},
+	}
+
 	m := &Postgres{
 		logger:  zap.NewNop(),
 		timeout: time.Second,
+		db:      dbmock,
 	}
-	mockDB, mock, err := sqlmock.New()
-	require.NoError(t, err)
-	defer mockDB.Close()
-
-	query := "simple query"
-
-	mock.ExpectQuery(query).WillReturnError(fmt.Errorf("err1"))
-
-	m.db = sqlx.NewDb(mockDB, "sqlmock")
 
 	luaState := lua.NewState()
 	luaState.Push(lua.LString(query))
@@ -41,23 +44,22 @@ func TestQuery_ErrorQuery(t *testing.T) {
 }
 
 func TestQuery(t *testing.T) {
-	db, dbmock, err := sqlmock.New()
-	require.NoError(t, err)
-	defer db.Close()
-
-	query := "simple query"
-
-	rows := sqlmock.NewRows([]string{"ID", "Name"}).
-		AddRow(1, "Foo").
-		AddRow(20, "Bar")
-
-	dbmock.ExpectQuery(query).WillReturnRows(rows)
-
-	m := &Postgres{
-		logger:  zap.NewNop(),
-		timeout: time.Second,
-		db:      sqlx.NewDb(db, "sqlmock"),
+	cfg := postgres.Postgres{
+		Name:        "pg1",
+		Host:        "127.0.0.1",
+		Port:        35432,
+		Username:    "postgres",
+		Password:    "secret",
+		Database:    "db",
+		SSLMode:     "disable",
+		SSLCertPath: "",
+		Timeout:     10000,
 	}
+
+	m, err := New(cfg, pgxpool.Connect, zap.NewNop())
+	require.NoError(t, err)
+
+	query := "select * from (values (1, 'Foo', true, null), (20, 'Bar', false, TIMESTAMP '2004-10-19 10:23:54+02')) as t(id, name, is_male, birthday)"
 
 	luaState := lua.NewState()
 	luaState.Push(lua.LString(query))
@@ -82,41 +84,6 @@ func TestQuery(t *testing.T) {
 	row2str, err := luaformatter.TableToString(row2.(*lua.LTable))
 	require.NoError(t, err)
 
-	assert.Equal(t, "{\"ID\":\"1\",\"Name\":\"Foo\"}", row1str)
-	assert.Equal(t, "{\"ID\":\"20\",\"Name\":\"Bar\"}", row2str)
-}
-
-func TestQuery_RowNextError(t *testing.T) {
-	db, dbmock, err := sqlmock.New()
-	require.NoError(t, err)
-	defer db.Close()
-
-	query := "simple query"
-
-	rows := sqlmock.NewRows([]string{"ID", "Name"}).
-		AddRow(1, "Foo").
-		AddRow(2, "Bar").
-		RowError(1, fmt.Errorf("err2"))
-
-	dbmock.ExpectQuery(query).WillReturnRows(rows)
-
-	m := &Postgres{
-		logger:  zap.NewNop(),
-		timeout: time.Second,
-		db:      sqlx.NewDb(db, "sqlmock"),
-	}
-
-	luaState := lua.NewState()
-	luaState.Push(lua.LString(query))
-
-	n := m.query(luaState)
-
-	assert.Equal(t, 2, n)
-
-	arg2 := luaState.Get(2)
-	arg3 := luaState.Get(3)
-
-	assert.Equal(t, arg2.Type(), lua.LTNil)
-	assert.Equal(t, arg3.Type(), lua.LTString)
-	assert.Equal(t, "error next: err2", arg3.String())
+	assert.Equal(t, `{"birthday":"<nil>","id":"1","is_male":"true","name":"Foo"}`, row1str)
+	assert.Equal(t, `{"birthday":"2004-10-19 10:23:54 +0000 UTC","id":"20","is_male":"false","name":"Bar"}`, row2str)
 }
