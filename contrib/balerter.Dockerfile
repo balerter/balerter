@@ -1,6 +1,6 @@
 FROM golang:1.17 AS build
 
-ENV CGO_ENABLED=0
+ENV CGO_ENABLED=1
 ENV GOOS=linux
 ENV GOARCH=amd64
 ENV GOFLAGS="-mod=vendor"
