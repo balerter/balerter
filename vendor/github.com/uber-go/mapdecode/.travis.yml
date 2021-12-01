@@ -1,0 +1,33 @@
+sudo: false
+language: go
+
+env:
+  global:
+    - GO15VENDOREXPERIMENT=1
+
+go:
+  - 1.7
+  - 1.8
+  - 1.9
+  - tip
+
+cache:
+  directories:
+    - vendor
+
+before_install:
+- go version
+
+install:
+- |
+  set -e
+  make install_ci
+
+script:
+- |
+  set -e
+  make lint
+  make test_ci
+
+  travis_retry goveralls -coverprofile=cover.out -service=travis-ci || true
+

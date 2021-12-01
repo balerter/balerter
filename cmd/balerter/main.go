@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	apiManager "github.com/balerter/balerter/internal/api/manager"
+	"github.com/balerter/balerter/internal/cadence"
 	"github.com/balerter/balerter/internal/corestorage"
 	alertModule "github.com/balerter/balerter/internal/modules/alert"
 	"github.com/balerter/balerter/internal/modules/meta"
@@ -169,6 +170,16 @@ func run(
 
 	lgr.Logger().Info("run runner")
 	go rnr.Watch(ctx, ctxCancel, flg.Once)
+
+	// ---------------------
+	// |
+	// | Cadence manager
+	// |
+	if cfg.Cadence != nil {
+		cad := cadence.New(cfg.Cadence, rnr, lgr.Logger())
+		wg.Add(1)
+		go cad.Run(ctx, ctxCancel, wg)
+	}
 
 	// ---------------------
 	// |

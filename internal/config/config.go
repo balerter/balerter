@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"github.com/balerter/balerter/internal/config/cadence"
 	"github.com/balerter/balerter/internal/config/secrets/env"
 	"github.com/balerter/balerter/internal/config/secrets/vault"
 	"io"
@@ -122,8 +123,10 @@ type Config struct {
 	StorageAlert string `json:"storageAlert" yaml:"storageAlert" hcl:"storageAlert,optional"`
 	// StorageKV item
 	StorageKV string `json:"storageKV" yaml:"storageKV" hcl:"storageKV,optional"`
-
+	// System section
 	System *system.System `json:"system" yaml:"system" hcl:"system,block"`
+	// Cadence section
+	Cadence *cadence.Cadence `json:"cadence" yaml:"cadence" hcl:"cadence,block"`
 }
 
 // Validate the config
@@ -161,6 +164,11 @@ func (cfg Config) Validate() error {
 	if cfg.System != nil {
 		if err := cfg.System.Validate(); err != nil {
 			return fmt.Errorf("error system validation, %w", err)
+		}
+	}
+	if cfg.Cadence != nil {
+		if err := cfg.Cadence.Validate(); err != nil {
+			return fmt.Errorf("error cadence validation, %w", err)
 		}
 	}
 

@@ -1,0 +1,12 @@
+package: github.com/uber-go/mapdecode
+import:
+- package: github.com/mitchellh/mapstructure
+- package: go.uber.org/multierr
+  version: ">= 0.1, < 2.0"
+testImport:
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert
+- package: github.com/golang/mock
+  subpackages:
+  - gomock

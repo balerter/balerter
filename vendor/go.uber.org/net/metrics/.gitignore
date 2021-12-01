@@ -1,0 +1,14 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+*.test
+*.out
+*.pprof
+.glide/
+vendor/
+/bin
+lint.log
+cover.html

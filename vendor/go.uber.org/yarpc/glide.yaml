@@ -1,0 +1,82 @@
+package: go.uber.org/yarpc
+homepage: https://github.com/yarpc/yarpc-go
+license: MIT
+import:
+- package: github.com/apache/thrift
+  version: 0.9.3 # TODO switch back to ^0.9.3 once Apache Thrift fixes https://issues.apache.org/jira/browse/THRIFT-4261
+- package: github.com/crossdock/crossdock-go
+  version: master
+- package: github.com/gogo/protobuf
+  version: '>=1, <1.3' # T4191773 - TODO: v1.3 breaks gRPC/Protobuf tests
+- package: github.com/gogo/googleapis
+  version: '>=1, <1.3' # T4191773 - not pinning to a version grabs latest master :/
+- package: github.com/mattn/go-shellwords
+  version: ^1
+- package: github.com/uber-go/mapdecode
+  version: '>=0.3, < 2.0'
+- package: github.com/opentracing/opentracing-go
+  version: ^1
+- package: go.uber.org/fx
+  version: ^1
+- package: go.uber.org/zap
+  version: ^1
+- package: github.com/uber/jaeger-client-go
+  version: '>=1, <3'
+- package: github.com/uber/tchannel-go
+  version: ^1.16.0
+- package: github.com/uber-go/tally
+  version: ^3
+- package: go.uber.org/atomic
+  version: ^1
+- package: go.uber.org/net/metrics
+  version: ^1
+- package: go.uber.org/thriftrw
+  version: ^1.25.0
+- package: golang.org/x/net
+  version: master
+  subpackages:
+  - context
+- package: google.golang.org/grpc
+  version: ^1.19.0
+  repo: https://github.com/grpc/grpc-go
+- package: golang.org/x/sys
+  # explicitly specifying this because glide is having issues with golang.org repos
+  # this is just a dependency of golang.org/x/net and if this problem is fixed
+  # then we no longer need to have this dependency in glide.yaml
+  repo: https://github.com/golang/sys
+- package: golang.org/x/tools
+  # explicitly specifying this because glide is having issues with golang.org repos
+  # this is just a dependency of golang.org/x/net and if this problem is fixed
+  # then we no longer need to have this dependency in glide.yaml imports
+  # we should then move it to testImports
+  repo: https://github.com/golang/tools
+- package: gopkg.in/yaml.v2
+- package: go.uber.org/multierr
+  version: '>= 0.1, < 2.0'
+- package: github.com/golang/mock
+  version: ^1
+- package: golang.org/x/lint
+  subpackages:
+  - golint
+- package: github.com/kisielk/errcheck
+- package: go.uber.org/tools
+  subpackages:
+  - update-license
+- package: honnef.co/go/tools
+  version: 2019.2.3
+  subpackages:
+  - cmd/staticcheck
+- package: github.com/gogo/status
+  version: ^1.1.0
+# Version 1.2.0 of prometheus/client_golang uses xxhash/v2, which we cannot
+# pull from Glide. Use older versions until we can upgrade to Go modules.
+- package: github.com/prometheus/client_golang
+  version: '>= 0.9, < 1.2.0'
+- package: github.com/dgryski/go-farm
+  version: master
+testImport:
+- package: github.com/stretchr/testify
+  # No version pin because some of our dependencies aren't pinning.
+  subpackages:
+  - assert
+  - require

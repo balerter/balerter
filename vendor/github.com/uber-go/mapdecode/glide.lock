@@ -1,0 +1,27 @@
+hash: accb17066faad853ceb103c17115c3a71b0eb1ccc08713da04a6047c36068480
+updated: 2017-05-31T17:00:43.982161135-07:00
+imports:
+- name: github.com/mitchellh/mapstructure
+  version: d0303fe809921458f417bcf828397a65db30a7e4
+- name: go.uber.org/atomic
+  version: 4e336646b2ef9fc6e47be8e21594178f98e5ebcf
+- name: go.uber.org/multierr
+  version: ef109dc7f883f3a99db2d89edc701c25cac40571
+testImports:
+- name: github.com/davecgh/go-spew
+  version: 346938d642f2ec3594ed81d874461961cd0faa76
+  subpackages:
+  - spew
+- name: github.com/golang/mock
+  version: bd3c8e81be01eef76d4b503f5e687d2d1354d2d9
+  subpackages:
+  - gomock
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: e964b172ca7f4c322ee4c39ea605ff53fab44f79
+  subpackages:
+  - assert
+  - require
