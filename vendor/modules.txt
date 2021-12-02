@@ -168,12 +168,13 @@ github.com/go-telegram-bot-api/telegram-bot-api
 # github.com/gofrs/uuid v4.0.0+incompatible
 ## explicit
 github.com/gofrs/uuid
-# github.com/gogo/googleapis v1.3.2
+# github.com/gogo/googleapis v1.4.1
 ## explicit; go 1.12
 github.com/gogo/googleapis/google/rpc
 # github.com/gogo/protobuf v1.3.2
 ## explicit; go 1.15
 github.com/gogo/protobuf/gogoproto
+github.com/gogo/protobuf/jsonpb
 github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/protoc-gen-gogo/descriptor
 github.com/gogo/protobuf/sortkeys
@@ -185,10 +186,10 @@ github.com/gogo/status
 ## explicit
 github.com/golang/freetype/raster
 github.com/golang/freetype/truetype
-# github.com/golang/mock v1.4.4
+# github.com/golang/mock v1.6.0
 ## explicit; go 1.11
 github.com/golang/mock/gomock
-# github.com/golang/protobuf v1.4.3
+# github.com/golang/protobuf v1.5.2
 ## explicit; go 1.9
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
@@ -209,7 +210,7 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/google/uuid v1.1.1
+# github.com/google/uuid v1.3.0
 ## explicit
 github.com/google/uuid
 # github.com/gorilla/mux v1.7.3
@@ -229,9 +230,12 @@ github.com/grafana/loki/pkg/loghttp
 github.com/grafana/loki/pkg/logproto
 github.com/grafana/loki/pkg/logql
 github.com/grafana/loki/pkg/logql/stats
-# github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
-## explicit
+# github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
+## explicit; go 1.14
 github.com/grpc-ecosystem/go-grpc-middleware
+github.com/grpc-ecosystem/go-grpc-middleware/retry
+github.com/grpc-ecosystem/go-grpc-middleware/util/backoffutils
+github.com/grpc-ecosystem/go-grpc-middleware/util/metautils
 # github.com/hashicorp/errwrap v1.0.0
 ## explicit
 github.com/hashicorp/errwrap
@@ -381,7 +385,7 @@ github.com/opentracing-contrib/go-stdlib/nethttp
 github.com/opentracing/opentracing-go
 github.com/opentracing/opentracing-go/ext
 github.com/opentracing/opentracing-go/log
-# github.com/pborman/uuid v1.2.0
+# github.com/pborman/uuid v1.2.1
 ## explicit
 github.com/pborman/uuid
 # github.com/pkg/errors v0.9.1
@@ -487,7 +491,7 @@ github.com/shurcooL/vfsgen
 # github.com/sirupsen/logrus v1.6.0
 ## explicit; go 1.13
 github.com/sirupsen/logrus
-# github.com/stretchr/objx v0.2.0
+# github.com/stretchr/objx v0.3.0
 ## explicit; go 1.12
 github.com/stretchr/objx
 # github.com/stretchr/testify v1.7.0
@@ -499,6 +503,9 @@ github.com/stretchr/testify/require
 # github.com/technoweenie/multipartstreamer v1.0.1
 ## explicit
 github.com/technoweenie/multipartstreamer
+# github.com/twmb/murmur3 v1.1.6
+## explicit; go 1.11
+github.com/twmb/murmur3
 # github.com/uber-go/mapdecode v1.0.0
 ## explicit
 github.com/uber-go/mapdecode
@@ -506,7 +513,11 @@ github.com/uber-go/mapdecode/internal/mapstructure
 # github.com/uber-go/tally v3.3.15+incompatible
 ## explicit
 github.com/uber-go/tally
-# github.com/uber/jaeger-client-go v2.25.0+incompatible
+# github.com/uber-go/tally/v4 v4.0.1
+## explicit; go 1.15
+github.com/uber-go/tally/v4
+github.com/uber-go/tally/v4/internal/identity
+# github.com/uber/jaeger-client-go v2.29.1+incompatible
 ## explicit
 github.com/uber/jaeger-client-go
 github.com/uber/jaeger-client-go/internal/baggage
@@ -520,7 +531,7 @@ github.com/uber/jaeger-client-go/thrift-gen/jaeger
 github.com/uber/jaeger-client-go/thrift-gen/sampling
 github.com/uber/jaeger-client-go/thrift-gen/zipkincore
 github.com/uber/jaeger-client-go/utils
-# github.com/uber/jaeger-lib v2.2.0+incompatible
+# github.com/uber/jaeger-lib v2.4.1+incompatible
 ## explicit
 github.com/uber/jaeger-lib/metrics
 # github.com/uber/tchannel-go v1.22.2
@@ -569,6 +580,42 @@ github.com/zclconf/go-cty/cty/function/stdlib
 github.com/zclconf/go-cty/cty/gocty
 github.com/zclconf/go-cty/cty/json
 github.com/zclconf/go-cty/cty/set
+# go.temporal.io/api v1.5.0
+## explicit; go 1.16
+go.temporal.io/api/command/v1
+go.temporal.io/api/common/v1
+go.temporal.io/api/enums/v1
+go.temporal.io/api/errordetails/v1
+go.temporal.io/api/failure/v1
+go.temporal.io/api/filter/v1
+go.temporal.io/api/history/v1
+go.temporal.io/api/namespace/v1
+go.temporal.io/api/query/v1
+go.temporal.io/api/replication/v1
+go.temporal.io/api/serviceerror
+go.temporal.io/api/taskqueue/v1
+go.temporal.io/api/version/v1
+go.temporal.io/api/workflow/v1
+go.temporal.io/api/workflowservice/v1
+go.temporal.io/api/workflowservicemock/v1
+# go.temporal.io/sdk v1.11.1
+## explicit; go 1.16
+go.temporal.io/sdk/activity
+go.temporal.io/sdk/client
+go.temporal.io/sdk/converter
+go.temporal.io/sdk/internal
+go.temporal.io/sdk/internal/common
+go.temporal.io/sdk/internal/common/backoff
+go.temporal.io/sdk/internal/common/cache
+go.temporal.io/sdk/internal/common/metrics
+go.temporal.io/sdk/internal/common/retry
+go.temporal.io/sdk/internal/common/serializer
+go.temporal.io/sdk/internal/common/util
+go.temporal.io/sdk/internal/log
+go.temporal.io/sdk/log
+go.temporal.io/sdk/temporal
+go.temporal.io/sdk/worker
+go.temporal.io/sdk/workflow
 # go.uber.org/atomic v1.9.0
 ## explicit; go 1.13
 go.uber.org/atomic
@@ -590,7 +637,7 @@ go.uber.org/cadence/internal/common/serializer
 go.uber.org/cadence/internal/common/util
 go.uber.org/cadence/worker
 go.uber.org/cadence/workflow
-# go.uber.org/goleak v1.0.0
+# go.uber.org/goleak v1.1.11
 ## explicit; go 1.13
 go.uber.org/goleak
 go.uber.org/goleak/internal/stack
@@ -678,14 +725,14 @@ golang.org/x/image/math/f64
 golang.org/x/image/math/fixed
 golang.org/x/image/tiff
 golang.org/x/image/tiff/lzw
-# golang.org/x/lint v0.0.0-20200302205851-738671d3881b
+# golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 ## explicit; go 1.11
 golang.org/x/lint
 golang.org/x/lint/golint
 # golang.org/x/mod v0.4.2
 ## explicit; go 1.12
 golang.org/x/mod/semver
-# golang.org/x/net v0.0.0-20210726213435-c6fcb2dbf985
+# golang.org/x/net v0.0.0-20210913180222-943fd674d43e
 ## explicit; go 1.17
 golang.org/x/net/bpf
 golang.org/x/net/context
@@ -711,14 +758,14 @@ golang.org/x/oauth2/internal
 # golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 ## explicit
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1
+# golang.org/x/sys v0.0.0-20210910150752-751e447fb3d0
 ## explicit; go 1.17
 golang.org/x/sys/execabs
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/text v0.3.6
-## explicit; go 1.11
+# golang.org/x/text v0.3.7
+## explicit; go 1.17
 golang.org/x/text/cases
 golang.org/x/text/internal
 golang.org/x/text/internal/language
@@ -732,7 +779,7 @@ golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
 golang.org/x/text/width
-# golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
+# golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 ## explicit
 golang.org/x/time/rate
 # golang.org/x/tools v0.1.5
@@ -764,8 +811,6 @@ golang.org/x/tools/internal/typesinternal
 ## explicit; go 1.11
 golang.org/x/xerrors
 golang.org/x/xerrors/internal
-# gonum.org/v1/gonum v0.6.2
-## explicit; go 1.12
 # gonum.org/v1/plot v0.0.0-20200212202559-4d97eda4de95
 ## explicit; go 1.12
 gonum.org/v1/plot
@@ -788,10 +833,10 @@ google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/remote_api
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/urlfetch
-# google.golang.org/genproto v0.0.0-20200825200019-8632dd797987
+# google.golang.org/genproto v0.0.0-20210909211513-a8c4777a87af
 ## explicit; go 1.11
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.31.0
+# google.golang.org/grpc v1.40.0
 ## explicit; go 1.11
 google.golang.org/grpc
 google.golang.org/grpc/attributes
@@ -804,10 +849,10 @@ google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/codes
 google.golang.org/grpc/connectivity
 google.golang.org/grpc/credentials
-google.golang.org/grpc/credentials/internal
 google.golang.org/grpc/encoding
 google.golang.org/grpc/encoding/proto
 google.golang.org/grpc/grpclog
+google.golang.org/grpc/health/grpc_health_v1
 google.golang.org/grpc/internal
 google.golang.org/grpc/internal/backoff
 google.golang.org/grpc/internal/balancerload
@@ -820,12 +865,16 @@ google.golang.org/grpc/internal/grpclog
 google.golang.org/grpc/internal/grpcrand
 google.golang.org/grpc/internal/grpcsync
 google.golang.org/grpc/internal/grpcutil
+google.golang.org/grpc/internal/metadata
+google.golang.org/grpc/internal/resolver
 google.golang.org/grpc/internal/resolver/dns
 google.golang.org/grpc/internal/resolver/passthrough
+google.golang.org/grpc/internal/resolver/unix
 google.golang.org/grpc/internal/serviceconfig
 google.golang.org/grpc/internal/status
 google.golang.org/grpc/internal/syscall
 google.golang.org/grpc/internal/transport
+google.golang.org/grpc/internal/transport/networktype
 google.golang.org/grpc/keepalive
 google.golang.org/grpc/metadata
 google.golang.org/grpc/peer
@@ -834,14 +883,16 @@ google.golang.org/grpc/serviceconfig
 google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
-# google.golang.org/protobuf v1.26.0-rc.1
+# google.golang.org/protobuf v1.27.1
 ## explicit; go 1.9
+google.golang.org/protobuf/encoding/protojson
 google.golang.org/protobuf/encoding/prototext
 google.golang.org/protobuf/encoding/protowire
 google.golang.org/protobuf/internal/descfmt
 google.golang.org/protobuf/internal/descopts
 google.golang.org/protobuf/internal/detrand
 google.golang.org/protobuf/internal/encoding/defval
+google.golang.org/protobuf/internal/encoding/json
 google.golang.org/protobuf/internal/encoding/messageset
 google.golang.org/protobuf/internal/encoding/tag
 google.golang.org/protobuf/internal/encoding/text
@@ -857,10 +908,12 @@ google.golang.org/protobuf/internal/set
 google.golang.org/protobuf/internal/strs
 google.golang.org/protobuf/internal/version
 google.golang.org/protobuf/proto
+google.golang.org/protobuf/reflect/protodesc
 google.golang.org/protobuf/reflect/protoreflect
 google.golang.org/protobuf/reflect/protoregistry
 google.golang.org/protobuf/runtime/protoiface
 google.golang.org/protobuf/runtime/protoimpl
+google.golang.org/protobuf/types/descriptorpb
 google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/emptypb

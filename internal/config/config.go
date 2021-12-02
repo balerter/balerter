@@ -7,6 +7,7 @@ import (
 	"github.com/balerter/balerter/internal/config/cadence"
 	"github.com/balerter/balerter/internal/config/secrets/env"
 	"github.com/balerter/balerter/internal/config/secrets/vault"
+	"github.com/balerter/balerter/internal/config/temporalio"
 	"io"
 	"os"
 	"regexp"
@@ -127,6 +128,8 @@ type Config struct {
 	System *system.System `json:"system" yaml:"system" hcl:"system,block"`
 	// Cadence section
 	Cadence *cadence.Cadence `json:"cadence" yaml:"cadence" hcl:"cadence,block"`
+	// Temporalio section
+	Temporalio *temporalio.Temporalio `json:"temporalio" yaml:"temporalio" hcl:"temporalio,block"`
 }
 
 // Validate the config
@@ -169,6 +172,11 @@ func (cfg Config) Validate() error {
 	if cfg.Cadence != nil {
 		if err := cfg.Cadence.Validate(); err != nil {
 			return fmt.Errorf("error cadence validation, %w", err)
+		}
+	}
+	if cfg.Temporalio != nil {
+		if err := cfg.Temporalio.Validate(); err != nil {
+			return fmt.Errorf("error temporalio validation, %w", err)
 		}
 	}
 

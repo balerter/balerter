@@ -2,10 +2,6 @@
 
 Goroutine leak detector to help avoid Goroutine leaks.
 
-## Development Status: Alpha
-
-goleak is still in development, and APIs are still in flux.
-
 ## Installation
 
 You can use `go get` to get the latest version:
@@ -50,7 +46,7 @@ $ go test -c -o tests
 
 # Run each test individually, printing "." for successful tests, or the test name
 # for failing tests.
-$ for test in $(go test -list . | grep "^Test"); do ./tests -test.run "^$test\$" &>/dev/null && echo -n "." || echo "\n$test failed"; done
+$ for test in $(go test -list . | grep -E "^(Test|Example)"); do ./tests -test.run "^$test\$" &>/dev/null && echo -n "." || echo -e "\n$test failed"; done
 ```
 
 This will only print names of failing tests which can be investigated individually. E.g.,
@@ -61,10 +57,15 @@ TestLeakyTest failed
 .......
 ```
 
+## Stability
+
+goleak is v1 and follows [SemVer](http://semver.org/) strictly.
+
+No breaking changes will be made to exported APIs before 2.0.
 
 [doc-img]: https://godoc.org/go.uber.org/goleak?status.svg
 [doc]: https://godoc.org/go.uber.org/goleak
-[ci-img]: https://travis-ci.com/uber-go/goleak.svg?branch=master
-[ci]: https://travis-ci.com/uber-go/goleak
+[ci-img]: https://github.com/uber-go/goleak/actions/workflows/go.yml/badge.svg
+[ci]: https://github.com/uber-go/goleak/actions/workflows/go.yml
 [cov-img]: https://codecov.io/gh/uber-go/goleak/branch/master/graph/badge.svg
 [cov]: https://codecov.io/gh/uber-go/goleak

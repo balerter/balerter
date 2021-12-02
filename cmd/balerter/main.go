@@ -10,6 +10,7 @@ import (
 	alertModule "github.com/balerter/balerter/internal/modules/alert"
 	"github.com/balerter/balerter/internal/modules/meta"
 	"github.com/balerter/balerter/internal/service"
+	"github.com/balerter/balerter/internal/temporalio"
 	"log"
 	"net"
 	"os"
@@ -177,6 +178,16 @@ func run(
 	// |
 	if cfg.Cadence != nil {
 		cad := cadence.New(cfg.Cadence, rnr, lgr.Logger())
+		wg.Add(1)
+		go cad.Run(ctx, ctxCancel, wg)
+	}
+
+	// ---------------------
+	// |
+	// | Temporalio manager
+	// |
+	if cfg.Temporalio != nil {
+		cad := temporalio.New(cfg.Temporalio, rnr, lgr.Logger())
 		wg.Add(1)
 		go cad.Run(ctx, ctxCancel, wg)
 	}
