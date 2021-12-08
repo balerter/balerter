@@ -619,3 +619,43 @@ func TestAlert_call_level_was_not_updated(t *testing.T) {
 	assert.Equal(t, 0, n)
 	assert.Equal(t, 0, len(chManager.SendCalls()))
 }
+
+func TestAlert_call_repeat(t *testing.T) {
+	ra := &alert2.Alert{
+		Count: 10,
+	}
+
+	am := &corestorage.AlertMock{}
+	am.On("Update", mock.Anything, mock.Anything).Return(ra, false, nil)
+
+	chManager := &chManagerMock{
+		SendFunc: func(_ *alert2.Alert, _ string, _ *alert2.Options) {
+
+		},
+	}
+
+	a := &Alert{
+		logger:    zap.NewNop(),
+		storage:   am,
+		chManager: chManager,
+	}
+
+	j := &modules.JobMock{
+		ScriptFunc: func() *script.Script {
+			return &script.Script{}
+		},
+	}
+
+	f := a.call(j.Script().Channels, alert2.LevelError)
+
+	ls := lua.NewState()
+	ls.Push(lua.LString("id"))
+	ls.Push(lua.LString("text"))
+	opts := &lua.LTable{}
+	opts.RawSetString("resend", lua.LNumber(2))
+	ls.Push(opts)
+
+	n := f(ls)
+	assert.Equal(t, 0, n)
+	assert.Equal(t, 1, len(chManager.SendCalls()))
+}
