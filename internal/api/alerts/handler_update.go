@@ -57,7 +57,7 @@ func (a *Alerts) handlerUpdate(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if levelWasUpdated {
+	if levelWasUpdated || (payload.Repeat > 0 && updatedAlert.Count%payload.Repeat == 0) {
 		a.chManager.Send(updatedAlert, payload.Text, &alert.Options{
 			Channels: payload.Channels,
 			Quiet:    payload.Quiet,
