@@ -154,7 +154,7 @@ func (a *Alert) call(scriptChannels []string, alertLevel alert.Level) lua.LGFunc
 			return 1
 		}
 
-		if levelWasUpdated {
+		if levelWasUpdated || (options.Repeat > 0 && updatedAlert.Count%options.Repeat == 0) {
 			a.chManager.Send(updatedAlert, text, options)
 		}
 
