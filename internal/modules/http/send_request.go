@@ -3,9 +3,10 @@ package http
 import (
 	"bytes"
 	"fmt"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 func (h *HTTP) sendRequest(args *requestArgs) (*response, error) {
@@ -18,7 +19,9 @@ func (h *HTTP) sendRequest(args *requestArgs) (*response, error) {
 		req.Header.Set(name, value)
 	}
 
-	resp, err := h.client.Do(req)
+	client := h.createClientFunc(args.Timeout, args.InsecureSkipVerify)
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}

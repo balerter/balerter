@@ -1,11 +1,14 @@
 package http
 
 import (
-	"github.com/balerter/balerter/internal/modules"
-	lua "github.com/yuin/gopher-lua"
-	"go.uber.org/zap"
+	"crypto/tls"
 	"net/http"
 	"time"
+
+	"github.com/balerter/balerter/internal/modules"
+
+	lua "github.com/yuin/gopher-lua"
+	"go.uber.org/zap"
 )
 
 //go:generate moq -out http_client_mock.go -skip-ensure -fmt goimports . httpClient
@@ -31,27 +34,44 @@ func Methods() []string {
 }
 
 type httpClient interface {
-	CloseIdleConnections()
 	Do(r *http.Request) (*http.Response, error)
 }
 
+type createClient func(timeout time.Duration, insecureSkipVerify bool) httpClient
+
 // HTTP represents the HTTP core module
 type HTTP struct {
-	logger *zap.Logger
-	client httpClient
+	logger           *zap.Logger
+	createClientFunc createClient
 }
 
 // New creates HTTP core module
 func New(logger *zap.Logger) *HTTP {
 	h := &HTTP{
-		logger: logger,
-	}
-
-	h.client = &http.Client{
-		Timeout: defaultTimeout,
+		logger:           logger,
+		createClientFunc: createHTTPClient,
 	}
 
 	return h
+}
+
+func createHTTPClient(timeout time.Duration, insecureSkipVerify bool) httpClient {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: insecureSkipVerify,
+		},
+	}
+
+	if timeout == 0 {
+		timeout = defaultTimeout
+	}
+
+	client := &http.Client{
+		Transport: tr,
+		Timeout:   timeout,
+	}
+
+	return client
 }
 
 // Name returns the module name
@@ -91,7 +111,5 @@ func (h *HTTP) GetLoader(_ modules.Job) lua.LGFunction {
 
 // Stop the module
 func (h *HTTP) Stop() error {
-	h.client.CloseIdleConnections()
-
 	return nil
 }

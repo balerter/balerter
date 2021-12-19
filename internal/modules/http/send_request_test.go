@@ -3,13 +3,15 @@ package http
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"net/http"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
-	"io"
-	"net/http"
-	"testing"
 )
 
 func TestHTTP_sendRequest_error_new_request(t *testing.T) {
@@ -30,7 +32,7 @@ func TestHTTP_sendRequest_error_do_request(t *testing.T) {
 	}
 
 	h := &HTTP{
-		client: hm,
+		createClientFunc: func(_ time.Duration, _ bool) httpClient { return hm },
 	}
 	args := &requestArgs{}
 	_, err := h.sendRequest(args)
@@ -54,7 +56,7 @@ func TestHTTP_sendRequest_error_read_response_body(t *testing.T) {
 	}
 
 	h := &HTTP{
-		client: hm,
+		createClientFunc: func(_ time.Duration, _ bool) httpClient { return hm },
 	}
 	args := &requestArgs{}
 	_, err := h.sendRequest(args)
@@ -77,8 +79,8 @@ func TestHTTP_sendRequest_multiple_response_header_values(t *testing.T) {
 	core, logs := observer.New(zap.DebugLevel)
 
 	h := &HTTP{
-		client: hm,
-		logger: zap.New(core),
+		createClientFunc: func(_ time.Duration, _ bool) httpClient { return hm },
+		logger:           zap.New(core),
 	}
 	args := &requestArgs{
 		Headers: map[string]string{"a": "b"},
