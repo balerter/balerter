@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"testing"
+	"time"
 )
 
 func TestHTTP_send_error_parseRequestArgs(t *testing.T) {
@@ -33,8 +34,8 @@ func TestHTTP_send_error_send_request(t *testing.T) {
 	}
 
 	h := &HTTP{
-		logger: zap.NewNop(),
-		client: hc,
+		logger:           zap.NewNop(),
+		createClientFunc: func(_ time.Duration, _ bool) httpClient { return hc },
 	}
 
 	f := h.send("POST")
@@ -59,8 +60,8 @@ func TestHTTP_send(t *testing.T) {
 	}
 
 	h := &HTTP{
-		logger: zap.NewNop(),
-		client: hc,
+		logger:           zap.NewNop(),
+		createClientFunc: func(_ time.Duration, _ bool) httpClient { return hc },
 	}
 
 	f := h.send("POST")
@@ -111,8 +112,8 @@ func TestHTTP_request_error_send_request(t *testing.T) {
 	}
 
 	h := &HTTP{
-		logger: zap.NewNop(),
-		client: hc,
+		logger:           zap.NewNop(),
+		createClientFunc: func(_ time.Duration, _ bool) httpClient { return hc },
 	}
 
 	ls := lua.NewState()
@@ -134,8 +135,8 @@ func TestHTTP_request(t *testing.T) {
 	}
 
 	h := &HTTP{
-		logger: zap.NewNop(),
-		client: hc,
+		logger:           zap.NewNop(),
+		createClientFunc: func(_ time.Duration, _ bool) httpClient { return hc },
 	}
 
 	ls := lua.NewState()

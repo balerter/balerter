@@ -60,14 +60,6 @@ func TestName(t *testing.T) {
 }
 
 func TestHTTP_Stop(t *testing.T) {
-	hm := &httpClientMock{CloseIdleConnectionsFunc: func() {}}
-
-	h := &HTTP{
-		client: hm,
-	}
+	h := &HTTP{}
 	assert.NoError(t, h.Stop())
-
-	s := hm.CloseIdleConnectionsCalls()
-
-	assert.Equal(t, 1, len(s))
 }

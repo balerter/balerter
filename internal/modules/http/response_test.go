@@ -1,10 +1,11 @@
 package http
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
-	"testing"
 )
 
 func Test_response_toLuaTable(t *testing.T) {

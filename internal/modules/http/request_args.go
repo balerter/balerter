@@ -2,15 +2,19 @@ package http
 
 import (
 	"fmt"
-	lua "github.com/yuin/gopher-lua"
 	"strings"
+	"time"
+
+	lua "github.com/yuin/gopher-lua"
 )
 
 type requestArgs struct {
-	Method  string            `json:"method"`
-	URI     string            `json:"uri"`
-	Body    []byte            `json:"body"`
-	Headers map[string]string `json:"headers"`
+	Method             string            `json:"method"`
+	URI                string            `json:"uri"`
+	Body               []byte            `json:"body"`
+	Headers            map[string]string `json:"headers"`
+	Timeout            time.Duration     `json:"timeout"`
+	InsecureSkipVerify bool              `json:"insecure_skip_verify"`
 }
 
 func newRequestArgs() *requestArgs {
@@ -39,6 +43,23 @@ func (r *requestArgs) parseFromTable(tbl *lua.LTable) error {
 	bodyValue := tbl.RawGetString("body")
 	if bodyValue.Type() != lua.LTNil {
 		r.Body = []byte(bodyValue.String())
+	}
+
+	skipVerifyValue := tbl.RawGetString("insecureSkipVerify")
+	if skipVerifyValue.Type() != lua.LTNil {
+		if skipVerifyValue.Type() != lua.LTBool {
+			return fmt.Errorf("insecureSkipVerify must be a bool")
+		}
+		r.InsecureSkipVerify = skipVerifyValue.String() == "true"
+	}
+
+	timeoutValue := tbl.RawGetString("timeout")
+	if timeoutValue.Type() != lua.LTNil {
+		timeoutDuration, errParseTimeout := time.ParseDuration(timeoutValue.String())
+		if errParseTimeout != nil {
+			return fmt.Errorf("timeout must be a time.Duration")
+		}
+		r.Timeout = timeoutDuration
 	}
 
 	headersValue := tbl.RawGetString("headers")

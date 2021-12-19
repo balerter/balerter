@@ -1,17 +1,17 @@
 package http
 
 import (
-	lua "github.com/yuin/gopher-lua"
-	"go.uber.org/zap"
-	"net/http"
 	"reflect"
 	"testing"
+	"time"
+
+	lua "github.com/yuin/gopher-lua"
+	"go.uber.org/zap"
 )
 
 func TestHTTP_parseRequestArgs(t *testing.T) {
 	type fields struct {
 		logger *zap.Logger
-		client *http.Client
 	}
 	type args struct {
 		luaState *lua.LState
@@ -142,7 +142,6 @@ func TestHTTP_parseRequestArgs(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			h := &HTTP{
 				logger: tt.fields.logger,
-				client: tt.fields.client,
 			}
 			got, err := h.parseRequestArgs(tt.args.luaState)
 			if (err != nil) != tt.wantErr {
@@ -195,10 +194,12 @@ func Test_parseMethod(t *testing.T) {
 
 func Test_requestArgs_parseFromTable(t *testing.T) {
 	type fields struct {
-		Method  string
-		URI     string
-		Body    []byte
-		Headers map[string]string
+		Method             string
+		URI                string
+		Body               []byte
+		Headers            map[string]string
+		InsecureSkipVerify bool
+		Timeout            time.Duration
 	}
 	type args struct {
 		tbl func() *lua.LTable
@@ -264,7 +265,7 @@ func Test_requestArgs_parseFromTable(t *testing.T) {
 			errValue: "headers must be a table",
 		},
 		{
-			name: "ok",
+			name: "bad insecureSkipVerify",
 			fields: fields{
 				Method:  "GET",
 				URI:     "uri",
@@ -277,6 +278,59 @@ func Test_requestArgs_parseFromTable(t *testing.T) {
 					tbl.RawSetString("method", lua.LString("get"))
 					tbl.RawSetString("uri", lua.LString("uri"))
 					tbl.RawSetString("body", lua.LString("foo"))
+					tbl.RawSetString("insecureSkipVerify", lua.LString("foo"))
+					h := &lua.LTable{}
+					h.RawSetString("a", lua.LString("b"))
+					tbl.RawSetString("headers", h)
+					return tbl
+				},
+			},
+			wantErr:  true,
+			errValue: "insecureSkipVerify must be a bool",
+		},
+		{
+			name: "bad timeout",
+			fields: fields{
+				Method:  "GET",
+				URI:     "uri",
+				Body:    []byte("foo"),
+				Headers: map[string]string{"a": "b"},
+			},
+			args: args{
+				tbl: func() *lua.LTable {
+					tbl := &lua.LTable{}
+					tbl.RawSetString("method", lua.LString("get"))
+					tbl.RawSetString("uri", lua.LString("uri"))
+					tbl.RawSetString("body", lua.LString("foo"))
+					tbl.RawSetString("insecureSkipVerify", lua.LBool(true))
+					tbl.RawSetString("timeout", lua.LString("10r"))
+					h := &lua.LTable{}
+					h.RawSetString("a", lua.LString("b"))
+					tbl.RawSetString("headers", h)
+					return tbl
+				},
+			},
+			wantErr:  true,
+			errValue: "timeout must be a time.Duration",
+		},
+		{
+			name: "ok",
+			fields: fields{
+				Method:             "GET",
+				URI:                "uri",
+				Body:               []byte("foo"),
+				Headers:            map[string]string{"a": "b"},
+				InsecureSkipVerify: true,
+				Timeout:            time.Second * 10,
+			},
+			args: args{
+				tbl: func() *lua.LTable {
+					tbl := &lua.LTable{}
+					tbl.RawSetString("method", lua.LString("get"))
+					tbl.RawSetString("uri", lua.LString("uri"))
+					tbl.RawSetString("body", lua.LString("foo"))
+					tbl.RawSetString("insecureSkipVerify", lua.LBool(true))
+					tbl.RawSetString("timeout", lua.LString("10s"))
 					h := &lua.LTable{}
 					h.RawSetString("a", lua.LString("b"))
 					tbl.RawSetString("headers", h)
