@@ -1,7 +1,7 @@
 version: '3'
 services:
   clickhouse:
-    image: yandex/clickhouse-server:21.7.5.29-alpine
+    image: yandex/clickhouse-server:21.3.20.1-alpine
     ports:
       - 9000:9000
   postgres:
@@ -13,7 +13,7 @@ services:
     ports:
       - 35432:5432
   mysql:
-    image: mysql:8.0.26
+    image: mysql/mysql-server:8.0.28
     environment:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_USER: mysql
