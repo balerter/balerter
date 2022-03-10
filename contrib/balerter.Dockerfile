@@ -13,7 +13,7 @@ ADD . /build/balerter
 
 RUN go build -o /balerter -ldflags "-X main.version=${version} -s -w"  ./cmd/balerter
 
-FROM  ubuntu:20.10
+FROM  ubuntu:20.04
 COPY --from=build /balerter /
 COPY --from=build /build/balerter/modules /modules
 
