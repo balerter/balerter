@@ -2,11 +2,12 @@ package telegram
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/balerter/balerter/internal/channels/telegram/api"
 	"github.com/balerter/balerter/internal/message"
+
 	"go.uber.org/zap"
-	"strconv"
-	"strings"
 )
 
 // Send the message to the channel
@@ -20,8 +21,6 @@ func (tg *Telegram) Send(mes *message.Message) error {
 			tg.logger.Error("error send photo", zap.Error(err))
 		}
 	}
-
-	mes.Text = escapeTgMarkdown(mes.Text)
 
 	if len(mes.Fields) > 0 {
 		mes.Text += addFields(mes.Fields)
@@ -50,13 +49,4 @@ func maxKeyLen(fields map[string]string) int {
 		}
 	}
 	return max
-}
-
-var shouldBeEscaped = []string{"_", "*", "[", "]", "(", ")", "~", "`", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!"}
-
-func escapeTgMarkdown(s string) string {
-	for _, sym := range shouldBeEscaped {
-		s = strings.Replace(s, sym, "\\"+sym, -1)
-	}
-	return s
 }
