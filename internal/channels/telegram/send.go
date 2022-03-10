@@ -14,16 +14,17 @@ import (
 func (tg *Telegram) Send(mes *message.Message) error {
 	tg.logger.Debug("tg send message")
 
+	if len(mes.Fields) > 0 {
+		mes.Text += addFields(mes.Fields)
+	}
+
 	if mes.Image != "" {
-		tgMessage := api.NewPhotoMessage(tg.chatID, mes.Image, "")
+		tgMessage := api.NewPhotoMessage(tg.chatID, mes.Image, mes.Text)
 		err := tg.api.SendPhotoMessage(tgMessage)
 		if err != nil {
 			tg.logger.Error("error send photo", zap.Error(err))
 		}
-	}
-
-	if len(mes.Fields) > 0 {
-		mes.Text += addFields(mes.Fields)
+		return nil
 	}
 
 	tgMessage := api.NewTextMessage(tg.chatID, mes.Text)
