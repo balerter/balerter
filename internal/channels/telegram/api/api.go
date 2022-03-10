@@ -13,9 +13,6 @@ import (
 const (
 	apiEndpoint              = "https://api.telegram.org/bot"
 	defaultHTTPClientTimeout = time.Second * 5
-
-	methodSendMessage = "sendMessage"
-	methodSendPhoto   = "sendPhoto"
 )
 
 // API represents the Telegram API

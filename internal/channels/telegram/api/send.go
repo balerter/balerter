@@ -5,27 +5,74 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
+	"strconv"
+	"strings"
+)
+
+const (
+	methodSendMessage = "sendMessage"
+	methodSendPhoto   = "sendPhoto"
 )
 
 // SendPhotoMessage send PhotoMessage to the Telegram API
 func (api *API) SendPhotoMessage(mes *PhotoMessage) error {
-	body, err := json.Marshal(mes)
-	if err != nil {
-		return fmt.Errorf("error marshaling a message, %w", err)
+	fields := map[string]string{
+		"chat_id":    strconv.Itoa(int(mes.ChatID)),
+		"photo":      mes.Photo,
+		"caption":    mes.Caption,
+		"parse_mode": "MarkdownV2",
 	}
 
-	return api.sendMessage(body, methodSendPhoto)
+	return api.sendMessage(fields, methodSendPhoto)
 }
 
 // SendTextMessage send TextMessage to the Telegram API
 func (api *API) SendTextMessage(mes *TextMessage) error {
-	body, err := json.Marshal(mes)
-	if err != nil {
-		return fmt.Errorf("error marshaling a message, %w", err)
+	fields := map[string]string{
+		"chat_id":    strconv.Itoa(int(mes.ChatID)),
+		"text":       mes.Text,
+		"parse_mode": "MarkdownV2",
 	}
 
-	return api.sendMessage(body, methodSendMessage)
+	return api.sendMessage(fields, methodSendMessage)
+}
+
+func (api *API) buildMultipartBody(fields map[string]string) (string, *bytes.Buffer, error) {
+	buf := bytes.NewBuffer(nil)
+
+	w := multipart.NewWriter(buf)
+
+	for k, v := range fields {
+		var f io.Writer
+		var e error
+
+		switch k {
+		case "photo":
+			if strings.HasPrefix(v, "http") {
+				f, e = w.CreateFormField(k)
+			} else {
+				f, e = w.CreateFormFile(k, "image.png")
+			}
+		default:
+			f, e = w.CreateFormField(k)
+		}
+		if e != nil {
+			return "", nil, fmt.Errorf("error create field %s, %w", k, e)
+		}
+		_, errCopy := io.Copy(f, bytes.NewBufferString(v))
+		if errCopy != nil {
+			return "", nil, fmt.Errorf("error copy value for field %s", k)
+		}
+	}
+
+	errClose := w.Close()
+	if errClose != nil {
+		return "", nil, fmt.Errorf("error close writer, %w", errClose)
+	}
+
+	return w.FormDataContentType(), buf, nil
 }
 
 type tgResponse struct {
@@ -34,29 +81,34 @@ type tgResponse struct {
 	Description string `json:"description,omitempty"`
 }
 
-func (api *API) sendMessage(body []byte, method string) error {
-	req, err := http.NewRequest(http.MethodPost, api.endpoint+method, bytes.NewReader(body))
-	if err != nil {
-		return fmt.Errorf("error generate request to telegram, %w", err)
+func (api *API) sendMessage(fields map[string]string, method string) error {
+	contentType, body, errBuildBody := api.buildMultipartBody(fields)
+	if errBuildBody != nil {
+		return fmt.Errorf("error build body, %w", errBuildBody)
 	}
-	req.Header.Add("Content-type", "application/json")
 
-	res, err := api.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("error send request, %w", err)
+	req, errCreateRequest := http.NewRequest(http.MethodPost, api.endpoint+method, body)
+	if errCreateRequest != nil {
+		return fmt.Errorf("error generate request to telegram, %w", errCreateRequest)
+	}
+	req.Header.Add("Content-type", contentType)
+
+	res, errDo := api.httpClient.Do(req)
+	if errDo != nil {
+		return fmt.Errorf("error send request, %w", errDo)
 	}
 
 	defer res.Body.Close()
 
-	body, err = io.ReadAll(res.Body)
-	if err != nil {
-		return fmt.Errorf("error read response body, %w", err)
+	respBody, errReadRespBody := io.ReadAll(res.Body)
+	if errReadRespBody != nil {
+		return fmt.Errorf("error read response body, %w", errReadRespBody)
 	}
 
 	tgResp := &tgResponse{}
-	err = json.Unmarshal(body, tgResp)
-	if err != nil {
-		return fmt.Errorf("error unmarshal response body, %w", err)
+	errDecodeRespBody := json.Unmarshal(respBody, tgResp)
+	if errDecodeRespBody != nil {
+		return fmt.Errorf("error unmarshal response body, %w", errDecodeRespBody)
 	}
 
 	if !tgResp.OK {
