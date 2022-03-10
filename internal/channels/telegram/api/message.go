@@ -2,9 +2,8 @@ package api
 
 // TextMessage represents TextMessage from Telegram API
 type TextMessage struct {
-	ChatID    int64  `json:"chat_id"`
-	Text      string `json:"text"`
-	ParseMode string `json:"parse_mode"`
+	ChatID int64  `json:"chat_id"`
+	Text   string `json:"text"`
 }
 
 // PhotoMessage represents PhotoMessage from Telegram API
@@ -26,8 +25,7 @@ func NewPhotoMessage(chatID int64, photo, text string) *PhotoMessage {
 // NewTextMessage creates new TextMessage
 func NewTextMessage(chatID int64, text string) *TextMessage {
 	return &TextMessage{
-		ChatID:    chatID,
-		Text:      text,
-		ParseMode: "MarkdownV2",
+		ChatID: chatID,
+		Text:   text,
 	}
 }

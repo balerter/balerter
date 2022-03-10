@@ -14,9 +14,6 @@ import (
 //
 // 		// make and configure a mocked httpClient
 // 		mockedhttpClient := &httpClientMock{
-// 			CloseIdleConnectionsFunc: func()  {
-// 				panic("mock out the CloseIdleConnections method")
-// 			},
 // 			DoFunc: func(r *http.Request) (*http.Response, error) {
 // 				panic("mock out the Do method")
 // 			},
@@ -27,51 +24,18 @@ import (
 //
 // 	}
 type httpClientMock struct {
-	// CloseIdleConnectionsFunc mocks the CloseIdleConnections method.
-	CloseIdleConnectionsFunc func()
-
 	// DoFunc mocks the Do method.
 	DoFunc func(r *http.Request) (*http.Response, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// CloseIdleConnections holds details about calls to the CloseIdleConnections method.
-		CloseIdleConnections []struct {
-		}
 		// Do holds details about calls to the Do method.
 		Do []struct {
 			// R is the r argument value.
 			R *http.Request
 		}
 	}
-	lockCloseIdleConnections sync.RWMutex
-	lockDo                   sync.RWMutex
-}
-
-// CloseIdleConnections calls CloseIdleConnectionsFunc.
-func (mock *httpClientMock) CloseIdleConnections() {
-	if mock.CloseIdleConnectionsFunc == nil {
-		panic("httpClientMock.CloseIdleConnectionsFunc: method is nil but httpClient.CloseIdleConnections was just called")
-	}
-	callInfo := struct {
-	}{}
-	mock.lockCloseIdleConnections.Lock()
-	mock.calls.CloseIdleConnections = append(mock.calls.CloseIdleConnections, callInfo)
-	mock.lockCloseIdleConnections.Unlock()
-	mock.CloseIdleConnectionsFunc()
-}
-
-// CloseIdleConnectionsCalls gets all the calls that were made to CloseIdleConnections.
-// Check the length with:
-//     len(mockedhttpClient.CloseIdleConnectionsCalls())
-func (mock *httpClientMock) CloseIdleConnectionsCalls() []struct {
-} {
-	var calls []struct {
-	}
-	mock.lockCloseIdleConnections.RLock()
-	calls = mock.calls.CloseIdleConnections
-	mock.lockCloseIdleConnections.RUnlock()
-	return calls
+	lockDo sync.RWMutex
 }
 
 // Do calls DoFunc.

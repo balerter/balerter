@@ -7,6 +7,8 @@ import (
 	"go.uber.org/zap"
 )
 
+//go:generate moq -out api_mock.go -skip-ensure -fmt goimports . APIer
+
 // APIer is an interface for Telegram API
 type APIer interface {
 	SendTextMessage(*api.TextMessage) error

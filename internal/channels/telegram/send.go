@@ -2,29 +2,29 @@ package telegram
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/balerter/balerter/internal/channels/telegram/api"
 	"github.com/balerter/balerter/internal/message"
+
 	"go.uber.org/zap"
-	"strconv"
-	"strings"
 )
 
 // Send the message to the channel
 func (tg *Telegram) Send(mes *message.Message) error {
 	tg.logger.Debug("tg send message")
 
+	if len(mes.Fields) > 0 {
+		mes.Text += addFields(mes.Fields)
+	}
+
 	if mes.Image != "" {
-		tgMessage := api.NewPhotoMessage(tg.chatID, mes.Image, "")
+		tgMessage := api.NewPhotoMessage(tg.chatID, mes.Image, mes.Text)
 		err := tg.api.SendPhotoMessage(tgMessage)
 		if err != nil {
 			tg.logger.Error("error send photo", zap.Error(err))
 		}
-	}
-
-	mes.Text = escapeTgMarkdown(mes.Text)
-
-	if len(mes.Fields) > 0 {
-		mes.Text += addFields(mes.Fields)
+		return nil
 	}
 
 	tgMessage := api.NewTextMessage(tg.chatID, mes.Text)
@@ -50,13 +50,4 @@ func maxKeyLen(fields map[string]string) int {
 		}
 	}
 	return max
-}
-
-var shouldBeEscaped = []string{"_", "*", "[", "]", "(", ")", "~", "`", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!"}
-
-func escapeTgMarkdown(s string) string {
-	for _, sym := range shouldBeEscaped {
-		s = strings.Replace(s, sym, "\\"+sym, -1)
-	}
-	return s
 }
