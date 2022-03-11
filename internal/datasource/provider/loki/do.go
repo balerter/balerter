@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	lokihttp "github.com/grafana/loki/pkg/loghttp"
+	"github.com/balerter/balerter/internal/datasource/provider/loki/models"
 	"go.uber.org/zap"
 	"io"
 	"net/http"
@@ -65,7 +65,7 @@ func (m *Loki) sendQuery(query string, opts *queryOptions) string {
 	return u.String()
 }
 
-func (m *Loki) send(u string) (*lokihttp.QueryResponse, error) {
+func (m *Loki) send(u string) (*models.QueryResponse, error) {
 	m.logger.Debug("request to loki", zap.String("url", u))
 
 	req, err := http.NewRequest(http.MethodGet, u, nil)
@@ -95,12 +95,12 @@ func (m *Loki) send(u string) (*lokihttp.QueryResponse, error) {
 		return nil, err
 	}
 
-	var apires *lokihttp.QueryResponse
+	var apiResp *models.QueryResponse
 
-	err = json.Unmarshal(body, &apires)
+	err = json.Unmarshal(body, &apiResp)
 	if err != nil {
 		return nil, err
 	}
 
-	return apires, nil
+	return apiResp, nil
 }

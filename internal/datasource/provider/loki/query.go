@@ -2,7 +2,9 @@ package loki
 
 import (
 	"fmt"
-	lokihttp "github.com/grafana/loki/pkg/loghttp"
+
+	"github.com/balerter/balerter/internal/datasource/provider/loki/models"
+
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
@@ -80,8 +82,8 @@ func (m *Loki) do(luaState *lua.LState, u string) int {
 	}
 
 	switch v.Data.Result.Type() {
-	case lokihttp.ResultTypeStream:
-		vv := v.Data.Result.(lokihttp.Streams)
+	case models.ResultTypeStream:
+		vv := v.Data.Result.(models.Streams)
 
 		tbl := &lua.LTable{}
 		for _, s := range vv {

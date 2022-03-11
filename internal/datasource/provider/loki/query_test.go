@@ -132,7 +132,7 @@ func Test_do_unexpected_model_type(t *testing.T) {
 	assert.Equal(t, 2, n)
 	assert.Equal(t, lua.LTNil, luaState.Get(1).Type())
 	assert.Equal(t, lua.LTString, luaState.Get(2).Type())
-	assert.Equal(t, "query error: unexpected loki model type", luaState.Get(2).String())
+	assert.Equal(t, "error send query to loki: unknown type: vector", luaState.Get(2).String())
 }
 
 func Test_doQuery(t *testing.T) {
