@@ -11,7 +11,6 @@ require (
 	github.com/fatih/color v1.9.0
 	github.com/go-chi/chi v1.5.1
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/grafana/loki v1.6.1
 	github.com/hashicorp/hcl/v2 v2.9.0
 	github.com/jackc/pgx/v4 v4.13.0
@@ -29,7 +28,6 @@ require (
 	github.com/prometheus/common v0.30.0
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/stretchr/testify v1.7.0
-	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/xhit/go-simple-mail/v2 v2.3.1
 	github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7
 	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb

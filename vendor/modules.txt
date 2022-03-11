@@ -153,9 +153,6 @@ github.com/go-logfmt/logfmt
 # github.com/go-sql-driver/mysql v1.5.0
 ## explicit; go 1.10
 github.com/go-sql-driver/mysql
-# github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
-## explicit
-github.com/go-telegram-bot-api/telegram-bot-api
 # github.com/gofrs/uuid v4.0.0+incompatible
 ## explicit
 github.com/gofrs/uuid
@@ -475,9 +472,6 @@ github.com/stretchr/testify/assert
 github.com/stretchr/testify/http
 github.com/stretchr/testify/mock
 github.com/stretchr/testify/require
-# github.com/technoweenie/multipartstreamer v1.0.1
-## explicit
-github.com/technoweenie/multipartstreamer
 # github.com/uber/jaeger-client-go v2.25.0+incompatible
 ## explicit
 github.com/uber/jaeger-client-go
