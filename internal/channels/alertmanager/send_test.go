@@ -3,16 +3,17 @@ package alertmanager
 import (
 	"bytes"
 	"fmt"
-	"github.com/balerter/balerter/internal/message"
-	"github.com/prometheus/common/model"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/balerter/balerter/internal/message"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
 type webHookCoreMock struct {
@@ -29,7 +30,7 @@ func (mm *webHookCoreMock) Send(body io.Reader, m *message.Message) (*http.Respo
 
 func Test_newPromAlert(t *testing.T) {
 	a := newPromAlert()
-	assert.IsType(t, &model.Alert{}, a)
+	assert.IsType(t, &modelAlert{}, a)
 }
 
 func TestSend_error_send(t *testing.T) {
