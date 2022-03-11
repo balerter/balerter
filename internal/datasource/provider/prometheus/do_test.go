@@ -157,7 +157,7 @@ func Test_send_bad_response_body2(t *testing.T) {
 
 	_, err := m.send("domain.com/foo")
 	require.Error(t, err)
-	assert.Equal(t, "unexpected value type \"<ValNone>\"", err.Error())
+	assert.Equal(t, "unexpected value type \"\"", err.Error())
 }
 
 type badReader struct{}

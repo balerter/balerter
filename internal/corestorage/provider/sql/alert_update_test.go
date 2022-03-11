@@ -417,15 +417,17 @@ func TestAlert_Update_not_change_level(t *testing.T) {
 		logger:   zap.NewNop(),
 	}
 
-	a, updated, err := pa.Update("foo", alert.LevelWarn)
+	alertName := "foo22"
+
+	a, updated, err := pa.Update(alertName, alert.LevelWarn)
 	require.NoError(t, err)
 	assert.False(t, updated)
 
-	assert.Equal(t, "foo", a.Name)
+	assert.Equal(t, alertName, a.Name)
 	assert.Equal(t, alert.LevelWarn, a.Level)
 	assert.Equal(t, 2, a.Count)
 
-	v, err := metrics.GetAlertLevel("foo")
+	v, err := metrics.GetAlertLevel(alertName)
 	require.NoError(t, err)
 	assert.Equal(t, float64(alert.LevelWarn), v)
 }
@@ -539,11 +541,13 @@ func TestAlert_Update_change_level(t *testing.T) {
 		logger:   zap.NewNop(),
 	}
 
-	a, updated, err := pa.Update("foo", alert.LevelError)
+	alertName := "foo33"
+
+	a, updated, err := pa.Update(alertName, alert.LevelError)
 	require.NoError(t, err)
 	assert.True(t, updated)
 
-	assert.Equal(t, "foo", a.Name)
+	assert.Equal(t, alertName, a.Name)
 	assert.Equal(t, alert.LevelError, a.Level)
 	assert.Equal(t, 0, a.Count)
 }

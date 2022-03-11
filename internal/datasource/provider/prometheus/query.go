@@ -2,7 +2,7 @@ package prometheus
 
 import (
 	"fmt"
-	"github.com/prometheus/common/model"
+	"github.com/balerter/balerter/internal/datasource/provider/prometheus/models"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
@@ -76,14 +76,14 @@ func (m *Prometheus) doRange(luaState *lua.LState) int {
 	return m.resp(v, luaState)
 }
 
-func (m *Prometheus) resp(v model.Value, luaState *lua.LState) int {
+func (m *Prometheus) resp(v models.ModelValue, luaState *lua.LState) int {
 	switch v.Type() {
-	case model.ValMatrix:
-		tbl := processValMatrixRange(v.(model.Matrix))
+	case models.ValMatrix:
+		tbl := processValMatrixRange(v.(models.Matrix))
 		luaState.Push(tbl)
 
-	case model.ValVector:
-		tbl := processValVectorRange(v.(model.Vector))
+	case models.ValVector:
+		tbl := processValVectorRange(v.(models.Vector))
 		luaState.Push(tbl)
 	default:
 		m.logger.Debug("query error: unexpected prometheus model type")
@@ -97,7 +97,7 @@ func (m *Prometheus) resp(v model.Value, luaState *lua.LState) int {
 	return 2
 }
 
-func processValVectorRange(vv model.Vector) *lua.LTable {
+func processValVectorRange(vv models.Vector) *lua.LTable {
 	tbl := &lua.LTable{}
 	for _, s := range vv {
 		row := &lua.LTable{}
@@ -106,6 +106,7 @@ func processValVectorRange(vv model.Vector) *lua.LTable {
 			metrics.RawSet(lua.LString(key), lua.LString(val))
 		}
 		row.RawSet(lua.LString("metrics"), metrics)
+		row.RawSet(lua.LString("timestamp"), lua.LNumber(s.Timestamp))
 		row.RawSet(lua.LString("value"), lua.LNumber(s.Value))
 		tbl.Append(row)
 	}
@@ -113,7 +114,7 @@ func processValVectorRange(vv model.Vector) *lua.LTable {
 	return tbl
 }
 
-func processValMatrixRange(vv model.Matrix) *lua.LTable {
+func processValMatrixRange(vv models.Matrix) *lua.LTable {
 	tbl := &lua.LTable{}
 	for _, s := range vv {
 		row := &lua.LTable{}
@@ -126,7 +127,7 @@ func processValMatrixRange(vv model.Matrix) *lua.LTable {
 		values := &lua.LTable{}
 		for _, val := range s.Values {
 			value := &lua.LTable{}
-			value.RawSet(lua.LString("timestamp"), lua.LNumber(val.Timestamp.Unix()))
+			value.RawSet(lua.LString("timestamp"), lua.LNumber(val.Timestamp))
 			value.RawSet(lua.LString("value"), lua.LNumber(val.Value))
 
 			values.Append(value)

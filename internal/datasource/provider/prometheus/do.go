@@ -5,10 +5,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/prometheus/common/model"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/balerter/balerter/internal/datasource/provider/prometheus/models"
 )
 
 const (
@@ -52,7 +53,7 @@ func (m *Prometheus) sendQuery(query string, opts *queryQueryOptions) string {
 	return u.String()
 }
 
-func (m *Prometheus) send(u string) (model.Value, error) {
+func (m *Prometheus) send(u string) (models.ModelValue, error) {
 	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		return nil, err
@@ -84,18 +85,12 @@ func (m *Prometheus) send(u string) (model.Value, error) {
 		return nil, err
 	}
 
-	var apires apiResponse
-	var qres queryResult
+	var apiResp apiResponse
 
-	err = json.Unmarshal(body, &apires)
+	err = json.Unmarshal(body, &apiResp)
 	if err != nil {
 		return nil, err
 	}
 
-	err = json.Unmarshal(apires.Data, &qres)
-	if err != nil {
-		return nil, err
-	}
-
-	return qres.v, nil
+	return apiResp.Data.v, nil
 }
