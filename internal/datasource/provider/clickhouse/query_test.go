@@ -2,33 +2,50 @@ package clickhouse
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	"github.com/DATA-DOG/go-sqlmock"
+	"testing"
+	"time"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"testing"
-	"time"
 )
 
-func TestQuery(t *testing.T) {
-	db, dbmock, err := sqlmock.New()
+var _db *sqlx.DB
+
+func getDB(t *testing.T) *sqlx.DB {
+	if _db != nil {
+		return _db
+	}
+
+	connString := fmt.Sprintf("tcp://%s:%d?username=%s&password=%s&database=%s&%s",
+		"127.0.0.1",
+		9000,
+		"default",
+		"",
+		"default",
+		"",
+	)
+
+	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer ctxCancel()
+
+	var err error
+
+	_db, err = sqlx.ConnectContext(ctx, "clickhouse", connString)
 	require.NoError(t, err)
-	defer db.Close()
+	return _db
+}
 
-	query := "some query"
+func TestQuery(t *testing.T) {
+	query := "SELECT 42 AS age, 'Foo' AS name UNION ALL SELECT 12, 'Bar'"
 
-	rows := sqlmock.NewRows([]string{"age", "name"}).
-		AddRow(42, "Foo").
-		AddRow(12, "Bar")
-
-	dbmock.ExpectQuery(query).WillReturnRows(rows)
+	db := getDB(t)
 
 	ch := &Clickhouse{
-		db:      sqlx.NewDb(db, "sqlmock"),
+		db:      db,
 		logger:  zap.NewNop(),
 		timeout: time.Second,
 	}
@@ -51,8 +68,8 @@ func TestQuery(t *testing.T) {
 	}
 
 	results := []resultItem{
-		{"42", "Foo"},
 		{"12", "Bar"},
+		{"42", "Foo"},
 	}
 
 	arg2.(*lua.LTable).ForEach(func(value lua.LValue, value2 lua.LValue) {
@@ -72,25 +89,4 @@ func TestQuery(t *testing.T) {
 			}
 		})
 	})
-}
-
-func Test_query_err_query_context(t *testing.T) {
-	m := &dbConnectionMock{
-		QueryContextFunc: func(_ context.Context, query string, args ...interface{}) (*sql.Rows, error) {
-			assert.Equal(t, "query", query)
-			return nil, fmt.Errorf("err1")
-		},
-	}
-	ch := &Clickhouse{
-		db:     m,
-		logger: zap.NewNop(),
-	}
-
-	ls := lua.NewState()
-	ls.Push(lua.LString("query"))
-
-	n := ch.query(ls)
-	assert.Equal(t, 2, n)
-	assert.Equal(t, "err1", ls.Get(3).String())
-	assert.Equal(t, 1, len(m.QueryContextCalls()))
 }
