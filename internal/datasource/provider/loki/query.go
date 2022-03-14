@@ -3,7 +3,7 @@ package loki
 import (
 	"fmt"
 
-	"github.com/balerter/balerter/internal/datasource/provider/loki/models"
+	prometheusModels "github.com/balerter/balerter/internal/prometheus_models"
 
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -74,31 +74,24 @@ func (m *Loki) do(luaState *lua.LState, u string) int {
 		return 2
 	}
 
-	if v == nil || v.Data.Result == nil {
-		m.logger.Error("unexpected response from loki")
-		luaState.Push(lua.LNil)
-		luaState.Push(lua.LString("unexpected response from loki"))
-		return 2
-	}
-
-	switch v.Data.Result.Type() {
-	case models.ResultTypeStream:
-		vv := v.Data.Result.(models.Streams)
+	switch v.Type() {
+	case prometheusModels.ValStreams:
+		vv := v.(prometheusModels.Streams)
 
 		tbl := &lua.LTable{}
 		for _, s := range vv {
 			row := &lua.LTable{}
 			labels := &lua.LTable{}
-			for key, val := range s.Labels {
+			for key, val := range s.Metric {
 				labels.RawSet(lua.LString(key), lua.LString(val))
 			}
 			row.RawSet(lua.LString("labels"), labels)
 
 			entries := &lua.LTable{}
-			for _, e := range s.Entries {
+			for _, e := range s.Values {
 				value := &lua.LTable{}
-				value.RawSet(lua.LString("timestamp"), lua.LNumber(e.Timestamp.Unix()))
-				value.RawSet(lua.LString("line"), lua.LString(e.Line))
+				value.RawSet(lua.LString("timestamp"), lua.LNumber(e.Timestamp))
+				value.RawSet(lua.LString("line"), lua.LString(e.Value))
 				entries.Append(value)
 			}
 			row.RawSet(lua.LString("entries"), entries)
@@ -107,9 +100,9 @@ func (m *Loki) do(luaState *lua.LState, u string) int {
 
 		luaState.Push(tbl)
 	default:
-		m.logger.Error("query error: unexpected loki model type")
+		m.logger.Error("query error: unexpected loki model type", zap.String("type", v.Type()))
 		luaState.Push(lua.LNil)
-		luaState.Push(lua.LString("query error: unexpected loki model type"))
+		luaState.Push(lua.LString("query error: unexpected loki model type: " + v.Type()))
 		return 2
 	}
 

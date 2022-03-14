@@ -87,6 +87,10 @@ func TestGet(t *testing.T) {
 }
 
 func TestManager_Init(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	type fields struct {
 		modules map[string]modules.Module
 	}

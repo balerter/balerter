@@ -64,6 +64,10 @@ func TestStop(t *testing.T) {
 //}
 
 func TestNew(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	ch, err := New(clickhouseCfg.Clickhouse{
 		Name:        "ch1",
 		Host:        "127.0.0.1",

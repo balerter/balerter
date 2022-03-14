@@ -2,7 +2,9 @@ package prometheus
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/datasource/provider/prometheus/models"
+
+	prometheusModels "github.com/balerter/balerter/internal/prometheus_models"
+
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
@@ -76,14 +78,14 @@ func (m *Prometheus) doRange(luaState *lua.LState) int {
 	return m.resp(v, luaState)
 }
 
-func (m *Prometheus) resp(v models.ModelValue, luaState *lua.LState) int {
+func (m *Prometheus) resp(v prometheusModels.ModelValue, luaState *lua.LState) int {
 	switch v.Type() {
-	case models.ValMatrix:
-		tbl := processValMatrixRange(v.(models.Matrix))
+	case prometheusModels.ValMatrix:
+		tbl := processValMatrixRange(v.(prometheusModels.Matrix))
 		luaState.Push(tbl)
 
-	case models.ValVector:
-		tbl := processValVectorRange(v.(models.Vector))
+	case prometheusModels.ValVector:
+		tbl := processValVectorRange(v.(prometheusModels.Vector))
 		luaState.Push(tbl)
 	default:
 		m.logger.Debug("query error: unexpected prometheus model type")
@@ -97,7 +99,7 @@ func (m *Prometheus) resp(v models.ModelValue, luaState *lua.LState) int {
 	return 2
 }
 
-func processValVectorRange(vv models.Vector) *lua.LTable {
+func processValVectorRange(vv prometheusModels.Vector) *lua.LTable {
 	tbl := &lua.LTable{}
 	for _, s := range vv {
 		row := &lua.LTable{}
@@ -106,15 +108,15 @@ func processValVectorRange(vv models.Vector) *lua.LTable {
 			metrics.RawSet(lua.LString(key), lua.LString(val))
 		}
 		row.RawSet(lua.LString("metrics"), metrics)
-		row.RawSet(lua.LString("timestamp"), lua.LNumber(s.Timestamp))
-		row.RawSet(lua.LString("value"), lua.LNumber(s.Value))
+		row.RawSet(lua.LString("timestamp"), lua.LNumber(s.Value.Timestamp))
+		row.RawSet(lua.LString("value"), lua.LNumber(s.Value.Value))
 		tbl.Append(row)
 	}
 
 	return tbl
 }
 
-func processValMatrixRange(vv models.Matrix) *lua.LTable {
+func processValMatrixRange(vv prometheusModels.Matrix) *lua.LTable {
 	tbl := &lua.LTable{}
 	for _, s := range vv {
 		row := &lua.LTable{}

@@ -4,10 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"testing"
@@ -47,40 +46,32 @@ func Test_sendQuery(t *testing.T) {
 	assert.Equal(t, "//domain.com/loki/api/v1/query?direction=2&limit=10&query=&time=1", u)
 }
 
-type httpClientMock struct {
-	mock.Mock
-}
-
-func (m *httpClientMock) CloseIdleConnections() {}
-func (m *httpClientMock) Do(req *http.Request) (*http.Response, error) {
-	args := m.Called(req)
-	r := args.Get(0)
-	if r == nil {
-		return nil, args.Error(1)
-	}
-	return r.(*http.Response), args.Error(1)
-}
-
 func Test_send(t *testing.T) {
-	hm := &httpClientMock{}
-	hm.On("Do", mock.Anything).Return(&http.Response{
-		Status: "status1",
-		Body:   ioutil.NopCloser(bytes.NewBuffer([]byte(`{}`))),
-	}, nil)
+	hm := &httpClientMock{
+		DoFunc: func(r *http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Status:     "status1",
+				Body:       io.NopCloser(bytes.NewBuffer([]byte(`{}`))),
+			}, nil
+		},
+	}
 
 	m := &Loki{
 		logger: zap.NewNop(),
 		client: hm,
 	}
 
-	resp, err := m.send("domain.com/foo")
+	_, err := m.send("domain.com/foo")
 	require.NoError(t, err)
-	require.NotNil(t, resp)
 }
 
 func Test_send_error(t *testing.T) {
-	hm := &httpClientMock{}
-	hm.On("Do", mock.Anything).Return(nil, fmt.Errorf("foo error"))
+	hm := &httpClientMock{
+		DoFunc: func(r *http.Request) (*http.Response, error) {
+			return nil, fmt.Errorf("foo error")
+		},
+	}
 
 	m := &Loki{
 		logger: zap.NewNop(),

@@ -3,15 +3,15 @@ package loki
 import (
 	"bytes"
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
-	lua "github.com/yuin/gopher-lua"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/url"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	lua "github.com/yuin/gopher-lua"
+	"go.uber.org/zap"
 )
 
 func Test_doQuery_getQuery_no_query(t *testing.T) {
@@ -54,8 +54,11 @@ func Test_doQuery_error_parse_options(t *testing.T) {
 }
 
 func Test_doQuery_error_send_request(t *testing.T) {
-	mm := &httpClientMock{}
-	mm.On("Do", mock.Anything).Return(nil, fmt.Errorf("err1"))
+	mm := &httpClientMock{
+		DoFunc: func(r *http.Request) (*http.Response, error) {
+			return nil, fmt.Errorf("err1")
+		},
+	}
 
 	m := &Loki{
 		logger: zap.NewNop(),
@@ -93,8 +96,11 @@ func Test_doRange_error_parse_options(t *testing.T) {
 }
 
 func Test_doRange_error_send_request(t *testing.T) {
-	mm := &httpClientMock{}
-	mm.On("Do", mock.Anything).Return(nil, fmt.Errorf("err1"))
+	mm := &httpClientMock{
+		DoFunc: func(r *http.Request) (*http.Response, error) {
+			return nil, fmt.Errorf("err1")
+		},
+	}
 
 	m := &Loki{
 		logger: zap.NewNop(),
@@ -114,11 +120,16 @@ func Test_doRange_error_send_request(t *testing.T) {
 }
 
 func Test_do_unexpected_model_type(t *testing.T) {
-	mm := &httpClientMock{}
 	resp := &http.Response{
-		Body: io.NopCloser(bytes.NewReader([]byte(`{"data":{"resultType": "vector","result":[]}}`))),
+		StatusCode: http.StatusOK,
+		Body:       io.NopCloser(bytes.NewReader([]byte(`{"data":{"resultType": "vector","result":[]}}`))),
 	}
-	mm.On("Do", mock.Anything).Return(resp, nil)
+
+	mm := &httpClientMock{
+		DoFunc: func(r *http.Request) (*http.Response, error) {
+			return resp, nil
+		},
+	}
 
 	m := &Loki{
 		logger: zap.NewNop(),
@@ -132,15 +143,19 @@ func Test_do_unexpected_model_type(t *testing.T) {
 	assert.Equal(t, 2, n)
 	assert.Equal(t, lua.LTNil, luaState.Get(1).Type())
 	assert.Equal(t, lua.LTString, luaState.Get(2).Type())
-	assert.Equal(t, "error send query to loki: unknown type: vector", luaState.Get(2).String())
+	assert.Equal(t, "query error: unexpected loki model type: vector", luaState.Get(2).String())
 }
 
 func Test_doQuery(t *testing.T) {
-	mm := &httpClientMock{}
 	resp := &http.Response{
-		Body: io.NopCloser(bytes.NewReader([]byte(`{"status": "success","data":{"resultType": "streams","result": [{"stream": {},"values": []}]}}`))),
+		StatusCode: http.StatusOK,
+		Body:       io.NopCloser(bytes.NewReader([]byte(`{"status": "success","data":{"resultType": "streams","result": [{"stream": {},"values": []}]}}`))),
 	}
-	mm.On("Do", mock.Anything).Return(resp, nil)
+	mm := &httpClientMock{
+		DoFunc: func(r *http.Request) (*http.Response, error) {
+			return resp, nil
+		},
+	}
 	m := &Loki{
 		logger: zap.NewNop(),
 		client: mm,
