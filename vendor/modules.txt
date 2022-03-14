@@ -1,16 +1,17 @@
-# github.com/ClickHouse/clickhouse-go v1.3.13
+# git.sr.ht/~sbinet/gg v0.3.1
+## explicit; go 1.16
+git.sr.ht/~sbinet/gg
+# github.com/ClickHouse/clickhouse-go v1.5.4
 ## explicit; go 1.12
 github.com/ClickHouse/clickhouse-go
 github.com/ClickHouse/clickhouse-go/lib/binary
 github.com/ClickHouse/clickhouse-go/lib/cityhash102
 github.com/ClickHouse/clickhouse-go/lib/column
 github.com/ClickHouse/clickhouse-go/lib/data
-github.com/ClickHouse/clickhouse-go/lib/leakypool
 github.com/ClickHouse/clickhouse-go/lib/lz4
 github.com/ClickHouse/clickhouse-go/lib/protocol
 github.com/ClickHouse/clickhouse-go/lib/types
-github.com/ClickHouse/clickhouse-go/lib/writebuffer
-# github.com/DATA-DOG/go-sqlmock v1.4.1
+# github.com/DATA-DOG/go-sqlmock v1.5.0
 ## explicit
 github.com/DATA-DOG/go-sqlmock
 # github.com/VictoriaMetrics/metrics v1.18.1
@@ -19,13 +20,13 @@ github.com/VictoriaMetrics/metrics
 # github.com/agext/levenshtein v1.2.1
 ## explicit
 github.com/agext/levenshtein
-# github.com/ajstarks/svgo v0.0.0-20180226025133-644b8db467af
-## explicit
+# github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b
+## explicit; go 1.15
 github.com/ajstarks/svgo
 # github.com/apparentlymart/go-textseg/v13 v13.0.0
 ## explicit; go 1.16
 github.com/apparentlymart/go-textseg/v13/textseg
-# github.com/aws/aws-sdk-go v1.40.11
+# github.com/aws/aws-sdk-go v1.43.17
 ## explicit; go 1.11
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/arn
@@ -85,53 +86,80 @@ github.com/davecgh/go-spew/spew
 # github.com/deckarep/gosx-notifier v0.0.0-20180201035817-e127226297fb
 ## explicit
 github.com/deckarep/gosx-notifier
-# github.com/diamondburned/arikawa v0.9.2
+# github.com/diamondburned/arikawa v1.3.14
 ## explicit; go 1.13
 github.com/diamondburned/arikawa/api
 github.com/diamondburned/arikawa/api/rate
 github.com/diamondburned/arikawa/discord
 github.com/diamondburned/arikawa/gateway
-github.com/diamondburned/arikawa/handler
+github.com/diamondburned/arikawa/internal/heart
+github.com/diamondburned/arikawa/internal/moreatomic
 github.com/diamondburned/arikawa/session
 github.com/diamondburned/arikawa/state
-github.com/diamondburned/arikawa/utils/heart
+github.com/diamondburned/arikawa/utils/handler
 github.com/diamondburned/arikawa/utils/httputil
 github.com/diamondburned/arikawa/utils/httputil/httpdriver
 github.com/diamondburned/arikawa/utils/json
 github.com/diamondburned/arikawa/utils/json/enum
 github.com/diamondburned/arikawa/utils/json/option
-github.com/diamondburned/arikawa/utils/moreatomic
 github.com/diamondburned/arikawa/utils/wsutil
-# github.com/fatih/color v1.9.0
+github.com/diamondburned/arikawa/webhook
+# github.com/fatih/color v1.13.0
 ## explicit; go 1.13
 github.com/fatih/color
-# github.com/fogleman/gg v1.3.0
-## explicit
-github.com/fogleman/gg
-# github.com/go-chi/chi v1.5.1
-## explicit; go 1.15
+# github.com/go-chi/chi v1.5.4
+## explicit; go 1.16
 github.com/go-chi/chi
-# github.com/go-sql-driver/mysql v1.5.0
+# github.com/go-fonts/liberation v0.2.0
+## explicit; go 1.13
+github.com/go-fonts/liberation/liberationmonobold
+github.com/go-fonts/liberation/liberationmonobolditalic
+github.com/go-fonts/liberation/liberationmonoitalic
+github.com/go-fonts/liberation/liberationmonoregular
+github.com/go-fonts/liberation/liberationsansbold
+github.com/go-fonts/liberation/liberationsansbolditalic
+github.com/go-fonts/liberation/liberationsansitalic
+github.com/go-fonts/liberation/liberationsansregular
+github.com/go-fonts/liberation/liberationserifbold
+github.com/go-fonts/liberation/liberationserifbolditalic
+github.com/go-fonts/liberation/liberationserifitalic
+github.com/go-fonts/liberation/liberationserifregular
+# github.com/go-latex/latex v0.0.0-20210823091927-c0d11ff05a81
+## explicit; go 1.16
+github.com/go-latex/latex
+github.com/go-latex/latex/ast
+github.com/go-latex/latex/drawtex
+github.com/go-latex/latex/font
+github.com/go-latex/latex/font/ttf
+github.com/go-latex/latex/internal/tex2unicode
+github.com/go-latex/latex/mtex
+github.com/go-latex/latex/mtex/symbols
+github.com/go-latex/latex/tex
+github.com/go-latex/latex/token
+# github.com/go-pdf/fpdf v0.5.0
+## explicit; go 1.16
+github.com/go-pdf/fpdf
+# github.com/go-sql-driver/mysql v1.6.0
 ## explicit; go 1.10
 github.com/go-sql-driver/mysql
 # github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 ## explicit
 github.com/golang/freetype/raster
 github.com/golang/freetype/truetype
-# github.com/google/go-cmp v0.5.5
+# github.com/google/go-cmp v0.3.1
 ## explicit; go 1.8
 github.com/google/go-cmp/cmp
 github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/gorilla/schema v1.1.0
+# github.com/gorilla/schema v1.2.0
 ## explicit
 github.com/gorilla/schema
 # github.com/gorilla/websocket v1.4.2
 ## explicit; go 1.12
 github.com/gorilla/websocket
-# github.com/hashicorp/hcl/v2 v2.9.0
+# github.com/hashicorp/hcl/v2 v2.11.1
 ## explicit; go 1.12
 github.com/hashicorp/hcl/v2
 github.com/hashicorp/hcl/v2/ext/customdecode
@@ -143,7 +171,7 @@ github.com/hashicorp/hcl/v2/json
 # github.com/jackc/chunkreader/v2 v2.0.1
 ## explicit; go 1.12
 github.com/jackc/chunkreader/v2
-# github.com/jackc/pgconn v1.10.0
+# github.com/jackc/pgconn v1.11.0
 ## explicit; go 1.12
 github.com/jackc/pgconn
 github.com/jackc/pgconn/internal/ctxwatch
@@ -154,40 +182,31 @@ github.com/jackc/pgio
 # github.com/jackc/pgpassfile v1.0.0
 ## explicit; go 1.12
 github.com/jackc/pgpassfile
-# github.com/jackc/pgproto3/v2 v2.1.1
+# github.com/jackc/pgproto3/v2 v2.2.0
 ## explicit; go 1.12
 github.com/jackc/pgproto3/v2
 # github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b
 ## explicit; go 1.14
 github.com/jackc/pgservicefile
-# github.com/jackc/pgtype v1.8.1
+# github.com/jackc/pgtype v1.10.0
 ## explicit; go 1.13
 github.com/jackc/pgtype
-# github.com/jackc/pgx/v4 v4.13.0
+# github.com/jackc/pgx/v4 v4.15.0
 ## explicit; go 1.13
 github.com/jackc/pgx/v4
 github.com/jackc/pgx/v4/internal/sanitize
 github.com/jackc/pgx/v4/pgxpool
-# github.com/jackc/puddle v1.1.3
+# github.com/jackc/puddle v1.2.1
 ## explicit; go 1.12
 github.com/jackc/puddle
 # github.com/jmespath/go-jmespath v0.4.0
 ## explicit; go 1.14
 github.com/jmespath/go-jmespath
-# github.com/jmoiron/sqlx v1.2.0
-## explicit
+# github.com/jmoiron/sqlx v1.3.4
+## explicit; go 1.10
 github.com/jmoiron/sqlx
 github.com/jmoiron/sqlx/reflectx
-# github.com/jung-kurt/gofpdf v1.0.3-0.20190309125859-24315acbbda5
-## explicit
-github.com/jung-kurt/gofpdf
-# github.com/kr/pretty v0.2.0
-## explicit; go 1.12
-# github.com/kr/text v0.2.0
-## explicit
-# github.com/kylelemons/godebug v1.1.0
-## explicit; go 1.11
-# github.com/lib/pq v1.10.2
+# github.com/lib/pq v1.10.4
 ## explicit; go 1.13
 github.com/lib/pq
 github.com/lib/pq/oid
@@ -195,28 +214,26 @@ github.com/lib/pq/scram
 # github.com/martinlindhe/notify v0.0.0-20181008203735-20632c9a275a
 ## explicit
 github.com/martinlindhe/notify
-# github.com/mattn/go-colorable v0.1.6
+# github.com/mattn/go-colorable v0.1.9
 ## explicit; go 1.13
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.12
+# github.com/mattn/go-isatty v0.0.14
 ## explicit; go 1.12
 github.com/mattn/go-isatty
-# github.com/mattn/go-sqlite3 v1.14.6
+# github.com/mattn/go-sqlite3 v1.14.12
 ## explicit; go 1.12
 github.com/mattn/go-sqlite3
-# github.com/mavolin/dismock v1.0.0
+# github.com/mavolin/dismock v1.3.4
 ## explicit; go 1.13
 github.com/mavolin/dismock/internal/mockutil
 github.com/mavolin/dismock/internal/sanitize
 github.com/mavolin/dismock/pkg/dismock
-# github.com/mitchellh/go-wordwrap v1.0.0
+# github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7
 ## explicit
 github.com/mitchellh/go-wordwrap
-# github.com/mitchellh/mapstructure v1.4.1
+# github.com/mitchellh/mapstructure v1.4.3
 ## explicit; go 1.14
 github.com/mitchellh/mapstructure
-# github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e
-## explicit; go 1.12
 # github.com/nlopes/slack v0.6.0
 ## explicit
 github.com/nlopes/slack
@@ -226,15 +243,13 @@ github.com/nlopes/slack/slackutilsx
 # github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 ## explicit
 github.com/nu7hatch/gouuid
-# github.com/pierrec/lz4 v2.5.3-0.20200429092203-e876bbd321b3+incompatible
-## explicit
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib
-# github.com/robfig/cron/v3 v3.0.0
+# github.com/robfig/cron/v3 v3.0.1
 ## explicit; go 1.12
 github.com/robfig/cron/v3
 # github.com/stretchr/objx v0.2.0
@@ -246,20 +261,23 @@ github.com/stretchr/testify/assert
 github.com/stretchr/testify/http
 github.com/stretchr/testify/mock
 github.com/stretchr/testify/require
+# github.com/toorop/go-dkim v0.0.0-20201103131630-e1cd1a0a5208
+## explicit
+github.com/toorop/go-dkim
 # github.com/valyala/fastrand v1.1.0
 ## explicit
 github.com/valyala/fastrand
 # github.com/valyala/histogram v1.2.0
 ## explicit; go 1.12
 github.com/valyala/histogram
-# github.com/xhit/go-simple-mail/v2 v2.3.1
+# github.com/xhit/go-simple-mail/v2 v2.11.0
 ## explicit; go 1.13
 github.com/xhit/go-simple-mail/v2
 # github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7
 ## explicit
 github.com/yuin/gluamapper
-# github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb
-## explicit
+# github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9
+## explicit; go 1.14
 github.com/yuin/gopher-lua
 github.com/yuin/gopher-lua/ast
 github.com/yuin/gopher-lua/parse
@@ -273,13 +291,13 @@ github.com/zclconf/go-cty/cty/function/stdlib
 github.com/zclconf/go-cty/cty/gocty
 github.com/zclconf/go-cty/cty/json
 github.com/zclconf/go-cty/cty/set
-# go.uber.org/atomic v1.9.0
+# go.uber.org/atomic v1.7.0
 ## explicit; go 1.13
 go.uber.org/atomic
-# go.uber.org/multierr v1.5.0
+# go.uber.org/multierr v1.6.0
 ## explicit; go 1.12
 go.uber.org/multierr
-# go.uber.org/zap v1.14.1
+# go.uber.org/zap v1.21.0
 ## explicit; go 1.13
 go.uber.org/zap
 go.uber.org/zap/buffer
@@ -291,31 +309,38 @@ go.uber.org/zap/zaptest/observer
 # golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 ## explicit; go 1.17
 golang.org/x/crypto/pbkdf2
-# golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6
-## explicit; go 1.12
-# golang.org/x/image v0.0.0-20190802002840-cff245a6509b
+# golang.org/x/image v0.0.0-20211028202545-6944b10bf410
 ## explicit; go 1.12
 golang.org/x/image/ccitt
 golang.org/x/image/draw
 golang.org/x/image/font
 golang.org/x/image/font/basicfont
+golang.org/x/image/font/gofont/gobold
+golang.org/x/image/font/gofont/gobolditalic
+golang.org/x/image/font/gofont/goitalic
+golang.org/x/image/font/gofont/goregular
+golang.org/x/image/font/opentype
+golang.org/x/image/font/sfnt
 golang.org/x/image/math/f64
 golang.org/x/image/math/fixed
 golang.org/x/image/tiff
 golang.org/x/image/tiff/lzw
-# golang.org/x/lint v0.0.0-20200302205851-738671d3881b
-## explicit; go 1.11
-# golang.org/x/net v0.0.0-20210726213435-c6fcb2dbf985
+golang.org/x/image/vector
+# golang.org/x/net v0.0.0-20220225172249-27dd8689420f
 ## explicit; go 1.17
 golang.org/x/net/internal/socks
 golang.org/x/net/proxy
-# golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1
+# golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e
 ## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
-# golang.org/x/text v0.3.6
-## explicit; go 1.11
+# golang.org/x/text v0.3.7
+## explicit; go 1.17
 golang.org/x/text/cases
+golang.org/x/text/encoding
+golang.org/x/text/encoding/charmap
+golang.org/x/text/encoding/internal
+golang.org/x/text/encoding/internal/identifier
 golang.org/x/text/internal
 golang.org/x/text/internal/language
 golang.org/x/text/internal/language/compact
@@ -331,25 +356,22 @@ golang.org/x/text/width
 # golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
 ## explicit
 golang.org/x/time/rate
-# golang.org/x/tools v0.1.5
-## explicit; go 1.17
-# gonum.org/v1/gonum v0.6.2
-## explicit; go 1.12
-# gonum.org/v1/plot v0.0.0-20200212202559-4d97eda4de95
-## explicit; go 1.12
+# gonum.org/v1/plot v0.10.1
+## explicit; go 1.16
 gonum.org/v1/plot
+gonum.org/v1/plot/font
+gonum.org/v1/plot/font/liberation
 gonum.org/v1/plot/palette
 gonum.org/v1/plot/plotter
+gonum.org/v1/plot/text
 gonum.org/v1/plot/tools/bezier
 gonum.org/v1/plot/vg
 gonum.org/v1/plot/vg/draw
-gonum.org/v1/plot/vg/fonts
 gonum.org/v1/plot/vg/vgeps
 gonum.org/v1/plot/vg/vgimg
 gonum.org/v1/plot/vg/vgpdf
 gonum.org/v1/plot/vg/vgsvg
-# gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f
-## explicit
+gonum.org/v1/plot/vg/vgtex
 # gopkg.in/toast.v1 v1.0.0-20180812000517-0a84660828b2
 ## explicit
 gopkg.in/toast.v1
@@ -359,5 +381,3 @@ gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 ## explicit
 gopkg.in/yaml.v3
-# honnef.co/go/tools v0.0.1-2020.1.3
-## explicit; go 1.11

@@ -2,11 +2,11 @@ package sanitize
 
 import "github.com/diamondburned/arikawa/discord"
 
-// Emoji sanitizes the passed emoji.
+// Emoji sanitizes an discord.Emoji.
 //
 // This function will sanitize Emoji.ID and Emoji.User.ID.
-func Emoji(e discord.Emoji, id, userID discord.Snowflake) discord.Emoji {
-	if e.ID <= 0 {
+func Emoji(e discord.Emoji, id discord.EmojiID, userID discord.UserID) discord.Emoji {
+	if e.ID == 0 {
 		e.ID = id
 	}
 

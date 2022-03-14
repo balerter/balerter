@@ -18,7 +18,7 @@ import (
 // Member mocks a Member request.
 //
 // The User.ID field of the passed member must be set.
-func (m *Mocker) Member(guildID discord.Snowflake, member discord.Member) {
+func (m *Mocker) Member(guildID discord.GuildID, member discord.Member) {
 	m.MockAPI("Member", http.MethodGet, "/guilds/"+guildID.String()+"/members/"+member.User.ID.String(),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			mockutil.WriteJSON(t, w, member)
@@ -28,7 +28,7 @@ func (m *Mocker) Member(guildID discord.Snowflake, member discord.Member) {
 // Members mocks a Members request.
 //
 // This method will sanitize Member.User.ID.
-func (m *Mocker) Members(guildID discord.Snowflake, limit uint, members []discord.Member) {
+func (m *Mocker) Members(guildID discord.GuildID, limit uint, members []discord.Member) {
 	if members == nil {
 		members = []discord.Member{}
 	}
@@ -39,7 +39,7 @@ func (m *Mocker) Members(guildID discord.Snowflake, limit uint, members []discor
 
 	const hardLimit uint = 1000
 
-	var after discord.Snowflake
+	var after discord.UserID
 
 	for i := 0; i <= len(members)/int(hardLimit); i++ {
 		var (
@@ -75,7 +75,7 @@ func (m *Mocker) Members(guildID discord.Snowflake, limit uint, members []discor
 // MembersAfter mocks a MembersAfter request.
 //
 // This method will sanitize Member.User.ID.
-func (m *Mocker) MembersAfter(guildID, after discord.Snowflake, limit uint, members []discord.Member) {
+func (m *Mocker) MembersAfter(guildID discord.GuildID, after discord.UserID, limit uint, members []discord.Member) {
 	if members == nil {
 		members = []discord.Member{}
 	}
@@ -120,7 +120,9 @@ func (m *Mocker) MembersAfter(guildID, after discord.Snowflake, limit uint, memb
 // membersAfter mocks a single request to the GET /Members endpoint.
 //
 // This method will sanitize Member.User.ID.
-func (m *Mocker) membersAfter(guildID, after discord.Snowflake, name string, limit uint, g []discord.Member) {
+func (m *Mocker) membersAfter(
+	guildID discord.GuildID, after discord.UserID, name string, limit uint, g []discord.Member,
+) {
 	for i, Member := range g {
 		g[i] = sanitize.Member(Member, 1)
 	}
@@ -142,8 +144,8 @@ func (m *Mocker) membersAfter(guildID, after discord.Snowflake, name string, lim
 
 // AddMember mocks a AddMember request.
 //
-// The User.ID field of the passed member must be set.
-func (m *Mocker) AddMember(guildID discord.Snowflake, d api.AddMemberData, member discord.Member) {
+// The User.ID field of the passed discord.Member must be set.
+func (m *Mocker) AddMember(guildID discord.GuildID, d api.AddMemberData, member discord.Member) {
 	m.MockAPI("AddMember", http.MethodPut, "/guilds/"+guildID.String()+"/members/"+member.User.ID.String(),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			mockutil.CheckJSON(t, r.Body, new(api.AddMemberData), &d)
@@ -152,7 +154,7 @@ func (m *Mocker) AddMember(guildID discord.Snowflake, d api.AddMemberData, membe
 }
 
 // ModifyMember mocks a ModifyMember request.
-func (m *Mocker) ModifyMember(guildID, userID discord.Snowflake, d api.ModifyMemberData) {
+func (m *Mocker) ModifyMember(guildID discord.GuildID, userID discord.UserID, d api.ModifyMemberData) {
 	m.MockAPI("ModifyMember", http.MethodPatch, "/guilds/"+guildID.String()+"/members/"+userID.String(),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			mockutil.CheckJSON(t, r.Body, new(api.ModifyMemberData), &d)
@@ -165,7 +167,7 @@ type pruneBody struct {
 }
 
 // PruneCount mocks a PruneCount request.
-func (m *Mocker) PruneCount(guildID discord.Snowflake, d api.PruneCountData, pruned uint) {
+func (m *Mocker) PruneCount(guildID discord.GuildID, d api.PruneCountData, pruned uint) {
 	if d.Days == 0 {
 		d.Days = 7
 	}
@@ -194,7 +196,7 @@ func (m *Mocker) PruneCount(guildID discord.Snowflake, d api.PruneCountData, pru
 }
 
 // Prune mocks a Prune request.
-func (m *Mocker) Prune(guildID discord.Snowflake, d api.PruneData, pruned uint) {
+func (m *Mocker) Prune(guildID discord.GuildID, d api.PruneData, pruned uint) {
 	if d.Days == 0 {
 		d.Days = 7
 	}
@@ -224,14 +226,14 @@ func (m *Mocker) Prune(guildID discord.Snowflake, d api.PruneData, pruned uint) 
 }
 
 // Kick mocks a Kick request.
-func (m *Mocker) Kick(guildID, userID discord.Snowflake) {
+func (m *Mocker) Kick(guildID discord.GuildID, userID discord.UserID) {
 	m.MockAPI("Kick", http.MethodDelete, "/guilds/"+guildID.String()+"/members/"+userID.String(), nil)
 }
 
 // Bans mocks a Bans request.
 //
 // This method will sanitize Bans.User.ID.
-func (m *Mocker) Bans(guildID discord.Snowflake, b []discord.Ban) {
+func (m *Mocker) Bans(guildID discord.GuildID, b []discord.Ban) {
 	for i, ban := range b {
 		b[i] = sanitize.Ban(ban, 1)
 	}
@@ -244,8 +246,8 @@ func (m *Mocker) Bans(guildID discord.Snowflake, b []discord.Ban) {
 
 // GetBan mocks a GetBan request.
 //
-// The User.ID field of the passed ban must be set.
-func (m *Mocker) GetBan(guildID discord.Snowflake, b discord.Ban) {
+// The User.ID field of the passed discord.Ban must be set.
+func (m *Mocker) GetBan(guildID discord.GuildID, b discord.Ban) {
 	m.MockAPI("GetBan", http.MethodGet, "/guilds/"+guildID.String()+"/bans/"+b.User.ID.String(),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			mockutil.WriteJSON(t, w, b)
@@ -253,7 +255,7 @@ func (m *Mocker) GetBan(guildID discord.Snowflake, b discord.Ban) {
 }
 
 // Ban mocks a Ban request.
-func (m *Mocker) Ban(guildID, userID discord.Snowflake, d api.BanData) {
+func (m *Mocker) Ban(guildID discord.GuildID, userID discord.UserID, d api.BanData) {
 	if *d.DeleteDays > 7 {
 		*d.DeleteDays = 7
 	}
@@ -276,6 +278,6 @@ func (m *Mocker) Ban(guildID, userID discord.Snowflake, d api.BanData) {
 }
 
 // Unban mocks a Unban request.
-func (m *Mocker) Unban(guildID, userID discord.Snowflake) {
+func (m *Mocker) Unban(guildID discord.GuildID, userID discord.UserID) {
 	m.MockAPI("Unban", http.MethodDelete, "/guilds/"+guildID.String()+"/bans/"+userID.String(), nil)
 }

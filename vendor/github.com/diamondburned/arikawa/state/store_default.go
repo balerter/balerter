@@ -1,7 +1,6 @@
 package state
 
 import (
-	"sort"
 	"sync"
 
 	"github.com/diamondburned/arikawa/discord"
@@ -10,21 +9,25 @@ import (
 // TODO: make an ExpiryStore
 
 type DefaultStore struct {
-	*DefaultStoreOptions
+	DefaultStoreOptions
 
 	self discord.User
 
 	// includes normal and private
-	privates map[discord.Snowflake]*discord.Channel // channelID:channel
-	guilds   map[discord.Snowflake]*discord.Guild   // guildID:guild
+	privates map[discord.ChannelID]discord.Channel
+	guilds   map[discord.GuildID]discord.Guild
 
-	channels    map[discord.Snowflake][]discord.Channel    // guildID:channels
-	members     map[discord.Snowflake][]discord.Member     // guildID:members
-	presences   map[discord.Snowflake][]discord.Presence   // guildID:presences
-	messages    map[discord.Snowflake][]discord.Message    // channelID:messages
-	voiceStates map[discord.Snowflake][]discord.VoiceState // guildID:voiceStates
+	roles       map[discord.GuildID][]discord.Role
+	emojis      map[discord.GuildID][]discord.Emoji
+	channels    map[discord.GuildID][]discord.Channel
+	presences   map[discord.GuildID][]discord.Presence
+	voiceStates map[discord.GuildID][]discord.VoiceState
+	messages    map[discord.ChannelID][]discord.Message
 
-	mut sync.Mutex
+	// special case; optimize for lots of members
+	members map[discord.GuildID]map[discord.UserID]discord.Member
+
+	mut sync.RWMutex
 }
 
 type DefaultStoreOptions struct {
@@ -40,9 +43,7 @@ func NewDefaultStore(opts *DefaultStoreOptions) *DefaultStore {
 		}
 	}
 
-	ds := &DefaultStore{
-		DefaultStoreOptions: opts,
-	}
+	ds := &DefaultStore{DefaultStoreOptions: *opts}
 	ds.Reset()
 
 	return ds
@@ -54,14 +55,17 @@ func (s *DefaultStore) Reset() error {
 
 	s.self = discord.User{}
 
-	s.privates = map[discord.Snowflake]*discord.Channel{}
-	s.guilds = map[discord.Snowflake]*discord.Guild{}
+	s.privates = map[discord.ChannelID]discord.Channel{}
+	s.guilds = map[discord.GuildID]discord.Guild{}
 
-	s.channels = map[discord.Snowflake][]discord.Channel{}
-	s.members = map[discord.Snowflake][]discord.Member{}
-	s.presences = map[discord.Snowflake][]discord.Presence{}
-	s.messages = map[discord.Snowflake][]discord.Message{}
-	s.voiceStates = map[discord.Snowflake][]discord.VoiceState{}
+	s.roles = map[discord.GuildID][]discord.Role{}
+	s.emojis = map[discord.GuildID][]discord.Emoji{}
+	s.channels = map[discord.GuildID][]discord.Channel{}
+	s.presences = map[discord.GuildID][]discord.Presence{}
+	s.voiceStates = map[discord.GuildID][]discord.VoiceState{}
+	s.messages = map[discord.ChannelID][]discord.Message{}
+
+	s.members = map[discord.GuildID]map[discord.UserID]discord.Member{}
 
 	return nil
 }
@@ -69,19 +73,19 @@ func (s *DefaultStore) Reset() error {
 ////
 
 func (s *DefaultStore) Me() (*discord.User, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
-	if !s.self.ID.Valid() {
+	if !s.self.ID.IsValid() {
 		return nil, ErrStoreNotFound
 	}
 
 	return &s.self, nil
 }
 
-func (s *DefaultStore) MyselfSet(me *discord.User) error {
+func (s *DefaultStore) MyselfSet(me discord.User) error {
 	s.mut.Lock()
-	s.self = *me
+	s.self = me
 	s.mut.Unlock()
 
 	return nil
@@ -89,12 +93,13 @@ func (s *DefaultStore) MyselfSet(me *discord.User) error {
 
 ////
 
-func (s *DefaultStore) Channel(id discord.Snowflake) (*discord.Channel, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) Channel(id discord.ChannelID) (*discord.Channel, error) {
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
 	if ch, ok := s.privates[id]; ok {
-		return ch, nil
+		// implicit copy
+		return &ch, nil
 	}
 
 	for _, chs := range s.channels {
@@ -108,9 +113,9 @@ func (s *DefaultStore) Channel(id discord.Snowflake) (*discord.Channel, error) {
 	return nil, ErrStoreNotFound
 }
 
-func (s *DefaultStore) Channels(guildID discord.Snowflake) ([]discord.Channel, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) Channels(guildID discord.GuildID) ([]discord.Channel, error) {
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
 	chs, ok := s.channels[guildID]
 	if !ok {
@@ -122,17 +127,18 @@ func (s *DefaultStore) Channels(guildID discord.Snowflake) ([]discord.Channel, e
 
 // CreatePrivateChannel searches in the cache for a private channel. It makes no
 // API calls.
-func (s *DefaultStore) CreatePrivateChannel(recipient discord.Snowflake) (*discord.Channel, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) CreatePrivateChannel(recipient discord.UserID) (*discord.Channel, error) {
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
 	// slow way
 	for _, ch := range s.privates {
-		if ch.Type != discord.DirectMessage || len(ch.DMRecipients) < 1 {
+		if ch.Type != discord.DirectMessage || len(ch.DMRecipients) == 0 {
 			continue
 		}
 		if ch.DMRecipients[0].ID == recipient {
-			return &(*ch), nil
+			// Return an implicit copy made by range.
+			return &ch, nil
 		}
 	}
 	return nil, ErrStoreNotFound
@@ -140,22 +146,22 @@ func (s *DefaultStore) CreatePrivateChannel(recipient discord.Snowflake) (*disco
 
 // PrivateChannels returns a list of Direct Message channels randomly ordered.
 func (s *DefaultStore) PrivateChannels() ([]discord.Channel, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
 	var chs = make([]discord.Channel, 0, len(s.privates))
-	for _, ch := range s.privates {
-		chs = append(chs, *ch)
+	for i := range s.privates {
+		chs = append(chs, s.privates[i])
 	}
 
 	return chs, nil
 }
 
-func (s *DefaultStore) ChannelSet(channel *discord.Channel) error {
+func (s *DefaultStore) ChannelSet(channel discord.Channel) error {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 
-	if !channel.GuildID.Valid() {
+	if !channel.GuildID.IsValid() {
 		s.privates[channel.ID] = channel
 
 	} else {
@@ -169,20 +175,20 @@ func (s *DefaultStore) ChannelSet(channel *discord.Channel) error {
 				}
 
 				// Found, just edit
-				chs[i] = *channel
+				chs[i] = channel
 
 				return nil
 			}
 		}
 
-		chs = append(chs, *channel)
+		chs = append(chs, channel)
 		s.channels[channel.GuildID] = chs
 	}
 
 	return nil
 }
 
-func (s *DefaultStore) ChannelRemove(channel *discord.Channel) error {
+func (s *DefaultStore) ChannelRemove(channel discord.Channel) error {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 
@@ -193,9 +199,11 @@ func (s *DefaultStore) ChannelRemove(channel *discord.Channel) error {
 
 	for i, ch := range chs {
 		if ch.ID == channel.ID {
-			chs = append(chs[:i], chs[i+1:]...)
-			s.channels[channel.GuildID] = chs
+			// Fast unordered delete.
+			chs[i] = chs[len(chs)-1]
+			chs = chs[:len(chs)-1]
 
+			s.channels[channel.GuildID] = chs
 			return nil
 		}
 	}
@@ -205,17 +213,18 @@ func (s *DefaultStore) ChannelRemove(channel *discord.Channel) error {
 
 ////
 
-func (s *DefaultStore) Emoji(guildID, emojiID discord.Snowflake) (*discord.Emoji, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) Emoji(guildID discord.GuildID, emojiID discord.EmojiID) (*discord.Emoji, error) {
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
-	gd, ok := s.guilds[guildID]
+	emojis, ok := s.emojis[guildID]
 	if !ok {
 		return nil, ErrStoreNotFound
 	}
 
-	for _, emoji := range gd.Emojis {
+	for _, emoji := range emojis {
 		if emoji.ID == emojiID {
+			// Emoji is an implicit copy, so we could do this safely.
 			return &emoji, nil
 		}
 	}
@@ -223,169 +232,133 @@ func (s *DefaultStore) Emoji(guildID, emojiID discord.Snowflake) (*discord.Emoji
 	return nil, ErrStoreNotFound
 }
 
-func (s *DefaultStore) Emojis(guildID discord.Snowflake) ([]discord.Emoji, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) Emojis(guildID discord.GuildID) ([]discord.Emoji, error) {
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
-	gd, ok := s.guilds[guildID]
+	emojis, ok := s.emojis[guildID]
 	if !ok {
 		return nil, ErrStoreNotFound
 	}
 
-	return append([]discord.Emoji{}, gd.Emojis...), nil
+	return append([]discord.Emoji{}, emojis...), nil
 }
 
-func (s *DefaultStore) EmojiSet(guildID discord.Snowflake, emojis []discord.Emoji) error {
+func (s *DefaultStore) EmojiSet(guildID discord.GuildID, emojis []discord.Emoji) error {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 
-	gd, ok := s.guilds[guildID]
-	if !ok {
-		return ErrStoreNotFound
-	}
+	// A nil slice is acceptable, as we'll make a new slice later on and set it.
+	s.emojis[guildID] = emojis
 
-	filtered := emojis[:0]
-
-Main:
-	for _, enew := range emojis {
-		// Try and see if this emoji is already in the slice
-		for i, emoji := range gd.Emojis {
-			if emoji.ID == enew.ID {
-				// If it is, we simply replace it
-				gd.Emojis[i] = enew
-
-				continue Main
-			}
-		}
-
-		// If not, we add it to the slice that's to be appended.
-		filtered = append(filtered, enew)
-	}
-
-	// Append the new emojis
-	gd.Emojis = append(gd.Emojis, filtered...)
 	return nil
 }
 
 ////
 
-func (s *DefaultStore) Guild(id discord.Snowflake) (*discord.Guild, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) Guild(id discord.GuildID) (*discord.Guild, error) {
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
 	ch, ok := s.guilds[id]
 	if !ok {
 		return nil, ErrStoreNotFound
 	}
 
-	return ch, nil
+	// implicit copy
+	return &ch, nil
 }
 
 func (s *DefaultStore) Guilds() ([]discord.Guild, error) {
-	s.mut.Lock()
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
 	if len(s.guilds) == 0 {
-		s.mut.Unlock()
 		return nil, ErrStoreNotFound
 	}
 
 	var gs = make([]discord.Guild, 0, len(s.guilds))
 	for _, g := range s.guilds {
-		gs = append(gs, *g)
+		gs = append(gs, g)
 	}
-
-	s.mut.Unlock()
-
-	sort.Slice(gs, func(i, j int) bool {
-		return gs[i].ID > gs[j].ID
-	})
 
 	return gs, nil
 }
 
-func (s *DefaultStore) GuildSet(guild *discord.Guild) error {
+func (s *DefaultStore) GuildSet(guild discord.Guild) error {
 	s.mut.Lock()
 	defer s.mut.Unlock()
-
-	if g, ok := s.guilds[guild.ID]; ok {
-		// preserve state stuff
-		if guild.Roles == nil {
-			guild.Roles = g.Roles
-		}
-		if guild.Emojis == nil {
-			guild.Emojis = g.Emojis
-		}
-	}
 
 	s.guilds[guild.ID] = guild
 	return nil
 }
 
-func (s *DefaultStore) GuildRemove(id discord.Snowflake) error {
+func (s *DefaultStore) GuildRemove(id discord.GuildID) error {
 	s.mut.Lock()
-	delete(s.guilds, id)
-	s.mut.Unlock()
+	defer s.mut.Unlock()
 
+	if _, ok := s.guilds[id]; !ok {
+		return ErrStoreNotFound
+	}
+
+	delete(s.guilds, id)
 	return nil
 }
 
 ////
 
-func (s *DefaultStore) Member(guildID, userID discord.Snowflake) (*discord.Member, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) Member(
+	guildID discord.GuildID, userID discord.UserID) (*discord.Member, error) {
+
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
 	ms, ok := s.members[guildID]
 	if !ok {
 		return nil, ErrStoreNotFound
 	}
 
-	for _, m := range ms {
-		if m.User.ID == userID {
-			return &m, nil
-		}
+	m, ok := ms[userID]
+	if ok {
+		return &m, nil
 	}
 
 	return nil, ErrStoreNotFound
 }
 
-func (s *DefaultStore) Members(guildID discord.Snowflake) ([]discord.Member, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) Members(guildID discord.GuildID) ([]discord.Member, error) {
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
 	ms, ok := s.members[guildID]
 	if !ok {
 		return nil, ErrStoreNotFound
 	}
 
-	return append([]discord.Member{}, ms...), nil
+	var members = make([]discord.Member, 0, len(ms))
+	for _, m := range ms {
+		members = append(members, m)
+	}
+
+	return members, nil
 }
 
-func (s *DefaultStore) MemberSet(guildID discord.Snowflake, member *discord.Member) error {
+func (s *DefaultStore) MemberSet(guildID discord.GuildID, member discord.Member) error {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 
-	ms := s.members[guildID]
-
-	// Try and see if this member is already in the slice
-	for i, m := range ms {
-		if m.User.ID == member.User.ID {
-			// If it is, we simply replace it
-			ms[i] = *member
-			s.members[guildID] = ms
-
-			return nil
-		}
+	ms, ok := s.members[guildID]
+	if !ok {
+		ms = make(map[discord.UserID]discord.Member, 1)
 	}
 
-	// Append the new member
-	ms = append(ms, *member)
+	ms[member.User.ID] = member
 	s.members[guildID] = ms
 
 	return nil
 }
 
-func (s *DefaultStore) MemberRemove(guildID, userID discord.Snowflake) error {
+func (s *DefaultStore) MemberRemove(guildID discord.GuildID, userID discord.UserID) error {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 
@@ -394,24 +367,21 @@ func (s *DefaultStore) MemberRemove(guildID, userID discord.Snowflake) error {
 		return ErrStoreNotFound
 	}
 
-	// Try and see if this member is already in the slice
-	for i, m := range ms {
-		if m.User.ID == userID {
-			ms = append(ms, ms[i+1:]...)
-			s.members[guildID] = ms
-
-			return nil
-		}
+	if _, ok := ms[userID]; !ok {
+		return ErrStoreNotFound
 	}
 
-	return ErrStoreNotFound
+	delete(ms, userID)
+	return nil
 }
 
 ////
 
-func (s *DefaultStore) Message(channelID, messageID discord.Snowflake) (*discord.Message, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) Message(
+	channelID discord.ChannelID, messageID discord.MessageID) (*discord.Message, error) {
+
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
 	ms, ok := s.messages[channelID]
 	if !ok {
@@ -427,25 +397,23 @@ func (s *DefaultStore) Message(channelID, messageID discord.Snowflake) (*discord
 	return nil, ErrStoreNotFound
 }
 
-func (s *DefaultStore) Messages(channelID discord.Snowflake) ([]discord.Message, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) Messages(channelID discord.ChannelID) ([]discord.Message, error) {
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
 	ms, ok := s.messages[channelID]
 	if !ok {
 		return nil, ErrStoreNotFound
 	}
 
-	cp := make([]discord.Message, len(ms))
-	copy(cp, ms)
-	return cp, nil
+	return append([]discord.Message{}, ms...), nil
 }
 
 func (s *DefaultStore) MaxMessages() int {
 	return int(s.DefaultStoreOptions.MaxMessages)
 }
 
-func (s *DefaultStore) MessageSet(message *discord.Message) error {
+func (s *DefaultStore) MessageSet(message discord.Message) error {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 
@@ -457,7 +425,7 @@ func (s *DefaultStore) MessageSet(message *discord.Message) error {
 	// Check if we already have the message.
 	for i, m := range ms {
 		if m.ID == message.ID {
-			DiffMessage(*message, &m)
+			DiffMessage(message, &m)
 			ms[i] = m
 			return nil
 		}
@@ -480,13 +448,15 @@ func (s *DefaultStore) MessageSet(message *discord.Message) error {
 	// 1st-endth.
 	copy(ms[1:end], ms[0:end-1])
 	// Then, set the 0th entry.
-	ms[0] = *message
+	ms[0] = message
 
 	s.messages[message.ChannelID] = ms
 	return nil
 }
 
-func (s *DefaultStore) MessageRemove(channelID, messageID discord.Snowflake) error {
+func (s *DefaultStore) MessageRemove(
+	channelID discord.ChannelID, messageID discord.MessageID) error {
+
 	s.mut.Lock()
 	defer s.mut.Unlock()
 
@@ -508,9 +478,11 @@ func (s *DefaultStore) MessageRemove(channelID, messageID discord.Snowflake) err
 
 ////
 
-func (s *DefaultStore) Presence(guildID, userID discord.Snowflake) (*discord.Presence, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) Presence(
+	guildID discord.GuildID, userID discord.UserID) (*discord.Presence, error) {
+
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
 	ps, ok := s.presences[guildID]
 	if !ok {
@@ -526,39 +498,38 @@ func (s *DefaultStore) Presence(guildID, userID discord.Snowflake) (*discord.Pre
 	return nil, ErrStoreNotFound
 }
 
-func (s *DefaultStore) Presences(guildID discord.Snowflake) ([]discord.Presence, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) Presences(guildID discord.GuildID) ([]discord.Presence, error) {
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
 	ps, ok := s.presences[guildID]
 	if !ok {
 		return nil, ErrStoreNotFound
 	}
 
-	return ps, nil
+	return append([]discord.Presence{}, ps...), nil
 }
 
-func (s *DefaultStore) PresenceSet(guildID discord.Snowflake, presence *discord.Presence) error {
+func (s *DefaultStore) PresenceSet(guildID discord.GuildID, presence discord.Presence) error {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 
-	ps := s.presences[guildID]
+	ps, _ := s.presences[guildID]
 
 	for i, p := range ps {
 		if p.User.ID == presence.User.ID {
-			ps[i] = *presence
-			s.presences[guildID] = ps
-
+			// Change the backing array.
+			ps[i] = presence
 			return nil
 		}
 	}
 
-	ps = append(ps, *presence)
+	ps = append(ps, presence)
 	s.presences[guildID] = ps
 	return nil
 }
 
-func (s *DefaultStore) PresenceRemove(guildID, userID discord.Snowflake) error {
+func (s *DefaultStore) PresenceRemove(guildID discord.GuildID, userID discord.UserID) error {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 
@@ -569,9 +540,10 @@ func (s *DefaultStore) PresenceRemove(guildID, userID discord.Snowflake) error {
 
 	for i, p := range ps {
 		if p.User.ID == userID {
-			ps = append(ps[:i], ps[i+1:]...)
-			s.presences[guildID] = ps
+			ps[i] = ps[len(ps)-1]
+			ps = ps[:len(ps)-1]
 
+			s.presences[guildID] = ps
 			return nil
 		}
 	}
@@ -581,16 +553,16 @@ func (s *DefaultStore) PresenceRemove(guildID, userID discord.Snowflake) error {
 
 ////
 
-func (s *DefaultStore) Role(guildID, roleID discord.Snowflake) (*discord.Role, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) Role(guildID discord.GuildID, roleID discord.RoleID) (*discord.Role, error) {
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
-	gd, ok := s.guilds[guildID]
+	rs, ok := s.roles[guildID]
 	if !ok {
 		return nil, ErrStoreNotFound
 	}
 
-	for _, r := range gd.Roles {
+	for _, r := range rs {
 		if r.ID == roleID {
 			return &r, nil
 		}
@@ -599,50 +571,55 @@ func (s *DefaultStore) Role(guildID, roleID discord.Snowflake) (*discord.Role, e
 	return nil, ErrStoreNotFound
 }
 
-func (s *DefaultStore) Roles(guildID discord.Snowflake) ([]discord.Role, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) Roles(guildID discord.GuildID) ([]discord.Role, error) {
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
-	gd, ok := s.guilds[guildID]
+	rs, ok := s.roles[guildID]
 	if !ok {
 		return nil, ErrStoreNotFound
 	}
 
-	return append([]discord.Role{}, gd.Roles...), nil
+	return append([]discord.Role{}, rs...), nil
 }
 
-func (s *DefaultStore) RoleSet(guildID discord.Snowflake, role *discord.Role) error {
+func (s *DefaultStore) RoleSet(guildID discord.GuildID, role discord.Role) error {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 
-	gd, ok := s.guilds[guildID]
-	if !ok {
-		return ErrStoreNotFound
-	}
+	// A nil slice is fine, since we can just append the role.
+	rs, _ := s.roles[guildID]
 
-	for i, r := range gd.Roles {
+	for i, r := range rs {
 		if r.ID == role.ID {
-			gd.Roles[i] = *role
+			// This changes the backing array, so we don't need to reset the
+			// slice.
+			rs[i] = role
 			return nil
 		}
 	}
 
-	gd.Roles = append(gd.Roles, *role)
+	rs = append(rs, role)
+	s.roles[guildID] = rs
 	return nil
 }
 
-func (s *DefaultStore) RoleRemove(guildID, roleID discord.Snowflake) error {
+func (s *DefaultStore) RoleRemove(guildID discord.GuildID, roleID discord.RoleID) error {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 
-	gd, ok := s.guilds[guildID]
+	rs, ok := s.roles[guildID]
 	if !ok {
 		return ErrStoreNotFound
 	}
 
-	for i, r := range gd.Roles {
+	for i, r := range rs {
 		if r.ID == roleID {
-			gd.Roles = append(gd.Roles[:i], gd.Roles[i+1:]...)
+			// Fast delete.
+			rs[i] = rs[len(rs)-1]
+			rs = rs[:len(rs)-1]
+
+			s.roles[guildID] = rs
 			return nil
 		}
 	}
@@ -652,9 +629,11 @@ func (s *DefaultStore) RoleRemove(guildID, roleID discord.Snowflake) error {
 
 ////
 
-func (s *DefaultStore) VoiceState(guildID, userID discord.Snowflake) (*discord.VoiceState, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) VoiceState(
+	guildID discord.GuildID, userID discord.UserID) (*discord.VoiceState, error) {
+
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
 	states, ok := s.voiceStates[guildID]
 	if !ok {
@@ -670,9 +649,9 @@ func (s *DefaultStore) VoiceState(guildID, userID discord.Snowflake) (*discord.V
 	return nil, ErrStoreNotFound
 }
 
-func (s *DefaultStore) VoiceStates(guildID discord.Snowflake) ([]discord.VoiceState, error) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
+func (s *DefaultStore) VoiceStates(guildID discord.GuildID) ([]discord.VoiceState, error) {
+	s.mut.RLock()
+	defer s.mut.RUnlock()
 
 	states, ok := s.voiceStates[guildID]
 	if !ok {
@@ -682,27 +661,26 @@ func (s *DefaultStore) VoiceStates(guildID discord.Snowflake) ([]discord.VoiceSt
 	return append([]discord.VoiceState{}, states...), nil
 }
 
-func (s *DefaultStore) VoiceStateSet(guildID discord.Snowflake, voiceState *discord.VoiceState) error {
+func (s *DefaultStore) VoiceStateSet(guildID discord.GuildID, voiceState discord.VoiceState) error {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 
-	states := s.voiceStates[guildID]
+	states, _ := s.voiceStates[guildID]
 
 	for i, vs := range states {
 		if vs.UserID == voiceState.UserID {
-			states[i] = *voiceState
-			s.voiceStates[guildID] = states
-
+			// change the backing array
+			states[i] = voiceState
 			return nil
 		}
 	}
 
-	states = append(states, *voiceState)
+	states = append(states, voiceState)
 	s.voiceStates[guildID] = states
 	return nil
 }
 
-func (s *DefaultStore) VoiceStateRemove(guildID, userID discord.Snowflake) error {
+func (s *DefaultStore) VoiceStateRemove(guildID discord.GuildID, userID discord.UserID) error {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 

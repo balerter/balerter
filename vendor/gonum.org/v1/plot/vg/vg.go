@@ -11,10 +11,13 @@ import (
 	"image"
 	"image/color"
 	"io"
+
+	"gonum.org/v1/plot/font"
 )
 
 // A Canvas is the main drawing interface for 2D vector
-// graphics.  The origin is in the bottom left corner.
+// graphics.
+// The origin is in the bottom left corner.
 type Canvas interface {
 	// SetLineWidth sets the width of stroked paths.
 	// If the width is not positive then stroked lines
@@ -38,13 +41,12 @@ type Canvas interface {
 	// and stroke colors then you must set a color,
 	// draw fills, set a new color and then draw lines.
 	//
-	// The initial color is black.  If SetColor is
-	// called with a nil color then black is used.
+	// The initial color is black.
+	// If SetColor is called with a nil color then black is used.
 	SetColor(color.Color)
 
-	// Rotate applies a rotation transform to the
-	// context.  The parameter is specified in
-	// radians.
+	// Rotate applies a rotation transform to the context.
+	// The parameter is specified in radians.
 	Rotate(rad float64)
 
 	// Translate applies a translational transform
@@ -75,7 +77,7 @@ type Canvas interface {
 	// FillString fills in text at the specified
 	// location using the given font.
 	// If the font size is zero, the text is not drawn.
-	FillString(f Font, pt Point, text string)
+	FillString(f font.Face, pt Point, text string)
 
 	// DrawImage draws the image, scaled to fit
 	// the destination rectangle.

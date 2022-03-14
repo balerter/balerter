@@ -3,16 +3,15 @@ package mail
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/base64"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"mime"
 	"net"
 	"net/mail"
 	"net/textproto"
-	"path/filepath"
+	"strconv"
 	"time"
+
+	"github.com/toorop/go-dkim"
 )
 
 // Email represents an email message.
@@ -24,12 +23,13 @@ type Email struct {
 	recipients  []string
 	headers     textproto.MIMEHeader
 	parts       []part
-	attachments []*file
-	inlines     []*file
+	attachments []*File
+	inlines     []*File
 	Charset     string
 	Encoding    encoding
 	Error       error
 	SMTPServer  *smtpClient
+	DkimMsg     string
 }
 
 /*
@@ -37,15 +37,17 @@ SMTPServer represents a SMTP Server
 If authentication is CRAM-MD5 then the Password is the Secret
 */
 type SMTPServer struct {
-	Authentication authType
-	Encryption     encryption
+	Authentication AuthType
+	Encryption     Encryption
 	Username       string
 	Password       string
+	Helo           string
 	ConnectTimeout time.Duration
 	SendTimeout    time.Duration
 	Host           string
 	Port           int
 	KeepAlive      bool
+	TLSConfig      *tls.Config
 }
 
 //SMTPClient represents a SMTP Client for send email
@@ -61,27 +63,28 @@ type part struct {
 	body        *bytes.Buffer
 }
 
-// file represents the files that can be added to the email message.
-type file struct {
-	filename string
-	mimeType string
-	data     []byte
-}
+// Encryption type to enum encryption types (None, SSL/TLS, STARTTLS)
+type Encryption int
 
-type encryption int
+// TODO: Remove EncryptionSSL and EncryptionTLS before launch v3
 
 const (
 	// EncryptionNone uses no encryption when sending email
-	EncryptionNone encryption = iota
-	// EncryptionSSL sets encryption type to SSL when sending email
+	EncryptionNone Encryption = iota
+	// EncryptionSSL: DEPRECATED. Use EncryptionSSLTLS. Sets encryption type to SSL/TLS when sending email
 	EncryptionSSL
-	// EncryptionTLS sets encryption type to TLS when sending email
+	// EncryptionTLS: DEPRECATED. Use EncryptionSTARTTLS. sets encryption type to STARTTLS when sending email
 	EncryptionTLS
+	// EncryptionSSLTLS sets encryption type to SSL/TLS when sending email
+	EncryptionSSLTLS
+	// EncryptionSTARTTLS sets encryption type to STARTTLS when sending email
+	EncryptionSTARTTLS
 )
 
-var encryptionTypes = [...]string{"None", "SSL", "TLS"}
+// TODO: Remove last two indexes
+var encryptionTypes = [...]string{"None", "SSL/TLS", "STARTTLS", "SSL/TLS", "STARTTLS"}
 
-func (encryption encryption) string() string {
+func (encryption Encryption) String() string {
 	return encryptionTypes[encryption]
 }
 
@@ -109,23 +112,27 @@ const (
 	TextPlain contentType = iota
 	// TextHTML sets body type to text/html in message body
 	TextHTML
+	// TextCalendar sets body type to text/calendar in message body
+	TextCalendar
 )
 
-var contentTypes = [...]string{"text/plain", "text/html"}
+var contentTypes = [...]string{"text/plain", "text/html", "text/calendar"}
 
 func (contentType contentType) string() string {
 	return contentTypes[contentType]
 }
 
-type authType int
+type AuthType int
 
 const (
 	// AuthPlain implements the PLAIN authentication
-	AuthPlain authType = iota
+	AuthPlain AuthType = iota
 	// AuthLogin implements the LOGIN authentication
 	AuthLogin
 	// AuthCRAMMD5 implements the CRAM-MD5 authentication
 	AuthCRAMMD5
+	// AuthNone for SMTP servers without authentication
+	AuthNone
 )
 
 // NewMSG creates a new email. It uses UTF-8 by default. All charsets: http://webcheatsheet.com/HTML/character_sets_list.php
@@ -148,8 +155,14 @@ func NewSMTPClient() *SMTPServer {
 		Encryption:     EncryptionNone,
 		ConnectTimeout: 10 * time.Second,
 		SendTimeout:    10 * time.Second,
+		Helo:           "localhost",
 	}
 	return server
+}
+
+// GetEncryptionType returns the encryption type used to connect to SMTP server
+func (server *SMTPServer) GetEncryptionType() Encryption {
+	return server.Encryption
 }
 
 // GetError returns the first email error encountered
@@ -260,16 +273,22 @@ func (email *Email) AddAddresses(header string, addresses ...string) *Email {
 
 	// check to see if the addresses are valid
 	for i := range addresses {
-		address, err := mail.ParseAddress(addresses[i])
-		if err != nil {
-			email.Error = errors.New("Mail Error: " + err.Error() + "; Header: [" + header + "] Address: [" + addresses[i] + "]")
-			return email
+		var address = new(mail.Address)
+		var err error
+
+		// ignore parse the address if empty
+		if len(addresses[i]) > 0 {
+			address, err = mail.ParseAddress(addresses[i])
+			if err != nil {
+				email.Error = errors.New("Mail Error: " + err.Error() + "; Header: [" + header + "] Address: [" + addresses[i] + "]")
+				return email
+			}
+		} else {
+			continue
 		}
 
 		// check for more than one address
 		switch {
-		case header == "From" && len(email.from) > 0:
-			fallthrough
 		case header == "Sender" && len(email.sender) > 0:
 			fallthrough
 		case header == "Reply-To" && len(email.replyTo) > 0:
@@ -284,6 +303,11 @@ func (email *Email) AddAddresses(header string, addresses ...string) *Email {
 		// save the address
 		switch header {
 		case "From":
+			// delete the current "From" to set the new
+			// when "From" need to be changed in the message
+			if len(email.from) > 0 && header == "From" {
+				email.headers.Del("From")
+			}
 			email.from = address.Address
 		case "Sender":
 			email.sender = address.Address
@@ -399,6 +423,36 @@ func (email *Email) SetSubject(subject string) *Email {
 	return email
 }
 
+// SetListUnsubscribe sets the Unsubscribe address.
+func (email *Email) SetListUnsubscribe(address string) *Email {
+	if email.Error != nil {
+		return email
+	}
+
+	email.AddHeader("List-Unsubscribe", address)
+
+	return email
+}
+
+// SetDkim adds DomainKey signature to the email message (header+body)
+func (email *Email) SetDkim(options dkim.SigOptions) *Email {
+	if email.Error != nil {
+		return email
+	}
+
+	msg := []byte(email.GetMessage())
+	err := dkim.Sign(&msg, options)
+
+	if err != nil {
+		email.Error = errors.New("Mail Error: cannot dkim sign message due: %s" + err.Error())
+		return email
+	}
+
+	email.DkimMsg = string(msg)
+
+	return email
+}
+
 // SetBody sets the body of the email message.
 func (email *Email) SetBody(contentType contentType, body string) *Email {
 	if email.Error != nil {
@@ -409,6 +463,22 @@ func (email *Email) SetBody(contentType contentType, body string) *Email {
 		{
 			contentType: contentType.string(),
 			body:        bytes.NewBufferString(body),
+		},
+	}
+
+	return email
+}
+
+// SetBodyData sets the body of the email message from []byte
+func (email *Email) SetBodyData(contentType contentType, body []byte) *Email {
+	if email.Error != nil {
+		return email
+	}
+
+	email.parts = []part{
+		{
+			contentType: contentType.string(),
+			body:        bytes.NewBuffer(body),
 		},
 	}
 
@@ -426,6 +496,9 @@ func (email *Email) AddHeader(header string, values ...string) *Email {
 		email.Error = errors.New("Mail Error: no value provided; Header: [" + header + "]")
 		return email
 	}
+
+	// Set header to correct canonical Mime
+	header = textproto.CanonicalMIMEHeaderKey(header)
 
 	switch header {
 	case "Sender":
@@ -448,6 +521,8 @@ func (email *Email) AddHeader(header string, values ...string) *Email {
 			return email
 		}
 		email.SetDate(values[0])
+	case "List-Unsubscribe":
+		fallthrough
 	default:
 		email.headers[header] = values
 	}
@@ -487,122 +562,27 @@ func (email *Email) AddAlternative(contentType contentType, body string) *Email 
 	return email
 }
 
-// AddAttachment allows you to add an attachment to the email message.
-// You can optionally provide a different name for the file.
-func (email *Email) AddAttachment(file string, name ...string) *Email {
+// AddAlternativeData allows you to add alternative parts to the body
+// of the email message. This is most commonly used to add an
+// html version in addition to a plain text version that was
+// already added with SetBody.
+func (email *Email) AddAlternativeData(contentType contentType, body []byte) *Email {
 	if email.Error != nil {
 		return email
 	}
 
-	if len(name) > 1 {
-		email.Error = errors.New("Mail Error: Attach can only have a file and an optional name")
-		return email
-	}
-
-	email.Error = email.attach(file, false, name...)
-
-	return email
-}
-
-// AddAttachmentBase64 allows you to add an attachment in base64 to the email message.
-// You need provide a name for the file.
-func (email *Email) AddAttachmentBase64(b64File string, name string) *Email {
-	if email.Error != nil {
-		return email
-	}
-
-	if len(name) < 1 || len(b64File) < 1 {
-		email.Error = errors.New("Mail Error: Attach Base64 need have a base64 string and name")
-		return email
-	}
-
-	email.Error = email.attachB64(b64File, name)
+	email.parts = append(email.parts,
+		part{
+			contentType: contentType.string(),
+			body:        bytes.NewBuffer(body),
+		},
+	)
 
 	return email
 }
 
-// AddInline allows you to add an inline attachment to the email message.
-// You can optionally provide a different name for the file.
-func (email *Email) AddInline(file string, name ...string) *Email {
-	if email.Error != nil {
-		return email
-	}
-
-	if len(name) > 1 {
-		email.Error = errors.New("Mail Error: Inline can only have a file and an optional name")
-		return email
-	}
-
-	email.Error = email.attach(file, true, name...)
-
-	return email
-}
-
-// attach does the low level attaching of the files
-func (email *Email) attach(f string, inline bool, name ...string) error {
-	// Get the file data
-	data, err := ioutil.ReadFile(f)
-	if err != nil {
-		return errors.New("Mail Error: Failed to add file with following error: " + err.Error())
-	}
-
-	// get the file mime type
-	mimeType := mime.TypeByExtension(filepath.Ext(f))
-	if mimeType == "" {
-		mimeType = "application/octet-stream"
-	}
-
-	// get the filename
-	_, filename := filepath.Split(f)
-
-	// if an alternative filename was provided, use that instead
-	if len(name) == 1 {
-		filename = name[0]
-	}
-
-	if inline {
-		email.inlines = append(email.inlines, &file{
-			filename: filename,
-			mimeType: mimeType,
-			data:     data,
-		})
-	} else {
-		email.attachments = append(email.attachments, &file{
-			filename: filename,
-			mimeType: mimeType,
-			data:     data,
-		})
-	}
-
-	return nil
-}
-
-// attachB64 does the low level attaching of the files but decoding base64 instead have a filepath
-func (email *Email) attachB64(b64File string, name string) error {
-
-	// decode the string
-	dec, err := base64.StdEncoding.DecodeString(b64File)
-	if err != nil {
-		return errors.New("Mail Error: Failed to decode base64 attachment with following error: " + err.Error())
-	}
-
-	// get the file mime type
-	mimeType := mime.TypeByExtension(name)
-	if mimeType == "" {
-		mimeType = "application/octet-stream"
-	}
-
-	email.attachments = append(email.attachments, &file{
-		filename: name,
-		mimeType: mimeType,
-		data:     dec,
-	})
-
-	return nil
-}
-
-// getFrom returns the sender of the email, if any
-func (email *Email) getFrom() string {
+// GetFrom returns the sender of the email, if any
+func (email *Email) GetFrom() string {
 	from := email.returnPath
 	if from == "" {
 		from = email.sender
@@ -617,6 +597,11 @@ func (email *Email) getFrom() string {
 	return from
 }
 
+// GetRecipients returns a slice of recipients emails
+func (email *Email) GetRecipients() []string {
+	return email.recipients
+}
+
 func (email *Email) hasMixedPart() bool {
 	return (len(email.parts) > 0 && len(email.attachments) > 0) || len(email.attachments) > 1
 }
@@ -629,7 +614,7 @@ func (email *Email) hasAlternativePart() bool {
 	return len(email.parts) > 1
 }
 
-// GetMessage builds and returns the email message
+// GetMessage builds and returns the email message (RFC822 formatted message)
 func (email *Email) GetMessage() string {
 	msg := newMessage(email)
 
@@ -668,23 +653,36 @@ func (email *Email) GetMessage() string {
 
 // Send sends the composed email
 func (email *Email) Send(client *SMTPClient) error {
+	return email.SendEnvelopeFrom(email.from, client)
+}
 
+// SendEnvelopeFrom sends the composed email with envelope
+// sender. 'from' must be an email address.
+func (email *Email) SendEnvelopeFrom(from string, client *SMTPClient) error {
 	if email.Error != nil {
 		return email.Error
+	}
+
+	if from == "" {
+		from = email.from
 	}
 
 	if len(email.recipients) < 1 {
 		return errors.New("Mail Error: No recipient specified")
 	}
 
-	msg := email.GetMessage()
+	var msg string
+	if email.DkimMsg != "" {
+		msg = email.DkimMsg
+	} else {
+		msg = email.GetMessage()
+	}
 
-	return send(email.from, email.recipients, msg, client)
-
+	return send(from, email.recipients, msg, client)
 }
 
 // dial connects to the smtp server with the request encryption type
-func dial(host string, port string, encryption encryption, config *tls.Config) (*smtpClient, error) {
+func dial(host string, port string, encryption Encryption, config *tls.Config) (*smtpClient, error) {
 	var conn net.Conn
 	var err error
 
@@ -692,20 +690,21 @@ func dial(host string, port string, encryption encryption, config *tls.Config) (
 
 	// do the actual dial
 	switch encryption {
-	case EncryptionSSL:
+	// TODO: Remove EncryptionSSL check before launch v3
+	case EncryptionSSL, EncryptionSSLTLS:
 		conn, err = tls.Dial("tcp", address, config)
 	default:
 		conn, err = net.Dial("tcp", address)
 	}
 
 	if err != nil {
-		return nil, errors.New("Mail Error on dailing with encryption type " + encryption.string() + ": " + err.Error())
+		return nil, errors.New("Mail Error on dialing with encryption type " + encryption.String() + ": " + err.Error())
 	}
 
 	c, err := newClient(conn, host)
 
 	if err != nil {
-		return nil, errors.New("Mail Error on smtp dial: " + err.Error())
+		return nil, fmt.Errorf("Mail Error on smtp dial: %w", err)
 	}
 
 	return c, err
@@ -713,7 +712,7 @@ func dial(host string, port string, encryption encryption, config *tls.Config) (
 
 // smtpConnect connects to the smtp server and starts TLS and passes auth
 // if necessary
-func smtpConnect(host string, port string, a auth, encryption encryption, config *tls.Config) (*smtpClient, error) {
+func smtpConnect(host, port, helo string, a auth, at AuthType, encryption Encryption, config *tls.Config) (*smtpClient, error) {
 	// connect to the mail server
 	c, err := dial(host, port, encryption, config)
 
@@ -721,32 +720,36 @@ func smtpConnect(host string, port string, a auth, encryption encryption, config
 		return nil, err
 	}
 
-	// send Hello
-	if err = c.hi("localhost"); err != nil {
-		c.close()
-		return nil, errors.New("Mail Error on Hello: " + err.Error())
+	if helo == "" {
+		helo = "localhost"
 	}
 
-	// start TLS if necessary
-	if encryption == EncryptionTLS {
-		if ok, _ := c.extension("STARTTLS"); ok {
-			if config.ServerName == "" {
-				config = &tls.Config{ServerName: host}
-			}
+	// send Helo
+	if err = c.hi(helo); err != nil {
+		c.close()
+		return nil, fmt.Errorf("Mail Error on Hello: %w", err)
+	}
 
+	// STARTTLS if necessary
+	// TODO: Remove EncryptionTLS check before launch v3
+	if encryption == EncryptionTLS || encryption == EncryptionSTARTTLS {
+		if ok, _ := c.extension("STARTTLS"); ok {
 			if err = c.startTLS(config); err != nil {
 				c.close()
-				return nil, errors.New("Mail Error on Start TLS: " + err.Error())
+				return nil, fmt.Errorf("Mail Error on STARTTLS: %w", err)
 			}
 		}
 	}
 
-	// pass the authentication if necessary
-	if a != nil {
-		if ok, _ := c.extension("AUTH"); ok {
-			if err = c.authenticate(a); err != nil {
-				c.close()
-				return nil, errors.New("Mail Error on Auth: " + err.Error())
+	// only pass authentication if defined
+	if at != AuthNone {
+		// pass the authentication if necessary
+		if a != nil {
+			if ok, _ := c.extension("AUTH"); ok {
+				if err = c.authenticate(a); err != nil {
+					c.close()
+					return nil, fmt.Errorf("Mail Error on Auth: %w", err)
+				}
 			}
 		}
 	}
@@ -778,11 +781,16 @@ func (server *SMTPServer) Connect() (*SMTPClient, error) {
 	var c *smtpClient
 	var err error
 
+	tlsConfig := server.TLSConfig
+	if tlsConfig == nil {
+		tlsConfig = &tls.Config{ServerName: server.Host}
+	}
+
 	// if there is a ConnectTimeout, setup the channel and do the connect under a goroutine
 	if server.ConnectTimeout != 0 {
 		smtpConnectChannel = make(chan error, 2)
 		go func() {
-			c, err = smtpConnect(server.Host, fmt.Sprintf("%d", server.Port), a, server.Encryption, new(tls.Config))
+			c, err = smtpConnect(server.Host, fmt.Sprintf("%d", server.Port), server.Helo, a, server.Authentication, server.Encryption, tlsConfig)
 			// send the result
 			smtpConnectChannel <- err
 		}()
@@ -797,7 +805,7 @@ func (server *SMTPServer) Connect() (*SMTPClient, error) {
 		}
 	} else {
 		// no ConnectTimeout, just fire the connect
-		c, err = smtpConnect(server.Host, fmt.Sprintf("%d", server.Port), a, server.Encryption, new(tls.Config))
+		c, err = smtpConnect(server.Host, fmt.Sprintf("%d", server.Port), server.Helo, a, server.Authentication, server.Encryption, tlsConfig)
 		if err != nil {
 			return nil, err
 		}
@@ -828,6 +836,19 @@ func (smtpClient *SMTPClient) Quit() error {
 // Close closes the connection
 func (smtpClient *SMTPClient) Close() error {
 	return smtpClient.Client.close()
+}
+
+// SendMessage sends a message (a RFC822 formatted message)
+// 'from' must be an email address, recipients must be a slice of email address
+func SendMessage(from string, recipients []string, msg string, client *SMTPClient) error {
+	if from == "" {
+		return errors.New("Mail Error: No From email specifier")
+	}
+	if len(recipients) < 1 {
+		return errors.New("Mail Error: No recipient specified")
+	}
+
+	return send(from, recipients, msg, client)
 }
 
 // send does the low level sending of the email
@@ -870,8 +891,15 @@ func send(from string, to []string, msg string, client *SMTPClient) error {
 }
 
 func sendMailProcess(from string, to []string, msg string, c *smtpClient) error {
+
+	cmdArgs := make(map[string]string)
+
+	if _, ok := c.ext["SIZE"]; ok {
+		cmdArgs["SIZE"] = strconv.Itoa(len(msg))
+	}
+
 	// Set the sender
-	if err := c.mail(from); err != nil {
+	if err := c.mail(from, cmdArgs); err != nil {
 		return err
 	}
 

@@ -4,7 +4,7 @@ import (
 	"github.com/diamondburned/arikawa/discord"
 )
 
-// AuditLog sanitizes an AuditLog.
+// AuditLog sanitizes an discord.AuditLog.
 //
 // This function will sanitize AuditLog.Webhook.ID, AuditLog.Webhook.User.ID,
 // AuditLog.Users.ID, AuditLog.Entries.ID, AuditLog.Entries.UserID,
@@ -30,15 +30,15 @@ func AuditLog(al discord.AuditLog) discord.AuditLog {
 	return al
 }
 
-// AuditLogEntry sanitizes an AuditLogEntry.
+// AuditLogEntry sanitizes an discord.AuditLogEntry.
 //
 // This function will sanitize AuditLogEntry.ID and AuditLogEntry.UserID.
-func AuditLogEntry(e discord.AuditLogEntry, id, userID discord.Snowflake) discord.AuditLogEntry {
-	if e.ID <= 0 {
+func AuditLogEntry(e discord.AuditLogEntry, id discord.AuditLogEntryID, userID discord.UserID) discord.AuditLogEntry {
+	if e.ID == 0 {
 		e.ID = id
 	}
 
-	if e.UserID <= 0 {
+	if e.UserID == 0 {
 		e.UserID = userID
 	}
 

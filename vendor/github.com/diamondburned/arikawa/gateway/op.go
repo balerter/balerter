@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"time"
@@ -29,6 +30,11 @@ const (
 	GuildSubscriptionsOP  OPCode = 14
 )
 
+// ErrReconnectRequest is returned by HandleOP if a ReconnectOP is given. This
+// is used mostly internally to signal the heartbeat loop to reconnect, if
+// needed. It is not a fatal error.
+var ErrReconnectRequest = errors.New("ReconnectOP received")
+
 func (g *Gateway) HandleOP(op *wsutil.OP) error {
 	switch op.Code {
 	case HeartbeatAckOP:
@@ -36,32 +42,38 @@ func (g *Gateway) HandleOP(op *wsutil.OP) error {
 		g.PacerLoop.Echo()
 
 	case HeartbeatOP:
+		ctx, cancel := context.WithTimeout(context.Background(), g.WSTimeout)
+		defer cancel()
+
 		// Server requesting a heartbeat.
-		return g.PacerLoop.Pace()
+		if err := g.PacerLoop.Pace(ctx); err != nil {
+			return wsutil.ErrBrokenConnection(errors.Wrap(err, "failed to pace"))
+		}
 
 	case ReconnectOP:
 		// Server requests to reconnect, die and retry.
 		wsutil.WSDebug("ReconnectOP received.")
-		// We must reconnect in another goroutine, as running Reconnect
-		// synchronously would prevent the main event loop from exiting.
-		go g.Reconnect()
-		// Gracefully exit with a nil let the event handler take the signal from
-		// the pacemaker.
-		return nil
+
+		// Exit with the ReconnectOP error to force the heartbeat event loop to
+		// reconnect synchronously. Not really a fatal error.
+		return wsutil.ErrBrokenConnection(ErrReconnectRequest)
 
 	case InvalidSessionOP:
 		// Discord expects us to sleep for no reason
 		time.Sleep(time.Duration(rand.Intn(5)+1) * time.Second)
 
+		ctx, cancel := context.WithTimeout(context.Background(), g.WSTimeout)
+		defer cancel()
+
 		// Invalid session, try and Identify.
-		if err := g.Identify(); err != nil {
+		if err := g.IdentifyCtx(ctx); err != nil {
 			// Can't identify, reconnect.
-			go g.Reconnect()
+			return wsutil.ErrBrokenConnection(ErrReconnectRequest)
 		}
+
 		return nil
 
 	case HelloOP:
-		// What is this OP doing here???
 		return nil
 
 	case DispatchOP:
@@ -74,7 +86,7 @@ func (g *Gateway) HandleOP(op *wsutil.OP) error {
 		fn, ok := EventCreator[op.EventName]
 		if !ok {
 			return fmt.Errorf(
-				"Unknown event %s: %s",
+				"unknown event %s: %s",
 				op.EventName, string(op.Data),
 			)
 		}
@@ -92,7 +104,7 @@ func (g *Gateway) HandleOP(op *wsutil.OP) error {
 			g.SessionID = ev.SessionID
 		}
 
-		// Throw the event into a channel, it's valid now.
+		// Throw the event into a channel; it's valid now.
 		g.Events <- ev
 		return nil
 

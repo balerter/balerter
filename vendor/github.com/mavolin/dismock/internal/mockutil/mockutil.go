@@ -21,7 +21,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// WriteJSON writes the passed value to the passed Writer.
+// WriteJSON writes the passed value to the passed http.ResponseWriter.
 func WriteJSON(t *testing.T, w http.ResponseWriter, v interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -43,8 +43,8 @@ var (
 	nilColor  = reflect.ValueOf((*option.NullableColorData)(nil))
 )
 
-// CheckJSON checks the body extracted from the passed ReadCloser against the
-// passed expected value, assuming the body contains JSON data.
+// CheckJSON checks the body extracted from the passed io.ReadCloser against
+// the passed expected value, assuming the body contains JSON data.
 // v will be used to decode into and should not contain any data.
 func CheckJSON(t *testing.T, r io.ReadCloser, v interface{}, expect interface{}) {
 	checkJSON(t, r, v, expect)
@@ -53,7 +53,7 @@ func CheckJSON(t *testing.T, r io.ReadCloser, v interface{}, expect interface{})
 }
 
 // CheckMultipart checks if the passed request contains the passed JSON body
-// and the passed SendMessageFiles.
+// and the passed []api.SendMessageFile.
 //
 // The expectJSON parameter may be nil, indicating no JSON body.
 func CheckMultipart(
@@ -144,8 +144,8 @@ func CheckQuery(t *testing.T, query url.Values, expect url.Values) {
 	}
 }
 
-// checkJSON compares the JSON data from the passed reader against the passed
-// expected value.
+// checkJSON compares the JSON data from the passed io.Reader against the
+// passed expected value.
 // v will be used to decode into and should not contain any data.
 func checkJSON(t *testing.T, r io.Reader, v interface{}, expect interface{}) {
 	err := json.NewDecoder(r).Decode(v)
@@ -209,7 +209,7 @@ func replaceNullables(val reflect.Value) {
 	}
 }
 
-// equalReader checks if the values of the two readers are the same
+// equalReader checks if the values of the two readers are the same.
 func equalReader(r1, r2 io.Reader) error {
 	const size = 16
 

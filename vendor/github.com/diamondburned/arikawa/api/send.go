@@ -3,19 +3,16 @@ package api
 import (
 	"io"
 	"mime/multipart"
-	"net/url"
 	"strconv"
-	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/diamondburned/arikawa/discord"
 	"github.com/diamondburned/arikawa/utils/httputil"
 	"github.com/diamondburned/arikawa/utils/json"
-	"github.com/pkg/errors"
 )
 
 const AttachmentSpoilerPrefix = "SPOILER_"
-
-var quoteEscaper = strings.NewReplacer(`\`, `\\`, `"`, `\"`)
 
 // AllowedMentions is a whitelist of mentions for a message.
 // https://discordapp.com/developers/docs/resources/channel#allowed-mentions-object
@@ -41,9 +38,9 @@ type AllowedMentions struct {
 	// Parse is an array of allowed mention types to parse from the content.
 	Parse []AllowedMentionType `json:"parse"`
 	// Roles is an array of role_ids to mention (Max size of 100).
-	Roles []discord.Snowflake `json:"roles,omitempty"`
+	Roles []discord.RoleID `json:"roles,omitempty"`
 	// Users is an array of user_ids to mention (Max size of 100).
-	Users []discord.Snowflake `json:"users,omitempty"`
+	Users []discord.UserID `json:"users,omitempty"`
 }
 
 // AllowedMentionType is a constant that tells Discord what is allowed to parse
@@ -138,7 +135,7 @@ func (data *SendMessageData) WriteMultipart(body *multipart.Writer) error {
 // least one of content, embed or file. For a file attachment, the
 // Content-Disposition subpart header MUST contain a filename parameter.
 func (c *Client) SendMessageComplex(
-	channelID discord.Snowflake, data SendMessageData) (*discord.Message, error) {
+	channelID discord.ChannelID, data SendMessageData) (*discord.Message, error) {
 
 	if data.Content == "" && data.Embed == nil && len(data.Files) == 0 {
 		return nil, ErrEmptyMessage
@@ -205,65 +202,6 @@ type ExecuteWebhookData struct {
 
 func (data *ExecuteWebhookData) WriteMultipart(body *multipart.Writer) error {
 	return writeMultipart(body, data, data.Files)
-}
-
-// ExecuteWebhook sends a message to the webhook. If wait is bool, Discord will
-// wait for the message to be delivered and will return the message body. This
-// also means the returned message will only be there if wait is true.
-func (c *Client) ExecuteWebhook(
-	webhookID discord.Snowflake,
-	token string,
-	wait bool, // if false, then nil returned for *Message.
-	data ExecuteWebhookData) (*discord.Message, error) {
-
-	if data.Content == "" && len(data.Embeds) == 0 && len(data.Files) == 0 {
-		return nil, ErrEmptyMessage
-	}
-
-	if data.AllowedMentions != nil {
-		if err := data.AllowedMentions.Verify(); err != nil {
-			return nil, errors.Wrap(err, "allowedMentions error")
-		}
-	}
-
-	for i, embed := range data.Embeds {
-		if err := embed.Validate(); err != nil {
-			return nil, errors.Wrap(err, "embed error at "+strconv.Itoa(i))
-		}
-	}
-
-	var param = url.Values{}
-	if wait {
-		param.Set("wait", "true")
-	}
-
-	var URL = EndpointWebhooks + webhookID.String() + "/" + token + "?" + param.Encode()
-	var msg *discord.Message
-
-	if len(data.Files) == 0 {
-		// No files, so no need for streaming.
-		return msg, c.RequestJSON(&msg, "POST", URL,
-			httputil.WithJSONBody(data))
-	}
-
-	writer := func(mw *multipart.Writer) error {
-		return data.WriteMultipart(mw)
-	}
-
-	resp, err := c.MeanwhileMultipart(writer, "POST", URL)
-	if err != nil {
-		return nil, err
-	}
-
-	var body = resp.GetBody()
-	defer body.Close()
-
-	if !wait {
-		// Since we didn't tell Discord to wait, we have nothing to parse.
-		return nil, nil
-	}
-
-	return msg, json.DecodeStream(body, &msg)
 }
 
 func writeMultipart(body *multipart.Writer, item interface{}, files []SendMessageFile) error {

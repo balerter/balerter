@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/balerter/balerter/internal/message"
-	"github.com/stretchr/testify/mock"
 	"io/ioutil"
 	"testing"
 
@@ -134,7 +133,7 @@ func TestSend(t *testing.T) {
 	})
 }
 
-func sanitizeMessage(m discord.Message, id, channelID, authorID discord.Snowflake) discord.Message {
+func sanitizeMessage(m discord.Message, id discord.MessageID, channelID discord.ChannelID, authorID discord.UserID) discord.Message {
 	if m.ID <= 0 {
 		m.ID = id
 	}
@@ -148,7 +147,7 @@ func sanitizeMessage(m discord.Message, id, channelID, authorID discord.Snowflak
 	return m
 }
 
-func User(u discord.User, id discord.Snowflake) discord.User {
+func User(u discord.User, id discord.UserID) discord.User {
 	if u.ID <= 0 {
 		u.ID = id
 	}
@@ -156,21 +155,12 @@ func User(u discord.User, id discord.Snowflake) discord.User {
 	return u
 }
 
-type sessionMock struct {
-	mock.Mock
-}
-
-func (m *sessionMock) SendMessage(channelID discord.Snowflake, content string, embed *discord.Embed) (*discord.Message, error) {
-	args := m.Called(channelID, content, embed)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*discord.Message), args.Error(1)
-}
-
 func TestTest_error_send(t *testing.T) {
-	m := &sessionMock{}
-	m.On("SendMessage", mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("err1"))
+	m := &isessionMock{
+		SendMessageFunc: func(channelID discord.ChannelID, content string, embed *discord.Embed) (*discord.Message, error) {
+			return nil, fmt.Errorf("err1")
+		},
+	}
 	d := &Discord{
 		session: m,
 	}
@@ -183,8 +173,11 @@ func TestTest_error_send(t *testing.T) {
 }
 
 func TestTest(t *testing.T) {
-	m := &sessionMock{}
-	m.On("SendMessage", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+	m := &isessionMock{
+		SendMessageFunc: func(channelID discord.ChannelID, content string, embed *discord.Embed) (*discord.Message, error) {
+			return nil, nil
+		},
+	}
 	d := &Discord{
 		session: m,
 	}

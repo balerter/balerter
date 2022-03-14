@@ -33,7 +33,7 @@ func (m *Mocker) CreateGuild(d api.CreateGuildData, g discord.Guild) {
 
 // Guild mocks a Guild request.
 //
-// The ID field of the passed Guild must be set.
+// The ID field of the passed discord.Guild must be set.
 //
 // This method will sanitize Guild.ID, Guild.OwnerID, Guild.Emojis.ID and
 // Guild.Roles.ID.
@@ -48,7 +48,7 @@ func (m *Mocker) Guild(g discord.Guild) {
 
 // GuildWithCount mocks a GuildWithCount request.
 //
-// The ID field of the passed Guild must be set.
+// The ID field of the passed discord.Guild must be set.
 //
 // This method will sanitize Guild.ID, Guild.OwnerID, Guild.Emojis.ID and
 // Guild.Roles.ID.
@@ -92,7 +92,7 @@ func (m *Mocker) Guilds(limit uint, g []discord.Guild) {
 
 	const hardLimit uint = 100
 
-	var after discord.Snowflake
+	var after discord.GuildID
 
 	for i := 0; i <= len(g)/int(hardLimit); i++ {
 		var (
@@ -129,7 +129,7 @@ func (m *Mocker) Guilds(limit uint, g []discord.Guild) {
 //
 // This method will sanitize Guilds.ID, Guilds.OwnerID, Guilds.Emojis.ID and
 // Guilds.Roles.ID.
-func (m *Mocker) GuildsBefore(before discord.Snowflake, limit uint, g []discord.Guild) {
+func (m *Mocker) GuildsBefore(before discord.GuildID, limit uint, g []discord.Guild) {
 	if g == nil {
 		g = []discord.Guild{}
 	}
@@ -179,7 +179,7 @@ func (m *Mocker) GuildsBefore(before discord.Snowflake, limit uint, g []discord.
 //
 // This method will sanitize Guilds.ID, Guilds.OwnerID, Guilds.Emojis.ID and
 // Guilds.Roles.ID.WithToken
-func (m *Mocker) GuildsAfter(after discord.Snowflake, limit uint, g []discord.Guild) {
+func (m *Mocker) GuildsAfter(after discord.GuildID, limit uint, g []discord.Guild) {
 	if g == nil {
 		g = []discord.Guild{}
 	}
@@ -225,7 +225,7 @@ func (m *Mocker) GuildsAfter(after discord.Snowflake, limit uint, g []discord.Gu
 //
 // This method will sanitize Guilds.ID, Guilds.OwnerID, Guilds.Emojis.ID and
 // Guilds.Roles.ID.
-func (m *Mocker) guildsRange(before, after discord.Snowflake, name string, limit uint, g []discord.Guild) {
+func (m *Mocker) guildsRange(before, after discord.GuildID, name string, limit uint, g []discord.Guild) {
 	for i, guild := range g {
 		g[i] = sanitize.Guild(guild, 1, 1, 1, 1)
 	}
@@ -250,13 +250,13 @@ func (m *Mocker) guildsRange(before, after discord.Snowflake, name string, limit
 }
 
 // LeaveGuild mocks a LeaveGuild request.
-func (m *Mocker) LeaveGuild(id discord.Snowflake) {
+func (m *Mocker) LeaveGuild(id discord.GuildID) {
 	m.MockAPI("LeaveGuild", http.MethodDelete, "/users/@me/guilds/"+id.String(), nil)
 }
 
 // ModifyGuild mocks a ModifyGuild request.
 //
-// The ID field of the passed guild must be set.
+// The ID field of the passed discord.Guild must be set.
 //
 // This method will sanitize Guild.ID, Guild.OwnerID, Guild.Emojis.ID and
 // Guild.Roles.ID.
@@ -271,12 +271,12 @@ func (m *Mocker) ModifyGuild(d api.ModifyGuildData, g discord.Guild) {
 }
 
 // DeleteGuild mocks a DeleteGuild request.
-func (m *Mocker) DeleteGuild(id discord.Snowflake) {
+func (m *Mocker) DeleteGuild(id discord.GuildID) {
 	m.MockAPI("DeleteGuild", http.MethodDelete, "/guilds/"+id.String(), nil)
 }
 
 // VoiceRegionsGuild mocks a VoiceRegionsGuild request.
-func (m *Mocker) VoiceRegionsGuild(guildID discord.Snowflake, vr []discord.VoiceRegion) {
+func (m *Mocker) VoiceRegionsGuild(guildID discord.GuildID, vr []discord.VoiceRegion) {
 	if vr == nil {
 		vr = []discord.VoiceRegion{}
 	}
@@ -293,7 +293,7 @@ func (m *Mocker) VoiceRegionsGuild(guildID discord.Snowflake, vr []discord.Voice
 // AuditLog.Users.ID, AuditLog.Entries.ID, AuditLog.Entries.UserID,
 // AuditLog.Integrations.ID, AuditLog.Integrations.RoleID and
 // AuditLog.Integrations.User.ID.
-func (m *Mocker) AuditLog(guildID discord.Snowflake, d api.AuditLogData, al discord.AuditLog) {
+func (m *Mocker) AuditLog(guildID discord.GuildID, d api.AuditLogData, al discord.AuditLog) {
 	switch {
 	case d.Limit == 0:
 		d.Limit = 50
@@ -330,7 +330,7 @@ func (m *Mocker) AuditLog(guildID discord.Snowflake, d api.AuditLogData, al disc
 //
 // This method will sanitize Integration.ID, Integration.RoleID and
 // Integration.User.ID.
-func (m *Mocker) Integrations(guildID discord.Snowflake, integrations []discord.Integration) {
+func (m *Mocker) Integrations(guildID discord.GuildID, integrations []discord.Integration) {
 	if integrations == nil {
 		integrations = []discord.Integration{}
 	}
@@ -346,12 +346,14 @@ func (m *Mocker) Integrations(guildID discord.Snowflake, integrations []discord.
 }
 
 type attachIntegrationPayload struct {
-	Type discord.Service   `json:"type"`
-	ID   discord.Snowflake `json:"id"`
+	Type discord.Service       `json:"type"`
+	ID   discord.IntegrationID `json:"id"`
 }
 
 // AttachIntegration mocks a AttachIntegration request.
-func (m *Mocker) AttachIntegration(guildID, integrationID discord.Snowflake, integrationType discord.Service) {
+func (m *Mocker) AttachIntegration(
+	guildID discord.GuildID, integrationID discord.IntegrationID, integrationType discord.Service,
+) {
 	m.MockAPI("AttachIntegration", http.MethodPost, "/guilds/"+guildID.String()+"/integrations",
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			expect := &attachIntegrationPayload{
@@ -365,7 +367,9 @@ func (m *Mocker) AttachIntegration(guildID, integrationID discord.Snowflake, int
 }
 
 // ModifyIntegration mocks a ModifyIntegration request.
-func (m *Mocker) ModifyIntegration(guildID, integrationID discord.Snowflake, d api.ModifyIntegrationData) {
+func (m *Mocker) ModifyIntegration(
+	guildID discord.GuildID, integrationID discord.IntegrationID, d api.ModifyIntegrationData,
+) {
 	m.MockAPI("ModifyIntegration", http.MethodPatch,
 		"/guilds/"+guildID.String()+"/integrations/"+integrationID.String(),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
@@ -375,13 +379,13 @@ func (m *Mocker) ModifyIntegration(guildID, integrationID discord.Snowflake, d a
 }
 
 // SyncIntegration mocks a SyncIntegration request.
-func (m *Mocker) SyncIntegration(guildID, integrationID discord.Snowflake) {
+func (m *Mocker) SyncIntegration(guildID discord.GuildID, integrationID discord.IntegrationID) {
 	m.MockAPI("SyncIntegration", http.MethodPost,
 		"/guilds/"+guildID.String()+"/integrations/"+integrationID.String()+"/sync", nil)
 }
 
 // GuildWidget mocks a GuildWidget request.
-func (m *Mocker) GuildWidget(guildID discord.Snowflake, e discord.GuildWidget) {
+func (m *Mocker) GuildWidget(guildID discord.GuildID, e discord.GuildWidget) {
 	m.MockAPI("GuildWidget", http.MethodGet, "/guilds/"+guildID.String()+"/widget",
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			mockutil.WriteJSON(t, w, e)
@@ -389,7 +393,7 @@ func (m *Mocker) GuildWidget(guildID discord.Snowflake, e discord.GuildWidget) {
 }
 
 // ModifyGuildWidget mocks a ModifyGuildWidget request.
-func (m *Mocker) ModifyGuildWidget(guildID discord.Snowflake, d api.ModifyGuildWidgetData, e discord.GuildWidget) {
+func (m *Mocker) ModifyGuildWidget(guildID discord.GuildID, d api.ModifyGuildWidgetData, e discord.GuildWidget) {
 	m.MockAPI("ModifyGuild", http.MethodPatch, "/guilds/"+guildID.String()+"/widget",
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			mockutil.CheckJSON(t, r.Body, new(api.ModifyGuildWidgetData), &d)
@@ -402,7 +406,7 @@ func (m *Mocker) ModifyGuildWidget(guildID discord.Snowflake, d api.ModifyGuildW
 // Although those fields are normally not sent, this method will sanitize
 // Invite.Guild.ID, Invite.Guild.OwnerID, Invite.Guild.Emojis.ID,
 // Invite.Guild.Roles.ID, Invite.Channel.ID, Invite.Inviter.ID.
-func (m *Mocker) GuildVanityURL(guildID discord.Snowflake, i discord.Invite) {
+func (m *Mocker) GuildVanityURL(guildID discord.GuildID, i discord.Invite) {
 	i = sanitize.Invite(i, 1, 1, 1, 1, 1, 1, 1)
 
 	m.MockAPI("GuildVanityURL", http.MethodGet, "/guilds/"+guildID.String()+"/vanity-url",
@@ -412,7 +416,7 @@ func (m *Mocker) GuildVanityURL(guildID discord.Snowflake, i discord.Invite) {
 }
 
 // GuildImage mocks a GuildImage request.
-func (m *Mocker) GuildImage(guildID discord.Snowflake, style api.GuildImageStyle, img io.Reader) {
+func (m *Mocker) GuildImage(guildID discord.GuildID, style api.GuildImageStyle, img io.Reader) {
 	m.MockAPI("GuildImage", http.MethodGet, "/guilds/"+guildID.String()+"/widget.png",
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			mockutil.CheckQuery(t, r.URL.Query(), url.Values{

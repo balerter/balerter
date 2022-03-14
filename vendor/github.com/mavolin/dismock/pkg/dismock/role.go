@@ -12,13 +12,13 @@ import (
 )
 
 // AddRole mocks a AddRole request.
-func (m *Mocker) AddRole(guildID, userID, roleID discord.Snowflake) {
+func (m *Mocker) AddRole(guildID discord.GuildID, userID discord.UserID, roleID discord.RoleID) {
 	m.MockAPI("AddRole", http.MethodPut,
 		"/guilds/"+guildID.String()+"/members/"+userID.String()+"/roles/"+roleID.String(), nil)
 }
 
 // RemoveRole mocks a RemoveRole request.
-func (m *Mocker) RemoveRole(guildID, userID, roleID discord.Snowflake) {
+func (m *Mocker) RemoveRole(guildID discord.GuildID, userID discord.UserID, roleID discord.RoleID) {
 	m.MockAPI("RemoveRole", http.MethodDelete,
 		"/guilds/"+guildID.String()+"/members/"+userID.String()+"/roles/"+roleID.String(), nil)
 }
@@ -26,7 +26,7 @@ func (m *Mocker) RemoveRole(guildID, userID, roleID discord.Snowflake) {
 // Roles mocks a Roles request.
 //
 // This method will sanitize Roles.ID.
-func (m *Mocker) Roles(guildID discord.Snowflake, roles []discord.Role) {
+func (m *Mocker) Roles(guildID discord.GuildID, roles []discord.Role) {
 	for i, r := range roles {
 		roles[i] = sanitize.Role(r, 1)
 	}
@@ -40,7 +40,7 @@ func (m *Mocker) Roles(guildID discord.Snowflake, roles []discord.Role) {
 // CreateRole mocks a CreateRole request.
 //
 // This method will sanitize Role.ID.
-func (m *Mocker) CreateRole(guildID discord.Snowflake, d api.CreateRoleData, role discord.Role) {
+func (m *Mocker) CreateRole(guildID discord.GuildID, d api.CreateRoleData, role discord.Role) {
 	role = sanitize.Role(role, 1)
 
 	m.MockAPI("CreateRole", http.MethodPost, "/guilds/"+guildID.String()+"/roles",
@@ -53,7 +53,7 @@ func (m *Mocker) CreateRole(guildID discord.Snowflake, d api.CreateRoleData, rol
 // MoveRole mocks a MoveRole request.
 //
 // This method will sanitize Roles.ID.
-func (m *Mocker) MoveRole(guildID discord.Snowflake, d []api.MoveRoleData, roles []discord.Role) {
+func (m *Mocker) MoveRole(guildID discord.GuildID, d []api.MoveRoleData, roles []discord.Role) {
 	for i, r := range roles {
 		roles[i] = sanitize.Role(r, 1)
 	}
@@ -68,7 +68,7 @@ func (m *Mocker) MoveRole(guildID discord.Snowflake, d []api.MoveRoleData, roles
 // ModifyRole mocks a ModifyRole request.
 //
 // This method will sanitize Role.ID.
-func (m *Mocker) ModifyRole(guildID discord.Snowflake, d api.ModifyRoleData, role discord.Role) {
+func (m *Mocker) ModifyRole(guildID discord.GuildID, d api.ModifyRoleData, role discord.Role) {
 	role = sanitize.Role(role, 1)
 
 	m.MockAPI("ModifyRole", http.MethodPatch, "/guilds/"+guildID.String()+"/roles/"+role.ID.String(),
@@ -79,6 +79,6 @@ func (m *Mocker) ModifyRole(guildID discord.Snowflake, d api.ModifyRoleData, rol
 }
 
 // DeleteRole mocks a DeleteRole request.
-func (m *Mocker) DeleteRole(guildID, roleID discord.Snowflake) {
+func (m *Mocker) DeleteRole(guildID discord.GuildID, roleID discord.RoleID) {
 	m.MockAPI("DeleteRole", http.MethodDelete, "/guilds/"+guildID.String()+"/roles/"+roleID.String(), nil)
 }

@@ -8,113 +8,148 @@ import (
 	"github.com/diamondburned/arikawa/utils/json/option"
 )
 
-// Messages returns a list of messages sent in the channel with the passed ID.
-// This method automatically paginates until it reaches the passed limit, or,
-// if the limit is set to 0, has fetched all guilds within the passed ange.
+// the limit of max messages per request, as imposed by Discord
+const maxMessageFetchLimit = 100
+
+// Messages returns a slice filled with the most recent messages sent in the
+// channel with the passed ID. The method automatically paginates until it
+// reaches the passed limit, or, if the limit is set to 0, has fetched all
+// messages in the channel.
 //
-// As the underlying endpoint has a maximum of 100 messages per request, at
-// maximum a total of limit/100 rounded up requests will be made, although they
-// may be less, if no more messages are available.
+// As the underlying endpoint is capped at a maximum of 100 messages per
+// request, at maximum a total of limit/100 rounded up requests will be made,
+// although they may be less, if no more messages are available.
 //
-// When fetching the messages, those with the smallest ID will be fetched
+// When fetching the messages, those with the highest ID, will be fetched
 // first.
-func (c *Client) Messages(channelID discord.Snowflake, limit uint) ([]discord.Message, error) {
-	return c.MessagesAfter(channelID, 0, limit)
+// The returned slice will be sorted from latest to oldest.
+func (c *Client) Messages(channelID discord.ChannelID, limit uint) ([]discord.Message, error) {
+	// Since before is 0 it will be omitted by the http lib, which in turn
+	// will lead discord to send us the most recent messages without having to
+	// specify a Snowflake.
+	return c.MessagesBefore(channelID, 0, limit)
 }
 
 // MessagesAround returns messages around the ID, with a limit of 100.
 func (c *Client) MessagesAround(
-	channelID, around discord.Snowflake, limit uint) ([]discord.Message, error) {
+	channelID discord.ChannelID, around discord.MessageID, limit uint) ([]discord.Message, error) {
 
 	return c.messagesRange(channelID, 0, 0, around, limit)
 }
 
-// MessagesBefore returns a list messages sent in the channel with the passed
-// ID. This method automatically paginates until it reaches the passed limit,
-// or, if the limit is set to 0, has fetched all guilds within the passed
-// range.
+// MessagesBefore returns a slice filled with the messages sent in the channel
+// with the passed id. The method automatically paginates until it reaches the
+// passed limit, or, if the limit is set to 0, has fetched all messages in the
+// channel with an id smaller than before.
 //
 // As the underlying endpoint has a maximum of 100 messages per request, at
 // maximum a total of limit/100 rounded up requests will be made, although they
 // may be less, if no more messages are available.
+//
+// The returned slice will be sorted from latest to oldest.
 func (c *Client) MessagesBefore(
-	channelID, before discord.Snowflake, limit uint) ([]discord.Message, error) {
+	channelID discord.ChannelID, before discord.MessageID, limit uint) ([]discord.Message, error) {
 
-	var msgs []discord.Message
+	msgs := make([]discord.Message, 0, limit)
 
-	// this is the limit of max messages per request, as imposed by Discord
-	const hardLimit int = 100
+	fetch := uint(maxMessageFetchLimit)
 
+	// Check if we are truly fetching unlimited messages to avoid confusion
+	// later on, if the limit reaches 0.
 	unlimited := limit == 0
 
-	for fetch := uint(hardLimit); limit > 0 || unlimited; fetch = uint(hardLimit) {
+	for limit > 0 || unlimited {
 		if limit > 0 {
+			// Only fetch as much as we need. Since limit gradually decreases,
+			// we only need to fetch min(fetch, limit).
 			if fetch > limit {
 				fetch = limit
 			}
-			limit -= fetch
+			limit -= maxMessageFetchLimit
 		}
 
 		m, err := c.messagesRange(channelID, before, 0, 0, fetch)
 		if err != nil {
 			return msgs, err
 		}
-		msgs = append(m, msgs...)
+		// Append the older messages into the list of newer messages.
+		msgs = append(msgs, m...)
 
-		if len(m) < hardLimit {
+		if len(m) < maxMessageFetchLimit {
 			break
 		}
 
-		before = m[0].ID
+		before = m[len(m)-1].ID
+	}
+
+	if len(msgs) == 0 {
+		return nil, nil
 	}
 
 	return msgs, nil
 }
 
-// MessagesAfter returns a list messages sent in the channel with the passed
-// ID. This method automatically paginates until it reaches the passed limit,
-// or, if the limit is set to 0, has fetched all guilds within the passed
-// range.
+// MessagesAfter returns a slice filled with the messages sent in the channel
+// with the passed ID. The method automatically paginates until it reaches the
+// passed limit, or, if the limit is set to 0, has fetched all messages in the
+// channel with an id higher than after.
 //
 // As the underlying endpoint has a maximum of 100 messages per request, at
 // maximum a total of limit/100 rounded up requests will be made, although they
 // may be less, if no more messages are available.
+//
+// The returned slice will be sorted from latest to oldest.
 func (c *Client) MessagesAfter(
-	channelID, after discord.Snowflake, limit uint) ([]discord.Message, error) {
+	channelID discord.ChannelID, after discord.MessageID, limit uint) ([]discord.Message, error) {
+
+	// 0 is uint's zero value and will lead to the after param getting omitted,
+	// which in turn will lead to the most recent messages being returned.
+	// Setting this to 1 will prevent that.
+	if after == 0 {
+		after = 1
+	}
 
 	var msgs []discord.Message
 
-	// this is the limit of max messages per request, as imposed by Discord
-	const hardLimit int = 100
+	fetch := uint(maxMessageFetchLimit)
 
+	// Check if we are truly fetching unlimited messages to avoid confusion
+	// later on, if the limit reaches 0.
 	unlimited := limit == 0
 
-	for fetch := uint(hardLimit); limit > 0 || unlimited; fetch = uint(hardLimit) {
+	for limit > 0 || unlimited {
 		if limit > 0 {
+			// Only fetch as much as we need. Since limit gradually decreases,
+			// we only need to fetch min(fetch, limit).
 			if fetch > limit {
 				fetch = limit
 			}
-			limit -= fetch
+			limit -= maxMessageFetchLimit
 		}
 
 		m, err := c.messagesRange(channelID, 0, after, 0, fetch)
 		if err != nil {
 			return msgs, err
 		}
-		msgs = append(msgs, m...)
+		// Prepend the older messages into the newly-fetched messages list.
+		msgs = append(m, msgs...)
 
-		if len(m) < hardLimit {
+		if len(m) < maxMessageFetchLimit {
 			break
 		}
 
-		after = m[len(m)-1].ID
+		after = m[0].ID
+	}
+
+	if len(msgs) == 0 {
+		return nil, nil
 	}
 
 	return msgs, nil
 }
 
 func (c *Client) messagesRange(
-	channelID, before, after, around discord.Snowflake, limit uint) ([]discord.Message, error) {
+	channelID discord.ChannelID, before, after, around discord.MessageID, limit uint) ([]discord.Message, error) {
 
 	switch {
 	case limit == 0:
@@ -124,9 +159,9 @@ func (c *Client) messagesRange(
 	}
 
 	var param struct {
-		Before discord.Snowflake `schema:"before,omitempty"`
-		After  discord.Snowflake `schema:"after,omitempty"`
-		Around discord.Snowflake `schema:"around,omitempty"`
+		Before discord.MessageID `schema:"before,omitempty"`
+		After  discord.MessageID `schema:"after,omitempty"`
+		Around discord.MessageID `schema:"around,omitempty"`
 
 		Limit uint `schema:"limit"`
 	}
@@ -148,7 +183,7 @@ func (c *Client) messagesRange(
 //
 // If operating on a guild channel, this endpoint requires the
 // READ_MESSAGE_HISTORY permission to be present on the current user.
-func (c *Client) Message(channelID, messageID discord.Snowflake) (*discord.Message, error) {
+func (c *Client) Message(channelID discord.ChannelID, messageID discord.MessageID) (*discord.Message, error) {
 	var msg *discord.Message
 	return msg, c.RequestJSON(&msg, "GET",
 		EndpointChannels+channelID.String()+"/messages/"+messageID.String())
@@ -160,7 +195,7 @@ func (c *Client) Message(channelID, messageID discord.Snowflake) (*discord.Messa
 // permission to be present on the current user.
 //
 // Fires a Message Create Gateway event.
-func (c *Client) SendText(channelID discord.Snowflake, content string) (*discord.Message, error) {
+func (c *Client) SendText(channelID discord.ChannelID, content string) (*discord.Message, error) {
 	return c.SendMessageComplex(channelID, SendMessageData{
 		Content: content,
 	})
@@ -173,7 +208,7 @@ func (c *Client) SendText(channelID discord.Snowflake, content string) (*discord
 //
 // Fires a Message Create Gateway event.
 func (c *Client) SendEmbed(
-	channelID discord.Snowflake, e discord.Embed) (*discord.Message, error) {
+	channelID discord.ChannelID, e discord.Embed) (*discord.Message, error) {
 
 	return c.SendMessageComplex(channelID, SendMessageData{
 		Embed: &e,
@@ -187,7 +222,7 @@ func (c *Client) SendEmbed(
 //
 // Fires a Message Create Gateway event.
 func (c *Client) SendMessage(
-	channelID discord.Snowflake, content string, embed *discord.Embed) (*discord.Message, error) {
+	channelID discord.ChannelID, content string, embed *discord.Embed) (*discord.Message, error) {
 
 	return c.SendMessageComplex(channelID, SendMessageData{
 		Content: content,
@@ -213,7 +248,7 @@ type EditMessageData struct {
 // EditText edits the contents of a previously sent message. For more
 // documentation, refer to EditMessageComplex.
 func (c *Client) EditText(
-	channelID, messageID discord.Snowflake, content string) (*discord.Message, error) {
+	channelID discord.ChannelID, messageID discord.MessageID, content string) (*discord.Message, error) {
 
 	return c.EditMessageComplex(channelID, messageID, EditMessageData{
 		Content: option.NewNullableString(content),
@@ -223,7 +258,7 @@ func (c *Client) EditText(
 // EditEmbed edits the embed of a previously sent message. For more
 // documentation, refer to EditMessageComplex.
 func (c *Client) EditEmbed(
-	channelID, messageID discord.Snowflake, embed discord.Embed) (*discord.Message, error) {
+	channelID discord.ChannelID, messageID discord.MessageID, embed discord.Embed) (*discord.Message, error) {
 
 	return c.EditMessageComplex(channelID, messageID, EditMessageData{
 		Embed: &embed,
@@ -233,7 +268,7 @@ func (c *Client) EditEmbed(
 // EditMessage edits a previously sent message. For more documentation, refer to
 // EditMessageComplex.
 func (c *Client) EditMessage(
-	channelID, messageID discord.Snowflake, content string,
+	channelID discord.ChannelID, messageID discord.MessageID, content string,
 	embed *discord.Embed, suppressEmbeds bool) (*discord.Message, error) {
 
 	var data = EditMessageData{
@@ -258,7 +293,7 @@ func (c *Client) EditMessage(
 //
 // Fires a Message Update Gateway event.
 func (c *Client) EditMessageComplex(
-	channelID, messageID discord.Snowflake, data EditMessageData) (*discord.Message, error) {
+	channelID discord.ChannelID, messageID discord.MessageID, data EditMessageData) (*discord.Message, error) {
 
 	if data.AllowedMentions != nil {
 		if err := data.AllowedMentions.Verify(); err != nil {
@@ -283,7 +318,7 @@ func (c *Client) EditMessageComplex(
 // DeleteMessage delete a message. If operating on a guild channel and trying
 // to delete a message that was not sent by the current user, this endpoint
 // requires the MANAGE_MESSAGES permission.
-func (c *Client) DeleteMessage(channelID, messageID discord.Snowflake) error {
+func (c *Client) DeleteMessage(channelID discord.ChannelID, messageID discord.MessageID) error {
 	return c.FastRequest("DELETE", EndpointChannels+channelID.String()+
 		"/messages/"+messageID.String())
 }
@@ -297,9 +332,9 @@ func (c *Client) DeleteMessage(channelID, messageID discord.Snowflake) error {
 // provided.
 //
 // Fires a Message Delete Bulk Gateway event.
-func (c *Client) DeleteMessages(channelID discord.Snowflake, messageIDs []discord.Snowflake) error {
+func (c *Client) DeleteMessages(channelID discord.ChannelID, messageIDs []discord.MessageID) error {
 	var param struct {
-		Messages []discord.Snowflake `json:"messages"`
+		Messages []discord.MessageID `json:"messages"`
 	}
 
 	param.Messages = messageIDs

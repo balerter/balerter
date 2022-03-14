@@ -6,6 +6,7 @@ package plotter
 
 import (
 	"errors"
+	"image/color"
 	"math"
 	"sort"
 
@@ -64,6 +65,10 @@ type BoxPlot struct {
 	// GlyphStyle is the style of the outside point glyphs.
 	GlyphStyle draw.GlyphStyle
 
+	// FillColor is the color used to fill the box.
+	// The default is no fill.
+	FillColor color.Color
+
 	// BoxStyle is the line style for the box.
 	BoxStyle draw.LineStyle
 
@@ -95,7 +100,7 @@ type BoxPlot struct {
 // values that are not outside the fences.
 func NewBoxPlot(w vg.Length, loc float64, values Valuer) (*BoxPlot, error) {
 	if w < 0 {
-		return nil, errors.New("Negative boxplot width")
+		return nil, errors.New("plotter: negative boxplot width")
 	}
 
 	b := new(BoxPlot)
@@ -206,26 +211,32 @@ func (b *BoxPlot) Plot(c draw.Canvas, plt *plot.Plot) {
 	aLow := trY(b.AdjLow)
 	aHigh := trY(b.AdjHigh)
 
-	box := c.ClipLinesY([]vg.Point{
-		{x - b.Width/2, q1},
-		{x - b.Width/2, q3},
-		{x + b.Width/2, q3},
-		{x + b.Width/2, q1},
-		{x - b.Width/2 - b.BoxStyle.Width/2, q1},
-	})
+	pts := []vg.Point{
+		{X: x - b.Width/2, Y: q1},
+		{X: x - b.Width/2, Y: q3},
+		{X: x + b.Width/2, Y: q3},
+		{X: x + b.Width/2, Y: q1},
+		{X: x - b.Width/2 - b.BoxStyle.Width/2, Y: q1},
+	}
+	box := c.ClipLinesY(pts)
+	if b.FillColor != nil {
+		c.FillPolygon(b.FillColor, c.ClipPolygonY(pts))
+	}
 	c.StrokeLines(b.BoxStyle, box...)
 
 	medLine := c.ClipLinesY([]vg.Point{
-		{x - b.Width/2, med},
-		{x + b.Width/2, med},
+		{X: x - b.Width/2, Y: med},
+		{X: x + b.Width/2, Y: med},
 	})
 	c.StrokeLines(b.MedianStyle, medLine...)
 
 	cap := b.CapWidth / 2
-	whisks := c.ClipLinesY([]vg.Point{{x, q3}, {x, aHigh}},
-		[]vg.Point{{x - cap, aHigh}, {x + cap, aHigh}},
-		[]vg.Point{{x, q1}, {x, aLow}},
-		[]vg.Point{{x - cap, aLow}, {x + cap, aLow}})
+	whisks := c.ClipLinesY(
+		[]vg.Point{{X: x, Y: q3}, {X: x, Y: aHigh}},
+		[]vg.Point{{X: x - cap, Y: aHigh}, {X: x + cap, Y: aHigh}},
+		[]vg.Point{{X: x, Y: q1}, {X: x, Y: aLow}},
+		[]vg.Point{{X: x - cap, Y: aLow}, {X: x + cap, Y: aLow}},
+	)
 	c.StrokeLines(b.WhiskerStyle, whisks...)
 
 	for _, out := range b.Outside {
@@ -290,8 +301,8 @@ func (b *BoxPlot) OutsideLabels(labels Labeller) (*Labels, error) {
 	if err != nil {
 		return nil, err
 	}
-	ls.XOffset += b.GlyphStyle.Radius / 2
-	ls.YOffset += b.GlyphStyle.Radius / 2
+	off := 0.5 * b.GlyphStyle.Radius
+	ls.Offset = ls.Offset.Add(vg.Point{X: off, Y: off})
 	return ls, nil
 }
 
@@ -332,26 +343,32 @@ func (b horizBoxPlot) Plot(c draw.Canvas, plt *plot.Plot) {
 	aLow := trX(b.AdjLow)
 	aHigh := trX(b.AdjHigh)
 
-	box := c.ClipLinesX([]vg.Point{
-		{q1, y - b.Width/2},
-		{q3, y - b.Width/2},
-		{q3, y + b.Width/2},
-		{q1, y + b.Width/2},
-		{q1, y - b.Width/2 - b.BoxStyle.Width/2},
-	})
+	pts := []vg.Point{
+		{X: q1, Y: y - b.Width/2},
+		{X: q3, Y: y - b.Width/2},
+		{X: q3, Y: y + b.Width/2},
+		{X: q1, Y: y + b.Width/2},
+		{X: q1, Y: y - b.Width/2 - b.BoxStyle.Width/2},
+	}
+	box := c.ClipLinesX(pts)
+	if b.FillColor != nil {
+		c.FillPolygon(b.FillColor, c.ClipPolygonX(pts))
+	}
 	c.StrokeLines(b.BoxStyle, box...)
 
 	medLine := c.ClipLinesX([]vg.Point{
-		{med, y - b.Width/2},
-		{med, y + b.Width/2},
+		{X: med, Y: y - b.Width/2},
+		{X: med, Y: y + b.Width/2},
 	})
 	c.StrokeLines(b.MedianStyle, medLine...)
 
 	cap := b.CapWidth / 2
-	whisks := c.ClipLinesX([]vg.Point{{q3, y}, {aHigh, y}},
-		[]vg.Point{{aHigh, y - cap}, {aHigh, y + cap}},
-		[]vg.Point{{q1, y}, {aLow, y}},
-		[]vg.Point{{aLow, y - cap}, {aLow, y + cap}})
+	whisks := c.ClipLinesX(
+		[]vg.Point{{X: q3, Y: y}, {X: aHigh, Y: y}},
+		[]vg.Point{{X: aHigh, Y: y - cap}, {X: aHigh, Y: y + cap}},
+		[]vg.Point{{X: q1, Y: y}, {X: aLow, Y: y}},
+		[]vg.Point{{X: aLow, Y: y - cap}, {X: aLow, Y: y + cap}},
+	)
 	c.StrokeLines(b.WhiskerStyle, whisks...)
 
 	for _, out := range b.Outside {
@@ -404,8 +421,8 @@ func (b *horizBoxPlot) OutsideLabels(labels Labeller) (*Labels, error) {
 	if err != nil {
 		return nil, err
 	}
-	ls.XOffset += b.GlyphStyle.Radius / 2
-	ls.YOffset += b.GlyphStyle.Radius / 2
+	off := 0.5 * b.GlyphStyle.Radius
+	ls.Offset = ls.Offset.Add(vg.Point{X: off, Y: off})
 	return ls, nil
 }
 

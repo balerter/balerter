@@ -20,21 +20,27 @@ type (
 
 // https://discordapp.com/developers/docs/topics/gateway#channels
 type (
-	ChannelCreateEvent     discord.Channel
-	ChannelUpdateEvent     discord.Channel
-	ChannelDeleteEvent     discord.Channel
+	ChannelCreateEvent struct {
+		discord.Channel
+	}
+	ChannelUpdateEvent struct {
+		discord.Channel
+	}
+	ChannelDeleteEvent struct {
+		discord.Channel
+	}
 	ChannelPinsUpdateEvent struct {
-		GuildID   discord.Snowflake `json:"guild_id,omitempty"`
-		ChannelID discord.Snowflake `json:"channel_id,omitempty"`
+		GuildID   discord.GuildID   `json:"guild_id,omitempty"`
+		ChannelID discord.ChannelID `json:"channel_id,omitempty"`
 		LastPin   discord.Timestamp `json:"timestamp,omitempty"`
 	}
 
 	ChannelUnreadUpdateEvent struct {
-		GuildID discord.Snowflake `json:"guild_id"`
+		GuildID discord.GuildID `json:"guild_id"`
 
 		ChannelUnreadUpdates []struct {
-			ID            discord.Snowflake `json:"id"`
-			LastMessageID discord.Snowflake `json:"last_message_id"`
+			ID            discord.ChannelID `json:"id"`
+			LastMessageID discord.MessageID `json:"last_message_id"`
 		}
 	}
 )
@@ -54,66 +60,72 @@ type (
 		Channels    []discord.Channel    `json:"channels,omitempty"`
 		Presences   []discord.Presence   `json:"presences,omitempty"`
 	}
-	GuildUpdateEvent discord.Guild
+	GuildUpdateEvent struct {
+		discord.Guild
+	}
 	GuildDeleteEvent struct {
-		ID discord.Snowflake `json:"id"`
+		ID discord.GuildID `json:"id"`
 		// Unavailable if false == removed
 		Unavailable bool `json:"unavailable"`
 	}
 
 	GuildBanAddEvent struct {
-		GuildID discord.Snowflake `json:"guild_id"`
-		User    discord.User      `json:"user"`
+		GuildID discord.GuildID `json:"guild_id"`
+		User    discord.User    `json:"user"`
 	}
 	GuildBanRemoveEvent struct {
-		GuildID discord.Snowflake `json:"guild_id"`
-		User    discord.User      `json:"user"`
+		GuildID discord.GuildID `json:"guild_id"`
+		User    discord.User    `json:"user"`
 	}
 
 	GuildEmojisUpdateEvent struct {
-		GuildID discord.Snowflake `json:"guild_id"`
-		Emojis  []discord.Emoji   `json:"emoji"`
+		GuildID discord.GuildID `json:"guild_id"`
+		Emojis  []discord.Emoji `json:"emoji"`
 	}
 
 	GuildIntegrationsUpdateEvent struct {
-		GuildID discord.Snowflake `json:"guild_id"`
+		GuildID discord.GuildID `json:"guild_id"`
 	}
 
 	GuildMemberAddEvent struct {
 		discord.Member
-		GuildID discord.Snowflake `json:"guild_id"`
+		GuildID discord.GuildID `json:"guild_id"`
 	}
 	GuildMemberRemoveEvent struct {
-		GuildID discord.Snowflake `json:"guild_id"`
-		User    discord.User      `json:"user"`
+		GuildID discord.GuildID `json:"guild_id"`
+		User    discord.User    `json:"user"`
 	}
 	GuildMemberUpdateEvent struct {
-		GuildID discord.Snowflake   `json:"guild_id"`
-		RoleIDs []discord.Snowflake `json:"roles"`
-		User    discord.User        `json:"user"`
-		Nick    string              `json:"nick"`
+		GuildID discord.GuildID  `json:"guild_id"`
+		RoleIDs []discord.RoleID `json:"roles"`
+		User    discord.User     `json:"user"`
+		Nick    string           `json:"nick"`
 	}
 
 	// GuildMembersChunkEvent is sent when Guild Request Members is called.
 	GuildMembersChunkEvent struct {
-		GuildID discord.Snowflake `json:"guild_id"`
-		Members []discord.Member  `json:"members"`
+		GuildID discord.GuildID  `json:"guild_id"`
+		Members []discord.Member `json:"members"`
+
+		ChunkIndex int `json:"chunk_index"`
+		ChunkCount int `json:"chunk_count"`
 
 		// Whatever's not found goes here
 		NotFound []string `json:"not_found,omitempty"`
 
 		// Only filled if requested
 		Presences []discord.Presence `json:"presences,omitempty"`
+		Nonce     string             `json:"nonce,omitempty"`
 	}
 
 	// GuildMemberListUpdate is an undocumented event. It's received when the
 	// client sends over GuildSubscriptions with the Channels field used.
 	// The State package does not handle this event.
 	GuildMemberListUpdate struct {
-		ID          string            `json:"id"`
-		GuildID     discord.Snowflake `json:"guild_id"`
-		MemberCount uint64            `json:"member_count"`
-		OnlineCount uint64            `json:"online_count"`
+		ID          string          `json:"id"`
+		GuildID     discord.GuildID `json:"guild_id"`
+		MemberCount uint64          `json:"member_count"`
+		OnlineCount uint64          `json:"online_count"`
 
 		// Groups is all the visible role sections.
 		Groups []GuildMemberListGroup `json:"groups"`
@@ -121,7 +133,7 @@ type (
 		Ops []GuildMemberListOp `json:"ops"`
 	}
 	GuildMemberListGroup struct {
-		ID    string `json:"id"` // either discord.Snowflake Role IDs or "online"
+		ID    string `json:"id"` // either discord.RoleID, "online" or "offline"
 		Count uint64 `json:"count"`
 	}
 	GuildMemberListOp struct {
@@ -152,16 +164,16 @@ type (
 	}
 
 	GuildRoleCreateEvent struct {
-		GuildID discord.Snowflake `json:"guild_id"`
-		Role    discord.Role      `json:"role"`
+		GuildID discord.GuildID `json:"guild_id"`
+		Role    discord.Role    `json:"role"`
 	}
 	GuildRoleUpdateEvent struct {
-		GuildID discord.Snowflake `json:"guild_id"`
-		Role    discord.Role      `json:"role"`
+		GuildID discord.GuildID `json:"guild_id"`
+		Role    discord.Role    `json:"role"`
 	}
 	GuildRoleDeleteEvent struct {
-		GuildID discord.Snowflake `json:"guild_id"`
-		RoleID  discord.Snowflake `json:"role_id"`
+		GuildID discord.GuildID `json:"guild_id"`
+		RoleID  discord.RoleID  `json:"role_id"`
 	}
 )
 
@@ -176,8 +188,8 @@ type (
 	InviteCreateEvent struct {
 		Code      string            `json:"code"`
 		CreatedAt discord.Timestamp `json:"created_at"`
-		ChannelID discord.Snowflake `json:"channel_id"`
-		GuildID   discord.Snowflake `json:"guild_id,omitempty"`
+		ChannelID discord.ChannelID `json:"channel_id"`
+		GuildID   discord.GuildID   `json:"guild_id,omitempty"`
 
 		// Similar to discord.Invite
 		Inviter    *discord.User          `json:"inviter,omitempty"`
@@ -188,8 +200,8 @@ type (
 	}
 	InviteDeleteEvent struct {
 		Code      string            `json:"code"`
-		ChannelID discord.Snowflake `json:"channel_id"`
-		GuildID   discord.Snowflake `json:"guild_id,omitempty"`
+		ChannelID discord.ChannelID `json:"channel_id"`
+		GuildID   discord.GuildID   `json:"guild_id,omitempty"`
 	}
 )
 
@@ -204,48 +216,48 @@ type (
 		Member *discord.Member `json:"member,omitempty"`
 	}
 	MessageDeleteEvent struct {
-		ID        discord.Snowflake `json:"id"`
-		ChannelID discord.Snowflake `json:"channel_id"`
-		GuildID   discord.Snowflake `json:"guild_id,omitempty"`
+		ID        discord.MessageID `json:"id"`
+		ChannelID discord.ChannelID `json:"channel_id"`
+		GuildID   discord.GuildID   `json:"guild_id,omitempty"`
 	}
 	MessageDeleteBulkEvent struct {
-		IDs       []discord.Snowflake `json:"ids"`
-		ChannelID discord.Snowflake   `json:"channel_id"`
-		GuildID   discord.Snowflake   `json:"guild_id,omitempty"`
+		IDs       []discord.MessageID `json:"ids"`
+		ChannelID discord.ChannelID   `json:"channel_id"`
+		GuildID   discord.GuildID     `json:"guild_id,omitempty"`
 	}
 
 	MessageReactionAddEvent struct {
-		UserID    discord.Snowflake `json:"user_id"`
-		ChannelID discord.Snowflake `json:"channel_id"`
-		MessageID discord.Snowflake `json:"message_id"`
+		UserID    discord.UserID    `json:"user_id"`
+		ChannelID discord.ChannelID `json:"channel_id"`
+		MessageID discord.MessageID `json:"message_id"`
 
 		Emoji discord.Emoji `json:"emoji,omitempty"`
 
-		GuildID discord.Snowflake `json:"guild_id,omitempty"`
-		Member  *discord.Member   `json:"member,omitempty"`
+		GuildID discord.GuildID `json:"guild_id,omitempty"`
+		Member  *discord.Member `json:"member,omitempty"`
 	}
 	MessageReactionRemoveEvent struct {
-		UserID    discord.Snowflake `json:"user_id"`
-		ChannelID discord.Snowflake `json:"channel_id"`
-		MessageID discord.Snowflake `json:"message_id"`
+		UserID    discord.UserID    `json:"user_id"`
+		ChannelID discord.ChannelID `json:"channel_id"`
+		MessageID discord.MessageID `json:"message_id"`
 		Emoji     discord.Emoji     `json:"emoji"`
-		GuildID   discord.Snowflake `json:"guild_id,omitempty"`
+		GuildID   discord.GuildID   `json:"guild_id,omitempty"`
 	}
 	MessageReactionRemoveAllEvent struct {
-		ChannelID discord.Snowflake `json:"channel_id"`
-		MessageID discord.Snowflake `json:"message_id"`
-		GuildID   discord.Snowflake `json:"guild_id,omitempty"`
+		ChannelID discord.ChannelID `json:"channel_id"`
+		MessageID discord.MessageID `json:"message_id"`
+		GuildID   discord.GuildID   `json:"guild_id,omitempty"`
 	}
 	MessageReactionRemoveEmoji struct {
-		ChannelID discord.Snowflake `json:"channel_id"`
-		MessageID discord.Snowflake `json:"message_id"`
+		ChannelID discord.ChannelID `json:"channel_id"`
+		MessageID discord.MessageID `json:"message_id"`
 		Emoji     discord.Emoji     `json:"emoji"`
-		GuildID   discord.Snowflake `json:"guild_id,omitempty"`
+		GuildID   discord.GuildID   `json:"guild_id,omitempty"`
 	}
 
 	MessageAckEvent struct {
-		MessageID discord.Snowflake `json:"message_id"`
-		ChannelID discord.Snowflake `json:"channel_id"`
+		MessageID discord.MessageID `json:"message_id"`
+		ChannelID discord.ChannelID `json:"channel_id"`
 	}
 )
 
@@ -276,12 +288,12 @@ type (
 	}
 
 	TypingStartEvent struct {
-		ChannelID discord.Snowflake     `json:"channel_id"`
-		UserID    discord.Snowflake     `json:"user_id"`
+		ChannelID discord.ChannelID     `json:"channel_id"`
+		UserID    discord.UserID        `json:"user_id"`
 		Timestamp discord.UnixTimestamp `json:"timestamp"`
 
-		GuildID discord.Snowflake `json:"guild_id,omitempty"`
-		Member  *discord.Member   `json:"member,omitempty"`
+		GuildID discord.GuildID `json:"guild_id,omitempty"`
+		Member  *discord.Member `json:"member,omitempty"`
 	}
 
 	UserUpdateEvent struct {
@@ -295,17 +307,17 @@ type (
 		discord.VoiceState
 	}
 	VoiceServerUpdateEvent struct {
-		Token    string            `json:"token"`
-		GuildID  discord.Snowflake `json:"guild_id"`
-		Endpoint string            `json:"endpoint"`
+		Token    string          `json:"token"`
+		GuildID  discord.GuildID `json:"guild_id"`
+		Endpoint string          `json:"endpoint"`
 	}
 )
 
 // https://discordapp.com/developers/docs/topics/gateway#webhooks
 type (
 	WebhooksUpdateEvent struct {
-		GuildID   discord.Snowflake `json:"guild_id"`
-		ChannelID discord.Snowflake `json:"channel_id"`
+		GuildID   discord.GuildID   `json:"guild_id"`
+		ChannelID discord.ChannelID `json:"channel_id"`
 	}
 )
 
@@ -318,16 +330,16 @@ type (
 		UserSettings
 	}
 	UserNoteUpdateEvent struct {
-		ID   discord.Snowflake `json:"id"`
-		Note string            `json:"note"`
+		ID   discord.UserID `json:"id"`
+		Note string         `json:"note"`
 	}
 )
 
 type (
-	RelationshipAdd struct {
-		Relationship
+	RelationshipAddEvent struct {
+		discord.Relationship
 	}
-	RelationshipRemove struct {
-		Relationship
+	RelationshipRemoveEvent struct {
+		discord.Relationship
 	}
 )

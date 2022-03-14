@@ -5,13 +5,13 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"time"
 
 	"github.com/balerter/balerter/internal/config/datasources/postgres"
 	"github.com/balerter/balerter/internal/modules"
 
 	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )

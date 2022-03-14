@@ -16,25 +16,25 @@ import (
 	"github.com/diamondburned/arikawa/session"
 	"github.com/diamondburned/arikawa/state"
 	"github.com/diamondburned/arikawa/utils/httputil/httpdriver"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 )
 
 type (
 	// Mocker handles the mocking of arikawa's API calls.
 	Mocker struct {
-		// Server is the Server used to mock the requests.
+		// Server is the httptest.Server used to mock the requests.
 		Server *httptest.Server
-		// Client is a mocked Client that redirects all requests to the mock-server.
+		// Client is a mocked http.Client that redirects all requests to the
+		// mock-server.
 		Client *http.Client
-		// handlers contains all mock handlers.
-		// The first map is sorted by path, the second by method.
+		// handlers is a map containing all handlers.
+		// The outer map is sorted by path, the inner one by method.
 		// This ensures that different requests don't share the same Handler array, while still
 		// enforcing the call order.
 		handlers map[string]map[string][]Handler // map[Path]map[HTTPMethod][]Handler
-		// mut is the Mutex used to secure the handlers map, when multiple request come in
+		// mut is the sync.Mutex used to secure the handlers map, when multiple request come in
 		// concurrently.
-		// However, adding handlers is not concurrent safe, as there is no point in it, when
-		// testing in a single method.
+		// However, mocks may not be added concurrently.
 		mut *sync.Mutex
 		// t is the test type called on error.
 		t *testing.T
@@ -44,7 +44,7 @@ type (
 	Handler struct {
 		// Name is the name of the handler.
 		Name string
-		// Handler is the underlying handler.
+		// Handler is the underlying http.Handler.
 		http.Handler
 	}
 
@@ -52,7 +52,8 @@ type (
 	MockFunc func(w http.ResponseWriter, r *http.Request, t *testing.T)
 )
 
-// New creates a new Mocker with a started serve listening on Mocker.Server.Listener.Addr().
+// New creates a new Mocker with a started server listening on
+// Mocker.Server.Listener.Addr().
 func New(t *testing.T) *Mocker {
 	m := &Mocker{
 		handlers: make(map[string]map[string][]Handler, 1),
@@ -67,10 +68,16 @@ func New(t *testing.T) *Mocker {
 		path := strings.TrimRight(r.URL.Path, "/")
 
 		methHandlers, ok := m.handlers[path]
-		require.True(t, ok, "unhandled path '"+path+"'")
+		if !assert.True(t, ok, "unhandled path '"+path+"'") {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 
 		h, ok := methHandlers[r.Method]
-		require.True(t, ok, "unhandled method '"+r.Method+"' on path '"+path+"'")
+		if !assert.True(t, ok, "unhandled method '"+r.Method+"' on path '"+path+"'") {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 
 		h[0].ServeHTTP(w, r)
 
@@ -102,7 +109,7 @@ func New(t *testing.T) *Mocker {
 }
 
 // NewSession creates a new Mocker, starts its test server and returns a
-// manipulated Session using the test Server.
+// manipulated session.Session using the test server.
 func NewSession(t *testing.T) (*Mocker, *session.Session) {
 	m := New(t)
 
@@ -116,7 +123,7 @@ func NewSession(t *testing.T) (*Mocker, *session.Session) {
 }
 
 // NewState creates a new Mocker, starts its test server and returns a
-// manipulated State which's Session uses the test server.
+// manipulated state.State which's Session uses the test server.
 // In order to allow for successful testing, the State's Store, will always
 // return an error, forcing the use of the (mocked) Session.
 func NewState(t *testing.T) (*Mocker, *state.State) {
@@ -130,19 +137,19 @@ func NewState(t *testing.T) (*Mocker, *state.State) {
 	return m, st
 }
 
-// Mock uses the passed MockFunc to create a mock on the passed path using the
+// Mock uses the passed MockFunc to create a mock for the passed path using the
 // passed method.
 // If there are already handlers for this path with the same method, the
 // handler will be queued up behind the other handlers with the same path and
 // method.
-// Queued up handlers are invoked in the same order they were added in.
+// Queued up handlers must be invoked in the same order they were added in.
 //
-// Trailing '/' will be removed.
+// Trailing slashes ('/') will be removed.
 //
 // Names don't need to be unique, and have the sole purpose of aiding in
 // debugging.
 //
-// The MockFunc may be nil, if only testing for invokes is needed.
+// The MockFunc may be nil if only the NoContent status shall be returned.
 func (m *Mocker) Mock(name, method, path string, f MockFunc) {
 	path = strings.TrimRight(path, "/")
 
@@ -164,65 +171,72 @@ func (m *Mocker) Mock(name, method, path string, f MockFunc) {
 	m.handlers[path][method] = append(m.handlers[path][method], h)
 }
 
-// MockAPI uses the passed MockFunc to as handler for the passed path and method.
-// The path is the path with "/api/v6" stripped.
+// MockAPI uses the passed MockFunc to as handler for the passed path and
+// method.
+// The path must not include the api version, i.e. '/api/v6' must be stripped.
 // If there are already handlers for this path with the same method, the
 // handler will be queued up behind the other handlers with the same path and
 // method.
 // Queued up handlers are invoked in the same order they were added in.
 //
-// Trailing '/' will be removed.
+// Trailing slashes ('/') will be removed.
 //
 // Names don't need to be unique, and have the sole purpose of aiding in
 // debugging.
 //
-// The MockFunc may be nil, if only testing for invokes is needed.
+// The MockFunc may be nil if only the NoContent status shall be returned.
 func (m *Mocker) MockAPI(name, method, path string, f MockFunc) {
 	path = "/api/v6" + path
 
 	m.Mock(name, method, path, f)
 }
 
-// CloneSession clones handlers of the Mocker and returns the cloned Mocker and
-// a new, mocked, Session.
-// Useful for multiple tests with the same API calls.
+// Clone creates a clone of the Mocker that has the same handlers but a
+// separate server.
 //
-// Creating a clone will automatically close the current server.
-func (m *Mocker) CloneSession(t *testing.T) (*Mocker, *session.Session) {
+// Creating a clone will automatically close the Mocker's server.
+func (m *Mocker) Clone(t *testing.T) (clone *Mocker) {
 	m.Close()
 
-	handlersCopy := make(map[string]map[string][]Handler, len(m.handlers))
+	clone = New(t)
 
-	for p, sub := range m.handlers {
-		subCopy := make(map[string][]Handler, len(sub))
+	clone.handlers = m.deepCopyHandlers()
 
-		for m, ssub := range sub {
-			ssubCopy := make([]Handler, len(ssub))
+	return
+}
 
-			copy(ssubCopy, ssub)
+// CloneSession clones handlers of the Mocker and returns the cloned Mocker and
+// a new session.Session using the new server.
+//
+// Creating a clone will automatically close the Mocker's server.
+func (m *Mocker) CloneSession(t *testing.T) (clone *Mocker, s *session.Session) {
+	m.Close()
 
-			subCopy[m] = ssubCopy
-		}
+	clone, s = NewSession(t)
 
-		handlersCopy[p] = subCopy
-	}
+	clone.handlers = m.deepCopyHandlers()
 
-	clone, s := NewSession(t)
-
-	clone.handlers = handlersCopy
-
-	return clone, s
+	return
 }
 
 // CloneState clones handlers of the Mocker and returns the cloned Mocker and a
-// new, mocked, State.
+// new state.State using the new server.
 // Useful for multiple tests with the same API calls.
 //
 // Creating a clone will automatically close the current server.
-func (m *Mocker) CloneState(t *testing.T) (*Mocker, *state.State) {
+func (m *Mocker) CloneState(t *testing.T) (clone *Mocker, s *state.State) {
 	m.Close()
 
-	handlersCopy := make(map[string]map[string][]Handler, len(m.handlers))
+	clone, s = NewState(t)
+
+	clone.handlers = m.deepCopyHandlers()
+
+	return
+}
+
+// deepCopyHandlers returns a deep copy of the handlers of the Mocker.
+func (m *Mocker) deepCopyHandlers() (cp map[string]map[string][]Handler) {
+	cp = make(map[string]map[string][]Handler, len(m.handlers))
 
 	for p, sub := range m.handlers {
 		subCopy := make(map[string][]Handler, len(sub))
@@ -235,19 +249,16 @@ func (m *Mocker) CloneState(t *testing.T) (*Mocker, *state.State) {
 			subCopy[m] = ssubCopy
 		}
 
-		handlersCopy[p] = subCopy
+		cp[p] = subCopy
 	}
 
-	clone, s := NewState(t)
-
-	clone.handlers = handlersCopy
-
-	return clone, s
+	return
 }
 
-// Eval closes the Server and evaluates if all registered handlers were
+// Eval closes the server and evaluates if all registered handlers were
 // invoked.
-// If not it will Fatal, stating the uninvoked handlers.
+// If not it will call testing.T.Fatal, printing an error message with all
+// uninvoked handlers.
 // This must be called at the end of every test.
 func (m *Mocker) Eval() {
 	m.Close()
@@ -259,8 +270,8 @@ func (m *Mocker) Eval() {
 	m.t.Fatal("there are uninvoked handlers:\n\n" + m.genUninvokedMsg())
 }
 
-// Close shuts down the Server and blocks until all outstanding requests on
-// this Server have completed.
+// Close shuts down the server and blocks until all current requests are
+// completed.
 func (m *Mocker) Close() { m.Server.Close() }
 
 // genUninvokedMsg generates an error message stating the unused handlers.

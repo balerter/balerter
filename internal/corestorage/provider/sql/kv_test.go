@@ -1,89 +1,72 @@
 package sql
 
 import (
-	"database/sql"
 	"fmt"
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/balerter/balerter/internal/config/storages/core/tables"
-	"github.com/jmoiron/sqlx"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 	"math/rand"
 	"os"
 	"strconv"
 	"testing"
 	"time"
 
+	"github.com/balerter/balerter/internal/config/storages/core/tables"
+
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
-func TestPostgresKV_All_error_query(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
+var _db *sqlx.DB
 
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	sqlm.ExpectQuery(`SELECT key, value FROM kv`).WillReturnError(fmt.Errorf("err1"))
-
-	kv := &PostgresKV{
-		db:       dbx,
-		tableCfg: tables.TableKV{Table: "kv", Fields: tables.KVFields{Key: "key", Value: "value"}},
-		logger:   zap.NewNop(),
+func getDB(t *testing.T) *sqlx.DB {
+	if _db != nil {
+		return _db
 	}
+	rand.Seed(time.Now().UnixNano())
 
-	_, err = kv.All()
-	require.Error(t, err)
-	assert.Equal(t, "error sql query, err1", err.Error())
+	var err error
+	_db, err = sqlx.Connect("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s&sslrootcert=%s",
+		"postgres",
+		"secret",
+		"127.0.0.1",
+		35432,
+		"postgres",
+		"disable",
+		""))
+	require.NoError(t, err)
+	return _db
 }
 
-func TestPostgresKV_All_scan_error(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	rows := sqlmock.NewRows([]string{"key", "value"}).
-		AddRow(
-			sql.NullInt64{Int64: 10, Valid: false},
-			sql.NullInt64{Int64: 10, Valid: true},
-		)
-	sqlm.ExpectQuery(`SELECT key, value FROM kv`).WillReturnRows(rows)
+func TestPostgresKV_All_error_query(t *testing.T) {
+	tableKV := fmt.Sprintf("kv_%d", rand.Int())
 
 	kv := &PostgresKV{
-		db:       dbx,
-		tableCfg: tables.TableKV{Table: "kv", Fields: tables.KVFields{Key: "key", Value: "value"}},
+		db:       getDB(t),
+		tableCfg: tables.TableKV{Table: tableKV, Fields: tables.KVFields{Key: "key", Value: "value"}},
 		logger:   zap.NewNop(),
 	}
 
-	_, err = kv.All()
+	_, err := kv.All()
 	require.Error(t, err)
-	assert.Equal(t, "error scan result, sql: Scan error on column index 0, "+
-		"name \"key\": converting NULL to string is unsupported", err.Error())
+	assert.Equal(t, "error sql query, pq: relation \""+tableKV+"\" does not exist", err.Error())
 }
 
 func TestPostgresKV_All(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	rows := sqlmock.NewRows([]string{"key", "value"}).
-		AddRow(
-			sql.NullString{String: "a1", Valid: true},
-			sql.NullString{String: "a2", Valid: true},
-		).
-		AddRow(
-			sql.NullString{String: "b1", Valid: true},
-			sql.NullString{String: "b2", Valid: true},
-		)
-	sqlm.ExpectQuery(`SELECT key, value FROM kv`).WillReturnRows(rows)
+	db := getDB(t)
+	tableName := fmt.Sprintf("kv_%d", rand.Int())
 
 	kv := &PostgresKV{
-		db:       dbx,
-		tableCfg: tables.TableKV{Table: "kv", Fields: tables.KVFields{Key: "key", Value: "value"}},
+		db:       db,
+		tableCfg: tables.TableKV{Table: tableName, Fields: tables.KVFields{Key: "key", Value: "value"}},
 		logger:   zap.NewNop(),
 	}
+
+	errCreate := kv.CreateTable()
+	require.NoError(t, errCreate)
+
+	_, errQuery := db.Query(fmt.Sprintf(`INSERT INTO %s (key, value) VALUES ('a1', 'a2'), ('b1', 'b2')`, tableName))
+	require.NoError(t, errQuery)
 
 	data, err := kv.All()
 	require.NoError(t, err)
@@ -98,232 +81,108 @@ func TestPostgresKV_All(t *testing.T) {
 	assert.Equal(t, "b2", e)
 }
 
-func TestPostgresKV_Put_error_query(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	sqlm.ExpectExec(`INSERT INTO kv \(key, value\) VALUES ` +
-		`\(\$1, \$2\) ON CONFLICT \(key\) DO NOTHING`).WillReturnError(fmt.Errorf("err1"))
-
-	kv := &PostgresKV{
-		db:       dbx,
-		tableCfg: tables.TableKV{Table: "kv", Fields: tables.KVFields{Key: "key", Value: "value"}},
-		logger:   zap.NewNop(),
-	}
-
-	err = kv.Put("k", "v")
-	require.Error(t, err)
-	assert.Equal(t, "error sql query, err1", err.Error())
-}
-
-func TestPostgresKV_Put_0_affected(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	r := sqlmock.NewResult(0, 0)
-
-	sqlm.ExpectExec(`INSERT INTO kv \(key, value\) VALUES ` +
-		`\(\$1, \$2\) ON CONFLICT \(key\) DO NOTHING`).WillReturnResult(r)
-
-	kv := &PostgresKV{
-		db:       dbx,
-		tableCfg: tables.TableKV{Table: "kv", Fields: tables.KVFields{Key: "key", Value: "value"}},
-		logger:   zap.NewNop(),
-	}
-
-	err = kv.Put("k", "v")
-	require.Error(t, err)
-	assert.Equal(t, "key already exists", err.Error())
-}
-
 func TestPostgresKV_Put(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	r := sqlmock.NewResult(0, 1)
-
-	sqlm.ExpectExec(`INSERT INTO kv \(key, value\) VALUES` +
-		` \(\$1, \$2\) ON CONFLICT \(key\) DO NOTHING`).WillReturnResult(r)
+	db := getDB(t)
+	tableName := fmt.Sprintf("kv_%d", rand.Int())
 
 	kv := &PostgresKV{
-		db:       dbx,
-		tableCfg: tables.TableKV{Table: "kv", Fields: tables.KVFields{Key: "key", Value: "value"}},
+		db:       db,
+		tableCfg: tables.TableKV{Table: tableName, Fields: tables.KVFields{Key: "key", Value: "value"}},
 		logger:   zap.NewNop(),
 	}
 
-	err = kv.Put("k", "v")
+	errCreate := kv.CreateTable()
+	require.NoError(t, errCreate)
+
+	err := kv.Put("k", "v")
 	require.NoError(t, err)
-}
-
-func TestPostgresKV_Get_error_query(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	sqlm.ExpectQuery(`SELECT value FROM kv WHERE key = \$1`).WillReturnError(fmt.Errorf("err1"))
-
-	kv := &PostgresKV{
-		db:       dbx,
-		tableCfg: tables.TableKV{Table: "kv", Fields: tables.KVFields{Key: "key", Value: "value"}},
-		logger:   zap.NewNop(),
-	}
-
-	_, err = kv.Get("k")
-	require.Error(t, err)
-	assert.Equal(t, "error sql query, err1", err.Error())
 }
 
 func TestPostgresKV_Get_error_no_rows(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	rows := sqlmock.NewRows([]string{"value"})
-
-	sqlm.ExpectQuery(`SELECT value FROM kv WHERE key = \$1`).WillReturnRows(rows)
+	db := getDB(t)
+	tableName := fmt.Sprintf("kv_%d", rand.Int())
 
 	kv := &PostgresKV{
-		db:       dbx,
-		tableCfg: tables.TableKV{Table: "kv", Fields: tables.KVFields{Key: "key", Value: "value"}},
+		db:       db,
+		tableCfg: tables.TableKV{Table: tableName, Fields: tables.KVFields{Key: "key", Value: "value"}},
 		logger:   zap.NewNop(),
 	}
 
-	_, err = kv.Get("k")
+	require.NoError(t, kv.CreateTable())
+
+	_, err := kv.Get("k")
 	require.Error(t, err)
 	assert.Equal(t, ErrNoRow.Error(), err.Error())
 }
 
-func TestPostgresKV_Get_error_scan(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	rows := sqlmock.NewRows([]string{"value"}).
-		AddRow(
-			sql.NullString{String: "not valid value", Valid: false},
-		)
-
-	sqlm.ExpectQuery(`SELECT value FROM kv WHERE key = \$1`).WillReturnRows(rows)
-
-	kv := &PostgresKV{
-		db:       dbx,
-		tableCfg: tables.TableKV{Table: "kv", Fields: tables.KVFields{Key: "key", Value: "value"}},
-		logger:   zap.NewNop(),
-	}
-
-	_, err = kv.Get("k")
-	require.Error(t, err)
-	assert.Equal(t, "error scan result, sql: Scan error on column index 0, "+
-		"name \"value\": converting NULL to string is unsupported", err.Error())
-}
-
 func TestPostgresKV_Get(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	rows := sqlmock.NewRows([]string{"value"}).
-		AddRow(
-			sql.NullString{String: "bar", Valid: true},
-		)
-
-	sqlm.ExpectQuery(`SELECT value FROM kv WHERE key = \$1`).WillReturnRows(rows)
+	db := getDB(t)
+	tableName := fmt.Sprintf("kv_%d", rand.Int())
 
 	kv := &PostgresKV{
-		db:       dbx,
-		tableCfg: tables.TableKV{Table: "kv", Fields: tables.KVFields{Key: "key", Value: "value"}},
+		db:       db,
+		tableCfg: tables.TableKV{Table: tableName, Fields: tables.KVFields{Key: "key", Value: "value"}},
 		logger:   zap.NewNop(),
 	}
+
+	require.NoError(t, kv.CreateTable())
+
+	_, errExec := db.Exec("INSERT INTO " + tableName + " VALUES ('k', 'bar')")
+	require.NoError(t, errExec)
 
 	v, err := kv.Get("k")
 	require.NoError(t, err)
 	assert.Equal(t, "bar", v)
 }
 
-func TestPostgresKV_Upsert_error_exec(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	sqlm.ExpectExec(`INSERT INTO kv \(key, value\) VALUES \(\$1, \$2\) ` +
-		`ON CONFLICT \(key\) DO UPDATE SET value = \$2`).WillReturnError(fmt.Errorf("err1"))
-
-	kv := &PostgresKV{
-		db:       dbx,
-		tableCfg: tables.TableKV{Table: "kv", Fields: tables.KVFields{Key: "key", Value: "value"}},
-		logger:   zap.NewNop(),
-	}
-
-	err = kv.Upsert("k", "v")
-	require.Error(t, err)
-	assert.Equal(t, "error sql query, err1", err.Error())
-}
-
 func TestPostgresKV_Upsert(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	sqlm.ExpectExec(`INSERT INTO kv \(key, value\) VALUES \(\$1, \$2\) ` +
-		`ON CONFLICT \(key\) DO UPDATE SET value = \$2`).WillReturnResult(sqlmock.NewResult(0, 1))
+	db := getDB(t)
+	tableName := fmt.Sprintf("kv_%d", rand.Int())
 
 	kv := &PostgresKV{
-		db:       dbx,
-		tableCfg: tables.TableKV{Table: "kv", Fields: tables.KVFields{Key: "key", Value: "value"}},
+		db:       db,
+		tableCfg: tables.TableKV{Table: tableName, Fields: tables.KVFields{Key: "key", Value: "value"}},
 		logger:   zap.NewNop(),
 	}
 
-	err = kv.Upsert("k", "v")
+	require.NoError(t, kv.CreateTable())
+
+	_, errExec := db.Exec("INSERT INTO " + tableName + " VALUES ('k', 'bar')")
+	require.NoError(t, errExec)
+
+	err := kv.Upsert("k", "v")
 	require.NoError(t, err)
-}
 
-func TestPostgresKV_Delete_error_exec(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	sqlm.ExpectQuery(`DELETE FROM kv WHERE key = \$1`).WillReturnError(fmt.Errorf("err1"))
-
-	kv := &PostgresKV{
-		db:       dbx,
-		tableCfg: tables.TableKV{Table: "kv", Fields: tables.KVFields{Key: "key", Value: "value"}},
-		logger:   zap.NewNop(),
-	}
-
-	err = kv.Delete("k")
-	require.Error(t, err)
-	assert.Equal(t, "error sql query, err1", err.Error())
+	row := db.QueryRow("SELECT value FROM " + tableName + " WHERE key = 'k'")
+	var v string
+	errScan := row.Scan(&v)
+	require.NoError(t, errScan)
+	assert.Equal(t, "v", v)
 }
 
 func TestPostgresKV_Delete(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	sqlm.ExpectQuery(`DELETE FROM kv WHERE key = \$1`).WillReturnRows(nil)
+	db := getDB(t)
+	tableName := fmt.Sprintf("kv_%d", rand.Int())
 
 	kv := &PostgresKV{
-		db:       dbx,
-		tableCfg: tables.TableKV{Table: "kv", Fields: tables.KVFields{Key: "key", Value: "value"}},
+		db:       db,
+		tableCfg: tables.TableKV{Table: tableName, Fields: tables.KVFields{Key: "key", Value: "value"}},
 		logger:   zap.NewNop(),
 	}
 
-	err = kv.Delete("k")
+	require.NoError(t, kv.CreateTable())
+
+	_, errExec := db.Exec("INSERT INTO " + tableName + " VALUES ('k', 'bar')")
+	require.NoError(t, errExec)
+
+	err := kv.Delete("k")
 	require.NoError(t, err)
+
+	row := db.QueryRow("SELECT value FROM " + tableName + " WHERE key = 'k'")
+	var v string
+	errScan := row.Scan(&v)
+	require.Error(t, errScan)
+	assert.Equal(t, "sql: no rows in result set", errScan.Error())
 }
 
 func TestPostgresKV_CreateTable_postgres(t *testing.T) {

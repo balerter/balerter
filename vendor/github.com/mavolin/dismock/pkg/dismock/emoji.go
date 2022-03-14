@@ -14,7 +14,7 @@ import (
 // Emojis mocks a Emojis request.
 //
 // This method will sanitize Emoji.ID and Emoji.User.ID.
-func (m *Mocker) Emojis(guildID discord.Snowflake, e []discord.Emoji) {
+func (m *Mocker) Emojis(guildID discord.GuildID, e []discord.Emoji) {
 	if e == nil {
 		e = []discord.Emoji{}
 	}
@@ -31,10 +31,10 @@ func (m *Mocker) Emojis(guildID discord.Snowflake, e []discord.Emoji) {
 
 // Emoji mocks a Emoji request.
 //
-// The ID field of the passed Emoji is required.
+// The ID field of the passed discord.Emoji is required.
 //
 // This method will sanitize Emoji.ID and Emoji.User.ID.
-func (m *Mocker) Emoji(guildID discord.Snowflake, e discord.Emoji) {
+func (m *Mocker) Emoji(guildID discord.GuildID, e discord.Emoji) {
 	e = sanitize.Emoji(e, 1, 1)
 
 	m.MockAPI("Emoji", http.MethodGet, "/guilds/"+guildID.String()+"/emojis/"+e.ID.String(),
@@ -45,10 +45,10 @@ func (m *Mocker) Emoji(guildID discord.Snowflake, e discord.Emoji) {
 
 // CreateEmoji mocks a CreateEmoji request.
 //
-// The fields Name and RoleIDs of the passed Emoji must be set.
+// The fields Name and RoleIDs of the passed discord.Emoji must be set.
 //
 // This method will sanitize Emoji.ID and Emoji.User.ID.
-func (m *Mocker) CreateEmoji(guildID discord.Snowflake, d api.CreateEmojiData, e discord.Emoji) {
+func (m *Mocker) CreateEmoji(guildID discord.GuildID, d api.CreateEmojiData, e discord.Emoji) {
 	e = sanitize.Emoji(e, 1, 1)
 
 	m.MockAPI("CreateEmoji", http.MethodPost, "/guilds/"+guildID.String()+"/emojis",
@@ -59,7 +59,7 @@ func (m *Mocker) CreateEmoji(guildID discord.Snowflake, d api.CreateEmojiData, e
 }
 
 // ModifyEmoji mocks a ModifyEmoji request.
-func (m *Mocker) ModifyEmoji(guildID, emojiID discord.Snowflake, d api.ModifyEmojiData) {
+func (m *Mocker) ModifyEmoji(guildID discord.GuildID, emojiID discord.EmojiID, d api.ModifyEmojiData) {
 	m.MockAPI("ModifyEmoji", http.MethodPatch, "/guilds/"+guildID.String()+"/emojis/"+emojiID.String(),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			mockutil.CheckJSON(t, r.Body, new(api.ModifyEmojiData), &d)
@@ -68,6 +68,6 @@ func (m *Mocker) ModifyEmoji(guildID, emojiID discord.Snowflake, d api.ModifyEmo
 }
 
 // DeleteEmoji mocks a DeleteEmoji request.
-func (m *Mocker) DeleteEmoji(guildID, emojiID discord.Snowflake) {
+func (m *Mocker) DeleteEmoji(guildID discord.GuildID, emojiID discord.EmojiID) {
 	m.MockAPI("DeleteEmoji", http.MethodDelete, "/guilds/"+guildID.String()+"/emojis/"+emojiID.String(), nil)
 }
