@@ -11,9 +11,6 @@ github.com/ClickHouse/clickhouse-go/lib/data
 github.com/ClickHouse/clickhouse-go/lib/lz4
 github.com/ClickHouse/clickhouse-go/lib/protocol
 github.com/ClickHouse/clickhouse-go/lib/types
-# github.com/DATA-DOG/go-sqlmock v1.5.0
-## explicit
-github.com/DATA-DOG/go-sqlmock
 # github.com/VictoriaMetrics/metrics v1.18.1
 ## explicit; go 1.12
 github.com/VictoriaMetrics/metrics
@@ -26,7 +23,7 @@ github.com/ajstarks/svgo
 # github.com/apparentlymart/go-textseg/v13 v13.0.0
 ## explicit; go 1.16
 github.com/apparentlymart/go-textseg/v13/textseg
-# github.com/aws/aws-sdk-go v1.43.17
+# github.com/aws/aws-sdk-go v1.43.18
 ## explicit; go 1.11
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/arn
