@@ -68,8 +68,8 @@ func TestQuery(t *testing.T) {
 	}
 
 	results := []resultItem{
-		{"12", "Bar"},
 		{"42", "Foo"},
+		{"12", "Bar"},
 	}
 
 	arg2.(*lua.LTable).ForEach(func(value lua.LValue, value2 lua.LValue) {
