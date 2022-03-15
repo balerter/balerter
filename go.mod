@@ -4,9 +4,8 @@ go 1.17
 
 require (
 	github.com/ClickHouse/clickhouse-go v1.5.4
-	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/VictoriaMetrics/metrics v1.18.1
-	github.com/aws/aws-sdk-go v1.43.17
+	github.com/aws/aws-sdk-go v1.43.18
 	github.com/diamondburned/arikawa v1.3.14
 	github.com/fatih/color v1.13.0
 	github.com/go-chi/chi v1.5.4
