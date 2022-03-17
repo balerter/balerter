@@ -173,6 +173,7 @@ func Test_interpolate(t *testing.T) {
 			AlertName: "alert_name",
 			Text:      "text",
 			Image:     "image",
+			Fields:    map[string]string{"a": "b"},
 		})
 		require.Equal(t, "level:alert_name:text:image", r)
 	})

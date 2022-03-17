@@ -32,6 +32,7 @@ func TestSend_WithoutImage(t *testing.T) {
 		AlertName: "bar",
 		Text:      "baz",
 		Image:     "",
+		Fields:    map[string]string{"a": "b"},
 	}
 
 	err := tg.Send(mes)
@@ -39,7 +40,7 @@ func TestSend_WithoutImage(t *testing.T) {
 
 	assert.Equal(t, 1, len(m.SendTextMessageCalls()))
 	require.NotNil(t, tgMessage)
-	assert.Equal(t, "baz", tgMessage.Text)
+	assert.Equal(t, "baz\n\n```\na = b\n\n```", tgMessage.Text)
 	assert.Equal(t, int64(42), tgMessage.ChatID)
 }
 
@@ -74,4 +75,17 @@ func TestSend_WithImage(t *testing.T) {
 	assert.Equal(t, int64(42), tgMessage.ChatID)
 	assert.Equal(t, "baz", tgMessage.Caption)
 	assert.Equal(t, "img1", tgMessage.Photo)
+}
+
+func Test_addFields(t *testing.T) {
+	s := addFields(map[string]string{"a": "1", "b": "2"})
+
+	eq := s == "\n\n```\na = 1\nb = 2\n\n```" || s == "\n\n```\nb = 2\na = 1\n\n```"
+
+	assert.True(t, eq)
+}
+
+func Test_maxKeyLength(t *testing.T) {
+	v := maxKeyLen(map[string]string{"a": "", "bb": "", "ccc": "", "dd": ""})
+	assert.Equal(t, 3, v)
 }

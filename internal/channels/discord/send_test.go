@@ -173,8 +173,11 @@ func TestTest_error_send(t *testing.T) {
 }
 
 func TestTest(t *testing.T) {
+	assertContent := "foo\n\na = b\n"
+
 	m := &isessionMock{
 		SendMessageFunc: func(channelID discord.ChannelID, content string, embed *discord.Embed) (*discord.Message, error) {
+			assert.Equal(t, assertContent, content)
 			return nil, nil
 		},
 	}
@@ -182,7 +185,8 @@ func TestTest(t *testing.T) {
 		session: m,
 	}
 	mes := &message.Message{
-		Text: "foo",
+		Text:   "foo",
+		Fields: map[string]string{"a": "b"},
 	}
 	err := d.Send(mes)
 	assert.NoError(t, err)

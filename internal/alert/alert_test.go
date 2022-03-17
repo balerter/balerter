@@ -153,3 +153,10 @@ func TestLevelNumString(t *testing.T) {
 	assert.Equal(t, "2", LevelWarn.NumString())
 	assert.Equal(t, "3", LevelError.NumString())
 }
+
+func TestNew(t *testing.T) {
+	a := New("foo")
+	assert.IsType(t, &Alert{}, a)
+	assert.Equal(t, "foo", a.Name)
+	assert.Equal(t, LevelSuccess, a.Level)
+}
