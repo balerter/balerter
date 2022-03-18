@@ -16,8 +16,6 @@ import (
 	"time"
 )
 
-//go:generate moq -out clickhouse_client_mock.go -skip-ensure -fmt goimports . dbConnection
-
 var (
 	defaultTimeout = time.Second * 5
 )

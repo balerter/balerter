@@ -2,7 +2,9 @@ package clickhouse
 
 import (
 	"context"
+
 	"github.com/balerter/balerter/internal/datasource/converter"
+
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
