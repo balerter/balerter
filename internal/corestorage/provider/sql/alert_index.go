@@ -2,10 +2,12 @@ package sql
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/alert"
-	"go.uber.org/zap"
 	"strings"
 	"time"
+
+	"github.com/balerter/balerter/internal/alert"
+
+	"go.uber.org/zap"
 )
 
 // Index is an implementation of the storage interface

@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/balerter/balerter/internal/alert"
 	"time"
+
+	"github.com/balerter/balerter/internal/alert"
 )
 
 // Get is an implementation of the storage interface
