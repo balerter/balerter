@@ -1,9 +1,13 @@
 package syslog
 
 import (
-	"github.com/stretchr/testify/assert"
+	syslogCfg "github.com/balerter/balerter/internal/config/channels/syslog"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 	"log/syslog"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestName(t *testing.T) {
@@ -55,7 +59,8 @@ func Test_parsePriority(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := parsePriority(tt.args.s); got != tt.want {
+			got, _ := parsePriority(tt.args.s)
+			if got != tt.want {
 				t.Errorf("parsePriority() = %v, want %v", got, tt.want)
 			}
 		})
@@ -65,4 +70,43 @@ func Test_parsePriority(t *testing.T) {
 func TestSyslog_Ignore(t *testing.T) {
 	sl := &Syslog{ignore: true}
 	assert.True(t, sl.Ignore())
+}
+
+func TestWrongFacility(t *testing.T) {
+	_, err := getFacility("foo")
+	require.Error(t, err)
+	assert.Equal(t, "unexpected facility value foo", err.Error())
+}
+
+func TestWrongSeverity(t *testing.T) {
+	_, err := getSeverity("foo")
+	require.Error(t, err)
+	assert.Equal(t, "unexpected severity value foo", err.Error())
+}
+
+func TestNew(t *testing.T) {
+	p, err := New(syslogCfg.Syslog{
+		Name:     "foo",
+		Tag:      "",
+		Network:  "",
+		Address:  "",
+		Priority: "",
+		Ignore:   false,
+	}, zap.NewNop())
+	require.NoError(t, err)
+	assert.IsType(t, &Syslog{}, p)
+	assert.Equal(t, "foo", p.Name())
+}
+
+func TestNew_ErrParse(t *testing.T) {
+	_, err := New(syslogCfg.Syslog{
+		Name:     "foo",
+		Tag:      "",
+		Network:  "",
+		Address:  "",
+		Priority: "foo",
+		Ignore:   false,
+	}, zap.NewNop())
+	require.Error(t, err)
+	assert.Equal(t, "error parse priority, unexpected severity value foo", err.Error())
 }

@@ -3,6 +3,7 @@ package syslog
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/balerter/balerter/internal/message"
 )
 
