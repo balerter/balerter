@@ -1,6 +1,6 @@
 module github.com/balerter/balerter
 
-go 1.17
+go 1.18
 
 require (
 	github.com/ClickHouse/clickhouse-go v1.5.4
