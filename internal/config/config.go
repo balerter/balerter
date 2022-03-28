@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"github.com/balerter/balerter/internal/config/secrets/env"
-	"github.com/balerter/balerter/internal/config/secrets/vault"
 	"io"
 	"os"
 	"regexp"
@@ -15,6 +13,8 @@ import (
 	"github.com/balerter/balerter/internal/config/channels"
 	"github.com/balerter/balerter/internal/config/datasources"
 	"github.com/balerter/balerter/internal/config/scripts"
+	"github.com/balerter/balerter/internal/config/secrets/env"
+	"github.com/balerter/balerter/internal/config/secrets/vault"
 	"github.com/balerter/balerter/internal/config/storages/core"
 	"github.com/balerter/balerter/internal/config/storages/upload"
 	"github.com/balerter/balerter/internal/config/system"
@@ -35,7 +35,7 @@ func New(fs *flag.FlagSet, args []string) (*Config, *Flags, error) {
 
 	flg := &Flags{}
 
-	fs.StringVar(&flg.ConfigFilePath, "config", "config.yml", "configuration source. Currently supports only path to yaml file and 'stdin'.")
+	fs.StringVar(&flg.ConfigFilePath, "config", "config.yml", "configuration file path")
 	fs.StringVar(&flg.LogLevel, "logLevel", "INFO", "log level. ERROR, INFO or DEBUG")
 	fs.BoolVar(&flg.Debug, "debug", false, "debug mode")
 	fs.BoolVar(&flg.Once, "once", false, "once run scripts and exit")
