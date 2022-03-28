@@ -3,10 +3,10 @@ package discord
 import (
 	"bytes"
 	"fmt"
-	"github.com/balerter/balerter/internal/message"
-	"io/ioutil"
+	"io"
 	"testing"
 
+	"github.com/balerter/balerter/internal/message"
 	"github.com/diamondburned/arikawa/api"
 	"github.com/diamondburned/arikawa/discord"
 	"github.com/mavolin/dismock/pkg/dismock"
@@ -56,7 +56,7 @@ func TestSend(t *testing.T) {
 				// deep copied. therefore we create two readers using the data from the original
 				// reader
 				for i, f := range c.data.Files {
-					b, err := ioutil.ReadAll(f.Reader)
+					b, err := io.ReadAll(f.Reader)
 					require.NoError(t, err)
 
 					cp.Files[i].Reader = bytes.NewBuffer(b)

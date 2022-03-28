@@ -86,7 +86,7 @@ package prometheus
 //	hm.On("Do", mock.Anything).Return(&http.Response{
 //		Status:     "status1",
 //		StatusCode: 200,
-//		Body:       ioutil.NopCloser(bytes.NewBuffer([]byte(`{"data":{"resultType":"vector","result":[]}}`))),
+//		Body:       io.NopCloser(bytes.NewBuffer([]byte(`{"data":{"resultType":"vector","result":[]}}`))),
 //	}, nil)
 //
 //	m := &Prometheus{
@@ -155,7 +155,7 @@ package prometheus
 //	hm.On("Do", mock.Anything).Return(&http.Response{
 //		Status:     "status1",
 //		StatusCode: 200,
-//		Body:       ioutil.NopCloser(bytes.NewBuffer([]byte(`{"data":{"resultType":"vector","result":[]}}`))),
+//		Body:       io.NopCloser(bytes.NewBuffer([]byte(`{"data":{"resultType":"vector","result":[]}}`))),
 //	}, nil)
 //
 //	m := &Prometheus{

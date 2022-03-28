@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"testing"
 
@@ -64,7 +63,7 @@ func TestSend_error_status_code(t *testing.T) {
 	}
 
 	resp := &http.Response{
-		Body:       ioutil.NopCloser(bytes.NewBuffer(nil)),
+		Body:       io.NopCloser(bytes.NewBuffer(nil)),
 		StatusCode: 0,
 	}
 
@@ -91,7 +90,7 @@ func TestSend(t *testing.T) {
 	}
 
 	resp := &http.Response{
-		Body:       ioutil.NopCloser(bytes.NewBuffer(nil)),
+		Body:       io.NopCloser(bytes.NewBuffer(nil)),
 		StatusCode: 200,
 	}
 

@@ -3,7 +3,7 @@ package webhook
 import (
 	webhookConfig "github.com/balerter/balerter/internal/config/channels/webhook"
 	"go.uber.org/zap"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -65,7 +65,7 @@ func TestSend(t *testing.T) {
 		err := testHook(conf, msg, func(w http.ResponseWriter, req *http.Request) {
 			a.Equal(conf.Settings.Method, req.Method)
 
-			b, err := ioutil.ReadAll(req.Body)
+			b, err := io.ReadAll(req.Body)
 			a.NoError(err)
 			a.Equal(`{"message": "alert text"}`, string(b))
 		})
