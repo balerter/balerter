@@ -4,30 +4,70 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/balerter/balerter/internal/message"
-	amWebhook "github.com/prometheus/alertmanager/notify/webhook"
-	"github.com/prometheus/alertmanager/template"
-	"github.com/prometheus/common/model"
 	"net/http"
 	"time"
+
+	"github.com/balerter/balerter/internal/message"
 )
+
+type AlertStatus string
+
+const (
+	AlertFiring   AlertStatus = "firing"
+	AlertResolved AlertStatus = "resolved"
+)
+
+type Alert struct {
+	Status       string    `json:"status"`
+	Labels       KV        `json:"labels"`
+	Annotations  KV        `json:"annotations"`
+	StartsAt     time.Time `json:"startsAt"`
+	EndsAt       time.Time `json:"endsAt"`
+	GeneratorURL string    `json:"generatorURL"`
+	Fingerprint  string    `json:"fingerprint"`
+}
+
+type KV map[string]string
+
+type Alerts []Alert
+
+type Data struct {
+	Receiver string `json:"receiver"`
+	Status   string `json:"status"`
+	Alerts   Alerts `json:"alerts"`
+
+	GroupLabels       KV `json:"groupLabels"`
+	CommonLabels      KV `json:"commonLabels"`
+	CommonAnnotations KV `json:"commonAnnotations"`
+
+	ExternalURL string `json:"externalURL"`
+}
+
+type Message struct {
+	*Data
+
+	// The protocol version.
+	Version         string `json:"version"`
+	GroupKey        string `json:"groupKey"`
+	TruncatedAlerts uint64 `json:"truncatedAlerts"`
+}
 
 // Send message to the channel
 func (a *AMReceiver) Send(mes *message.Message) error {
-	data := &template.Data{
+	data := &Data{
 		Receiver:          "balerter",
-		Status:            string(model.AlertResolved),
+		Status:            string(AlertResolved),
 		Alerts:            nil,
 		GroupLabels:       nil,
 		CommonLabels:      nil,
-		CommonAnnotations: template.KV{"name": mes.AlertName, "description": mes.Text},
+		CommonAnnotations: KV{"name": mes.AlertName, "description": mes.Text},
 		ExternalURL:       "",
 	}
 
-	alrt := template.Alert{
-		Status:       string(model.AlertResolved),
-		Labels:       template.KV{"name": mes.AlertName},
-		Annotations:  template.KV{"name": mes.AlertName, "description": mes.Text},
+	alrt := Alert{
+		Status:       string(AlertResolved),
+		Labels:       KV{"name": mes.AlertName},
+		Annotations:  KV{"name": mes.AlertName, "description": mes.Text},
 		StartsAt:     time.Time{},
 		EndsAt:       time.Now(),
 		GeneratorURL: "",
@@ -36,15 +76,15 @@ func (a *AMReceiver) Send(mes *message.Message) error {
 
 	// TODO (negasus): After refactoring with pass Alert to 'send' method, this condition should be refactoring
 	if mes.Level == "error" {
-		data.Status = string(model.AlertFiring)
-		alrt.Status = string(model.AlertFiring)
+		data.Status = string(AlertFiring)
+		alrt.Status = string(AlertFiring)
 		alrt.StartsAt = time.Now()
 		alrt.EndsAt = time.Time{}
 	}
 
 	data.Alerts = append(data.Alerts, alrt)
 
-	amMes := &amWebhook.Message{
+	amMes := &Message{
 		Version:  "4",
 		GroupKey: "",
 		Data:     data,

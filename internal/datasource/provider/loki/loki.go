@@ -1,14 +1,18 @@
 package loki
 
 import (
-	"github.com/balerter/balerter/internal/config/datasources/loki"
-	"github.com/balerter/balerter/internal/modules"
-	lua "github.com/yuin/gopher-lua"
-	"go.uber.org/zap"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/balerter/balerter/internal/config/datasources/loki"
+	"github.com/balerter/balerter/internal/modules"
+
+	lua "github.com/yuin/gopher-lua"
+	"go.uber.org/zap"
 )
+
+//go:generate moq -out module_mock_http_client.go -skip-ensure -fmt goimports . httpClient
 
 var (
 	defaultTimeout = time.Second * 5

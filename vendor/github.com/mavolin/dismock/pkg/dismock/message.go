@@ -16,11 +16,13 @@ import (
 	"github.com/mavolin/dismock/internal/sanitize"
 )
 
+const maxMessagesLimit = 100
+
 // Messages mocks a Messages request.
 //
 // This method will sanitize Message.ID, Message.ChannelID and
 // Message.Author.ID.
-func (m *Mocker) Messages(channelID discord.Snowflake, limit uint, messages []discord.Message) {
+func (m *Mocker) Messages(channelID discord.ChannelID, limit uint, messages []discord.Message) {
 	if messages == nil {
 		messages = []discord.Message{}
 	}
@@ -29,38 +31,36 @@ func (m *Mocker) Messages(channelID discord.Snowflake, limit uint, messages []di
 		panic(fmt.Sprintf("limit may not be less than the number of sent messages (%d vs. %d)", len(messages), limit))
 	}
 
-	const hardLimit uint = 100
+	var before discord.MessageID = 0
 
-	var after discord.Snowflake
-
-	for i := 0; i <= len(messages)/int(hardLimit); i++ {
+	for i := 0; i <= len(messages)/maxMessagesLimit; i++ {
 		var (
-			from = uint(i) * hardLimit
-			to   = uint(math.Min(float64(from+hardLimit), float64(len(messages))))
-
-			fetch = to - from // we expect this as the sent limit
+			from = uint(i) * maxMessagesLimit
+			to   = uint(math.Min(float64(from+maxMessagesLimit), float64(len(messages))))
 		)
+
+		fetch := to - from // we expect this as the sent limit
 
 		// but if limit != unlimited
 		if limit > 0 {
 			// and the max data we can send (fetch) is smaller than what could be requested max, we
 			// expect either limit or hardlimit, depending on which is smaller, instead.
-			if fetch < hardLimit {
-				fetch = uint(math.Min(float64(limit), float64(hardLimit)))
+			if fetch < maxMessagesLimit {
+				fetch = uint(math.Min(float64(limit), float64(maxMessagesLimit)))
 			}
 
 			limit -= fetch
 		} else { // this means there is no limit, hence we should expect hardlimit
-			fetch = hardLimit
+			fetch = maxMessagesLimit
 		}
 
-		m.messagesRange(channelID, 0, after, 0, fmt.Sprintf("Messages #%d", i+1), fetch, messages[from:to])
+		m.messagesRange(channelID, before, 0, 0, fmt.Sprintf("MessagesBefore #%d", i+1), fetch, messages[from:to])
 
-		if to-from < hardLimit {
+		if to-from < maxMessagesLimit {
 			break
 		}
 
-		after = messages[to-1].ID
+		before = messages[to-1].ID
 	}
 }
 
@@ -68,7 +68,9 @@ func (m *Mocker) Messages(channelID discord.Snowflake, limit uint, messages []di
 //
 // This method will sanitize Message.ID, Message.ChannelID and
 // Message.Author.ID.
-func (m *Mocker) MessagesAround(channelID, around discord.Snowflake, limit uint, messages []discord.Message) {
+func (m *Mocker) MessagesAround(
+	channelID discord.ChannelID, around discord.MessageID, limit uint, messages []discord.Message,
+) {
 	switch {
 	case limit == 0:
 		limit = 50
@@ -91,7 +93,9 @@ func (m *Mocker) MessagesAround(channelID, around discord.Snowflake, limit uint,
 //
 // This method will sanitize Message.ID, Message.ChannelID and
 // Message.Author.ID.
-func (m *Mocker) MessagesBefore(channelID, before discord.Snowflake, limit uint, messages []discord.Message) {
+func (m *Mocker) MessagesBefore(
+	channelID discord.ChannelID, before discord.MessageID, limit uint, messages []discord.Message,
+) {
 	if messages == nil {
 		messages = []discord.Message{}
 	}
@@ -100,17 +104,11 @@ func (m *Mocker) MessagesBefore(channelID, before discord.Snowflake, limit uint,
 		panic(fmt.Sprintf("limit may not be less than the number of sent messages (%d vs. %d)", len(messages), limit))
 	}
 
-	const hardLimit = 100
-
-	req := len(messages)/hardLimit + 1
-
-	from := uint(math.Min(float64(uint(req)*hardLimit), float64(len(messages))))
-
-	for i := req; i > 0; i-- {
-		no := req - i + 1
-
-		to := from
-		from = uint(math.Max(float64(0), float64(int(to-hardLimit))))
+	for i := 0; i <= len(messages)/maxMessagesLimit; i++ {
+		var (
+			from = uint(i) * maxMessagesLimit
+			to   = uint(math.Min(float64(from+maxMessagesLimit), float64(len(messages))))
+		)
 
 		fetch := to - from // we expect this as the sent limit
 
@@ -118,22 +116,22 @@ func (m *Mocker) MessagesBefore(channelID, before discord.Snowflake, limit uint,
 		if limit > 0 {
 			// and the max data we can send (fetch) is smaller than what could be requested max, we
 			// expect either limit or hardlimit, depending on which is smaller, instead.
-			if fetch < hardLimit {
-				fetch = uint(math.Min(float64(limit), float64(hardLimit)))
+			if fetch < maxMessagesLimit {
+				fetch = uint(math.Min(float64(limit), float64(maxMessagesLimit)))
 			}
 
 			limit -= fetch
 		} else { // this means there is no limit, hence we should expect hardlimit
-			fetch = hardLimit
+			fetch = maxMessagesLimit
 		}
 
-		m.messagesRange(channelID, before, 0, 0, fmt.Sprintf("MessagesBefore #%d", no), fetch, messages[from:to])
+		m.messagesRange(channelID, before, 0, 0, fmt.Sprintf("MessagesBefore #%d", i+1), fetch, messages[from:to])
 
-		if to-from < hardLimit {
+		if to-from < maxMessagesLimit {
 			break
 		}
 
-		before = messages[from].ID
+		before = messages[to-1].ID
 	}
 }
 
@@ -141,7 +139,13 @@ func (m *Mocker) MessagesBefore(channelID, before discord.Snowflake, limit uint,
 //
 // This method will sanitize Message.ID, Message.ChannelID and
 // Message.Author.ID.
-func (m *Mocker) MessagesAfter(channelID, after discord.Snowflake, limit uint, messages []discord.Message) {
+func (m *Mocker) MessagesAfter(
+	channelID discord.ChannelID, after discord.MessageID, limit uint, messages []discord.Message,
+) {
+	if after == 0 {
+		after = 1
+	}
+
 	if messages == nil {
 		messages = []discord.Message{}
 	}
@@ -150,36 +154,34 @@ func (m *Mocker) MessagesAfter(channelID, after discord.Snowflake, limit uint, m
 		panic(fmt.Sprintf("limit may not be less than the number of sent messages (%d vs. %d)", len(messages), limit))
 	}
 
-	const hardLimit uint = 100
-
-	for i := 0; i <= len(messages)/int(hardLimit); i++ {
+	for i := 0; i <= len(messages)/maxMessagesLimit; i++ {
 		var (
-			from = uint(i) * hardLimit
-			to   = uint(math.Min(float64(from+hardLimit), float64(len(messages))))
+			to   = len(messages) - i*maxMessagesLimit
+			from = int(math.Max(float64(to-maxMessagesLimit), float64(0)))
 
-			fetch = to - from // we expect this as the sent limit
+			fetch = from - to // we expect this as the sent limit
 		)
 
 		// but if limit != unlimited
 		if limit > 0 {
 			// and the max data we can send (fetch) is smaller than what could be requested max, we
 			// expect either limit or hardlimit, depending on which is smaller, instead.
-			if fetch < hardLimit {
-				fetch = uint(math.Min(float64(limit), float64(hardLimit)))
+			if fetch < maxMessagesLimit {
+				fetch = int(math.Min(float64(limit), float64(maxMessagesLimit)))
 			}
 
-			limit -= fetch
+			limit -= uint(fetch)
 		} else { // this means there is no limit, hence we should expect hardlimit
-			fetch = hardLimit
+			fetch = maxMessagesLimit
 		}
 
-		m.messagesRange(channelID, 0, after, 0, fmt.Sprintf("MessagesAfter #%d", i+1), fetch, messages[from:to])
+		m.messagesRange(channelID, 0, after, 0, fmt.Sprintf("MessagesAfter #%d", i+1), uint(fetch), messages[from:to])
 
-		if to-from < hardLimit {
+		if to-from < maxMessagesLimit {
 			break
 		}
 
-		after = messages[to-1].ID
+		after = messages[from].ID
 	}
 }
 
@@ -188,7 +190,8 @@ func (m *Mocker) MessagesAfter(channelID, after discord.Snowflake, limit uint, m
 // This method will sanitize Message.ID, Message.ChannelID and
 // Message.Author.ID.
 func (m *Mocker) messagesRange(
-	channelID, before, after, around discord.Snowflake, name string, limit uint, messages []discord.Message,
+	channelID discord.ChannelID, before, after, around discord.MessageID, name string, limit uint,
+	messages []discord.Message,
 ) {
 	for i, m := range messages {
 		messages[i] = sanitize.Message(m, 1, channelID, 1)
@@ -219,7 +222,8 @@ func (m *Mocker) messagesRange(
 
 // Message mocks a Message request.
 //
-// The ID field and the ChannelID field of the passed Message must be set.
+// The ID field and the ChannelID field of the passed discord.Message must be
+// set.
 //
 // This method will sanitize Message.Author.ID.
 func (m *Mocker) Message(msg discord.Message) {
@@ -233,7 +237,8 @@ func (m *Mocker) Message(msg discord.Message) {
 
 // SendText mocks a SendText request.
 //
-// The ChannelID field and the Content field of the passed Message must be set.
+// The ChannelID field and the Content field of the passed discord.Message must
+// be set.
 //
 // This method will sanitize Message.ID, Message.Author.ID, Message.Embeds.Type
 // and Message.Embeds.Color.
@@ -245,7 +250,8 @@ func (m *Mocker) SendText(msg discord.Message) {
 
 // SendEmbed mocks a SendEmbed request.
 //
-// The ChannelID field and the Embed field of the passed Message must be set.
+// The ChannelID field and the Embed field of the passed discord.Message must
+// be set.
 //
 // This method will sanitize Message.ID, Message.Author.ID, Message.Embeds.Type
 // and Message.Embeds.Color.
@@ -257,7 +263,8 @@ func (m *Mocker) SendEmbed(msg discord.Message) {
 
 // SendMessage mocks a SendMessage request.
 //
-// The ChannelID field and the Content field of the passed Message must be set.
+// The ChannelID field and the Content field of the passed discord.Message must
+// be set.
 //
 // This method will sanitize Message.ID, Message.Author.ID, Message.Embeds.Type
 // and Message.Embeds.Color.
@@ -292,7 +299,7 @@ func (m *Mocker) EditText(msg discord.Message) {
 // EditEmbed mocks a EditEmbed request.
 //
 // The ID field, the ChannelID field and the Embed[0] field of the passed
-// Message must be set.
+// discord.Message must be set.
 //
 // This method will sanitize Message.Author.ID, Message.Embed.Type and
 // Message.Embed.Color.
@@ -304,8 +311,8 @@ func (m *Mocker) EditEmbed(msg discord.Message) {
 
 // EditMessage mocks a EditMessage request.
 //
-// The ID field, the ChannelID field, the Content field of the passed Message
-// must be set.
+// The ID field, the ChannelID field, the Content field of the passed
+// discord.Message must be set.
 //
 // This method will sanitize Message.Author.ID, Message.Embed.Type and
 // Message.Embed.Color.
@@ -324,7 +331,8 @@ func (m *Mocker) EditMessage(embed *discord.Embed, msg discord.Message, suppress
 
 // EditMessageComplex mocks a EditMessageComplex request.
 //
-// The ID field and the ChannelID field of the passed Message must be set.
+// The ID field and the ChannelID field of the passed discord.Message must be
+// set.
 //
 // This method will sanitize Message.Author.ID, Message.Embed.Type and
 // Message.Embed.Color.
@@ -334,7 +342,8 @@ func (m *Mocker) EditMessageComplex(d api.EditMessageData, msg discord.Message) 
 
 // editMessageComplex mocks a EditMessageComplex request.
 //
-// The ID field and the ChannelID field of the passed Message must be set.
+// The ID field and the ChannelID field of the passed discord.Message must be
+// set.
 //
 // This method will sanitize Message.Author.ID, Message.Embed.Type and
 // Message.Embed.Color.
@@ -359,16 +368,16 @@ func (m *Mocker) editMessageComplex(name string, d api.EditMessageData, msg disc
 }
 
 // DeleteMessage mocks a DeleteMessage request.
-func (m *Mocker) DeleteMessage(channelID, messageID discord.Snowflake) {
+func (m *Mocker) DeleteMessage(channelID discord.ChannelID, messageID discord.MessageID) {
 	m.MockAPI("DeleteMessage", http.MethodDelete, "/channels/"+channelID.String()+"/messages/"+messageID.String(), nil)
 }
 
 type deleteMessagesPayload struct {
-	Messages []discord.Snowflake `json:"messages"`
+	Messages []discord.MessageID `json:"messages"`
 }
 
 // DeleteMessages mocks a DeleteMessages request.
-func (m *Mocker) DeleteMessages(channelID discord.Snowflake, messageIDs []discord.Snowflake) {
+func (m *Mocker) DeleteMessages(channelID discord.ChannelID, messageIDs []discord.MessageID) {
 	m.MockAPI("DeleteMessages", http.MethodPost, "/channels/"+channelID.String()+"/messages/bulk-delete",
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			expect := deleteMessagesPayload{

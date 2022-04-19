@@ -12,9 +12,9 @@ import (
 
 // ================================ Channel ================================
 
-// ChannelIconURL mocks a ChannelIconURL request.
-func (m *Mocker) ChannelIconURL(channelID discord.Snowflake, icon discord.Hash, img io.Reader) {
-	m.Mock("ChannelIconURL", http.MethodGet,
+// ChannelIcon mocks a ChannelIcon request.
+func (m *Mocker) ChannelIcon(channelID discord.ChannelID, icon discord.Hash, img io.Reader) {
+	m.Mock("ChannelIcon", http.MethodGet,
 		"/channel-icons/"+channelID.String()+"/"+formatImageType(icon, discord.PNGImage),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			_, err := io.Copy(w, img)
@@ -22,11 +22,11 @@ func (m *Mocker) ChannelIconURL(channelID discord.Snowflake, icon discord.Hash, 
 		})
 }
 
-// ChannelIconURLWithType mocks a ChannelIconURLWithType request.
-func (m *Mocker) ChannelIconURLWithType(
-	channelID discord.Snowflake, icon discord.Hash, t discord.ImageType, img io.Reader,
+// ChannelIconWithType mocks a ChannelIconWithType request.
+func (m *Mocker) ChannelIconWithType(
+	channelID discord.ChannelID, icon discord.Hash, t discord.ImageType, img io.Reader,
 ) {
-	m.Mock("ChannelIconURLWithType", http.MethodGet, "/channel-icons/"+channelID.String()+"/"+formatImageType(icon, t),
+	m.Mock("ChannelIconWithType", http.MethodGet, "/channel-icons/"+channelID.String()+"/"+formatImageType(icon, t),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			_, err := io.Copy(w, img)
 			require.NoError(t, err)
@@ -35,8 +35,8 @@ func (m *Mocker) ChannelIconURLWithType(
 
 // ================================ Emoji ================================
 
-// EmojiURL mocks a EmojiURL request.
-func (m *Mocker) EmojiURL(emojiID discord.Snowflake, animated bool, img io.Reader) {
+// EmojiPicture mocks a EmojiPicture request.
+func (m *Mocker) EmojiPicture(emojiID discord.EmojiID, animated bool, img io.Reader) {
 	var url string
 	if animated {
 		url = "/emojis/" + formatImageType(emojiID.String(), discord.GIFImage)
@@ -44,20 +44,20 @@ func (m *Mocker) EmojiURL(emojiID discord.Snowflake, animated bool, img io.Reade
 		url = "/emojis/" + formatImageType(emojiID.String(), discord.PNGImage)
 	}
 
-	m.Mock("EmojiURLWithType", http.MethodGet, url, func(w http.ResponseWriter, r *http.Request, t *testing.T) {
+	m.Mock("EmojiPictureWithType", http.MethodGet, url, func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 		_, err := io.Copy(w, img)
 		require.NoError(t, err)
 	})
 }
 
-// EmojiURLWithType mocks a EmojiURLWithType request.
-func (m *Mocker) EmojiURLWithType(emojiID discord.Snowflake, animated bool, t discord.ImageType, img io.Reader) {
+// EmojiPictureWithType mocks a EmojiPictureWithType request.
+func (m *Mocker) EmojiPictureWithType(emojiID discord.EmojiID, animated bool, t discord.ImageType, img io.Reader) {
 	if t == discord.AutoImage {
-		m.EmojiURL(emojiID, animated, img)
+		m.EmojiPicture(emojiID, animated, img)
 		return
 	}
 
-	m.Mock("EmojiURLWithType", http.MethodGet, "/emojis/"+formatImageType(emojiID.String(), t),
+	m.Mock("EmojiPictureWithType", http.MethodGet, "/emojis/"+formatImageType(emojiID.String(), t),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			_, err := io.Copy(w, img)
 			require.NoError(t, err)
@@ -66,83 +66,77 @@ func (m *Mocker) EmojiURLWithType(emojiID discord.Snowflake, animated bool, t di
 
 // ================================ Guild ================================
 
-// GuildIconURL mocks a GuildIconURL request.
+// GuildIcon mocks a GuildIcon request.
 //
-// This method can be used for both Guilds and GuildPreviews.
-func (m *Mocker) GuildIconURL(guildID discord.Snowflake, icon discord.Hash, img io.Reader) {
-	m.Mock("GuildIconURL", http.MethodGet, "/icons/"+guildID.String()+"/"+formatImageType(icon, discord.AutoImage),
+// This method can be used for both discord.Guild and discord.GuildPreview.
+func (m *Mocker) GuildIcon(guildID discord.GuildID, icon discord.Hash, img io.Reader) {
+	m.Mock("GuildIcon", http.MethodGet, "/icons/"+guildID.String()+"/"+formatImageType(icon, discord.AutoImage),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			_, err := io.Copy(w, img)
 			require.NoError(t, err)
 		})
 }
 
-// GuildIconURLWithType mocks a GuildIconURLWithType request.
+// GuildIconWithType mocks a GuildIconWithType request.
 //
-// This method can be used for both Guilds and GuildPreviews.
-func (m *Mocker) GuildIconURLWithType(
-	guildID discord.Snowflake, icon discord.Hash, t discord.ImageType, img io.Reader,
-) {
-	m.Mock("GuildIconURLWithType", http.MethodGet, "/icons/"+guildID.String()+"/"+formatImageType(icon, t),
+// This method can be used for both discord.Guild and discord.GuildPreview.
+func (m *Mocker) GuildIconWithType(guildID discord.GuildID, icon discord.Hash, t discord.ImageType, img io.Reader) {
+	m.Mock("GuildIconWithType", http.MethodGet, "/icons/"+guildID.String()+"/"+formatImageType(icon, t),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			_, err := io.Copy(w, img)
 			require.NoError(t, err)
 		})
 }
 
-// BannerURL mocks a BannerURL request.
+// Banner mocks a Banner request.
 //
-// This method can be used for both Guilds and GuildPreviews.
-func (m *Mocker) BannerURL(guildID discord.Snowflake, banner discord.Hash, img io.Reader) {
-	m.Mock("BannerURL", http.MethodGet, "/banners/"+guildID.String()+"/"+formatImageType(banner, discord.PNGImage),
+// This method can be used for both discord.Guild and discord.GuildPreview.
+func (m *Mocker) Banner(guildID discord.GuildID, banner discord.Hash, img io.Reader) {
+	m.Mock("Banner", http.MethodGet, "/banners/"+guildID.String()+"/"+formatImageType(banner, discord.PNGImage),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			_, err := io.Copy(w, img)
 			require.NoError(t, err)
 		})
 }
 
-// BannerURLWithType mocks a BannerURLWithType request.
+// BannerWithType mocks a BannerWithType request.
 //
-// This method can be used for both Guilds and GuildPreviews.
-func (m *Mocker) BannerURLWithType(
-	guildID discord.Snowflake, banner discord.Hash, t discord.ImageType, img io.Reader,
-) {
-	m.Mock("BannerURLWithType", http.MethodGet, "/banners/"+guildID.String()+"/"+formatImageType(banner, t),
+// This method can be used for both discord.Guild and discord.GuildPreview.
+func (m *Mocker) BannerWithType(guildID discord.GuildID, banner discord.Hash, t discord.ImageType, img io.Reader) {
+	m.Mock("BannerWithType", http.MethodGet, "/banners/"+guildID.String()+"/"+formatImageType(banner, t),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			_, err := io.Copy(w, img)
 			require.NoError(t, err)
 		})
 }
 
-// SplashURL mocks a SplashURL request.
+// Splash mocks a Splash request.
 //
-// This method can be used for both Guilds and GuildPreviews.
-func (m *Mocker) SplashURL(guildID discord.Snowflake, splash discord.Hash, img io.Reader) {
-	m.Mock("SplashURL", http.MethodGet, "/splashes/"+guildID.String()+"/"+formatImageType(splash, discord.PNGImage),
+// This method can be used for both discord.Guild and discord.GuildPreview.
+func (m *Mocker) Splash(guildID discord.GuildID, splash discord.Hash, img io.Reader) {
+	m.Mock("Splash", http.MethodGet, "/splashes/"+guildID.String()+"/"+formatImageType(splash, discord.PNGImage),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			_, err := io.Copy(w, img)
 			require.NoError(t, err)
 		})
 }
 
-// SplashURLWithType mocks a SplashURLWithType request.
+// SplashWithType mocks a SplashWithType request.
 //
-// This method can be used for both Guilds and GuildPreviews.
-func (m *Mocker) SplashURLWithType(
-	guildID discord.Snowflake, splash discord.Hash, t discord.ImageType, img io.Reader,
-) {
-	m.Mock("SplashURLWithType", http.MethodGet, "/splashes/"+guildID.String()+"/"+formatImageType(splash, t),
+// This method can be used for both discord.Guild and discord.GuildPreview.
+func (m *Mocker) SplashWithType(guildID discord.GuildID, splash discord.Hash, t discord.ImageType, img io.Reader) {
+	m.Mock("SplashWithType", http.MethodGet, "/splashes/"+guildID.String()+"/"+formatImageType(splash, t),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			_, err := io.Copy(w, img)
 			require.NoError(t, err)
 		})
 }
 
-// DiscoverySplashURL mocks a DiscoverySplashURL request.
+// DiscoverySplash mocks a DiscoverySplash request.
 //
-// This method can be used for both Guilds and GuildPreviews.
-func (m *Mocker) DiscoverySplashURL(guildID discord.Snowflake, splash discord.Hash, img io.Reader) {
-	m.Mock("DiscoverySplashURL", http.MethodGet,
+// This method can be used for both discord.Guild and discord.GuildPreview.
+func (m *Mocker) DiscoverySplash(guildID discord.GuildID, splash discord.Hash, img io.Reader) {
+	m.Mock("DiscoverySplash", http.MethodGet,
 		"/splashes/"+guildID.String()+"/"+formatImageType(splash, discord.PNGImage),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			_, err := io.Copy(w, img)
@@ -150,13 +144,13 @@ func (m *Mocker) DiscoverySplashURL(guildID discord.Snowflake, splash discord.Ha
 		})
 }
 
-// DiscoverySplashURLWithType mocks a DiscoverySplashURLWithType request.
+// DiscoverySplashWithType mocks a DiscoverySplashWithType request.
 //
-// This method can be used for both Guilds and GuildPreviews.
-func (m *Mocker) DiscoverySplashURLWithType(
-	guildID discord.Snowflake, splash discord.Hash, t discord.ImageType, img io.Reader,
+// This method can be used for both discord.Guild and discord.GuildPreview.
+func (m *Mocker) DiscoverySplashWithType(
+	guildID discord.GuildID, splash discord.Hash, t discord.ImageType, img io.Reader,
 ) {
-	m.Mock("DiscoverySplashURLWithType", http.MethodGet,
+	m.Mock("DiscoverySplashWithType", http.MethodGet,
 		"/splashes/"+guildID.String()+"/"+formatImageType(splash, t),
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			_, err := io.Copy(w, img)

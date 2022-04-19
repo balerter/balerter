@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package vgimg implements the vg.Canvas interface using
-// github.com/fogleman/gg as a backend to output raster images.
+// git.sr.ht/~sbinet/gg as a backend to output raster images.
 package vgimg // import "gonum.org/v1/plot/vg/vgimg"
 
 import (
@@ -16,11 +16,35 @@ import (
 	"image/png"
 	"io"
 
-	"github.com/fogleman/gg"
+	"git.sr.ht/~sbinet/gg"
 	"golang.org/x/image/tiff"
 
+	"gonum.org/v1/plot/font"
 	"gonum.org/v1/plot/vg"
+	vgdraw "gonum.org/v1/plot/vg/draw"
 )
+
+func init() {
+	vgdraw.RegisterFormat("png", func(w, h vg.Length) vg.CanvasWriterTo {
+		return PngCanvas{Canvas: New(w, h)}
+	})
+
+	vgdraw.RegisterFormat("jpg", func(w, h vg.Length) vg.CanvasWriterTo {
+		return JpegCanvas{Canvas: New(w, h)}
+	})
+
+	vgdraw.RegisterFormat("jpeg", func(w, h vg.Length) vg.CanvasWriterTo {
+		return JpegCanvas{Canvas: New(w, h)}
+	})
+
+	vgdraw.RegisterFormat("tif", func(w, h vg.Length) vg.CanvasWriterTo {
+		return TiffCanvas{Canvas: New(w, h)}
+	})
+
+	vgdraw.RegisterFormat("tiff", func(w, h vg.Length) vg.CanvasWriterTo {
+		return TiffCanvas{Canvas: New(w, h)}
+	})
+}
 
 // Canvas implements the vg.Canvas interface,
 // drawing to an image.Image using draw2d.
@@ -101,7 +125,7 @@ func NewWith(o ...option) *Canvas {
 		c.img = c.ctx.Image().(draw.Image)
 		c.ctx.InvertY()
 	}
-	draw.Draw(c.img, c.img.Bounds(), &image.Uniform{c.backgroundColor}, image.ZP, draw.Src)
+	draw.Draw(c.img, c.img.Bounds(), &image.Uniform{c.backgroundColor}, image.Point{}, draw.Src)
 	c.color = []color.Color{color.Black}
 	vg.Initialize(c)
 	return c
@@ -146,6 +170,10 @@ func UseDPI(dpi int) option {
 // the canvas from. The
 // minimum point of the given image
 // should probably be 0,0.
+//
+// Note that a copy of the input image is performed.
+// This means that modifications applied to the canvas are not reflected
+// on the original image.
 func UseImage(img draw.Image) option {
 	return func(c *Canvas) uint32 {
 		c.img = img
@@ -288,15 +316,18 @@ func (c *Canvas) DPI() float64 {
 	return float64(c.dpi)
 }
 
-func (c *Canvas) FillString(font vg.Font, pt vg.Point, str string) {
-	if font.Size == 0 {
+func (c *Canvas) FillString(font font.Face, pt vg.Point, str string) {
+	if font.Font.Size == 0 {
 		return
 	}
 
 	c.ctx.Push()
 	defer c.ctx.Pop()
 
-	c.ctx.SetFontFace(font.FontFace(c.DPI()))
+	face := font.FontFace(c.DPI())
+	defer face.Close()
+
+	c.ctx.SetFontFace(face)
 
 	x := pt.X.Dots(c.DPI())
 	y := pt.Y.Dots(c.DPI())

@@ -7,8 +7,10 @@ import (
 	"go.uber.org/zap"
 )
 
+//go:generate moq -out module_mock_session.go -skip-ensure -fmt goimports . isession
+
 type isession interface {
-	SendMessage(channelID discord.Snowflake, content string, embed *discord.Embed) (*discord.Message, error)
+	SendMessage(channelID discord.ChannelID, content string, embed *discord.Embed) (*discord.Message, error)
 }
 
 // Discord implements a Provider for discord notifications.
@@ -16,7 +18,7 @@ type Discord struct {
 	logger  *zap.Logger
 	name    string
 	session isession
-	chanID  discord.Snowflake
+	chanID  discord.ChannelID
 	ignore  bool
 }
 
@@ -31,7 +33,7 @@ func New(cfg discordCfg.Discord, logger *zap.Logger) (*Discord, error) {
 		logger:  logger,
 		name:    cfg.Name,
 		session: s,
-		chanID:  discord.Snowflake(cfg.ChannelID),
+		chanID:  discord.ChannelID(cfg.ChannelID),
 		ignore:  cfg.Ignore,
 	}
 

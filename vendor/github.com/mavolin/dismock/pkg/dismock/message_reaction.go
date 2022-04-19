@@ -16,21 +16,23 @@ import (
 )
 
 // React mocks a React request.
-func (m *Mocker) React(channelID, messageID discord.Snowflake, e api.Emoji) {
+func (m *Mocker) React(channelID discord.ChannelID, messageID discord.MessageID, e api.Emoji) {
 	m.MockAPI("React", http.MethodPut,
-		"/channels/"+channelID.String()+"/messages/"+messageID.String()+"/reactions/"+url.PathEscape(e)+"/@me", nil)
+		"/channels/"+channelID.String()+"/messages/"+messageID.String()+"/reactions/"+e+"/@me", nil)
 }
 
 // Unreact mocks a Unreact request.
-func (m *Mocker) Unreact(channelID, messageID discord.Snowflake, e api.Emoji) {
+func (m *Mocker) Unreact(channelID discord.ChannelID, messageID discord.MessageID, e api.Emoji) {
 	m.MockAPI("Unreact", http.MethodDelete,
-		"/channels/"+channelID.String()+"/messages/"+messageID.String()+"/reactions/"+url.PathEscape(e)+"/@me", nil)
+		"/channels/"+channelID.String()+"/messages/"+messageID.String()+"/reactions/"+e+"/@me", nil)
 }
 
 // Reactions mocks a Reactions request.
 //
 // This method will sanitize Users.ID.
-func (m *Mocker) Reactions(channelID, messageID discord.Snowflake, limit uint, e api.Emoji, u []discord.User) {
+func (m *Mocker) Reactions(
+	channelID discord.ChannelID, messageID discord.MessageID, limit uint, e api.Emoji, u []discord.User,
+) {
 	if u == nil {
 		u = []discord.User{}
 	}
@@ -41,7 +43,7 @@ func (m *Mocker) Reactions(channelID, messageID discord.Snowflake, limit uint, e
 
 	const hardLimit uint = 100
 
-	var after discord.Snowflake
+	var after discord.UserID
 
 	for i := 0; i <= len(u)/int(hardLimit); i++ {
 		var (
@@ -78,7 +80,8 @@ func (m *Mocker) Reactions(channelID, messageID discord.Snowflake, limit uint, e
 //
 // This method will sanitize Users.ID.
 func (m *Mocker) ReactionsBefore(
-	channelID, messageID discord.Snowflake, before discord.Snowflake, limit uint, e api.Emoji, u []discord.User,
+	channelID discord.ChannelID, messageID discord.MessageID, before discord.UserID, limit uint, e api.Emoji,
+	u []discord.User,
 ) {
 	if u == nil {
 		u = []discord.User{}
@@ -129,7 +132,8 @@ func (m *Mocker) ReactionsBefore(
 //
 // This method will sanitize Users.ID.
 func (m *Mocker) ReactionsAfter(
-	channelID, messageID, after discord.Snowflake, limit uint, e api.Emoji, u []discord.User,
+	channelID discord.ChannelID, messageID discord.MessageID, after discord.UserID, limit uint, e api.Emoji,
+	u []discord.User,
 ) {
 	if u == nil {
 		u = []discord.User{}
@@ -176,14 +180,15 @@ func (m *Mocker) ReactionsAfter(
 //
 // This method will sanitize Users.ID.
 func (m *Mocker) reactionsRange(
-	channelID, messageID, before, after discord.Snowflake, name string, limit uint, e api.Emoji, u []discord.User,
+	channelID discord.ChannelID, messageID discord.MessageID, before, after discord.UserID, name string, limit uint,
+	e api.Emoji, u []discord.User,
 ) {
 	for i, user := range u {
 		u[i] = sanitize.User(user, 1)
 	}
 
 	m.MockAPI(name, http.MethodGet,
-		"/channels/"+channelID.String()+"/messages/"+messageID.String()+"/reactions/"+url.PathEscape(e),
+		"/channels/"+channelID.String()+"/messages/"+messageID.String()+"/reactions/"+e,
 		func(w http.ResponseWriter, r *http.Request, t *testing.T) {
 			expect := url.Values{
 				"limit": {strconv.FormatUint(uint64(limit), 10)},
@@ -203,24 +208,26 @@ func (m *Mocker) reactionsRange(
 }
 
 // DeleteUserReaction mocks a DeleteUserReaction request.
-func (m *Mocker) DeleteUserReaction(channelID, messageID, userID discord.Snowflake, e api.Emoji) {
+func (m *Mocker) DeleteUserReaction(
+	channelID discord.ChannelID, messageID discord.MessageID, userID discord.UserID, e api.Emoji,
+) {
 	user := "@me"
 	if userID > 0 {
 		user = userID.String()
 	}
 
 	m.MockAPI("DeleteUserReaction", http.MethodDelete,
-		"/channels/"+channelID.String()+"/messages/"+messageID.String()+"/reactions/"+url.PathEscape(e)+"/"+user, nil)
+		"/channels/"+channelID.String()+"/messages/"+messageID.String()+"/reactions/"+e+"/"+user, nil)
 }
 
 // DeleteReactions mocks a DeleteReactions request.
-func (m *Mocker) DeleteReactions(channelID, messageID discord.Snowflake, e api.Emoji) {
+func (m *Mocker) DeleteReactions(channelID discord.ChannelID, messageID discord.MessageID, e api.Emoji) {
 	m.MockAPI("DeleteReactions", http.MethodDelete,
-		"/channels/"+channelID.String()+"/messages/"+messageID.String()+"/reactions/"+url.PathEscape(e), nil)
+		"/channels/"+channelID.String()+"/messages/"+messageID.String()+"/reactions/"+e, nil)
 }
 
 // DeleteAllReactions mocks a DeleteAllReactions request.
-func (m *Mocker) DeleteAllReactions(channelID, messageID discord.Snowflake) {
+func (m *Mocker) DeleteAllReactions(channelID discord.ChannelID, messageID discord.MessageID) {
 	m.MockAPI("DeleteAllReactions", http.MethodDelete,
 		"/channels/"+channelID.String()+"/messages/"+messageID.String()+"/reactions", nil)
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"testing"
 )
@@ -50,7 +49,7 @@ func TestSend_error_status_code(t *testing.T) {
 		whCore: m,
 	}
 
-	resp := &http.Response{StatusCode: 0, Body: ioutil.NopCloser(bytes.NewBuffer(nil))}
+	resp := &http.Response{StatusCode: 0, Body: io.NopCloser(bytes.NewBuffer(nil))}
 
 	m.On("Send", mock.Anything, mock.Anything).Return(resp, nil)
 
@@ -70,7 +69,7 @@ func TestSend(t *testing.T) {
 		whCore: m,
 	}
 
-	resp := &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewBuffer(nil))}
+	resp := &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewBuffer(nil))}
 
 	m.On("Send", mock.Anything, mock.Anything).Return(resp, nil)
 

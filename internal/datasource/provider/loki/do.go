@@ -4,12 +4,15 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	lokihttp "github.com/grafana/loki/pkg/loghttp"
-	"go.uber.org/zap"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	prometheusModels "github.com/balerter/balerter/internal/prometheus_models"
+
+	"go.uber.org/zap"
 )
 
 const (
@@ -65,7 +68,7 @@ func (m *Loki) sendQuery(query string, opts *queryOptions) string {
 	return u.String()
 }
 
-func (m *Loki) send(u string) (*lokihttp.QueryResponse, error) {
+func (m *Loki) send(u string) (prometheusModels.ModelValue, error) {
 	m.logger.Debug("request to loki", zap.String("url", u))
 
 	req, err := http.NewRequest(http.MethodGet, u, nil)
@@ -90,17 +93,21 @@ func (m *Loki) send(u string) (*lokihttp.QueryResponse, error) {
 
 	defer res.Body.Close()
 
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error response status code %d", res.StatusCode)
+	}
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	var apires *lokihttp.QueryResponse
+	var apiResp *prometheusModels.APIResponse
 
-	err = json.Unmarshal(body, &apires)
+	err = json.Unmarshal(body, &apiResp)
 	if err != nil {
 		return nil, err
 	}
 
-	return apires, nil
+	return apiResp.Data.Value, nil
 }

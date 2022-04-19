@@ -2,10 +2,11 @@ package sql
 
 import (
 	"fmt"
-	"github.com/balerter/balerter/internal/config/storages/core/tables"
 	"time"
 
+	"github.com/balerter/balerter/internal/config/storages/core/tables"
 	"github.com/balerter/balerter/internal/corestorage"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3" // import sqlite driver
 	"go.uber.org/zap"

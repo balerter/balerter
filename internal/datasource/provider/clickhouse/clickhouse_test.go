@@ -1,6 +1,8 @@
 package clickhouse
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 	clickhouseCfg "github.com/balerter/balerter/internal/config/datasources/clickhouse"
 	"github.com/stretchr/testify/assert"
@@ -39,22 +41,30 @@ func TestMethods(t *testing.T) {
 	assert.Equal(t, []string{"query"}, Methods())
 }
 
+type dbMock struct {
+	stopped bool
+}
+
+func (db *dbMock) Ping() error { return nil }
+func (db *dbMock) Close() error {
+	db.stopped = true
+	return fmt.Errorf("err1")
+}
+func (db *dbMock) QueryContext(_ context.Context, _ string, _ ...interface{}) (*sql.Rows, error) {
+	return nil, nil
+}
+
 func TestStop(t *testing.T) {
-	cc := &dbConnectionMock{
-		CloseFunc: func() error {
-			return fmt.Errorf("err1")
-		},
-	}
+	db := &dbMock{}
 	ch := &Clickhouse{
-		db: cc,
+		db: db,
 	}
 
 	err := ch.Stop()
 
 	require.Error(t, err)
 	assert.Equal(t, "err1", err.Error())
-
-	assert.Equal(t, 1, len(cc.CloseCalls()))
+	assert.True(t, db.stopped)
 }
 
 //func TestNew_error_connect(t *testing.T) {
@@ -64,6 +74,10 @@ func TestStop(t *testing.T) {
 //}
 
 func TestNew(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	ch, err := New(clickhouseCfg.Clickhouse{
 		Name:        "ch1",
 		Host:        "127.0.0.1",

@@ -18,3 +18,8 @@ func TestName(t *testing.T) {
 	a := &AMReceiver{name: "foo"}
 	assert.Equal(t, "foo", a.Name())
 }
+
+func TestAMReceiver_Ignore(t *testing.T) {
+	a := &AMReceiver{ignore: false}
+	assert.False(t, a.Ignore())
+}

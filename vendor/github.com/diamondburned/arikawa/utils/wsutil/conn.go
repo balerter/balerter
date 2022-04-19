@@ -6,15 +6,20 @@ import (
 	"context"
 	"io"
 	"net/http"
-	"sync"
+	"strings"
 	"time"
 
-	"github.com/diamondburned/arikawa/utils/json"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 )
 
-const CopyBufferSize = 2048
+// CopyBufferSize is used for the initial size of the internal WS' buffer. Its
+// size is 4KB.
+var CopyBufferSize = 4096
+
+// MaxCapUntilReset determines the maximum capacity before the bytes buffer is
+// re-allocated. It is roughly 16KB, quadruple CopyBufferSize.
+var MaxCapUntilReset = CopyBufferSize * 4
 
 // CloseDeadline controls the deadline to wait for sending the Close frame.
 var CloseDeadline = time.Second
@@ -24,117 +29,156 @@ var ErrWebsocketClosed = errors.New("websocket is closed")
 
 // Connection is an interface that abstracts around a generic Websocket driver.
 // This connection expects the driver to handle compression by itself, including
-// modifying the connection URL.
+// modifying the connection URL. The implementation doesn't have to be safe for
+// concurrent use.
 type Connection interface {
 	// Dial dials the address (string). Context needs to be passed in for
 	// timeout. This method should also be re-usable after Close is called.
 	Dial(context.Context, string) error
 
-	// Listen sends over events constantly. Error will be non-nil if Data is
-	// nil, so check for Error first.
+	// Listen returns an event channel that sends over events constantly. It can
+	// return nil if there isn't an ongoing connection.
 	Listen() <-chan Event
 
-	// Send allows the caller to send bytes. Thread safety is a requirement.
+	// Send allows the caller to send bytes. It does not need to clean itself
+	// up on errors, as the Websocket wrapper will do that.
 	Send(context.Context, []byte) error
 
-	// Close should close the websocket connection. The connection will not be
-	// reused.
+	// Close should close the websocket connection. The underlying connection
+	// may be reused, but this Connection instance will be reused with Dial. The
+	// Connection must still be reusable even if Close returns an error.
 	Close() error
 }
 
-// Conn is the default Websocket connection. It compresses all payloads using
-// zlib.
+// Conn is the default Websocket connection. It tries to compresses all payloads
+// using zlib.
 type Conn struct {
-	Conn *websocket.Conn
-	json.Driver
-
-	dialer *websocket.Dialer
+	Dialer websocket.Dialer
+	Header http.Header
+	Conn   *websocket.Conn
 	events chan Event
-
-	// write channels
-	writes chan []byte
-	errors chan error
-
-	buf  bytes.Buffer
-	zlib io.ReadCloser // (compress/zlib).reader
-
-	// nil until Dial().
-	closeOnce *sync.Once
-
-	// zlib *zlib.Inflator // zlib.NewReader
-	// buf  []byte         // io.Copy buffer
 }
 
 var _ Connection = (*Conn)(nil)
 
+// NewConn creates a new default websocket connection with a default dialer.
 func NewConn() *Conn {
-	return NewConnWithDriver(json.Default)
+	return NewConnWithDialer(websocket.Dialer{
+		Proxy:             http.ProxyFromEnvironment,
+		HandshakeTimeout:  WSTimeout,
+		ReadBufferSize:    CopyBufferSize,
+		WriteBufferSize:   CopyBufferSize,
+		EnableCompression: true,
+	})
 }
 
-func NewConnWithDriver(driver json.Driver) *Conn {
+// NewConn creates a new default websocket connection with a custom dialer.
+func NewConnWithDialer(dialer websocket.Dialer) *Conn {
 	return &Conn{
-		Driver: driver,
-		dialer: &websocket.Dialer{
-			Proxy:             http.ProxyFromEnvironment,
-			HandshakeTimeout:  WSTimeout,
-			EnableCompression: true,
+		Dialer: dialer,
+		Header: http.Header{
+			"Accept-Encoding": {"zlib"},
 		},
-		// zlib:   zlib.NewInflator(),
-		// buf:    make([]byte, CopyBufferSize),
 	}
 }
 
-func (c *Conn) Dial(ctx context.Context, addr string) error {
-	var err error
+func (c *Conn) Dial(ctx context.Context, addr string) (err error) {
+	// BUG which prevents stream compression.
+	// See https://github.com/golang/go/issues/31514.
 
-	// Enable compression:
-	headers := http.Header{}
-	headers.Set("Accept-Encoding", "zlib")
-
-	// BUG: https://github.com/golang/go/issues/31514
-	// // Enable stream compression:
-	// addr = InjectValues(addr, url.Values{
-	// 	"compress": {"zlib-stream"},
-	// })
-
-	c.Conn, _, err = c.dialer.DialContext(ctx, addr, headers)
+	c.Conn, _, err = c.Dialer.DialContext(ctx, addr, c.Header)
 	if err != nil {
 		return errors.Wrap(err, "failed to dial WS")
 	}
 
-	// Set up the closer.
-	c.closeOnce = &sync.Once{}
+	// Reset the deadline.
+	c.Conn.SetWriteDeadline(resetDeadline)
 
-	c.events = make(chan Event)
-	go c.readLoop()
-
-	c.writes = make(chan []byte)
-	c.errors = make(chan error)
-	go c.writeLoop()
+	c.events = make(chan Event, WSBuffer)
+	go startReadLoop(c.Conn, c.events)
 
 	return err
 }
 
+// Listen returns an event channel if there is a connection associated with it.
+// It returns nil if there is none.
 func (c *Conn) Listen() <-chan Event {
 	return c.events
 }
 
-func (c *Conn) readLoop() {
-	// Acquire the read lock throughout the span of the loop. This would still
-	// allow Send to acquire another RLock, but wouldn't allow Close to
-	// prematurely exit, as Close acquires a write lock.
-	// c.mut.RLock()
-	// defer c.mut.RUnlock()
+// resetDeadline is used to reset the write deadline after using the context's.
+var resetDeadline = time.Time{}
 
+func (c *Conn) Send(ctx context.Context, b []byte) error {
+	d, ok := ctx.Deadline()
+	if ok {
+		c.Conn.SetWriteDeadline(d)
+		defer c.Conn.SetWriteDeadline(resetDeadline)
+	}
+
+	if err := c.Conn.WriteMessage(websocket.TextMessage, b); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Conn) Close() error {
+	WSDebug("Conn: Close is called; shutting down the Websocket connection.")
+
+	// Have a deadline before closing.
+	var deadline = time.Now().Add(5 * time.Second)
+	c.Conn.SetWriteDeadline(deadline)
+
+	// Close the WS.
+	err := c.Conn.Close()
+
+	c.Conn.SetWriteDeadline(resetDeadline)
+
+	WSDebug("Conn: Websocket closed; error:", err)
+	WSDebug("Conn: Flusing events...")
+
+	// Flush all events before closing the channel. This will return as soon as
+	// c.events is closed, or after closed.
+	for range c.events {
+	}
+
+	WSDebug("Flushed events.")
+
+	return err
+}
+
+// loopState is a thread-unsafe disposable state container for the read loop.
+// It's made to completely separate the read loop of any synchronization that
+// doesn't involve the websocket connection itself.
+type loopState struct {
+	conn *websocket.Conn
+	zlib io.ReadCloser
+	buf  bytes.Buffer
+}
+
+func startReadLoop(conn *websocket.Conn, eventCh chan<- Event) {
 	// Clean up the events channel in the end.
-	defer close(c.events)
+	defer close(eventCh)
+
+	// Allocate the read loop its own private resources.
+	state := loopState{conn: conn}
+	state.buf.Grow(CopyBufferSize)
 
 	for {
-		b, err := c.handle()
+		b, err := state.handle()
 		if err != nil {
+			WSDebug("Conn: Read error:", err)
+
 			// Is the error an EOF?
 			if errors.Is(err, io.EOF) {
 				// Yes it is, exit.
+				return
+			}
+
+			// Is the error an intentional close call? Go 1.16 exposes
+			// ErrClosing, but we have to do this for now.
+			if strings.HasSuffix(err.Error(), "use of closed network connection") {
 				return
 			}
 
@@ -144,7 +188,7 @@ func (c *Conn) readLoop() {
 			}
 
 			// Unusual error; log and exit:
-			c.events <- Event{nil, errors.Wrap(err, "WS error")}
+			eventCh <- Event{nil, errors.Wrap(err, "WS error")}
 			return
 		}
 
@@ -153,147 +197,57 @@ func (c *Conn) readLoop() {
 			continue
 		}
 
-		c.events <- Event{b, nil}
+		eventCh <- Event{b, nil}
 	}
 }
 
-func (c *Conn) writeLoop() {
-	// Closig c.writes would break the loop immediately.
-	for bytes := range c.writes {
-		c.errors <- c.Conn.WriteMessage(websocket.TextMessage, bytes)
-	}
-
-	// Quick deadline:
-	deadline := time.Now().Add(CloseDeadline)
-
-	// Make a closure message:
-	msg := websocket.FormatCloseMessage(websocket.CloseGoingAway, "")
-
-	// Send a close message before closing the connection. We're not error
-	// checking this because it's not important.
-	c.Conn.WriteControl(websocket.TextMessage, msg, deadline)
-
-	// Safe to close now.
-	c.errors <- c.Conn.Close()
-	close(c.errors)
-}
-
-func (c *Conn) handle() ([]byte, error) {
+func (state *loopState) handle() ([]byte, error) {
 	// skip message type
-	t, r, err := c.Conn.NextReader()
+	t, r, err := state.conn.NextReader()
 	if err != nil {
 		return nil, err
 	}
 
 	if t == websocket.BinaryMessage {
-		// Probably a zlib payload
+		// Probably a zlib payload.
 
-		if c.zlib == nil {
+		if state.zlib == nil {
 			z, err := zlib.NewReader(r)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to create a zlib reader")
 			}
-			c.zlib = z
+			state.zlib = z
 		} else {
-			if err := c.zlib.(zlib.Resetter).Reset(r, nil); err != nil {
+			if err := state.zlib.(zlib.Resetter).Reset(r, nil); err != nil {
 				return nil, errors.Wrap(err, "failed to reset zlib reader")
 			}
 		}
 
-		defer c.zlib.Close()
-		r = c.zlib
+		defer state.zlib.Close()
+		r = state.zlib
 	}
 
-	return readAll(&c.buf, r)
-
-	// if t is a text message, then handle it normally.
-	// if t == websocket.TextMessage {
-	// 	return readAll(&c.buf, r)
-	// }
-
-	// // Write to the zlib writer.
-	// c.zlib.Write(r)
-	// // if _, err := io.CopyBuffer(c.zlib, r, c.buf); err != nil {
-	// // 	return nil, errors.Wrap(err, "Failed to write to zlib")
-	// // }
-
-	// if !c.zlib.CanFlush() {
-	// 	return nil, nil
-	// }
-
-	// // Flush and get the uncompressed payload.
-	// b, err := c.zlib.Flush()
-	// if err != nil {
-	// 	return nil, errors.Wrap(err, "Failed to flush zlib")
-	// }
-
-	// return nil, errors.New("Unexpected binary message.")
-}
-
-func (c *Conn) Send(ctx context.Context, b []byte) error {
-	// If websocket is already closed.
-	if c.writes == nil {
-		return ErrWebsocketClosed
-	}
-
-	// Send the bytes.
-	select {
-	case c.writes <- b:
-		// continue
-	case <-ctx.Done():
-		return ctx.Err()
-	}
-
-	// Receive the error.
-	select {
-	case err := <-c.errors:
-		return err
-	case <-ctx.Done():
-		return ctx.Err()
-	}
-}
-
-func (c *Conn) Close() (err error) {
-	// Use a sync.Once to guarantee that other Close() calls block until the
-	// main call is done. It also prevents future calls.
-	c.closeOnce.Do(func() {
-		// Close c.writes. This should trigger the websocket to close itself.
-		close(c.writes)
-		// Mark c.writes as empty.
-		c.writes = nil
-
-		// Wait for the write loop to exit by flusing the errors channel.
-		err = <-c.errors     // get close error
-		for range c.errors { // then flush
-		}
-
-		// Flush all events before closing the channel. This will return as soon as
-		// c.events is closed, or after closed.
-		for range c.events {
-		}
-
-		// Mark c.events as empty.
-		c.events = nil
-
-		// Mark c.Conn as empty.
-		c.Conn = nil
-	})
-
-	return err
+	return state.readAll(r)
 }
 
 // readAll reads bytes into an existing buffer, copy it over, then wipe the old
 // buffer.
-func readAll(buf *bytes.Buffer, r io.Reader) ([]byte, error) {
-	defer buf.Reset()
-	if _, err := buf.ReadFrom(r); err != nil {
+func (state *loopState) readAll(r io.Reader) ([]byte, error) {
+	defer state.buf.Reset()
+
+	if _, err := state.buf.ReadFrom(r); err != nil {
 		return nil, err
 	}
 
 	// Copy the bytes so we could empty the buffer for reuse.
-	p := buf.Bytes()
-	cpy := make([]byte, len(p))
-	copy(cpy, p)
+	cpy := make([]byte, state.buf.Len())
+	copy(cpy, state.buf.Bytes())
+
+	// If the buffer's capacity is over the limit, then re-allocate a new one.
+	if state.buf.Cap() > MaxCapUntilReset {
+		state.buf = bytes.Buffer{}
+		state.buf.Grow(CopyBufferSize)
+	}
 
 	return cpy, nil
 }

@@ -6,7 +6,6 @@ TAG         ?=  dev
 .PHONY: help \
 	build-dev push-dev \
 	build push gobuild-balerter \
-	build-tgtool push-tgtool \
 	test-full gen
 
 help:
@@ -43,14 +42,6 @@ push: ## Build balerter/balerter and balerter/test images to docker registry
 gobuild-balerter: ## Build balerter binary file
 	@echo Go Build Balerter
 	go build -o ./.debug/balerter -ldflags "-X main.revision=${TAG} -s -w" ./cmd/balerter
-
-build-tgtool: ## Build tgtool docker image
-	@echo Build tgtool
-	docker build -t balerter/tgtool:$(TAG) -f ./contrib/tgtool.Dockerfile .
-
-push-tgtool: ## Build tgtool image to docker registry
-	@echo Push tgtool $(TAG)
-	docker push balerter/tgtool:$(TAG)
 
 test-full: ## Run full tests
 	docker-compose up -d

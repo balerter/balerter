@@ -3,11 +3,10 @@ package discord
 import (
 	"bytes"
 	"fmt"
-	"github.com/balerter/balerter/internal/message"
-	"github.com/stretchr/testify/mock"
-	"io/ioutil"
+	"io"
 	"testing"
 
+	"github.com/balerter/balerter/internal/message"
 	"github.com/diamondburned/arikawa/api"
 	"github.com/diamondburned/arikawa/discord"
 	"github.com/mavolin/dismock/pkg/dismock"
@@ -57,7 +56,7 @@ func TestSend(t *testing.T) {
 				// deep copied. therefore we create two readers using the data from the original
 				// reader
 				for i, f := range c.data.Files {
-					b, err := ioutil.ReadAll(f.Reader)
+					b, err := io.ReadAll(f.Reader)
 					require.NoError(t, err)
 
 					cp.Files[i].Reader = bytes.NewBuffer(b)
@@ -134,7 +133,7 @@ func TestSend(t *testing.T) {
 	})
 }
 
-func sanitizeMessage(m discord.Message, id, channelID, authorID discord.Snowflake) discord.Message {
+func sanitizeMessage(m discord.Message, id discord.MessageID, channelID discord.ChannelID, authorID discord.UserID) discord.Message {
 	if m.ID <= 0 {
 		m.ID = id
 	}
@@ -148,7 +147,7 @@ func sanitizeMessage(m discord.Message, id, channelID, authorID discord.Snowflak
 	return m
 }
 
-func User(u discord.User, id discord.Snowflake) discord.User {
+func User(u discord.User, id discord.UserID) discord.User {
 	if u.ID <= 0 {
 		u.ID = id
 	}
@@ -156,21 +155,12 @@ func User(u discord.User, id discord.Snowflake) discord.User {
 	return u
 }
 
-type sessionMock struct {
-	mock.Mock
-}
-
-func (m *sessionMock) SendMessage(channelID discord.Snowflake, content string, embed *discord.Embed) (*discord.Message, error) {
-	args := m.Called(channelID, content, embed)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*discord.Message), args.Error(1)
-}
-
 func TestTest_error_send(t *testing.T) {
-	m := &sessionMock{}
-	m.On("SendMessage", mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("err1"))
+	m := &isessionMock{
+		SendMessageFunc: func(channelID discord.ChannelID, content string, embed *discord.Embed) (*discord.Message, error) {
+			return nil, fmt.Errorf("err1")
+		},
+	}
 	d := &Discord{
 		session: m,
 	}
@@ -183,13 +173,20 @@ func TestTest_error_send(t *testing.T) {
 }
 
 func TestTest(t *testing.T) {
-	m := &sessionMock{}
-	m.On("SendMessage", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+	assertContent := "foo\n\na = b\n"
+
+	m := &isessionMock{
+		SendMessageFunc: func(channelID discord.ChannelID, content string, embed *discord.Embed) (*discord.Message, error) {
+			assert.Equal(t, assertContent, content)
+			return nil, nil
+		},
+	}
 	d := &Discord{
 		session: m,
 	}
 	mes := &message.Message{
-		Text: "foo",
+		Text:   "foo",
+		Fields: map[string]string{"a": "b"},
 	}
 	err := d.Send(mes)
 	assert.NoError(t, err)

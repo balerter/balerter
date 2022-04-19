@@ -4,16 +4,24 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/balerter/balerter/internal/message"
-	"github.com/prometheus/common/model"
 	"net/http"
 	"time"
+
+	"github.com/balerter/balerter/internal/message"
 )
 
-func newPromAlert() *model.Alert {
-	return &model.Alert{
-		Labels:       map[model.LabelName]model.LabelValue{},
-		Annotations:  map[model.LabelName]model.LabelValue{},
+type modelAlert struct {
+	Labels       map[string]string `json:"labels"`
+	Annotations  map[string]string `json:"annotations"`
+	StartsAt     time.Time         `json:"startsAt,omitempty"`
+	EndsAt       time.Time         `json:"endsAt,omitempty"`
+	GeneratorURL string            `json:"generatorURL"`
+}
+
+func newPromAlert() *modelAlert {
+	return &modelAlert{
+		Labels:       map[string]string{},
+		Annotations:  map[string]string{},
 		StartsAt:     time.Time{},
 		EndsAt:       time.Time{},
 		GeneratorURL: "",
@@ -29,10 +37,10 @@ func (a *AlertManager) Send(mes *message.Message) error {
 		promAlert.EndsAt = time.Now()
 	}
 
-	promAlert.Labels["name"] = model.LabelValue(mes.AlertName)
-	promAlert.Annotations["description"] = model.LabelValue(mes.Text)
+	promAlert.Labels["name"] = mes.AlertName
+	promAlert.Annotations["description"] = mes.Text
 
-	data, err := json.Marshal([]*model.Alert{promAlert})
+	data, err := json.Marshal([]*modelAlert{promAlert})
 	if err != nil {
 		return fmt.Errorf("error marshal prometheus alert, %w", err)
 	}

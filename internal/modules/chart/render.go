@@ -108,10 +108,7 @@ func parseColor8(s string) (color.RGBA, error) {
 
 // Render the chart to the writer
 func (ch *Chart) Render(title string, data *Data, w io.Writer) error {
-	p, err := plot.New()
-	if err != nil {
-		return fmt.Errorf("error create new plot, %w", err)
-	}
+	p := plot.New()
 
 	xticks := plot.TimeTicks{Format: "2006-01-02\n15:04"}
 
@@ -130,6 +127,7 @@ func (ch *Chart) Render(title string, data *Data, w io.Writer) error {
 
 		var line *plotter.Line
 		var points *plotter.Scatter
+		var err error
 
 		line, points, err = plotter.NewLinePoints(data)
 		if err != nil {

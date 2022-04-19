@@ -5,10 +5,10 @@ import (
 )
 
 type User struct {
-	ID            Snowflake `json:"id,string"`
-	Username      string    `json:"username"`
-	Discriminator string    `json:"discriminator"`
-	Avatar        Hash      `json:"avatar"`
+	ID            UserID `json:"id,string"`
+	Username      string `json:"username"`
+	Discriminator string `json:"discriminator"`
+	Avatar        Hash   `json:"avatar"`
 
 	// These fields may be omitted
 
@@ -27,7 +27,7 @@ type User struct {
 }
 
 func (u User) Mention() string {
-	return "<@" + u.ID.String() + ">"
+	return u.ID.Mention()
 }
 
 // AvatarURL returns the URL of the Avatar Image. It automatically detects a
@@ -64,8 +64,8 @@ type UserFlags uint32
 const NoFlag UserFlags = 0
 
 const (
-	DiscordEmployee UserFlags = 1 << iota
-	DiscordPartner
+	Employee UserFlags = 1 << iota
+	Partner
 	HypeSquadEvents
 	BugHunterLvl1
 	_
@@ -93,9 +93,9 @@ const (
 )
 
 type Connection struct {
-	ID   Snowflake `json:"id"`
-	Name string    `json:"name"`
-	Type Service   `json:"type"`
+	ID   string  `json:"id"`
+	Name string  `json:"name"`
+	Type Service `json:"type"`
 
 	Revoked      bool `json:"revoked"`
 	Verified     bool `json:"verified"`
@@ -136,10 +136,10 @@ type Activity struct {
 	CreatedAt  UnixTimestamp      `json:"created_at,omitempty"`
 	Timestamps *ActivityTimestamp `json:"timestamps,omitempty"`
 
-	ApplicationID Snowflake `json:"application_id,omitempty"`
-	Details       string    `json:"details,omitempty"`
-	State         string    `json:"state,omitempty"` // party status
-	Emoji         *Emoji    `json:"emoji,omitempty"`
+	ApplicationID AppID  `json:"application_id,omitempty"`
+	Details       string `json:"details,omitempty"`
+	State         string `json:"state,omitempty"` // party status
+	Emoji         *Emoji `json:"emoji,omitempty"`
 
 	Party   *ActivityParty   `json:"party,omitempty"`
 	Assets  *ActivityAssets  `json:"assets,omitempty"`
@@ -162,7 +162,8 @@ const (
 	StreamingActivity
 	// Listening to $name
 	ListeningActivity
-	_
+	// Watching $name
+	WatchingActivity
 	// $emoji $state
 	CustomActivity
 )
@@ -200,3 +201,22 @@ type ActivitySecrets struct {
 	Spectate string `json:"spectate,omitempty"`
 	Match    string `json:"match,omitempty"`
 }
+
+// A Relationship between the logged in user and the user in the struct. This
+// struct is undocumented.
+type Relationship struct {
+	UserID UserID           `json:"id"`
+	User   User             `json:"user"`
+	Type   RelationshipType `json:"type"`
+}
+
+// RelationshipType is an enum for a relationship.
+type RelationshipType uint8
+
+const (
+	_ RelationshipType = iota
+	FriendRelationship
+	BlockedRelationship
+	IncomingFriendRequest
+	SentFriendRequest
+)

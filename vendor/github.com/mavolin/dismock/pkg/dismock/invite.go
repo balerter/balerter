@@ -14,7 +14,7 @@ import (
 
 // Invite mocks a Invite request.
 //
-// The Code field of the passed invite must be set.
+// The Code field of the passed discord.Invite must be set.
 //
 // This method will sanitize Invite.Guild.ID, Invite.Guild.OwnerID,
 // Invite.Guild.Emojis.ID, Invite.Guild.Roles.ID, Invite.Channel.ID and
@@ -30,7 +30,7 @@ func (m *Mocker) Invite(i discord.Invite) {
 
 // InviteWithCounts mocks a InviteWithCounts request.
 //
-// The Code field of the passed invite must be set.
+// The Code field of the passed discord.Invite must be set.
 //
 // This method will sanitize Invite.Guild.ID, Invite.Guild.OwnerID,
 // Invite.Guild.Emojis.ID, Invite.Guild.Roles.ID, Invite.Channel.ID and
@@ -52,7 +52,7 @@ func (m *Mocker) InviteWithCounts(i discord.Invite) {
 // This method will sanitize Invite.Guild.ID, Invite.Guild.OwnerID,
 // Invite.Guild.Emojis.ID, Invite.Guild.Roles.ID, Invite.Channel.ID and
 // Invite.Inviter.ID.
-func (m *Mocker) ChannelInvites(channelID discord.Snowflake, invites []discord.Invite) {
+func (m *Mocker) ChannelInvites(channelID discord.ChannelID, invites []discord.Invite) {
 	if invites == nil {
 		invites = []discord.Invite{}
 	}
@@ -72,7 +72,7 @@ func (m *Mocker) ChannelInvites(channelID discord.Snowflake, invites []discord.I
 // This method will sanitize Invite.Guild.ID, Invite.Guild.OwnerID,
 // Invite.Guild.Emojis.ID, Invite.Guild.Roles.ID, Invite.Channel.ID and
 // Invite.Inviter.ID.
-func (m *Mocker) GuildInvites(guildID discord.Snowflake, invites []discord.Invite) {
+func (m *Mocker) GuildInvites(guildID discord.GuildID, invites []discord.Invite) {
 	if invites == nil {
 		invites = []discord.Invite{}
 	}
@@ -89,7 +89,7 @@ func (m *Mocker) GuildInvites(guildID discord.Snowflake, invites []discord.Invit
 
 // CreateInvite mocks a CreateInvite request.
 //
-// The Channel.ID field of the passed Invite must be set.
+// The Channel.ID field of the passed discord.Invite must be set.
 //
 // This method will sanitize Invite.Guild.ID, Invite.Guild.OwnerID,
 // Invite.Guild.Emojis.ID, Invite.Guild.Roles.ID, and Invite.Inviter.ID.
@@ -105,7 +105,7 @@ func (m *Mocker) CreateInvite(d api.CreateInviteData, i discord.Invite) {
 
 // DeleteInvite mocks a DeleteInvite request.
 //
-// The Code field of the passed Invite must be set.
+// The Code field of the passed discord.Invite must be set.
 //
 // This method will sanitize Invite.Guild.ID, Invite.Guild.OwnerID,
 // Invite.Guild.Emojis.ID, Invite.Guild.Roles.ID, Invite.Channel.ID and

@@ -2,9 +2,7 @@ package clickhouse
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -14,83 +12,53 @@ import (
 	"time"
 )
 
-func TestQuery(t *testing.T) {
-	db, dbmock, err := sqlmock.New()
+var _db *sqlx.DB
+
+func getDB(t *testing.T) *sqlx.DB {
+	if _db != nil {
+		return _db
+	}
+
+	connString := fmt.Sprintf("tcp://%s:%d?username=%s&password=%s&database=%s&%s",
+		"127.0.0.1",
+		9000,
+		"default",
+		"",
+		"default",
+		"",
+	)
+
+	var err error
+
+	_db, err = sqlx.ConnectContext(context.Background(), "clickhouse", connString)
 	require.NoError(t, err)
-	defer db.Close()
+	return _db
+}
 
-	query := "some query"
-
-	rows := sqlmock.NewRows([]string{"age", "name"}).
-		AddRow(42, "Foo").
-		AddRow(12, "Bar")
-
-	dbmock.ExpectQuery(query).WillReturnRows(rows)
-
+func TestClickhouse_query(t *testing.T) {
 	ch := &Clickhouse{
-		db:      sqlx.NewDb(db, "sqlmock"),
+		db:      getDB(t),
 		logger:  zap.NewNop(),
 		timeout: time.Second,
 	}
 
-	L := lua.NewState()
-	L.Push(lua.LString(query))
+	state := lua.NewState()
+	state.Push(lua.LString("SELECT 1+1 AS num"))
 
-	n := ch.query(L)
+	n := ch.query(state)
 	assert.Equal(t, 2, n)
 
-	arg2 := L.Get(2)
-	arg3 := L.Get(3)
+	v := state.Get(2)
+	require.Equal(t, lua.LTTable, v.Type())
 
-	assert.Equal(t, arg3.Type(), lua.LTNil)
-	assert.Equal(t, arg2.Type(), lua.LTTable)
+	vv := v.(*lua.LTable)
 
-	type resultItem struct {
-		age  string
-		name string
-	}
+	var found bool
 
-	results := []resultItem{
-		{"42", "Foo"},
-		{"12", "Bar"},
-	}
-
-	arg2.(*lua.LTable).ForEach(func(value lua.LValue, value2 lua.LValue) {
-		require.Equal(t, value2.Type(), lua.LTTable)
-		item := results[0]
-		results = results[1:]
-
-		value2.(*lua.LTable).ForEach(func(value lua.LValue, value2 lua.LValue) {
-			key := value.String()
-			v := value2.String()
-			require.Contains(t, []string{"age", "name"}, key)
-			switch key {
-			case "age":
-				assert.Equal(t, item.age, v)
-			case "name":
-				assert.Equal(t, item.name, v)
-			}
-		})
+	vv.ForEach(func(value lua.LValue, value2 lua.LValue) {
+		tbl := value2.(*lua.LTable)
+		num := tbl.RawGetString("num")
+		found = "2" == num.String()
 	})
-}
-
-func Test_query_err_query_context(t *testing.T) {
-	m := &dbConnectionMock{
-		QueryContextFunc: func(_ context.Context, query string, args ...interface{}) (*sql.Rows, error) {
-			assert.Equal(t, "query", query)
-			return nil, fmt.Errorf("err1")
-		},
-	}
-	ch := &Clickhouse{
-		db:     m,
-		logger: zap.NewNop(),
-	}
-
-	ls := lua.NewState()
-	ls.Push(lua.LString("query"))
-
-	n := ch.query(ls)
-	assert.Equal(t, 2, n)
-	assert.Equal(t, "err1", ls.Get(3).String())
-	assert.Equal(t, 1, len(m.QueryContextCalls()))
+	assert.True(t, found)
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"testing"
@@ -65,7 +65,7 @@ func Test_send(t *testing.T) {
 	hm.On("Do", mock.Anything).Return(&http.Response{
 		Status:     "status1",
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewBuffer([]byte(`{"data":{"resultType":"vector","result":[]}}`))),
+		Body:       io.NopCloser(bytes.NewBuffer([]byte(`{"data":{"resultType":"vector","result":[]}}`))),
 	}, nil)
 
 	m := &Prometheus{
@@ -108,7 +108,7 @@ func Test_send_bad_response_status(t *testing.T) {
 	hm.On("Do", mock.Anything).Return(&http.Response{
 		Status:     "status1",
 		StatusCode: 0,
-		Body:       ioutil.NopCloser(bytes.NewBuffer([]byte(`{"data":{"resultType":"vector","result":[]}}`))),
+		Body:       io.NopCloser(bytes.NewBuffer([]byte(`{"data":{"resultType":"vector","result":[]}}`))),
 	}, nil)
 
 	m := &Prometheus{
@@ -127,7 +127,7 @@ func Test_send_bad_response_body(t *testing.T) {
 	hm.On("Do", mock.Anything).Return(&http.Response{
 		Status:     "status1",
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewBuffer([]byte(``))),
+		Body:       io.NopCloser(bytes.NewBuffer([]byte(``))),
 	}, nil)
 
 	m := &Prometheus{
@@ -146,7 +146,7 @@ func Test_send_bad_response_body2(t *testing.T) {
 	hm.On("Do", mock.Anything).Return(&http.Response{
 		Status:     "status1",
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewBuffer([]byte(`{"data":{}}`))),
+		Body:       io.NopCloser(bytes.NewBuffer([]byte(`{"data":{}}`))),
 	}, nil)
 
 	m := &Prometheus{
@@ -157,7 +157,7 @@ func Test_send_bad_response_body2(t *testing.T) {
 
 	_, err := m.send("domain.com/foo")
 	require.Error(t, err)
-	assert.Equal(t, "unexpected value type \"<ValNone>\"", err.Error())
+	assert.Equal(t, "unexpected value type \"\"", err.Error())
 }
 
 type badReader struct{}
@@ -171,7 +171,7 @@ func Test_send_error_read_body(t *testing.T) {
 	hm.On("Do", mock.Anything).Return(&http.Response{
 		Status:     "status1",
 		StatusCode: 200,
-		Body:       ioutil.NopCloser(&badReader{}),
+		Body:       io.NopCloser(&badReader{}),
 	}, nil)
 
 	m := &Prometheus{

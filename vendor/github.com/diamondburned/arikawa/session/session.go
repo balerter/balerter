@@ -4,14 +4,19 @@
 package session
 
 import (
+	"sync"
+
+	"github.com/pkg/errors"
+
 	"github.com/diamondburned/arikawa/api"
 	"github.com/diamondburned/arikawa/gateway"
-	"github.com/diamondburned/arikawa/handler"
-	"github.com/pkg/errors"
+	"github.com/diamondburned/arikawa/utils/handler"
 )
 
+var ErrMFA = errors.New("account has 2FA enabled")
+
 // Closed is an event that's sent to Session's command handler. This works by
-// using (*Gateway).AfterError. If the user sets this callback, no Closed events
+// using (*Gateway).AfterClose. If the user sets this callback, no Closed events
 // would be sent.
 //
 // Usage
@@ -21,8 +26,6 @@ import (
 type Closed struct {
 	Error error
 }
-
-var ErrMFA = errors.New("account has 2FA enabled")
 
 // Session manages both the API and Gateway. As such, Session inherits all of
 // API's methods, as well has the Handler used for Gateway.
@@ -38,22 +41,28 @@ type Session struct {
 	Ticket string
 
 	hstop chan struct{}
+	wstop sync.Once
 }
 
-func New(token string) (*Session, error) {
-	// Initialize the session and the API interface
-	s := &Session{}
-	s.Handler = handler.New()
-	s.Client = api.NewClient(token)
+func NewWithIntents(token string, intents ...gateway.Intents) (*Session, error) {
+	g, err := gateway.NewGatewayWithIntents(token, intents...)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to connect to Gateway")
+	}
 
+	return NewWithGateway(g), nil
+}
+
+// New creates a new session from a given token. Most bots should be using
+// NewWithIntents instead.
+func New(token string) (*Session, error) {
 	// Create a gateway
 	g, err := gateway.NewGateway(token)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect to Gateway")
 	}
-	s.Gateway = g
 
-	return s, nil
+	return NewWithGateway(g), nil
 }
 
 // Login tries to log in as a normal user account; MFA is optional.
@@ -97,9 +106,9 @@ func NewWithGateway(gw *gateway.Gateway) *Session {
 
 func (s *Session) Open() error {
 	// Start the handler beforehand so no events are missed.
-	stop := make(chan struct{})
-	s.hstop = stop
-	go s.startHandler(stop)
+	s.hstop = make(chan struct{})
+	s.wstop = sync.Once{}
+	go s.startHandler()
 
 	// Set the AfterClose's handler.
 	s.Gateway.AfterClose = func(err error) {
@@ -115,27 +124,20 @@ func (s *Session) Open() error {
 	return nil
 }
 
-func (s *Session) startHandler(stop <-chan struct{}) {
+func (s *Session) startHandler() {
 	for {
 		select {
-		case <-stop:
+		case <-s.hstop:
 			return
 		case ev := <-s.Gateway.Events:
-			s.Handler.Call(ev)
+			s.Call(ev)
 		}
 	}
 }
 
 func (s *Session) Close() error {
 	// Stop the event handler
-	s.close()
-
+	s.wstop.Do(func() { s.hstop <- struct{}{} })
 	// Close the websocket
 	return s.Gateway.Close()
-}
-
-func (s *Session) close() {
-	if s.hstop != nil {
-		close(s.hstop)
-	}
 }

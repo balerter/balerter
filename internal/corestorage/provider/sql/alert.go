@@ -2,10 +2,12 @@ package sql
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/balerter/balerter/internal/config/storages/core/tables"
+
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
-	"time"
 )
 
 // PostgresAlert represent Postgres implementation for Alert storage

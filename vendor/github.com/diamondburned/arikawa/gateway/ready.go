@@ -1,6 +1,11 @@
 package gateway
 
-import "github.com/diamondburned/arikawa/discord"
+import (
+	"strconv"
+	"strings"
+
+	"github.com/diamondburned/arikawa/discord"
+)
 
 type ReadyEvent struct {
 	Version int `json:"version"`
@@ -20,8 +25,8 @@ type ReadyEvent struct {
 	ReadState []ReadState        `json:"read_state,omitempty"`
 	Presences []discord.Presence `json:"presences,omitempty"`
 
-	Relationships []Relationship               `json:"relationships,omitempty"`
-	Notes         map[discord.Snowflake]string `json:"notes,omitempty"`
+	Relationships []discord.Relationship    `json:"relationships,omitempty"`
+	Notes         map[discord.UserID]string `json:"notes,omitempty"`
 }
 
 type UserSettings struct {
@@ -41,16 +46,16 @@ type UserSettings struct {
 	DeveloperMode           bool  `json:"developer_mode"`
 	DetectPlatformAccounts  bool  `json:"detect_platform_accounts"`
 	StreamNotification      bool  `json:"stream_notification_enabled"`
-	AccessibilityDetection  bool  `json:"allow_accessbility_detection"`
+	AccessibilityDetection  bool  `json:"allow_accessibility_detection"`
 	ContactSync             bool  `json:"contact_sync_enabled"`
 	NativePhoneIntegration  bool  `json:"native_phone_integration_enabled"`
 
 	Locale string `json:"locale"`
 	Theme  string `json:"theme"`
 
-	GuildPositions   []discord.Snowflake `json:"guild_positions"`
-	GuildFolders     []GuildFolder       `json:"guild_folders"`
-	RestrictedGuilds []discord.Snowflake `json:"restricted_guilds"`
+	GuildPositions   []discord.GuildID `json:"guild_positions"`
+	GuildFolders     []GuildFolder     `json:"guild_folders"`
+	RestrictedGuilds []discord.GuildID `json:"restricted_guilds"`
 
 	FriendSourceFlags struct {
 		All           bool `json:"all"`
@@ -62,19 +67,19 @@ type UserSettings struct {
 	CustomStatus struct {
 		Text      string            `json:"text"`
 		ExpiresAt discord.Timestamp `json:"expires_at,omitempty"`
-		EmojiID   discord.Snowflake `json:"emoji_id,string"`
+		EmojiID   discord.EmojiID   `json:"emoji_id,string"`
 		EmojiName string            `json:"emoji_name"`
 	} `json:"custom_status"`
 }
 
 // A UserGuildSettings stores data for a users guild settings.
 type UserGuildSettings struct {
-	GuildID discord.Snowflake `json:"guild_id"`
+	GuildID discord.GuildID `json:"guild_id"`
 
-	SupressEveryone bool `json:"suppress_everyone"`
-	SupressRoles    bool `json:"suppress_roles"`
-	Muted           bool `json:"muted"`
-	MobilePush      bool `json:"mobile_push"`
+	SuppressEveryone bool `json:"suppress_everyone"`
+	SuppressRoles    bool `json:"suppress_roles"`
+	Muted            bool `json:"muted"`
+	MobilePush       bool `json:"mobile_push"`
 
 	MessageNotifications UserNotification          `json:"message_notifications"`
 	ChannelOverrides     []SettingsChannelOverride `json:"channel_overrides"`
@@ -91,8 +96,8 @@ const (
 )
 
 type ReadState struct {
-	ChannelID     discord.Snowflake `json:"id"`
-	LastMessageID discord.Snowflake `json:"last_message_id"`
+	ChannelID     discord.ChannelID `json:"id"`
+	LastMessageID discord.MessageID `json:"last_message_id"`
 	MentionCount  int               `json:"mention_count"`
 }
 
@@ -102,30 +107,42 @@ type SettingsChannelOverride struct {
 	Muted bool `json:"muted"`
 
 	MessageNotifications UserNotification  `json:"message_notifications"`
-	ChannelID            discord.Snowflake `json:"channel_id"`
+	ChannelID            discord.ChannelID `json:"channel_id"`
 }
 
 // GuildFolder holds a single folder that you see in the left guild panel.
 type GuildFolder struct {
-	Name     string              `json:"name"`
-	ID       discord.Snowflake   `json:"id"`
-	GuildIDs []discord.Snowflake `json:"guild_ids"`
-	Color    discord.Color       `json:"color"`
+	Name     string            `json:"name"`
+	ID       GuildFolderID     `json:"id"`
+	GuildIDs []discord.GuildID `json:"guild_ids"`
+	Color    discord.Color     `json:"color"`
 }
 
-// A Relationship between the logged in user and Relationship.User
-type Relationship struct {
-	ID   string           `json:"id"`
-	User discord.User     `json:"user"`
-	Type RelationshipType `json:"type"`
+// GuildFolderID is possibly a snowflake. It can also be 0 (null) or a low
+// number of unknown significance.
+type GuildFolderID int64
+
+func (g *GuildFolderID) UnmarshalJSON(b []byte) error {
+	var body = string(b)
+	if body == "null" {
+		return nil
+	}
+
+	body = strings.Trim(body, `"`)
+
+	u, err := strconv.ParseInt(body, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	*g = GuildFolderID(u)
+	return nil
 }
 
-type RelationshipType uint8
+func (g GuildFolderID) MarshalJSON() ([]byte, error) {
+	if g == 0 {
+		return []byte("null"), nil
+	}
 
-const (
-	_ RelationshipType = iota
-	FriendRelationship
-	BlockedRelationship
-	IncomingFriendRequest
-	SentFriendRequest
-)
+	return []byte(strconv.FormatInt(int64(g), 10)), nil
+}

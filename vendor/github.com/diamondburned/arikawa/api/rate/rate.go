@@ -9,8 +9,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/diamondburned/arikawa/utils/moreatomic"
 	"github.com/pkg/errors"
+
+	"github.com/diamondburned/arikawa/internal/moreatomic"
 )
 
 // ExtraDelay because Discord is trash. I've seen this in both litcord and
@@ -27,9 +28,8 @@ type Limiter struct {
 
 	Prefix string
 
-	global     *int64 // atomic guarded, unixnano
-	buckets    sync.Map
-	globalRate time.Duration
+	global  *int64 // atomic guarded, unixnano
+	buckets sync.Map
 }
 
 type CustomRateLimit struct {
@@ -42,7 +42,6 @@ type bucket struct {
 	custom *CustomRateLimit
 
 	remaining uint64
-	limit     uint
 
 	reset     time.Time
 	lastReset time.Time // only for custom
@@ -101,7 +100,7 @@ func (l *Limiter) Acquire(ctx context.Context, path string) error {
 
 	if b.remaining == 0 && b.reset.After(time.Now()) {
 		// out of turns, gotta wait
-		sleep = b.reset.Sub(time.Now())
+		sleep = time.Until(b.reset)
 	} else {
 		// maybe global rate limit has it
 		now := time.Now()
@@ -129,14 +128,15 @@ func (l *Limiter) Acquire(ctx context.Context, path string) error {
 }
 
 // Release releases the URL from the locks. This doesn't need a context for
-// timing out, it doesn't block that much.
+// timing out, since it doesn't block that much.
 func (l *Limiter) Release(path string, headers http.Header) error {
 	b := l.getBucket(path, false)
 	if b == nil {
 		return nil
 	}
 
-	defer b.lock.Unlock()
+	// TryUnlock because Release may be called when Acquire has not been.
+	defer b.lock.TryUnlock()
 
 	// Check custom limiter
 	if b.custom != nil {

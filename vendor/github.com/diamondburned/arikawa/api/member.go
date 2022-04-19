@@ -6,42 +6,46 @@ import (
 	"github.com/diamondburned/arikawa/utils/json/option"
 )
 
-// Member returns a guild member object for the specified user..
-func (c *Client) Member(guildID, userID discord.Snowflake) (*discord.Member, error) {
+const maxMemberFetchLimit = 1000
+
+// Member returns a guild member object for the specified user.
+func (c *Client) Member(guildID discord.GuildID, userID discord.UserID) (*discord.Member, error) {
 	var m *discord.Member
 	return m, c.RequestJSON(&m, "GET", EndpointGuilds+guildID.String()+"/members/"+userID.String())
 }
 
 // Members returns a list of members of the guild with the passed id. This
 // method automatically paginates until it reaches the passed limit, or, if the
-// limit is set to 0, has fetched all members within the passed range.
+// limit is set to 0, has fetched all members in the guild.
 //
 // As the underlying endpoint has a maximum of 1000 members per request, at
 // maximum a total of limit/1000 rounded up requests will be made, although
-// they may be less, if no more members are available.
+// they may be less if no more members are available.
 //
 // When fetching the members, those with the smallest ID will be fetched first.
-func (c *Client) Members(guildID discord.Snowflake, limit uint) ([]discord.Member, error) {
+func (c *Client) Members(guildID discord.GuildID, limit uint) ([]discord.Member, error) {
 	return c.MembersAfter(guildID, 0, limit)
 }
 
 // MembersAfter returns a list of members of the guild with the passed id. This
 // method automatically paginates until it reaches the passed limit, or, if the
-// limit is set to 0, has fetched all members within the passed range.
+// limit is set to 0, has fetched all members with an id higher than after.
 //
 // As the underlying endpoint has a maximum of 1000 members per request, at
 // maximum a total of limit/1000 rounded up requests will be made, although
 // they may be less, if no more members are available.
 func (c *Client) MembersAfter(
-	guildID, after discord.Snowflake, limit uint) ([]discord.Member, error) {
+	guildID discord.GuildID, after discord.UserID, limit uint) ([]discord.Member, error) {
 
-	var mems []discord.Member
+	mems := make([]discord.Member, 0, limit)
 
-	const hardLimit int = 1000
+	fetch := uint(maxMemberFetchLimit)
 
 	unlimited := limit == 0
 
-	for fetch := uint(hardLimit); limit > 0 || unlimited; fetch = uint(hardLimit) {
+	for limit > 0 || unlimited {
+		// Only fetch as much as we need. Since limit gradually decreases,
+		// we only need to fetch min(fetch, limit).
 		if limit > 0 {
 			if fetch > limit {
 				fetch = limit
@@ -56,18 +60,22 @@ func (c *Client) MembersAfter(
 		mems = append(mems, m...)
 
 		// There aren't any to fetch, even if this is less than limit.
-		if len(m) < hardLimit {
+		if len(m) < maxMemberFetchLimit {
 			break
 		}
 
 		after = mems[len(mems)-1].User.ID
 	}
 
+	if len(mems) == 0 {
+		return nil, nil
+	}
+
 	return mems, nil
 }
 
 func (c *Client) membersAfter(
-	guildID, after discord.Snowflake, limit uint) ([]discord.Member, error) {
+	guildID discord.GuildID, after discord.UserID, limit uint) ([]discord.Member, error) {
 
 	switch {
 	case limit == 0:
@@ -77,8 +85,8 @@ func (c *Client) membersAfter(
 	}
 
 	var param struct {
-		After discord.Snowflake `schema:"after,omitempty"`
-		Limit uint              `schema:"limit"`
+		After discord.UserID `schema:"after,omitempty"`
+		Limit uint           `schema:"limit"`
 	}
 
 	param.Limit = limit
@@ -104,7 +112,7 @@ type AddMemberData struct {
 	// Roles is an array of role ids the member is assigned.
 	//
 	// Requires MANAGE_ROLES.
-	Roles *[]discord.Snowflake `json:"roles,omitempty"`
+	Roles *[]discord.RoleID `json:"roles,omitempty"`
 	// Mute specifies whether the user is muted in voice channels.
 	//
 	// Requires MUTE_MEMBERS.
@@ -126,7 +134,7 @@ type AddMemberData struct {
 // application used for authorization), and the bot must be a member of the
 // guild with CREATE_INSTANT_INVITE permission.
 func (c *Client) AddMember(
-	guildID, userID discord.Snowflake, data AddMemberData) (*discord.Member, error) {
+	guildID discord.GuildID, userID discord.UserID, data AddMemberData) (*discord.Member, error) {
 	var mem *discord.Member
 	return mem, c.RequestJSON(
 		&mem, "PUT",
@@ -144,7 +152,7 @@ type ModifyMemberData struct {
 	// Roles is an array of role ids the member is assigned.
 	//
 	// Requires MANAGE_ROLES.
-	Roles *[]discord.Snowflake `json:"roles,omitempty"`
+	Roles *[]discord.RoleID `json:"roles,omitempty"`
 	// Mute specifies whether the user is muted in voice channels.
 	//
 	// Requires MUTE_MEMBERS.
@@ -158,14 +166,14 @@ type ModifyMemberData struct {
 	// connected to voice).
 	//
 	// Requires MOVE_MEMBER
-	VoiceChannel discord.Snowflake `json:"channel_id,omitempty"`
+	VoiceChannel discord.ChannelID `json:"channel_id,omitempty"`
 }
 
 // ModifyMember modifies attributes of a guild member. If the channel_id is set
 // to null, this will force the target user to be disconnected from voice.
 //
 // Fires a Guild Member Update Gateway event.
-func (c *Client) ModifyMember(guildID, userID discord.Snowflake, data ModifyMemberData) error {
+func (c *Client) ModifyMember(guildID discord.GuildID, userID discord.UserID, data ModifyMemberData) error {
 
 	return c.FastRequest(
 		"PATCH",
@@ -176,10 +184,10 @@ func (c *Client) ModifyMember(guildID, userID discord.Snowflake, data ModifyMemb
 
 // https://discord.com/developers/docs/resources/guild#get-guild-prune-count-query-string-params
 type PruneCountData struct {
-	// Days is the number of days to count prune for (1 or more).
+	// Days is the number of days to count prune for (1 or more, default 7).
 	Days uint `schema:"days"`
 	// IncludedRoles are the role(s) to include.
-	IncludedRoles []discord.Snowflake `schema:"include_roles,omitempty"`
+	IncludedRoles []discord.RoleID `schema:"include_roles,omitempty"`
 }
 
 // PruneCount returns the number of members that would be removed in a prune
@@ -191,7 +199,7 @@ type PruneCountData struct {
 // will be counted in the prune and users with additional roles will not.
 //
 // Requires KICK_MEMBERS.
-func (c *Client) PruneCount(guildID discord.Snowflake, data PruneCountData) (uint, error) {
+func (c *Client) PruneCount(guildID discord.GuildID, data PruneCountData) (uint, error) {
 	if data.Days == 0 {
 		data.Days = 7
 	}
@@ -209,13 +217,13 @@ func (c *Client) PruneCount(guildID discord.Snowflake, data PruneCountData) (uin
 
 // https://discord.com/developers/docs/resources/guild#begin-guild-prune-query-string-params
 type PruneData struct {
-	// Days is the number of days to prune (1 or more).
+	// Days is the number of days to prune (1 or more, default 7).
 	Days uint `schema:"days"`
 	// ReturnCount specifies whether 'pruned' is returned. Discouraged for
 	// large guilds.
 	ReturnCount bool `schema:"compute_prune_count"`
 	// IncludedRoles are the role(s) to include.
-	IncludedRoles []discord.Snowflake `schema:"include_roles,omitempty"`
+	IncludedRoles []discord.RoleID `schema:"include_roles,omitempty"`
 }
 
 // Prune begins a prune. Days must be 1 or more, default 7.
@@ -227,7 +235,7 @@ type PruneData struct {
 //
 // Requires KICK_MEMBERS.
 // Fires multiple Guild Member Remove Gateway events.
-func (c *Client) Prune(guildID discord.Snowflake, data PruneData) (uint, error) {
+func (c *Client) Prune(guildID discord.GuildID, data PruneData) (uint, error) {
 	if data.Days == 0 {
 		data.Days = 7
 	}
@@ -247,17 +255,35 @@ func (c *Client) Prune(guildID discord.Snowflake, data PruneData) (uint, error) 
 //
 // Requires KICK_MEMBERS permission.
 // Fires a Guild Member Remove Gateway event.
-func (c *Client) Kick(guildID, userID discord.Snowflake) error {
+func (c *Client) Kick(guildID discord.GuildID, userID discord.UserID) error {
+	return c.KickWithReason(guildID, userID, "")
+}
+
+// KickWithReason removes a member from a guild.
+// The reason, if non-empty, will be displayed in the audit log of the guild.
+//
+// Requires KICK_MEMBERS permission.
+// Fires a Guild Member Remove Gateway event.
+func (c *Client) KickWithReason(
+	guildID discord.GuildID, userID discord.UserID, reason string) error {
+
+	var data struct {
+		Reason string `schema:"reason,omitempty"`
+	}
+
+	data.Reason = reason
+
 	return c.FastRequest(
 		"DELETE",
 		EndpointGuilds+guildID.String()+"/members/"+userID.String(),
+		httputil.WithSchema(c, data),
 	)
 }
 
 // Bans returns a list of ban objects for the users banned from this guild.
 //
 // Requires the BAN_MEMBERS permission.
-func (c *Client) Bans(guildID discord.Snowflake) ([]discord.Ban, error) {
+func (c *Client) Bans(guildID discord.GuildID) ([]discord.Ban, error) {
 	var bans []discord.Ban
 	return bans, c.RequestJSON(
 		&bans, "GET",
@@ -268,7 +294,7 @@ func (c *Client) Bans(guildID discord.Snowflake) ([]discord.Ban, error) {
 // GetBan returns a ban object for the given user.
 //
 // Requires the BAN_MEMBERS permission.
-func (c *Client) GetBan(guildID, userID discord.Snowflake) (*discord.Ban, error) {
+func (c *Client) GetBan(guildID discord.GuildID, userID discord.UserID) (*discord.Ban, error) {
 	var ban *discord.Ban
 	return ban, c.RequestJSON(
 		&ban, "GET",
@@ -288,11 +314,7 @@ type BanData struct {
 // banned user.
 //
 // Requires the BAN_MEMBERS permission.
-func (c *Client) Ban(guildID, userID discord.Snowflake, data BanData) error {
-	if *data.DeleteDays > 7 {
-		*data.DeleteDays = 7
-	}
-
+func (c *Client) Ban(guildID discord.GuildID, userID discord.UserID, data BanData) error {
 	return c.FastRequest(
 		"PUT",
 		EndpointGuilds+guildID.String()+"/bans/"+userID.String(),
@@ -304,6 +326,6 @@ func (c *Client) Ban(guildID, userID discord.Snowflake, data BanData) error {
 //
 // Requires the BAN_MEMBERS permissions.
 // Fires a Guild Ban Remove Gateway event.
-func (c *Client) Unban(guildID, userID discord.Snowflake) error {
+func (c *Client) Unban(guildID discord.GuildID, userID discord.UserID) error {
 	return c.FastRequest("DELETE", EndpointGuilds+guildID.String()+"/bans/"+userID.String())
 }

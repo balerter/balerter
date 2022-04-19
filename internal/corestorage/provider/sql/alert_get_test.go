@@ -1,146 +1,60 @@
 package sql
 
 import (
-	"database/sql"
-	"fmt"
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/balerter/balerter/internal/alert"
-	"github.com/jmoiron/sqlx"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
+	"math/rand"
+	"strconv"
 	"testing"
 	"time"
+
+	"github.com/balerter/balerter/internal/alert"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestGet_error_query_row(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
+func TestPostgresAlert_Get(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
 
-	dbx := sqlx.NewDb(db, "sqlmock")
+	p, tableName := instance(t)
+	defer p.db.Close()
 
-	sqlm.ExpectQuery(`SELECT id, level, count, last_change, start FROM alerts WHERE id = \$1`).WillReturnError(fmt.Errorf("err1"))
+	alertName := "foo_" + strconv.Itoa(rand.Intn(1e9))
 
-	pa := &PostgresAlert{
-		tableCfg: createTableAlertsCfg(),
-		db:       dbx,
-		logger:   zap.NewNop(),
-	}
+	_, errExec := p.db.Exec("INSERT INTO " + tableName + " (name, level, count) VALUES ('" + alertName + "', 1, 2)")
+	require.NoError(t, errExec)
 
-	_, err = pa.Get("foo")
-	require.Error(t, err)
-	assert.Equal(t, "error select alert, err1", err.Error())
-}
-
-func TestGet_error_row_scan(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	rows := sqlmock.NewRows([]string{"id", "level", "count", "last_change", "start"}).
-		AddRow(
-			sql.NullString{String: "not valid value", Valid: false},
-			sql.NullInt64{Int64: 10, Valid: true},
-			sql.NullInt64{Int64: 10, Valid: true},
-			sql.NullTime{Time: time.Now(), Valid: true},
-			sql.NullTime{Time: time.Now(), Valid: true},
-		)
-
-	sqlm.ExpectQuery(`SELECT id, level, count, last_change, start FROM alerts WHERE id = \$1`).WillReturnRows(rows)
-
-	pa := &PostgresAlert{
-		tableCfg: createTableAlertsCfg(),
-		db:       dbx,
-		logger:   zap.NewNop(),
-	}
-
-	_, err = pa.Get("foo")
-	require.Error(t, err)
-	assert.Equal(t, "error scan result, sql: Scan error on column index 0, name \"id\": converting NULL to string is unsupported", err.Error())
-}
-
-func TestGet_no_rows(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	rows := sqlmock.NewRows([]string{"id", "level", "count", "last_change", "start"})
-
-	sqlm.ExpectQuery(`SELECT id, level, count, last_change, start FROM alerts WHERE id = \$1`).WillReturnRows(rows)
-
-	pa := &PostgresAlert{
-		tableCfg: createTableAlertsCfg(),
-		db:       dbx,
-		logger:   zap.NewNop(),
-	}
-
-	a, err := pa.Get("foo")
-	assert.Nil(t, a)
-	assert.Nil(t, err)
-}
-
-func TestGet_error_parse_level(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	rows := sqlmock.NewRows([]string{"id", "level", "count", "last_change", "start"}).
-		AddRow(
-			sql.NullInt64{Int64: 10, Valid: true},
-			sql.NullInt64{Int64: 10, Valid: true},
-			sql.NullInt64{Int64: 10, Valid: true},
-			sql.NullTime{Time: time.Now(), Valid: true},
-			sql.NullTime{Time: time.Now(), Valid: true},
-		)
-
-	sqlm.ExpectQuery(`SELECT id, level, count, last_change, start FROM alerts WHERE id = \$1`).WillReturnRows(rows)
-
-	pa := &PostgresAlert{
-		tableCfg: createTableAlertsCfg(),
-		db:       dbx,
-		logger:   zap.NewNop(),
-	}
-
-	_, err = pa.Get("foo")
-	require.Error(t, err)
-	assert.Equal(t, "error parse level 10 for alert 10, bad level", err.Error())
-}
-
-func TestGet(t *testing.T) {
-	db, sqlm, err := sqlmock.New()
-	require.NoError(t, err)
-
-	dbx := sqlx.NewDb(db, "sqlmock")
-
-	now := time.Now()
-
-	rows := sqlmock.NewRows([]string{"id", "level", "count", "last_change", "start"}).
-		AddRow(
-			sql.NullInt64{Int64: 10, Valid: true},
-			sql.NullInt64{Int64: 1, Valid: true},
-			sql.NullInt64{Int64: 1, Valid: true},
-			sql.NullTime{Time: now, Valid: true},
-			sql.NullTime{Time: now.Add(time.Hour), Valid: true},
-		)
-
-	sqlm.ExpectQuery(`SELECT id, level, count, last_change, start FROM alerts WHERE id = \$1`).WillReturnRows(rows)
-
-	pa := &PostgresAlert{
-		tableCfg: createTableAlertsCfg(),
-		db:       dbx,
-		logger:   zap.NewNop(),
-	}
-
-	a, err := pa.Get("foo")
-	require.NoError(t, err)
-	require.NotNil(t, a)
-
-	assert.Equal(t, "10", a.Name)
+	a, errGet := p.Get(alertName)
+	require.NoError(t, errGet)
+	assert.IsType(t, &alert.Alert{}, a)
+	assert.Equal(t, alertName, a.Name)
 	assert.Equal(t, alert.LevelSuccess, a.Level)
-	assert.Equal(t, 1, a.Count)
-	assert.Equal(t, now.Unix(), a.LastChange.Unix())
-	assert.Equal(t, now.Add(time.Hour).Unix(), a.Start.Unix())
+	assert.Equal(t, 2, a.Count)
+}
+
+func TestPostgresAlert_Get_no_rows(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
+
+	p, _ := instance(t)
+	defer p.db.Close()
+
+	alertName := "foo_" + strconv.Itoa(rand.Intn(1e9))
+
+	a, errGet := p.Get(alertName)
+	require.NoError(t, errGet)
+	require.Nil(t, a)
+}
+
+func TestPostgresAlert_Get_wrong_level(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
+
+	p, tableName := instance(t)
+	defer p.db.Close()
+
+	alertName := "foo_" + strconv.Itoa(rand.Intn(1e9))
+
+	_, errExec := p.db.Exec("INSERT INTO " + tableName + " (name, level, count) VALUES ('" + alertName + "', 99999, 2)")
+	require.NoError(t, errExec)
+
+	_, errGet := p.Get(alertName)
+	require.Error(t, errGet)
+	assert.Equal(t, "error parse level 99999 for alert "+alertName+", bad level", errGet.Error())
 }

@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 	"errors"
-	"github.com/balerter/balerter/internal/metrics"
-	"github.com/go-chi/chi"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.uber.org/zap"
 	"net"
 	"net/http"
 	"net/http/pprof"
+
+	vmetrics "github.com/VictoriaMetrics/metrics"
+	"github.com/go-chi/chi"
+	"go.uber.org/zap"
 	"sync"
 )
 
@@ -30,8 +30,6 @@ func New(logger *zap.Logger) *Service {
 		logger: logger,
 	}
 
-	metrics.Register(logger)
-
 	router := chi.NewRouter()
 	router.Route("/debug/pprof", func(r chi.Router) {
 		r.Get("/profile", pprof.Profile)
@@ -42,7 +40,9 @@ func New(logger *zap.Logger) *Service {
 	})
 
 	router.Get("/liveness", s.livenessHandler)
-	router.Get("/metrics", promhttp.Handler().ServeHTTP)
+	router.Get("/metrics", func(rw http.ResponseWriter, req *http.Request) {
+		vmetrics.WritePrometheus(rw, true)
+	})
 
 	s.server.Handler = router
 

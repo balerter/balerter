@@ -8,7 +8,6 @@ import (
 	"github.com/balerter/balerter/internal/datasource/provider/postgres"
 	"github.com/balerter/balerter/internal/datasource/provider/prometheus"
 	"github.com/balerter/balerter/internal/modules"
-
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"

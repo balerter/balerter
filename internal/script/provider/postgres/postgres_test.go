@@ -1,90 +1,56 @@
 package postgres
 
 import (
-	"database/sql"
 	"fmt"
-	"github.com/DATA-DOG/go-sqlmock"
+	"math/rand"
+	"testing"
+	"time"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
-//func TestNew_error_connect(t *testing.T) {
-//	_, err := New(postgres.Postgres{})
-//	require.Error(t, err)
-//	assert.True(t, strings.HasPrefix(err.Error(), "dial tcp [::1]:0: connect:"))
-//}
+var _db *sqlx.DB
 
-func TestProvider_Get_error_query(t *testing.T) {
-	db, dbmock, err := sqlmock.New(sqlmock.MonitorPingsOption(true))
-	require.NoError(t, err)
-
-	dbmock.ExpectQuery("QUERY").WillReturnError(fmt.Errorf("err1"))
-
-	p := &Provider{
-		query: "QUERY",
-		db:    sqlx.NewDb(db, "sqlmock"),
+func getDB(t *testing.T) *sqlx.DB {
+	if _db != nil {
+		return _db
 	}
+	rand.Seed(time.Now().UnixNano())
 
-	_, err = p.Get()
-	require.Error(t, err)
-	assert.Equal(t, "error db query, err1", err.Error())
-}
-
-func TestProvider_Get_error_scan(t *testing.T) {
-	db, dbmock, err := sqlmock.New(sqlmock.MonitorPingsOption(true))
+	var err error
+	_db, err = sqlx.Connect("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s&sslrootcert=%s",
+		"postgres",
+		"secret",
+		"127.0.0.1",
+		35432,
+		"postgres",
+		"disable",
+		""))
 	require.NoError(t, err)
-
-	rows := sqlmock.NewRows([]string{"name", "body"}).
-		AddRow(sql.NullString{String: "bar", Valid: false}, "foo").
-		AddRow(sql.NullString{String: "bar", Valid: true}, "bar")
-
-	dbmock.ExpectQuery("QUERY").WillReturnRows(rows)
-
-	p := &Provider{
-		query: "QUERY",
-		db:    sqlx.NewDb(db, "sqlmock"),
-	}
-
-	_, err = p.Get()
-	require.Error(t, err)
-	assert.Equal(t, "sql: Scan error on column index 0, name \"name\": converting NULL to string is unsupported", err.Error())
+	return _db
 }
 
 func TestProvider_Get_error_parse_meta(t *testing.T) {
-	db, dbmock, err := sqlmock.New(sqlmock.MonitorPingsOption(true))
-	require.NoError(t, err)
-
-	rows := sqlmock.NewRows([]string{"name", "body"}).
-		AddRow(sql.NullString{String: "bar", Valid: true}, "-- @timeout abc\nfoo").
-		AddRow(sql.NullString{String: "bar", Valid: true}, "bar")
-
-	dbmock.ExpectQuery("QUERY").WillReturnRows(rows)
+	db := getDB(t)
 
 	p := &Provider{
-		query: "QUERY",
-		db:    sqlx.NewDb(db, "sqlmock"),
+		query: "SELECT 'name', '-- @timeout abc\nfoo\nbar'",
+		db:    db,
 	}
 
-	_, err = p.Get()
+	_, err := p.Get()
 	require.Error(t, err)
 	assert.Equal(t, "error parse 'abc' to time duration, time: invalid duration \"abc\"", err.Error())
 }
 
 func TestProvider_Get(t *testing.T) {
-	db, dbmock, err := sqlmock.New(sqlmock.MonitorPingsOption(true))
-	require.NoError(t, err)
-
-	rows := sqlmock.NewRows([]string{"name", "body"}).
-		AddRow(sql.NullString{String: "foo", Valid: true}, "foo").
-		AddRow(sql.NullString{String: "bar", Valid: true}, "bar")
-
-	dbmock.ExpectQuery("QUERY").WillReturnRows(rows)
+	db := getDB(t)
 
 	p := &Provider{
-		query: "QUERY",
-		db:    sqlx.NewDb(db, "sqlmock"),
+		query: "select * from (values ('name', 'foo'), ('name','bar')) as t (name, body)",
+		db:    db,
 	}
 
 	ss, err := p.Get()
@@ -96,18 +62,4 @@ func TestProvider_Get(t *testing.T) {
 			t.Fatal("unexpected file body")
 		}
 	}
-}
-
-func TestProvider_Stop(t *testing.T) {
-	db, e, err := sqlmock.New(sqlmock.MonitorPingsOption(true))
-	require.NoError(t, err)
-
-	e.ExpectClose()
-
-	p := &Provider{
-		db: sqlx.NewDb(db, "sqlmock"),
-	}
-
-	err = p.Stop()
-	require.NoError(t, err)
 }

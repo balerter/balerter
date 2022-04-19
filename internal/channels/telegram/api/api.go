@@ -3,11 +3,12 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/balerter/balerter/internal/config/channels/telegram"
 	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/balerter/balerter/internal/config/channels/telegram"
 )
 
 const (
