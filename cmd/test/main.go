@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/balerter/balerter/internal/modules/api"
+	"github.com/balerter/balerter/internal/modules/file"
 	"github.com/balerter/balerter/internal/modules/meta"
 	"io"
 	"log"
@@ -175,6 +176,15 @@ func run(cfg *config.Config, flg *config.Flags) (string, int) {
 	// |
 	metaMod := mock.New(meta.ModuleName(), meta.Methods(), lgr.Logger())
 	coreModules = append(coreModules, metaMod)
+
+	// ---------------------
+	// |
+	// | Core Modules
+	// |
+	// | file
+	// |
+	fileMod := mock.New(file.ModuleName(), file.Methods(), lgr.Logger())
+	coreModules = append(coreModules, fileMod)
 
 	// ---------------------
 	// |
