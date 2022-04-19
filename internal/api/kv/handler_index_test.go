@@ -17,11 +17,14 @@ func TestHandlerIndex(t *testing.T) {
 		"f2": "v2",
 	}
 
-	am := coreStorage.NewMock("")
-	am.KVMock().On("All").Return(resultData, nil)
+	am := &coreStorage.KVMock{
+		AllFunc: func() (map[string]string, error) {
+			return resultData, nil
+		},
+	}
 
 	kv := &KV{
-		storage: am.KV(),
+		storage: am,
 		logger:  zap.NewNop(),
 	}
 
@@ -36,13 +39,14 @@ func TestHandlerIndex(t *testing.T) {
 }
 
 func TestHandlerIndex_ErrorGetFromStorage(t *testing.T) {
-	resultData := map[string]string{}
-
-	am := coreStorage.NewMock("")
-	am.KVMock().On("All").Return(resultData, fmt.Errorf("error1"))
+	am := &coreStorage.KVMock{
+		AllFunc: func() (map[string]string, error) {
+			return nil, fmt.Errorf("error1")
+		},
+	}
 
 	kv := &KV{
-		storage: am.KV(),
+		storage: am,
 		logger:  zap.NewNop(),
 	}
 

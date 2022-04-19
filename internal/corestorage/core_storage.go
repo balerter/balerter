@@ -4,6 +4,10 @@ import (
 	"github.com/balerter/balerter/internal/alert"
 )
 
+//go:generate moq -out module_alert.go -skip-ensure -fmt goimports . Alert
+//go:generate moq -out module_kv.go -skip-ensure -fmt goimports . KV
+//go:generate moq -out module_core_storage.go -skip-ensure -fmt goimports . CoreStorage
+
 // KV is an interface for KV storage
 type KV interface {
 	Put(string, string) error

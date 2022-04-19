@@ -134,7 +134,7 @@ func (a *Alert) getAlertData(luaState *lua.LState) (alertName, alertText string,
 	return alertName, alertText, options, nil
 }
 
-func (a *Alert) call(scriptChannels []string, alertLevel alert.Level) lua.LGFunction {
+func (a *Alert) call(scriptChannels []string, escalate map[int][]string, alertLevel alert.Level) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		name, text, options, err := a.getAlertData(luaState)
 		if err != nil {
@@ -152,6 +152,17 @@ func (a *Alert) call(scriptChannels []string, alertLevel alert.Level) lua.LGFunc
 			a.logger.Error("error update an alert", zap.Error(err))
 			luaState.Push(lua.LString("error update an alert: " + err.Error()))
 			return 1
+		}
+
+		// For current Error level check if we need to escalate
+		if updatedAlert.Level == alert.LevelError {
+			for num, channels := range escalate {
+				if updatedAlert.Count == num {
+					opts := options
+					opts.Channels = channels
+					a.chManager.Send(updatedAlert, text, opts)
+				}
+			}
 		}
 
 		if levelWasUpdated || (options.Repeat > 0 && updatedAlert.Count%options.Repeat == 0) {

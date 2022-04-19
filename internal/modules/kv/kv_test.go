@@ -4,7 +4,6 @@ import (
 	"fmt"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
 	"testing"
@@ -52,8 +51,11 @@ func TestKV_Stop(t *testing.T) {
 }
 
 func Test_all_error(t *testing.T) {
-	s := &coreStorage.KVMock{}
-	s.On("All").Return(map[string]string{}, fmt.Errorf("err1"))
+	s := &coreStorage.KVMock{
+		AllFunc: func() (map[string]string, error) {
+			return map[string]string{}, fmt.Errorf("err1")
+		},
+	}
 
 	kv := &KV{engine: s}
 
@@ -67,8 +69,11 @@ func Test_all_error(t *testing.T) {
 }
 
 func Test_all(t *testing.T) {
-	s := &coreStorage.KVMock{}
-	s.On("All").Return(map[string]string{"a": "b"}, nil)
+	s := &coreStorage.KVMock{
+		AllFunc: func() (map[string]string, error) {
+			return map[string]string{"a": "b"}, nil
+		},
+	}
 
 	kv := &KV{engine: s}
 
@@ -84,8 +89,11 @@ func Test_all(t *testing.T) {
 }
 
 func Test_get_error(t *testing.T) {
-	s := &coreStorage.KVMock{}
-	s.On("Get", mock.Anything).Return("", fmt.Errorf("err1"))
+	s := &coreStorage.KVMock{
+		GetFunc: func(s string) (string, error) {
+			return "", fmt.Errorf("err1")
+		},
+	}
 
 	kv := &KV{engine: s}
 
@@ -99,8 +107,11 @@ func Test_get_error(t *testing.T) {
 }
 
 func Test_get(t *testing.T) {
-	s := &coreStorage.KVMock{}
-	s.On("Get", mock.Anything).Return("foo", nil)
+	s := &coreStorage.KVMock{
+		GetFunc: func(s string) (string, error) {
+			return "foo", nil
+		},
+	}
 
 	kv := &KV{engine: s}
 
@@ -114,8 +125,11 @@ func Test_get(t *testing.T) {
 }
 
 func Test_put_error(t *testing.T) {
-	s := &coreStorage.KVMock{}
-	s.On("Put", mock.Anything, mock.Anything).Return(fmt.Errorf("err1"))
+	s := &coreStorage.KVMock{
+		PutFunc: func(s1 string, s2 string) error {
+			return fmt.Errorf("err1")
+		},
+	}
 
 	kv := &KV{engine: s}
 
@@ -129,8 +143,11 @@ func Test_put_error(t *testing.T) {
 }
 
 func Test_put(t *testing.T) {
-	s := &coreStorage.KVMock{}
-	s.On("Put", mock.Anything, mock.Anything).Return(nil)
+	s := &coreStorage.KVMock{
+		PutFunc: func(s1 string, s2 string) error {
+			return nil
+		},
+	}
 
 	kv := &KV{engine: s}
 
@@ -141,8 +158,11 @@ func Test_put(t *testing.T) {
 }
 
 func Test_upsert_error(t *testing.T) {
-	s := &coreStorage.KVMock{}
-	s.On("Upsert", mock.Anything, mock.Anything).Return(fmt.Errorf("err1"))
+	s := &coreStorage.KVMock{
+		UpsertFunc: func(s1 string, s2 string) error {
+			return fmt.Errorf("err1")
+		},
+	}
 
 	kv := &KV{engine: s}
 
@@ -156,8 +176,11 @@ func Test_upsert_error(t *testing.T) {
 }
 
 func Test_upsert(t *testing.T) {
-	s := &coreStorage.KVMock{}
-	s.On("Upsert", mock.Anything, mock.Anything).Return(nil)
+	s := &coreStorage.KVMock{
+		UpsertFunc: func(s1 string, s2 string) error {
+			return nil
+		},
+	}
 
 	kv := &KV{engine: s}
 
@@ -168,8 +191,11 @@ func Test_upsert(t *testing.T) {
 }
 
 func Test_delete_error(t *testing.T) {
-	s := &coreStorage.KVMock{}
-	s.On("Delete", mock.Anything).Return(fmt.Errorf("err1"))
+	s := &coreStorage.KVMock{
+		DeleteFunc: func(s string) error {
+			return fmt.Errorf("err1")
+		},
+	}
 
 	kv := &KV{engine: s}
 
@@ -183,8 +209,11 @@ func Test_delete_error(t *testing.T) {
 }
 
 func Test_delete(t *testing.T) {
-	s := &coreStorage.KVMock{}
-	s.On("Delete", mock.Anything).Return(nil)
+	s := &coreStorage.KVMock{
+		DeleteFunc: func(s string) error {
+			return nil
+		},
+	}
 
 	kv := &KV{engine: s}
 
