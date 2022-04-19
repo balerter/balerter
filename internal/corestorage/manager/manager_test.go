@@ -31,8 +31,11 @@ func TestManager_Get_empty(t *testing.T) {
 }
 
 func TestManager_Stop(t *testing.T) {
-	s := &coreStorage.Mock{}
-	s.On("Stop").Return(nil)
+	s := &coreStorage.CoreStorageMock{
+		StopFunc: func() error {
+			return nil
+		},
+	}
 
 	m := &Manager{
 		storages: map[string]coreStorage.CoreStorage{
@@ -43,5 +46,5 @@ func TestManager_Stop(t *testing.T) {
 
 	m.Stop()
 
-	s.AssertCalled(t, "Stop")
+	assert.Equal(t, 1, len(s.StopCalls()))
 }

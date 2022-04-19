@@ -7,7 +7,6 @@ import (
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"reflect"
@@ -518,7 +517,7 @@ func TestAlert_call_error_get_alertData(t *testing.T) {
 		logger: zap.NewNop(),
 	}
 
-	f := a.call(nil, alert2.LevelError)
+	f := a.call(nil, map[int][]string{}, alert2.LevelError)
 
 	ls := lua.NewState()
 
@@ -528,8 +527,11 @@ func TestAlert_call_error_get_alertData(t *testing.T) {
 }
 
 func TestAlert_call_error_update(t *testing.T) {
-	am := &corestorage.AlertMock{}
-	am.On("Update", mock.Anything, mock.Anything).Return(nil, false, fmt.Errorf("err1"))
+	am := &corestorage.AlertMock{
+		UpdateFunc: func(name string, level alert2.Level) (*alert2.Alert, bool, error) {
+			return nil, false, fmt.Errorf("err1")
+		},
+	}
 
 	a := &Alert{
 		logger:  zap.NewNop(),
@@ -542,7 +544,7 @@ func TestAlert_call_error_update(t *testing.T) {
 		},
 	}
 
-	f := a.call(j.Script().Channels, alert2.LevelError)
+	f := a.call(j.Script().Channels, map[int][]string{}, alert2.LevelError)
 
 	ls := lua.NewState()
 	ls.Push(lua.LString("foo"))
@@ -555,8 +557,11 @@ func TestAlert_call_error_update(t *testing.T) {
 func TestAlert_call_level_was_updated(t *testing.T) {
 	ra := &alert2.Alert{}
 
-	am := &corestorage.AlertMock{}
-	am.On("Update", mock.Anything, mock.Anything).Return(ra, true, nil)
+	am := &corestorage.AlertMock{
+		UpdateFunc: func(name string, level alert2.Level) (*alert2.Alert, bool, error) {
+			return ra, true, nil
+		},
+	}
 
 	chManager := &chManagerMock{
 		SendFunc: func(_ *alert2.Alert, _ string, _ *alert2.Options) {
@@ -576,7 +581,7 @@ func TestAlert_call_level_was_updated(t *testing.T) {
 		},
 	}
 
-	f := a.call(j.Script().Channels, alert2.LevelError)
+	f := a.call(j.Script().Channels, map[int][]string{}, alert2.LevelError)
 
 	ls := lua.NewState()
 	ls.Push(lua.LString("foo"))
@@ -589,8 +594,11 @@ func TestAlert_call_level_was_updated(t *testing.T) {
 func TestAlert_call_level_was_not_updated(t *testing.T) {
 	ra := &alert2.Alert{}
 
-	am := &corestorage.AlertMock{}
-	am.On("Update", mock.Anything, mock.Anything).Return(ra, false, nil)
+	am := &corestorage.AlertMock{
+		UpdateFunc: func(name string, level alert2.Level) (*alert2.Alert, bool, error) {
+			return ra, false, nil
+		},
+	}
 
 	chManager := &chManagerMock{
 		SendFunc: func(_ *alert2.Alert, _ string, _ *alert2.Options) {
@@ -610,7 +618,7 @@ func TestAlert_call_level_was_not_updated(t *testing.T) {
 		},
 	}
 
-	f := a.call(j.Script().Channels, alert2.LevelError)
+	f := a.call(j.Script().Channels, map[int][]string{}, alert2.LevelError)
 
 	ls := lua.NewState()
 	ls.Push(lua.LString("foo"))
@@ -625,8 +633,11 @@ func TestAlert_call_repeat(t *testing.T) {
 		Count: 10,
 	}
 
-	am := &corestorage.AlertMock{}
-	am.On("Update", mock.Anything, mock.Anything).Return(ra, false, nil)
+	am := &corestorage.AlertMock{
+		UpdateFunc: func(name string, level alert2.Level) (*alert2.Alert, bool, error) {
+			return ra, false, nil
+		},
+	}
 
 	chManager := &chManagerMock{
 		SendFunc: func(_ *alert2.Alert, _ string, _ *alert2.Options) {
@@ -646,7 +657,7 @@ func TestAlert_call_repeat(t *testing.T) {
 		},
 	}
 
-	f := a.call(j.Script().Channels, alert2.LevelError)
+	f := a.call(j.Script().Channels, map[int][]string{}, alert2.LevelError)
 
 	ls := lua.NewState()
 	ls.Push(lua.LString("id"))
@@ -658,4 +669,41 @@ func TestAlert_call_repeat(t *testing.T) {
 	n := f(ls)
 	assert.Equal(t, 0, n)
 	assert.Equal(t, 1, len(chManager.SendCalls()))
+}
+
+func TestAlert_call_escalate(t *testing.T) {
+	alrt := &alert2.Alert{
+		Count: 10,
+		Level: alert2.LevelError,
+	}
+	moduleAlertMock := &corestorage.AlertMock{
+		UpdateFunc: func(name string, level alert2.Level) (*alert2.Alert, bool, error) {
+			return alrt, false, nil
+		},
+	}
+
+	var sentToChannels []string
+
+	chManagerMock := &chManagerMock{
+		SendFunc: func(_ *alert2.Alert, _ string, opts *alert2.Options) {
+			sentToChannels = append(sentToChannels, opts.Channels...)
+		},
+	}
+
+	a := &Alert{
+		storage:   moduleAlertMock,
+		chManager: chManagerMock,
+		logger:    zap.NewNop(),
+	}
+
+	f := a.call(nil, map[int][]string{10: {"foo", "bar"}}, alert2.LevelError)
+
+	ls := lua.NewState()
+	ls.Push(lua.LString("id"))
+	ls.Push(lua.LString("text"))
+
+	n := f(ls)
+
+	assert.Equal(t, 0, n)
+	assert.Equal(t, []string{"foo", "bar"}, sentToChannels)
 }

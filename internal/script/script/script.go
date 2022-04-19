@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"github.com/robfig/cron/v3"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -20,6 +21,7 @@ func New() *Script {
 	s := &Script{
 		CronValue: DefaultCronValue,
 		Timeout:   DefaultTimeout,
+		Escalate:  map[int][]string{},
 	}
 
 	return s
@@ -40,6 +42,7 @@ type Script struct {
 	Channels   []string
 	IsTest     bool
 	TestTarget string
+	Escalate   map[int][]string
 }
 
 // Hash returns the hash, based on script name and body
@@ -57,6 +60,7 @@ var (
 		"@channels": parseMetaChannels,
 		"@test":     parseMetaTest,
 		"@timeout":  parseMetaTimeout,
+		"@escalate": parseMetaEscalate,
 	}
 )
 
@@ -149,6 +153,34 @@ func parseMetaChannels(l string, s *Script) error {
 		}
 
 		s.Channels = append(s.Channels, channelName)
+	}
+
+	return nil
+}
+
+func parseMetaEscalate(l string, s *Script) error {
+	if l == "" {
+		return fmt.Errorf("escalate options must be not empty")
+	}
+
+	for _, item := range strings.Split(l, " ") {
+		pair := strings.Split(item, ":")
+		if len(pair) != 2 {
+			return fmt.Errorf("invalid escalate option '%s', not found ':'", item)
+		}
+
+		if pair[1] == "" {
+			return fmt.Errorf("invalid escalate option '%s', empty channels", item)
+		}
+
+		channels := strings.Split(pair[1], ",")
+
+		num, errNum := strconv.Atoi(pair[0])
+		if errNum != nil {
+			return fmt.Errorf("invalid escalate option '%s', not numeric key", item)
+		}
+
+		s.Escalate[num] = channels
 	}
 
 	return nil

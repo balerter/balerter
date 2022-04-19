@@ -5,7 +5,6 @@ import (
 	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/corestorage"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
 	"testing"
@@ -51,8 +50,11 @@ func TestGet_AlertNameNotString(t *testing.T) {
 func TestGet_ErrorGet(t *testing.T) {
 	err1 := fmt.Errorf("error1")
 
-	mgrMock := &corestorage.AlertMock{}
-	mgrMock.On("Get", mock.Anything).Return(nil, err1)
+	mgrMock := &corestorage.AlertMock{
+		GetFunc: func(name string) (*alert.Alert, error) {
+			return nil, err1
+		},
+	}
 
 	m := &Alert{
 		storage: mgrMock,
@@ -79,8 +81,11 @@ func TestGet(t *testing.T) {
 	a.Level = alert.LevelError
 	a.Count++
 
-	mgrMock := &corestorage.AlertMock{}
-	mgrMock.On("Get", mock.Anything).Return(a, nil)
+	mgrMock := &corestorage.AlertMock{
+		GetFunc: func(name string) (*alert.Alert, error) {
+			return a, nil
+		},
+	}
 
 	m := &Alert{
 		storage: mgrMock,

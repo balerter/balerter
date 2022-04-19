@@ -14,7 +14,14 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	cm := corestorage.NewMock("")
+	cm := &corestorage.CoreStorageMock{
+		AlertFunc: func() corestorage.Alert {
+			return nil
+		},
+		KVFunc: func() corestorage.KV {
+			return nil
+		},
+	}
 
 	a := New("", cm, cm, nil, nil, nil)
 	assert.IsType(t, &API{}, a)

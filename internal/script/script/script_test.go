@@ -3,6 +3,7 @@ package script
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -140,4 +141,110 @@ func TestScript_ParseMeta_Channels(t *testing.T) {
 	assert.Equal(t, 2, len(s.Channels))
 	assert.Contains(t, s.Channels, "foo")
 	assert.Contains(t, s.Channels, "bar")
+}
+
+func Test_parseMetaEscalate(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    string
+		wantErr  bool
+		errValue string
+		result   map[int][]string
+	}{
+		{
+			name:     "empty tag",
+			value:    "-- @escalate",
+			wantErr:  true,
+			errValue: "escalate options must be not empty",
+		},
+		{
+			name:     "no-divider",
+			value:    "-- @escalate 5",
+			wantErr:  true,
+			errValue: "invalid escalate option '5', not found ':'",
+		},
+		{
+			name:     "no-channels",
+			value:    "-- @escalate 5:a 10:",
+			wantErr:  true,
+			errValue: "invalid escalate option '10:', empty channels",
+		},
+		{
+			name:     "not-numeric-key",
+			value:    "-- @escalate a:b,c",
+			wantErr:  true,
+			errValue: "invalid escalate option 'a:b,c', not numeric key",
+		},
+		{
+			name:     "success",
+			value:    "-- @escalate 5:a,b 10:c",
+			wantErr:  false,
+			errValue: "",
+			result: map[int][]string{
+				5:  {"a", "b"},
+				10: {"c"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &Script{Escalate: map[int][]string{}, Body: []byte(tt.value)}
+
+			err := s.ParseMeta()
+			if tt.wantErr && err == nil {
+				t.Errorf("parseMetaEscalate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr && err != nil {
+				t.Errorf("parseMetaEscalate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.wantErr && err != nil && err.Error() != tt.errValue {
+				t.Errorf("parseMetaEscalate() error = %v, wantErr %v", err, tt.errValue)
+				return
+			}
+			if err != nil {
+				return
+			}
+			if !reflect.DeepEqual(s.Escalate, tt.result) {
+				t.Errorf("parseMetaEscalate() = %v, want %v", s.Escalate, tt.result)
+			}
+		})
+	}
+}
+
+func Test_parseMetaTest(t *testing.T) {
+	s := &Script{Body: []byte("-- @test")}
+
+	err := s.ParseMeta()
+	require.Error(t, err)
+	assert.Equal(t, "test must be not empty", err.Error())
+
+	s = &Script{Body: []byte("-- @test foo")}
+
+	err = s.ParseMeta()
+	require.NoError(t, err)
+	assert.Equal(t, "foo", s.TestTarget)
+	assert.True(t, s.IsTest)
+}
+
+func Test_parseMetaTimeout(t *testing.T) {
+	s := &Script{Body: []byte("-- @timeout foo")}
+
+	err := s.ParseMeta()
+	require.Error(t, err)
+	assert.Equal(t, "error parse 'foo' to time duration, time: invalid duration \"foo\"", err.Error())
+
+	s = &Script{Body: []byte("-- @timeout 5s")}
+
+	err = s.ParseMeta()
+	require.NoError(t, err)
+	assert.Equal(t, 5*time.Second, s.Timeout)
+}
+
+func TestNew(t *testing.T) {
+	s := New()
+
+	assert.Equal(t, DefaultCronValue, s.CronValue)
+	assert.Equal(t, DefaultTimeout, s.Timeout)
 }
