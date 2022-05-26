@@ -41,6 +41,7 @@ func New(fs *flag.FlagSet, args []string) (*Config, *Flags, error) {
 	fs.BoolVar(&flg.Once, "once", false, "once run scripts and exit")
 	fs.StringVar(&flg.Script, "script", "", "ignore all script sources and runs only one script. Meta-tag @ignore will be ignored")
 	fs.BoolVar(&flg.AsJSON, "json", false, "output json format")
+	fs.BoolVar(&flg.SafeMode, "safemode", false, "disable http module and embedded lua modules")
 	err = fs.Parse(args)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error parse falgs, %w", err)
@@ -99,6 +100,8 @@ type Flags struct {
 	Script string
 	// for CLI flag '-asJson' for test tool
 	AsJSON bool
+	// for CLI flag '-safemode'
+	SafeMode bool
 }
 
 // Config represent balerter configuration

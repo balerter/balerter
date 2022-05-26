@@ -46,6 +46,7 @@ type Runner struct {
 	cliScript       string
 	logger          *zap.Logger
 	updateInterval  time.Duration
+	safeMode        bool
 
 	coreModules []modules.Module
 
@@ -80,6 +81,7 @@ func New(
 	coreModules []modules.Module,
 	cliScript string,
 	systemCfg *system.System,
+	safeMode bool,
 	logger *zap.Logger,
 ) (*Runner, error) {
 	r := &Runner{
@@ -92,6 +94,7 @@ func New(
 		coreModules:     coreModules,
 		pool:            make(map[string]job),
 		jobs:            make(chan job, defaultToRunChanLen),
+		safeMode:        safeMode,
 	}
 
 	tz, errTz := getLocation(systemCfg)

@@ -162,6 +162,7 @@ func run(
 		coreModules,
 		flg.Script,
 		cfg.System,
+		flg.SafeMode,
 		lgr.Logger(),
 	)
 	if errCreateRunner != nil {
@@ -247,8 +248,10 @@ func initCoreModules(
 	chartMod := chartModule.New(lgr)
 	coreModules = append(coreModules, chartMod)
 
-	httpMod := httpModule.New(lgr)
-	coreModules = append(coreModules, httpMod)
+	if !flg.SafeMode {
+		httpMod := httpModule.New(lgr)
+		coreModules = append(coreModules, httpMod)
+	}
 
 	runtimeMod := runtimeModule.New(flg, lgr)
 	coreModules = append(coreModules, runtimeMod)
