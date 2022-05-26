@@ -99,7 +99,23 @@ func (j *Job) Run() {
 func (rnr *Runner) createLuaState(j job, apiRequest *http.Request) error {
 	rnr.logger.Debug("create job luaState", zap.String("name", j.Name()))
 
-	L := lua.NewState()
+	var luaLibs = []luaLib{
+		{LoadLibName, lua.OpenPackage},
+		{BaseLibName, lua.OpenBase},
+		{TabLibName, lua.OpenTable},
+		{StringLibName, lua.OpenString},
+		{MathLibName, lua.OpenMath},
+		{DebugLibName, lua.OpenDebug},
+		{ChannelLibName, lua.OpenChannel},
+		{CoroutineLibName, lua.OpenCoroutine},
+	}
+	if !rnr.safeMode {
+		luaLibs = append(luaLibs, luaLib{IoLibName, lua.OpenIo})
+		luaLibs = append(luaLibs, luaLib{OsLibName, lua.OpenOs})
+	}
+
+	L := lua.NewState(lua.Options{SkipOpenLibs: true})
+	openLibs(L, luaLibs)
 
 	for _, m := range rnr.coreModules {
 		L.PreloadModule(m.Name(), m.GetLoader(j))

@@ -3,22 +3,24 @@ package runner
 import (
 	"context"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/balerter/balerter/internal/config/system"
 	"github.com/balerter/balerter/internal/modules"
 	"github.com/balerter/balerter/internal/script/script"
+
 	"github.com/robfig/cron/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
-	"testing"
-	"time"
 )
 
 func TestNewRunner(t *testing.T) {
 	r, err := New(0, nil, nil,
-		nil, nil, "", nil, zap.NewNop())
+		nil, nil, "", nil, false, zap.NewNop())
 	assert.IsType(t, &Runner{}, r)
 	require.NoError(t, err)
 }
