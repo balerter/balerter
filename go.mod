@@ -17,8 +17,8 @@ require (
 	github.com/martinlindhe/notify v0.0.0-20181008203735-20632c9a275a
 	github.com/mattn/go-sqlite3 v1.14.12
 	github.com/mavolin/dismock v1.3.4
-	github.com/nlopes/slack v0.6.0
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/slack-go/slack v0.11.0
 	github.com/stretchr/testify v1.7.0
 	github.com/xhit/go-simple-mail/v2 v2.11.0
 	github.com/yuin/gluamapper v0.0.0-20150323120927-d836955830e7
@@ -41,9 +41,9 @@ require (
 	github.com/go-latex/latex v0.0.0-20210823091927-c0d11ff05a81 // indirect
 	github.com/go-pdf/fpdf v0.5.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
-	github.com/google/go-cmp v0.3.1 // indirect
+	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/gorilla/schema v1.2.0 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.11.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect

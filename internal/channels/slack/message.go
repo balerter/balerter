@@ -2,7 +2,7 @@ package slack
 
 import (
 	"fmt"
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 func createSlackMessageOptions(alertText, imageURL string, fields map[string]string) []slack.MsgOption {
