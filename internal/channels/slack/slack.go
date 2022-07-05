@@ -2,7 +2,7 @@ package slack
 
 import (
 	slackCfg "github.com/balerter/balerter/internal/config/channels/slack"
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 	"go.uber.org/zap"
 )
 

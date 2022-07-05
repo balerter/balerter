@@ -2,7 +2,7 @@ package slack
 
 import (
 	"github.com/balerter/balerter/internal/message"
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
