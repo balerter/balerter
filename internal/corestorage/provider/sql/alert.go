@@ -19,7 +19,7 @@ type PostgresAlert struct {
 	logger   *zap.Logger
 }
 
-func (m *PostgresAlert) RunApiHandler(rw http.ResponseWriter, req *http.Request) {
+func (p *PostgresAlert) RunApiHandler(rw http.ResponseWriter, req *http.Request) {
 	http.Error(rw, "coreapi is not supported for this module", http.StatusNotImplemented)
 }
 
