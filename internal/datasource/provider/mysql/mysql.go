@@ -1,14 +1,12 @@
 package mysql
 
 import (
-	"fmt"
 	"github.com/balerter/balerter/internal/config/datasources/mysql"
 	"github.com/balerter/balerter/internal/modules"
 	_ "github.com/go-sql-driver/mysql" // import DB driver
 	"github.com/jmoiron/sqlx"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"net/http"
 	"time"
 )
 
@@ -64,10 +62,6 @@ func New(cfg mysql.Mysql, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*MySQL, 
 	}
 
 	return p, nil
-}
-
-func (m *MySQL) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
-	return nil, http.StatusNotImplemented, fmt.Errorf("not implemented")
 }
 
 // Stop the datasource
