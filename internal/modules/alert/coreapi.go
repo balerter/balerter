@@ -72,6 +72,7 @@ func (a *Alert) CoreApiHandler(method string, parts []string, params map[string]
 		opts.Image = v
 	}
 	if v, ok := params["fields"]; ok {
+		opts.Fields = map[string]string{}
 		for _, s := range strings.Split(v, ",") {
 			p := strings.Split(s, ":")
 			if len(p) != 2 {
