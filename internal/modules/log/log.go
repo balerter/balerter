@@ -1,9 +1,11 @@
 package log
 
 import (
+	"fmt"
 	"github.com/balerter/balerter/internal/modules"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 // Log represents the Log core module
@@ -18,6 +20,27 @@ func New(logger *zap.Logger) *Log {
 	}
 
 	return l
+}
+
+func (l *Log) CoreApiHandler(req []string, body []byte) (any, int, error) {
+	if len(req) != 1 {
+		return nil, http.StatusBadRequest, fmt.Errorf("invalid request")
+	}
+
+	switch req[0] {
+	case "error":
+		l.logger.Error(string(body))
+	case "warn":
+		l.logger.Warn(string(body))
+	case "info":
+		l.logger.Info(string(body))
+	case "debug":
+		l.logger.Debug(string(body))
+	default:
+		return nil, http.StatusBadRequest, fmt.Errorf("invalid request, unknod method %s", req[0])
+	}
+
+	return nil, http.StatusOK, nil
 }
 
 // Name returns the module name

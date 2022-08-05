@@ -76,13 +76,13 @@ func (m *Prometheus) send(u string) (prometheusModels.ModelValue, error) {
 
 	defer res.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected response code %d", res.StatusCode)
-	}
-
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error read response body, %w", err)
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected response code %d, %s", res.StatusCode, body)
 	}
 
 	var apiResp prometheusModels.APIResponse

@@ -2,6 +2,7 @@ package http
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -53,6 +54,10 @@ func New(logger *zap.Logger) *HTTP {
 	}
 
 	return h
+}
+
+func (h *HTTP) CoreApiHandler(req []string, body []byte) (any, int, error) {
+	return nil, http.StatusNotImplemented, fmt.Errorf("not implemented")
 }
 
 func createHTTPClient(timeout time.Duration, insecureSkipVerify bool) httpClient {

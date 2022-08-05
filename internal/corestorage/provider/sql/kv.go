@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/balerter/balerter/internal/config/storages/core/tables"
+	"net/http"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -22,6 +23,10 @@ type PostgresKV struct {
 	tableCfg tables.TableKV
 	timeout  time.Duration
 	logger   *zap.Logger
+}
+
+func (p *PostgresKV) RunApiHandler(rw http.ResponseWriter, req *http.Request) {
+	http.Error(rw, "coreapi is not supported for this module", http.StatusNotImplemented)
 }
 
 func (p *PostgresKV) CreateTable() error {

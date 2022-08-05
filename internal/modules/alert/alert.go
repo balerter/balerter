@@ -61,14 +61,14 @@ func (a *Alert) GetLoader(j modules.Job) lua.LGFunction {
 	return func() lua.LGFunction {
 		return func(luaState *lua.LState) int {
 			var exports = map[string]lua.LGFunction{
-				"warn":    a.call(j.Script().Channels, j.Script().Escalate, alert.LevelWarn),
-				"warning": a.call(j.Script().Channels, j.Script().Escalate, alert.LevelWarn),
+				"warn":    a.callFromLua(j.Script().Channels, j.Script().Escalate, alert.LevelWarn),
+				"warning": a.callFromLua(j.Script().Channels, j.Script().Escalate, alert.LevelWarn),
 
-				"error": a.call(j.Script().Channels, j.Script().Escalate, alert.LevelError),
-				"fail":  a.call(j.Script().Channels, j.Script().Escalate, alert.LevelError),
+				"error": a.callFromLua(j.Script().Channels, j.Script().Escalate, alert.LevelError),
+				"fail":  a.callFromLua(j.Script().Channels, j.Script().Escalate, alert.LevelError),
 
-				"success": a.call(j.Script().Channels, j.Script().Escalate, alert.LevelSuccess),
-				"ok":      a.call(j.Script().Channels, j.Script().Escalate, alert.LevelSuccess),
+				"success": a.callFromLua(j.Script().Channels, j.Script().Escalate, alert.LevelSuccess),
+				"ok":      a.callFromLua(j.Script().Channels, j.Script().Escalate, alert.LevelSuccess),
 
 				"get": a.get(),
 			}

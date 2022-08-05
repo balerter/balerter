@@ -2,6 +2,7 @@ package sql
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/balerter/balerter/internal/config/storages/core/tables"
@@ -16,6 +17,10 @@ type PostgresAlert struct {
 	tableCfg tables.TableAlerts
 	timeout  time.Duration
 	logger   *zap.Logger
+}
+
+func (m *PostgresAlert) RunApiHandler(rw http.ResponseWriter, req *http.Request) {
+	http.Error(rw, "coreapi is not supported for this module", http.StatusNotImplemented)
 }
 
 func (p *PostgresAlert) CreateTable() error {

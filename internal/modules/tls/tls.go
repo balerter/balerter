@@ -2,9 +2,11 @@ package tls
 
 import (
 	"crypto/tls"
-	"github.com/balerter/balerter/internal/modules"
-	lua "github.com/yuin/gopher-lua"
 	"strings"
+
+	"github.com/balerter/balerter/internal/modules"
+
+	lua "github.com/yuin/gopher-lua"
 )
 
 // ModuleName returns the module name

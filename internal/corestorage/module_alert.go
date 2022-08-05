@@ -4,6 +4,7 @@
 package corestorage
 
 import (
+	"net/http"
 	"sync"
 
 	"github.com/balerter/balerter/internal/alert"
@@ -21,6 +22,9 @@ import (
 // 			IndexFunc: func(levels []alert.Level) (alert.Alerts, error) {
 // 				panic("mock out the Index method")
 // 			},
+// 			RunApiHandlerFunc: func(rw http.ResponseWriter, req *http.Request)  {
+// 				panic("mock out the RunApiHandler method")
+// 			},
 // 			UpdateFunc: func(name string, level alert.Level) (*alert.Alert, bool, error) {
 // 				panic("mock out the Update method")
 // 			},
@@ -37,6 +41,9 @@ type AlertMock struct {
 	// IndexFunc mocks the Index method.
 	IndexFunc func(levels []alert.Level) (alert.Alerts, error)
 
+	// RunApiHandlerFunc mocks the RunApiHandler method.
+	RunApiHandlerFunc func(rw http.ResponseWriter, req *http.Request)
+
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(name string, level alert.Level) (*alert.Alert, bool, error)
 
@@ -52,6 +59,13 @@ type AlertMock struct {
 			// Levels is the levels argument value.
 			Levels []alert.Level
 		}
+		// RunApiHandler holds details about calls to the RunApiHandler method.
+		RunApiHandler []struct {
+			// Rw is the rw argument value.
+			Rw http.ResponseWriter
+			// Req is the req argument value.
+			Req *http.Request
+		}
 		// Update holds details about calls to the Update method.
 		Update []struct {
 			// Name is the name argument value.
@@ -60,9 +74,10 @@ type AlertMock struct {
 			Level alert.Level
 		}
 	}
-	lockGet    sync.RWMutex
-	lockIndex  sync.RWMutex
-	lockUpdate sync.RWMutex
+	lockGet           sync.RWMutex
+	lockIndex         sync.RWMutex
+	lockRunApiHandler sync.RWMutex
+	lockUpdate        sync.RWMutex
 }
 
 // Get calls GetFunc.
@@ -124,6 +139,41 @@ func (mock *AlertMock) IndexCalls() []struct {
 	mock.lockIndex.RLock()
 	calls = mock.calls.Index
 	mock.lockIndex.RUnlock()
+	return calls
+}
+
+// RunApiHandler calls RunApiHandlerFunc.
+func (mock *AlertMock) RunApiHandler(rw http.ResponseWriter, req *http.Request) {
+	if mock.RunApiHandlerFunc == nil {
+		panic("AlertMock.RunApiHandlerFunc: method is nil but Alert.RunApiHandler was just called")
+	}
+	callInfo := struct {
+		Rw  http.ResponseWriter
+		Req *http.Request
+	}{
+		Rw:  rw,
+		Req: req,
+	}
+	mock.lockRunApiHandler.Lock()
+	mock.calls.RunApiHandler = append(mock.calls.RunApiHandler, callInfo)
+	mock.lockRunApiHandler.Unlock()
+	mock.RunApiHandlerFunc(rw, req)
+}
+
+// RunApiHandlerCalls gets all the calls that were made to RunApiHandler.
+// Check the length with:
+//     len(mockedAlert.RunApiHandlerCalls())
+func (mock *AlertMock) RunApiHandlerCalls() []struct {
+	Rw  http.ResponseWriter
+	Req *http.Request
+} {
+	var calls []struct {
+		Rw  http.ResponseWriter
+		Req *http.Request
+	}
+	mock.lockRunApiHandler.RLock()
+	calls = mock.calls.RunApiHandler
+	mock.lockRunApiHandler.RUnlock()
 	return calls
 }
 

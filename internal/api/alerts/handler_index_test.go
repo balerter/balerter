@@ -3,8 +3,8 @@ package alerts
 import (
 	"fmt"
 	alert2 "github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/corestorage"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"net/http"
@@ -31,14 +31,16 @@ func TestHandlerIndex_bad_levels(t *testing.T) {
 }
 
 func TestHandlerIndex_bad_get_index(t *testing.T) {
-	m := &coreStorageAlertMock{}
+	m := &corestorage.AlertMock{
+		IndexFunc: func(levels []alert2.Level) (alert2.Alerts, error) {
+			return nil, fmt.Errorf("err1")
+		},
+	}
 
 	a := &Alerts{
 		alertManager: m,
 		logger:       zap.NewNop(),
 	}
-
-	m.On("Index", mock.Anything).Return(nil, fmt.Errorf("err1"))
 
 	rw := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, "/", nil)
@@ -51,13 +53,6 @@ func TestHandlerIndex_bad_get_index(t *testing.T) {
 }
 
 func TestHandlerIndex(t *testing.T) {
-	m := &coreStorageAlertMock{}
-
-	a := &Alerts{
-		alertManager: m,
-		logger:       zap.NewNop(),
-	}
-
 	al := &alert2.Alert{
 		Name:       "1",
 		Level:      2,
@@ -66,7 +61,16 @@ func TestHandlerIndex(t *testing.T) {
 		Count:      3,
 	}
 
-	m.On("Index", mock.Anything).Return(alert2.Alerts{al}, nil)
+	m := &corestorage.AlertMock{
+		IndexFunc: func(levels []alert2.Level) (alert2.Alerts, error) {
+			return alert2.Alerts{al}, nil
+		},
+	}
+
+	a := &Alerts{
+		alertManager: m,
+		logger:       zap.NewNop(),
+	}
 
 	rw := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, "/", nil)

@@ -1,6 +1,7 @@
 package loki
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -76,6 +77,10 @@ func New(cfg loki.Loki, logger *zap.Logger) (*Loki, error) {
 	}
 
 	return m, nil
+}
+
+func (m *Loki) CoreApiHandler(req []string, body []byte) (any, int, error) {
+	return nil, http.StatusNotImplemented, fmt.Errorf("not implemented")
 }
 
 // Stop the datasource

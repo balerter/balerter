@@ -8,11 +8,11 @@ import (
 
 // Options represents Alert options
 type Options struct {
-	Channels []string
-	Quiet    bool
-	Repeat   int
-	Image    string
-	Fields   map[string]string
+	Channels []string          `json:"channels"`
+	Quiet    bool              `json:"quiet"`
+	Repeat   int               `json:"repeat"`
+	Image    string            `json:"image"`
+	Fields   map[string]string `json:"fields"`
 }
 
 func NewOptions() *Options {

@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"fmt"
 	"github.com/balerter/balerter/internal/config/datasources"
 	"github.com/balerter/balerter/internal/datasource/provider/clickhouse"
 	"github.com/balerter/balerter/internal/datasource/provider/loki"
@@ -8,6 +9,9 @@ import (
 	"github.com/balerter/balerter/internal/datasource/provider/postgres"
 	"github.com/balerter/balerter/internal/datasource/provider/prometheus"
 	"github.com/balerter/balerter/internal/modules"
+	"net/http"
+	"strings"
+
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
@@ -76,6 +80,24 @@ func (m *Manager) Init(cfg *datasources.DataSources) error {
 	}
 
 	return nil
+}
+
+func (m *Manager) CoreApiHandler(req []string, body []byte) (any, int, error) {
+	if len(req) < 2 {
+		return nil, http.StatusBadRequest, fmt.Errorf("invalid request")
+	}
+	datasourceName := strings.TrimSpace(req[0] + "." + req[1])
+
+	if datasourceName == "" {
+		return nil, http.StatusBadRequest, fmt.Errorf("datasource name is empty")
+	}
+	for n, m := range m.modules {
+		if n == datasourceName {
+			return m.CoreApiHandler(req, body)
+		}
+	}
+
+	return nil, http.StatusBadRequest, fmt.Errorf("datasource %q not found", datasourceName)
 }
 
 // Stop all datasources

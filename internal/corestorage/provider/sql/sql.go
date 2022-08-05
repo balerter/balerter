@@ -2,6 +2,7 @@ package sql
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/balerter/balerter/internal/config/storages/core/tables"
@@ -56,6 +57,10 @@ func New(name, driver, connectionString string, alertsCfg tables.TableAlerts, kv
 	}
 
 	return p, nil
+}
+
+func (p *SQL) RunApiHandler(rw http.ResponseWriter, req *http.Request) {
+	http.Error(rw, "coreapi is not supported for this module", http.StatusNotImplemented)
 }
 
 // Name returns the storage name

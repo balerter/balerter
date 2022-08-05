@@ -1,9 +1,11 @@
 package modules
 
 import (
-	"github.com/balerter/balerter/internal/script/script"
-	lua "github.com/yuin/gopher-lua"
 	"time"
+
+	"github.com/balerter/balerter/internal/script/script"
+
+	lua "github.com/yuin/gopher-lua"
 )
 
 //go:generate moq -out module_mock.go -skip-ensure -fmt goimports . Module
@@ -30,6 +32,7 @@ type Module interface {
 	Name() string
 	GetLoader(j Job) lua.LGFunction
 	Stop() error
+	CoreApiHandler(req []string, body []byte) (any, int, error)
 }
 
 // ModuleTest is an interface for core test module

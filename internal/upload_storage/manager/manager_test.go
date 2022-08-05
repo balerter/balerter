@@ -1,33 +1,16 @@
 package manager
 
 import (
+	"testing"
+
 	"github.com/balerter/balerter/internal/config/storages/upload"
 	"github.com/balerter/balerter/internal/config/storages/upload/s3"
 	"github.com/balerter/balerter/internal/modules"
+
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
-	"testing"
 )
-
-type moduleMock struct {
-	name string
-	mock.Mock
-}
-
-func (m *moduleMock) Name() string {
-	return ""
-}
-
-func (m *moduleMock) GetLoader(_ modules.Job) lua.LGFunction {
-	return nil
-}
-
-func (m *moduleMock) Stop() error {
-	return nil
-}
 
 func TestNew(t *testing.T) {
 	m := New(zap.NewNop())
@@ -35,8 +18,12 @@ func TestNew(t *testing.T) {
 }
 
 func TestManager_Get(t *testing.T) {
-	m1 := &moduleMock{name: "foo"}
-	m2 := &moduleMock{name: "bar"}
+	m1 := &modules.ModuleMock{NameFunc: func() string {
+		return "foo"
+	}}
+	m2 := &modules.ModuleMock{NameFunc: func() string {
+		return "bar"
+	}}
 
 	m := &Manager{
 		logger:  zap.NewNop(),
