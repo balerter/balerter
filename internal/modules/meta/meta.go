@@ -34,7 +34,7 @@ func New(logger *zap.Logger) *Meta {
 	return m
 }
 
-func (m *Meta) CoreApiHandler(req []string, body []byte) (any, int, error) {
+func (m *Meta) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
 	return nil, http.StatusNotImplemented, fmt.Errorf("not implemented")
 }
 

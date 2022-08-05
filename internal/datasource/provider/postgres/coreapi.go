@@ -2,12 +2,17 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"go.uber.org/zap"
 )
 
-func (m *Postgres) CoreApiHandler(_ []string, body []byte) (any, int, error) {
+func (m *Postgres) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
+	if method != "query" {
+		return nil, http.StatusBadRequest, fmt.Errorf("unknown method %q", method)
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 	defer cancel()
 

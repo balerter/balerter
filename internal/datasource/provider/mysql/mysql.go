@@ -66,7 +66,7 @@ func New(cfg mysql.Mysql, sqlConnFunc SQLConnFunc, logger *zap.Logger) (*MySQL, 
 	return p, nil
 }
 
-func (m *MySQL) CoreApiHandler(req []string, body []byte) (any, int, error) {
+func (m *MySQL) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
 	return nil, http.StatusNotImplemented, fmt.Errorf("not implemented")
 }
 

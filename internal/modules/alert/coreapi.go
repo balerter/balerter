@@ -1,39 +1,31 @@
 package alert
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/balerter/balerter/internal/alert"
 
 	"go.uber.org/zap"
 )
 
-type coreapiRequest struct {
-	Message  string           `json:"message"`
-	Options  alert.Options    `json:"options"`
-	Escalate map[int][]string `json:"escalate"`
-}
-
 type coreapiResponse struct {
 	Alert           *alert.Alert `json:"alert"`
 	LevelWasUpdated bool         `json:"level_was_updated"`
 }
 
-// CoreApiHandler expect req:
-// /alert/<method>/<name>
-
-func (a *Alert) CoreApiHandler(req []string, body []byte) (any, int, error) {
-	if len(req) != 2 {
+func (a *Alert) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
+	if len(parts) != 1 {
 		return nil, http.StatusBadRequest, fmt.Errorf("invalid request, expected: /alert/{method}/{name}")
 	}
 
-	name := req[1]
+	name := parts[0]
 
 	var level alert.Level
 
-	switch req[0] {
+	switch method {
 	case "warn", "warning":
 		level = alert.LevelWarn
 	case "error", "fail":
@@ -50,21 +42,59 @@ func (a *Alert) CoreApiHandler(req []string, body []byte) (any, int, error) {
 		}
 		return al, 0, nil
 	default:
-		return nil, http.StatusBadRequest, fmt.Errorf("invalid method: %s", req[0])
+		return nil, http.StatusBadRequest, fmt.Errorf("unknown method: %s", method)
 	}
 
-	r := coreapiRequest{}
-
-	errUnmarshalBody := json.Unmarshal(body, &r)
-	if errUnmarshalBody != nil {
-		return nil, http.StatusInternalServerError, fmt.Errorf("error unmarshal body: %s", errUnmarshalBody)
+	if len(body) == 0 {
+		return nil, http.StatusBadRequest, fmt.Errorf("empty body")
 	}
 
-	if r.Message == "" {
-		return nil, http.StatusBadRequest, fmt.Errorf("message is required")
+	escalate := map[int][]string{}
+
+	var opts = alert.Options{}
+
+	if v, ok := params["channels"]; ok {
+		opts.Channels = strings.Split(v, ",")
+	}
+	if v, ok := params["quiet"]; ok {
+		if v == "true" {
+			opts.Quiet = true
+		}
+	}
+	if v, ok := params["repeat"]; ok {
+		vv, err := strconv.Atoi(v)
+		if err != nil {
+			return nil, http.StatusBadRequest, fmt.Errorf("invalid repeat value, %v", v)
+		}
+		opts.Repeat = vv
+	}
+	if v, ok := params["image"]; ok {
+		opts.Image = v
+	}
+	if v, ok := params["fields"]; ok {
+		for _, s := range strings.Split(v, ",") {
+			p := strings.Split(s, ":")
+			if len(p) != 2 {
+				return nil, http.StatusBadRequest, fmt.Errorf("invalid fields value: %s", s)
+			}
+			opts.Fields[p[0]] = p[1]
+		}
+	}
+	if v, ok := params["escalate"]; ok {
+		for _, s := range strings.Split(v, ";") {
+			p := strings.Split(s, ":")
+			if len(p) != 2 {
+				return nil, http.StatusBadRequest, fmt.Errorf("invalid escalate value: %s", s)
+			}
+			n, err := strconv.Atoi(p[0])
+			if err != nil {
+				return nil, http.StatusBadRequest, fmt.Errorf("invalid escalate value: %s", s)
+			}
+			escalate[n] = strings.Split(p[1], ",")
+		}
 	}
 
-	updatedAlert, levelWasUpdated, err := a.call(name, r.Message, nil, r.Escalate, level, &r.Options)
+	updatedAlert, levelWasUpdated, err := a.call(name, string(body), nil, escalate, level, &opts)
 	if err != nil {
 		a.logger.Error("error alert.call", zap.Error(err))
 		return nil, http.StatusInternalServerError, fmt.Errorf("internal error")

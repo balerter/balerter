@@ -2,6 +2,7 @@ package clickhouse
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -12,7 +13,11 @@ import (
 	"go.uber.org/zap"
 )
 
-func (m *Clickhouse) CoreApiHandler(_ []string, body []byte) (any, int, error) {
+func (m *Clickhouse) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
+	if method != "query" {
+		return nil, http.StatusBadRequest, fmt.Errorf("unknown method %q", method)
+	}
+
 	ctx, ctxCancel := context.WithTimeout(context.Background(), m.timeout)
 	defer ctxCancel()
 

@@ -47,7 +47,7 @@ func New(cfg s3.S3, logger *zap.Logger) (*Provider, error) {
 	return p, nil
 }
 
-func (p *Provider) CoreApiHandler(req []string, body []byte) (any, int, error) {
+func (p *Provider) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
 	return nil, http.StatusNotImplemented, fmt.Errorf("not implemented")
 }
 

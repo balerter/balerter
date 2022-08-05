@@ -1,81 +1,46 @@
 package prometheus
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
-type runapiRequest struct {
-	Query   string `json:"query"`
-	Range   string `json:"range"`
-	Options struct {
-		Time  int `json:"time"`
-		Start int `json:"start"`
-		End   int `json:"end"`
-		Step  int `json:"step"`
-	} `json:"options"`
-}
+func (m *Prometheus) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
+	var u string
 
-func (r runapiRequest) validate() error {
-	if r.Query == "" && r.Range == "" {
-		return fmt.Errorf("query or range must be set")
+	switch method {
+	case "query":
+		opts := &queryQueryOptions{}
+		if v, ok := params["time"]; ok {
+			opts.Time = v
+		}
+		u = m.sendQuery(string(body), opts)
+	case "range":
+		opts := &queryRangeOptions{}
+		if v, ok := params["start"]; ok {
+			opts.Start = v
+		}
+		if v, ok := params["end"]; ok {
+			opts.End = v
+		}
+		if v, ok := params["step"]; ok {
+			opts.Step = v
+		}
+		u = m.sendRange(string(body), opts)
+	default:
+		return nil, http.StatusBadRequest, fmt.Errorf("unknown method %q", method)
 	}
 
-	if r.Query != "" && r.Range != "" {
-		return fmt.Errorf("query and range cannot be set at the same time")
+	res, errDo := m.send(u)
+	if errDo != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("error sending request: %v", errDo)
 	}
 
-	return nil
-}
+	resp, errMarshal := json.Marshal(res)
+	if errMarshal != nil {
+		return nil, http.StatusInternalServerError, fmt.Errorf("error marshaling response: %v", errMarshal)
+	}
 
-func (m *Prometheus) CoreApiHandler(req []string, body []byte) (any, int, error) {
-	return nil, http.StatusNotImplemented, fmt.Errorf("not implemented")
+	return resp, 0, nil
 }
-
-//r := runapiRequest{}
-//
-//err := json.NewDecoder(req.Body).Decode(&r)
-//if err != nil {
-//	http.Error(rw, "error decode request: "+err.Error(), http.StatusBadRequest)
-//	return
-//}
-//
-//if errValidate := r.validate(); errValidate != nil {
-//	http.Error(rw, "error validate request: "+errValidate.Error(), http.StatusBadRequest)
-//	return
-//}
-//
-//var u string
-//if r.Query != "" {
-//	opts := &queryQueryOptions{}
-//	if r.Options.Time != 0 {
-//		opts.Time = strconv.Itoa(r.Options.Time)
-//	}
-//	u = m.sendQuery(r.Query, opts)
-//} else {
-//	opts := &queryRangeOptions{}
-//	if r.Options.Start != 0 {
-//		opts.Start = strconv.Itoa(r.Options.Start)
-//	}
-//	if r.Options.End != 0 {
-//		opts.End = strconv.Itoa(r.Options.End)
-//	}
-//	if r.Options.Step != 0 {
-//		opts.Step = strconv.Itoa(r.Options.Step)
-//	}
-//	u = m.sendRange(r.Range, opts)
-//}
-//
-//res, errDo := m.send(u)
-//if errDo != nil {
-//	http.Error(rw, "error do query: "+errDo.Error(), http.StatusInternalServerError)
-//	return
-//}
-//
-//resp, errMarshal := json.Marshal(res)
-//if errMarshal != nil {
-//	http.Error(rw, "error marshal response: "+errMarshal.Error(), http.StatusInternalServerError)
-//	return
-//}
-//
-//rw.Write(resp)

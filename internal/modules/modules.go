@@ -32,7 +32,7 @@ type Module interface {
 	Name() string
 	GetLoader(j Job) lua.LGFunction
 	Stop() error
-	CoreApiHandler(req []string, body []byte) (any, int, error)
+	CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error)
 }
 
 // ModuleTest is an interface for core test module

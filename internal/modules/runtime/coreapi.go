@@ -1,10 +1,15 @@
 package runtime
 
 import (
+	"fmt"
 	"net/http"
 )
 
-func (m *Runtime) CoreApiHandler(_ []string, _ []byte) (any, int, error) {
+func (m *Runtime) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
+	if method != "get" {
+		return nil, http.StatusBadRequest, fmt.Errorf("unknown method %q", method)
+	}
+
 	resp := struct {
 		LogLevel     string `json:"log_level"`
 		IsDebug      bool   `json:"is_debug"`

@@ -79,7 +79,7 @@ func New(cfg loki.Loki, logger *zap.Logger) (*Loki, error) {
 	return m, nil
 }
 
-func (m *Loki) CoreApiHandler(req []string, body []byte) (any, int, error) {
+func (m *Loki) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
 	return nil, http.StatusNotImplemented, fmt.Errorf("not implemented")
 }
 

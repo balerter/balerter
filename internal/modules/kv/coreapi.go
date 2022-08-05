@@ -5,52 +5,41 @@ import (
 	"net/http"
 )
 
-func (kv *KV) CoreApiHandler(req []string, body []byte) (any, int, error) {
-	if len(req) == 0 {
-		return nil, http.StatusBadRequest, fmt.Errorf("empty path")
-	}
-
-	method := req[0]
-
-	switch method {
-	case "all":
+func (kv *KV) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
+	if method == "all" {
 		data, err := kv.engine.All()
 		if err != nil {
 			return nil, http.StatusInternalServerError, err
 		}
 		return data, 0, nil
+	}
+
+	if len(parts) != 1 {
+		return nil, http.StatusBadRequest, fmt.Errorf("invalid request")
+	}
+	keyName := parts[0]
+
+	switch method {
 	case "put":
-		if len(req) != 2 {
-			return nil, http.StatusBadRequest, fmt.Errorf("wrong number of params")
-		}
-		err := kv.engine.Put(req[1], string(body))
+		err := kv.engine.Put(keyName, string(body))
 		if err != nil {
 			return nil, http.StatusInternalServerError, err
 		}
 		return nil, 0, nil
 	case "upsert":
-		if len(req) != 2 {
-			return nil, http.StatusBadRequest, fmt.Errorf("wrong number of params")
-		}
-		err := kv.engine.Upsert(req[1], string(body))
+		err := kv.engine.Upsert(keyName, string(body))
 		if err != nil {
 			return nil, http.StatusInternalServerError, err
 		}
 		return nil, 0, nil
 	case "get":
-		if len(req) != 2 {
-			return nil, http.StatusBadRequest, fmt.Errorf("wrong number of params")
-		}
-		v, err := kv.engine.Get(req[1])
+		v, err := kv.engine.Get(keyName)
 		if err != nil {
 			return nil, http.StatusInternalServerError, err
 		}
 		return v, 0, nil
 	case "delete":
-		if len(req) != 2 {
-			return nil, http.StatusBadRequest, fmt.Errorf("wrong number of params")
-		}
-		err := kv.engine.Delete(req[1])
+		err := kv.engine.Delete(keyName)
 		if err != nil {
 			return nil, http.StatusInternalServerError, err
 		}

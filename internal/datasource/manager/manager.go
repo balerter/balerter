@@ -82,22 +82,26 @@ func (m *Manager) Init(cfg *datasources.DataSources) error {
 	return nil
 }
 
-func (m *Manager) CoreApiHandler(req []string, body []byte) (any, int, error) {
-	if len(req) < 2 {
+func (m *Manager) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
+	// for datasource manager Method is a datasource type, parts[0] is a datasource name, parts[1] is a method for a datasource provider
+	// for example: /datasource/clickhouse/ch1/query
+	//               ^^^^^^^^^							trim by coreapi handler
+	//                          ^^^^^^^^^^				method
+	//                                     ^^^ 			parts[0]
+	//                                         ^^^^^	parts[1]
+	if len(parts) != 2 {
 		return nil, http.StatusBadRequest, fmt.Errorf("invalid request")
 	}
-	datasourceName := strings.TrimSpace(req[0] + "." + req[1])
 
-	if datasourceName == "" {
-		return nil, http.StatusBadRequest, fmt.Errorf("datasource name is empty")
-	}
+	datasourceName := strings.TrimSpace(method + "." + parts[0])
+
 	for n, m := range m.modules {
 		if n == datasourceName {
-			return m.CoreApiHandler(req, body)
+			return m.CoreApiHandler(parts[1], parts[2:], params, body)
 		}
 	}
 
-	return nil, http.StatusBadRequest, fmt.Errorf("datasource %q not found", datasourceName)
+	return nil, http.StatusBadRequest, fmt.Errorf("datasource %q is not found", datasourceName)
 }
 
 // Stop all datasources

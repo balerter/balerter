@@ -2,14 +2,9 @@ package tls
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"net/http"
 )
-
-type coreapiRequest struct {
-	Hostname string `json:"hostname"`
-}
 
 type coreapiResponse struct {
 	Issuer         string   `json:"issuer"`
@@ -18,21 +13,12 @@ type coreapiResponse struct {
 	EmailAddresses []string `json:"email_addresses"`
 }
 
-func (a *TLS) CoreApiHandler(req []string, body []byte) (any, int, error) {
-	if len(req) != 1 {
-		return nil, http.StatusBadRequest, fmt.Errorf("invalid request, expected 1 argument, got %d", len(req))
-	}
-	if req[0] != "get" {
-		return nil, http.StatusBadRequest, fmt.Errorf("invalid request, unknown method %q", req[0])
+func (a *TLS) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
+	if method != "get" {
+		return nil, http.StatusBadRequest, fmt.Errorf("unknown method %q", method)
 	}
 
-	var r coreapiRequest
-	errUnmarshalBody := json.Unmarshal(body, &r)
-	if errUnmarshalBody != nil {
-		return nil, http.StatusBadRequest, fmt.Errorf("error unmarshal body: %s", errUnmarshalBody)
-	}
-
-	conn, errDial := a.dialFunc("tcp", r.Hostname+":443", &tls.Config{InsecureSkipVerify: true})
+	conn, errDial := a.dialFunc("tcp", string(body)+":443", &tls.Config{InsecureSkipVerify: true})
 	if errDial != nil {
 		return nil, http.StatusBadRequest, fmt.Errorf("error dial to host: %s", errDial)
 	}

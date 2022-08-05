@@ -56,7 +56,7 @@ func New(logger *zap.Logger) *HTTP {
 	return h
 }
 
-func (h *HTTP) CoreApiHandler(req []string, body []byte) (any, int, error) {
+func (h *HTTP) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
 	return nil, http.StatusNotImplemented, fmt.Errorf("not implemented")
 }
 

@@ -15,7 +15,7 @@ import (
 //
 // 		// make and configure a mocked Module
 // 		mockedModule := &ModuleMock{
-// 			CoreApiHandlerFunc: func(req []string, body []byte) (any, int, error) {
+// 			CoreApiHandlerFunc: func(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
 // 				panic("mock out the CoreApiHandler method")
 // 			},
 // 			GetLoaderFunc: func(j Job) lua.LGFunction {
@@ -35,7 +35,7 @@ import (
 // 	}
 type ModuleMock struct {
 	// CoreApiHandlerFunc mocks the CoreApiHandler method.
-	CoreApiHandlerFunc func(req []string, body []byte) (any, int, error)
+	CoreApiHandlerFunc func(method string, parts []string, params map[string]string, body []byte) (any, int, error)
 
 	// GetLoaderFunc mocks the GetLoader method.
 	GetLoaderFunc func(j Job) lua.LGFunction
@@ -50,8 +50,12 @@ type ModuleMock struct {
 	calls struct {
 		// CoreApiHandler holds details about calls to the CoreApiHandler method.
 		CoreApiHandler []struct {
-			// Req is the req argument value.
-			Req []string
+			// Method is the method argument value.
+			Method string
+			// Parts is the parts argument value.
+			Parts []string
+			// Params is the params argument value.
+			Params map[string]string
 			// Body is the body argument value.
 			Body []byte
 		}
@@ -74,33 +78,41 @@ type ModuleMock struct {
 }
 
 // CoreApiHandler calls CoreApiHandlerFunc.
-func (mock *ModuleMock) CoreApiHandler(req []string, body []byte) (any, int, error) {
+func (mock *ModuleMock) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
 	if mock.CoreApiHandlerFunc == nil {
 		panic("ModuleMock.CoreApiHandlerFunc: method is nil but Module.CoreApiHandler was just called")
 	}
 	callInfo := struct {
-		Req  []string
-		Body []byte
+		Method string
+		Parts  []string
+		Params map[string]string
+		Body   []byte
 	}{
-		Req:  req,
-		Body: body,
+		Method: method,
+		Parts:  parts,
+		Params: params,
+		Body:   body,
 	}
 	mock.lockCoreApiHandler.Lock()
 	mock.calls.CoreApiHandler = append(mock.calls.CoreApiHandler, callInfo)
 	mock.lockCoreApiHandler.Unlock()
-	return mock.CoreApiHandlerFunc(req, body)
+	return mock.CoreApiHandlerFunc(method, parts, params, body)
 }
 
 // CoreApiHandlerCalls gets all the calls that were made to CoreApiHandler.
 // Check the length with:
 //     len(mockedModule.CoreApiHandlerCalls())
 func (mock *ModuleMock) CoreApiHandlerCalls() []struct {
-	Req  []string
-	Body []byte
+	Method string
+	Parts  []string
+	Params map[string]string
+	Body   []byte
 } {
 	var calls []struct {
-		Req  []string
-		Body []byte
+		Method string
+		Parts  []string
+		Params map[string]string
+		Body   []byte
 	}
 	mock.lockCoreApiHandler.RLock()
 	calls = mock.calls.CoreApiHandler
