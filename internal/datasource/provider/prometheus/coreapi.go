@@ -42,5 +42,5 @@ func (m *Prometheus) CoreApiHandler(method string, parts []string, params map[st
 		return nil, http.StatusInternalServerError, fmt.Errorf("error marshaling response: %v", errMarshal)
 	}
 
-	return resp, 0, nil
+	return json.RawMessage(resp), 0, nil
 }
