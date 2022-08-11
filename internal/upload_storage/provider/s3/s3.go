@@ -1,10 +1,12 @@
 package s3
 
 import (
+	"fmt"
 	"github.com/balerter/balerter/internal/config/storages/upload/s3"
 	"github.com/balerter/balerter/internal/modules"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 // Provider represents S3 upload storage provider
@@ -43,6 +45,10 @@ func New(cfg s3.S3, logger *zap.Logger) (*Provider, error) {
 	}
 
 	return p, nil
+}
+
+func (p *Provider) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
+	return nil, http.StatusNotImplemented, fmt.Errorf("not implemented")
 }
 
 // Name returns the module name

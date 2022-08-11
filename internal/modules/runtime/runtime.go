@@ -20,6 +20,7 @@ func Methods() []string {
 		"isOnce",
 		"withScript",
 		"configSource",
+		"safeMode",
 	}
 }
 
@@ -54,6 +55,7 @@ func (m *Runtime) GetLoader(_ modules.Job) lua.LGFunction {
 				"isOnce":       m.returnBool(m.flg.Once),
 				"withScript":   m.returnString(m.flg.Script),
 				"configSource": m.returnString(m.flg.ConfigFilePath),
+				"safeMode":     m.returnBool(m.flg.SafeMode),
 			}
 
 			mod := luaState.SetFuncs(luaState.NewTable(), exports)

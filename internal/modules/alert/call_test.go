@@ -517,7 +517,7 @@ func TestAlert_call_error_get_alertData(t *testing.T) {
 		logger: zap.NewNop(),
 	}
 
-	f := a.call(nil, map[int][]string{}, alert2.LevelError)
+	f := a.callFromLua(nil, map[int][]string{}, alert2.LevelError)
 
 	ls := lua.NewState()
 
@@ -544,7 +544,7 @@ func TestAlert_call_error_update(t *testing.T) {
 		},
 	}
 
-	f := a.call(j.Script().Channels, map[int][]string{}, alert2.LevelError)
+	f := a.callFromLua(j.Script().Channels, map[int][]string{}, alert2.LevelError)
 
 	ls := lua.NewState()
 	ls.Push(lua.LString("foo"))
@@ -581,7 +581,7 @@ func TestAlert_call_level_was_updated(t *testing.T) {
 		},
 	}
 
-	f := a.call(j.Script().Channels, map[int][]string{}, alert2.LevelError)
+	f := a.callFromLua(j.Script().Channels, map[int][]string{}, alert2.LevelError)
 
 	ls := lua.NewState()
 	ls.Push(lua.LString("foo"))
@@ -618,7 +618,7 @@ func TestAlert_call_level_was_not_updated(t *testing.T) {
 		},
 	}
 
-	f := a.call(j.Script().Channels, map[int][]string{}, alert2.LevelError)
+	f := a.callFromLua(j.Script().Channels, map[int][]string{}, alert2.LevelError)
 
 	ls := lua.NewState()
 	ls.Push(lua.LString("foo"))
@@ -657,7 +657,7 @@ func TestAlert_call_repeat(t *testing.T) {
 		},
 	}
 
-	f := a.call(j.Script().Channels, map[int][]string{}, alert2.LevelError)
+	f := a.callFromLua(j.Script().Channels, map[int][]string{}, alert2.LevelError)
 
 	ls := lua.NewState()
 	ls.Push(lua.LString("id"))
@@ -696,7 +696,7 @@ func TestAlert_call_escalate(t *testing.T) {
 		logger:    zap.NewNop(),
 	}
 
-	f := a.call(nil, map[int][]string{10: {"foo", "bar"}}, alert2.LevelError)
+	f := a.callFromLua(nil, map[int][]string{10: {"foo", "bar"}}, alert2.LevelError)
 
 	ls := lua.NewState()
 	ls.Push(lua.LString("id"))

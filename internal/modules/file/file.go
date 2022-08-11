@@ -1,6 +1,8 @@
 package file
 
 import (
+	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/balerter/balerter/internal/modules"
@@ -32,6 +34,10 @@ func New(logger *zap.Logger) *File {
 	}
 
 	return f
+}
+
+func (f *File) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
+	return nil, http.StatusNotImplemented, fmt.Errorf("not implemented")
 }
 
 // Name returns the module name

@@ -3,14 +3,15 @@ package prometheus
 import (
 	"bytes"
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/url"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
 func Test_sendRange(t *testing.T) {
@@ -119,7 +120,7 @@ func Test_send_bad_response_status(t *testing.T) {
 
 	_, err := m.send("domain.com/foo")
 	require.Error(t, err)
-	assert.Equal(t, "unexpected response code 0", err.Error())
+	assert.Equal(t, "unexpected response code 0, {\"data\":{\"resultType\":\"vector\",\"result\":[]}}", err.Error())
 }
 
 func Test_send_bad_response_body(t *testing.T) {
@@ -182,5 +183,5 @@ func Test_send_error_read_body(t *testing.T) {
 
 	_, err := m.send("domain.com/foo")
 	require.Error(t, err)
-	assert.Equal(t, "err1", err.Error())
+	assert.Equal(t, "error read response body, err1", err.Error())
 }

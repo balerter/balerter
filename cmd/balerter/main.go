@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	apiManager "github.com/balerter/balerter/internal/api/manager"
+	"github.com/balerter/balerter/internal/coreapi"
 	"github.com/balerter/balerter/internal/corestorage"
 	alertModule "github.com/balerter/balerter/internal/modules/alert"
 	"github.com/balerter/balerter/internal/modules/file"
@@ -149,13 +150,34 @@ func run(
 
 	coreModules := initCoreModules(coreStorageAlert, coreStorageKV, channelsMgr, lgr.Logger(), flg)
 
+	if cfg.API != nil && cfg.API.CoreApi != nil && cfg.API.CoreApi.Address != "" {
+		lgr.Logger().Info("init coreapi")
+
+		lnCoreApi, errLnRunApi := net.Listen("tcp", cfg.API.CoreApi.Address)
+		if errLnRunApi != nil {
+			return fmt.Sprintf("error listen tcp address '%s', %v", cfg.API.CoreApi.Address, errLnRunApi), 1
+		}
+		defer lnCoreApi.Close()
+
+		coreAPI := coreapi.New(dsMgr, coreModules, cfg.API.CoreApi.AuthToken, lgr.Logger())
+
+		wg.Add(1)
+		go coreAPI.Run(ctx, ctxCancel, wg, lnCoreApi)
+	}
+
 	// ---------------------
 	// |
 	// | Runner
 	// |
 	lgr.Logger().Info("init runner")
+
+	var updateInterval int
+	if cfg.Scripts != nil {
+		updateInterval = cfg.Scripts.UpdateInterval
+	}
+
 	rnr, errCreateRunner := runner.New(
-		time.Millisecond*time.Duration(cfg.Scripts.UpdateInterval),
+		time.Millisecond*time.Duration(updateInterval),
 		scriptsMgr,
 		dsMgr,
 		uploadStoragesMgr,

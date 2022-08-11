@@ -3,48 +3,19 @@ package alerts
 import (
 	"context"
 	"fmt"
-	"github.com/balerter/balerter/internal/alert"
-	"github.com/go-chi/chi"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/corestorage"
+
+	"github.com/go-chi/chi"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
-
-type coreStorageAlertMock struct {
-	mock.Mock
-}
-
-func (m *coreStorageAlertMock) Update(name string, level alert.Level) (*alert.Alert, bool, error) {
-	args := m.Called(name, level)
-	a := args.Get(0)
-	if a == nil {
-		return nil, args.Bool(1), args.Error(2)
-	}
-	return a.(*alert.Alert), args.Bool(1), args.Error(2)
-}
-
-func (m *coreStorageAlertMock) Index(levels []alert.Level) (alert.Alerts, error) {
-	args := m.Called(levels)
-	a := args.Get(0)
-	if a == nil {
-		return nil, args.Error(1)
-	}
-	return a.(alert.Alerts), args.Error(1)
-}
-
-func (m *coreStorageAlertMock) Get(name string) (*alert.Alert, error) {
-	args := m.Called(name)
-	a := args.Get(0)
-	if a == nil {
-		return nil, args.Error(1)
-	}
-	return a.(*alert.Alert), args.Error(1)
-}
 
 func TestHandlerGet_empty_name(t *testing.T) {
 	a := Alerts{}
@@ -59,14 +30,16 @@ func TestHandlerGet_empty_name(t *testing.T) {
 }
 
 func TestHandlerGet_get_error(t *testing.T) {
-	m := &coreStorageAlertMock{}
+	m := &corestorage.AlertMock{
+		GetFunc: func(name string) (*alert.Alert, error) {
+			return nil, fmt.Errorf("err1")
+		},
+	}
 
 	a := Alerts{
 		alertManager: m,
 		logger:       zap.NewNop(),
 	}
-
-	m.On("Get", mock.Anything).Return(nil, fmt.Errorf("err1"))
 
 	rw := httptest.NewRecorder()
 
@@ -84,14 +57,16 @@ func TestHandlerGet_get_error(t *testing.T) {
 }
 
 func TestHandlerGet_alert_not_found(t *testing.T) {
-	m := &coreStorageAlertMock{}
+	m := &corestorage.AlertMock{
+		GetFunc: func(name string) (*alert.Alert, error) {
+			return nil, nil
+		},
+	}
 
 	a := Alerts{
 		alertManager: m,
 		logger:       zap.NewNop(),
 	}
-
-	m.On("Get", mock.Anything).Return(nil, nil)
 
 	rw := httptest.NewRecorder()
 
@@ -109,13 +84,6 @@ func TestHandlerGet_alert_not_found(t *testing.T) {
 }
 
 func TestHandlerGet(t *testing.T) {
-	m := &coreStorageAlertMock{}
-
-	a := Alerts{
-		alertManager: m,
-		logger:       zap.NewNop(),
-	}
-
 	al := &alert.Alert{
 		Name:       "1",
 		Level:      2,
@@ -124,7 +92,16 @@ func TestHandlerGet(t *testing.T) {
 		Count:      3,
 	}
 
-	m.On("Get", mock.Anything).Return(al, nil)
+	m := &corestorage.AlertMock{
+		GetFunc: func(name string) (*alert.Alert, error) {
+			return al, nil
+		},
+	}
+
+	a := Alerts{
+		alertManager: m,
+		logger:       zap.NewNop(),
+	}
 
 	rw := httptest.NewRecorder()
 

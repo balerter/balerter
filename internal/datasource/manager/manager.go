@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"fmt"
 	"github.com/balerter/balerter/internal/config/datasources"
 	"github.com/balerter/balerter/internal/datasource/provider/clickhouse"
 	"github.com/balerter/balerter/internal/datasource/provider/loki"
@@ -8,6 +9,9 @@ import (
 	"github.com/balerter/balerter/internal/datasource/provider/postgres"
 	"github.com/balerter/balerter/internal/datasource/provider/prometheus"
 	"github.com/balerter/balerter/internal/modules"
+	"net/http"
+	"strings"
+
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
@@ -76,6 +80,28 @@ func (m *Manager) Init(cfg *datasources.DataSources) error {
 	}
 
 	return nil
+}
+
+func (m *Manager) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
+	// for datasource manager Method is a datasource type, parts[0] is a datasource name, parts[1] is a method for a datasource provider
+	// for example: /datasource/clickhouse/ch1/query
+	//               ^^^^^^^^^							trim by coreapi handler
+	//                          ^^^^^^^^^^				method
+	//                                     ^^^ 			parts[0]
+	//                                         ^^^^^	parts[1]
+	if len(parts) != 2 {
+		return nil, http.StatusBadRequest, fmt.Errorf("invalid request")
+	}
+
+	datasourceName := strings.TrimSpace(method + "." + parts[0])
+
+	for n, m := range m.modules {
+		if n == datasourceName {
+			return m.CoreApiHandler(parts[1], parts[2:], params, body)
+		}
+	}
+
+	return nil, http.StatusBadRequest, fmt.Errorf("datasource %q is not found", datasourceName)
 }
 
 // Stop all datasources

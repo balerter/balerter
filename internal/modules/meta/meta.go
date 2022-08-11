@@ -1,9 +1,11 @@
 package meta
 
 import (
+	"fmt"
 	"github.com/balerter/balerter/internal/modules"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 // ModuleName returns the module name
@@ -30,6 +32,10 @@ func New(logger *zap.Logger) *Meta {
 	}
 
 	return m
+}
+
+func (m *Meta) CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error) {
+	return nil, http.StatusNotImplemented, fmt.Errorf("not implemented")
 }
 
 // Name returns the module name

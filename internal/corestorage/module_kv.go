@@ -4,6 +4,7 @@
 package corestorage
 
 import (
+	"net/http"
 	"sync"
 )
 
@@ -24,6 +25,9 @@ import (
 // 			},
 // 			PutFunc: func(s1 string, s2 string) error {
 // 				panic("mock out the Put method")
+// 			},
+// 			RunApiHandlerFunc: func(rw http.ResponseWriter, req *http.Request)  {
+// 				panic("mock out the RunApiHandler method")
 // 			},
 // 			UpsertFunc: func(s1 string, s2 string) error {
 // 				panic("mock out the Upsert method")
@@ -46,6 +50,9 @@ type KVMock struct {
 
 	// PutFunc mocks the Put method.
 	PutFunc func(s1 string, s2 string) error
+
+	// RunApiHandlerFunc mocks the RunApiHandler method.
+	RunApiHandlerFunc func(rw http.ResponseWriter, req *http.Request)
 
 	// UpsertFunc mocks the Upsert method.
 	UpsertFunc func(s1 string, s2 string) error
@@ -72,6 +79,13 @@ type KVMock struct {
 			// S2 is the s2 argument value.
 			S2 string
 		}
+		// RunApiHandler holds details about calls to the RunApiHandler method.
+		RunApiHandler []struct {
+			// Rw is the rw argument value.
+			Rw http.ResponseWriter
+			// Req is the req argument value.
+			Req *http.Request
+		}
 		// Upsert holds details about calls to the Upsert method.
 		Upsert []struct {
 			// S1 is the s1 argument value.
@@ -80,11 +94,12 @@ type KVMock struct {
 			S2 string
 		}
 	}
-	lockAll    sync.RWMutex
-	lockDelete sync.RWMutex
-	lockGet    sync.RWMutex
-	lockPut    sync.RWMutex
-	lockUpsert sync.RWMutex
+	lockAll           sync.RWMutex
+	lockDelete        sync.RWMutex
+	lockGet           sync.RWMutex
+	lockPut           sync.RWMutex
+	lockRunApiHandler sync.RWMutex
+	lockUpsert        sync.RWMutex
 }
 
 // All calls AllFunc.
@@ -207,6 +222,41 @@ func (mock *KVMock) PutCalls() []struct {
 	mock.lockPut.RLock()
 	calls = mock.calls.Put
 	mock.lockPut.RUnlock()
+	return calls
+}
+
+// RunApiHandler calls RunApiHandlerFunc.
+func (mock *KVMock) RunApiHandler(rw http.ResponseWriter, req *http.Request) {
+	if mock.RunApiHandlerFunc == nil {
+		panic("KVMock.RunApiHandlerFunc: method is nil but KV.RunApiHandler was just called")
+	}
+	callInfo := struct {
+		Rw  http.ResponseWriter
+		Req *http.Request
+	}{
+		Rw:  rw,
+		Req: req,
+	}
+	mock.lockRunApiHandler.Lock()
+	mock.calls.RunApiHandler = append(mock.calls.RunApiHandler, callInfo)
+	mock.lockRunApiHandler.Unlock()
+	mock.RunApiHandlerFunc(rw, req)
+}
+
+// RunApiHandlerCalls gets all the calls that were made to RunApiHandler.
+// Check the length with:
+//     len(mockedKV.RunApiHandlerCalls())
+func (mock *KVMock) RunApiHandlerCalls() []struct {
+	Rw  http.ResponseWriter
+	Req *http.Request
+} {
+	var calls []struct {
+		Rw  http.ResponseWriter
+		Req *http.Request
+	}
+	mock.lockRunApiHandler.RLock()
+	calls = mock.calls.RunApiHandler
+	mock.lockRunApiHandler.RUnlock()
 	return calls
 }
 

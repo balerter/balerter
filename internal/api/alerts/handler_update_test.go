@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	alert2 "github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/corestorage"
 	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -97,14 +98,16 @@ func TestHandlerUpdate_error_level_from_string(t *testing.T) {
 }
 
 func TestHandlerUpdate_error_update(t *testing.T) {
-	m := &coreStorageAlertMock{}
+	m := &corestorage.AlertMock{
+		UpdateFunc: func(name string, level alert2.Level) (*alert2.Alert, bool, error) {
+			return nil, false, fmt.Errorf("err1")
+		},
+	}
 
 	a := Alerts{
 		alertManager: m,
 		logger:       zap.NewNop(),
 	}
-
-	m.On("Update", mock.Anything, mock.Anything).Return(nil, false, fmt.Errorf("err1"))
 
 	chiCtx := chi.NewRouteContext()
 	chiCtx.URLParams.Add("name", "foo")
@@ -124,15 +127,6 @@ func TestHandlerUpdate_error_update(t *testing.T) {
 }
 
 func TestHandlerUpdate_level_was_updated(t *testing.T) {
-	m := &coreStorageAlertMock{}
-	ch := &chManagerMock{}
-
-	a := Alerts{
-		alertManager: m,
-		chManager:    ch,
-		logger:       zap.NewNop(),
-	}
-
 	al := &alert2.Alert{
 		Name:       "1",
 		Level:      2,
@@ -141,7 +135,20 @@ func TestHandlerUpdate_level_was_updated(t *testing.T) {
 		Count:      3,
 	}
 
-	m.On("Update", mock.Anything, mock.Anything).Return(al, true, nil)
+	m := &corestorage.AlertMock{
+		UpdateFunc: func(name string, level alert2.Level) (*alert2.Alert, bool, error) {
+			return al, true, nil
+		},
+	}
+
+	ch := &chManagerMock{}
+
+	a := Alerts{
+		alertManager: m,
+		chManager:    ch,
+		logger:       zap.NewNop(),
+	}
+
 	ch.On("Send", mock.Anything, mock.Anything, mock.Anything).Return()
 
 	chiCtx := chi.NewRouteContext()
@@ -167,13 +174,6 @@ func TestHandlerUpdate_level_was_updated(t *testing.T) {
 }
 
 func TestHandlerUpdate_level_was_not_updated(t *testing.T) {
-	m := &coreStorageAlertMock{}
-
-	a := Alerts{
-		alertManager: m,
-		logger:       zap.NewNop(),
-	}
-
 	al := &alert2.Alert{
 		Name:       "1",
 		Level:      2,
@@ -182,7 +182,16 @@ func TestHandlerUpdate_level_was_not_updated(t *testing.T) {
 		Count:      3,
 	}
 
-	m.On("Update", mock.Anything, mock.Anything).Return(al, false, nil)
+	m := &corestorage.AlertMock{
+		UpdateFunc: func(name string, level alert2.Level) (*alert2.Alert, bool, error) {
+			return al, false, nil
+		},
+	}
+
+	a := Alerts{
+		alertManager: m,
+		logger:       zap.NewNop(),
+	}
 
 	chiCtx := chi.NewRouteContext()
 	chiCtx.URLParams.Add("name", "foo")
@@ -203,15 +212,6 @@ func TestHandlerUpdate_level_was_not_updated(t *testing.T) {
 }
 
 func TestHandlerUpdate_resend(t *testing.T) {
-	m := &coreStorageAlertMock{}
-	ch := &chManagerMock{}
-
-	a := Alerts{
-		alertManager: m,
-		chManager:    ch,
-		logger:       zap.NewNop(),
-	}
-
 	al := &alert2.Alert{
 		Name:       "1",
 		Level:      2,
@@ -220,7 +220,20 @@ func TestHandlerUpdate_resend(t *testing.T) {
 		Count:      10,
 	}
 
-	m.On("Update", mock.Anything, mock.Anything).Return(al, false, nil)
+	m := &corestorage.AlertMock{
+		UpdateFunc: func(name string, level alert2.Level) (*alert2.Alert, bool, error) {
+			return al, false, nil
+		},
+	}
+
+	ch := &chManagerMock{}
+
+	a := Alerts{
+		alertManager: m,
+		chManager:    ch,
+		logger:       zap.NewNop(),
+	}
+
 	ch.On("Send", mock.Anything, mock.Anything, mock.Anything).Return()
 
 	chiCtx := chi.NewRouteContext()

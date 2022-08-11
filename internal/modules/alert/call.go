@@ -134,7 +134,7 @@ func (a *Alert) getAlertData(luaState *lua.LState) (alertName, alertText string,
 	return alertName, alertText, options, nil
 }
 
-func (a *Alert) call(scriptChannels []string, escalate map[int][]string, alertLevel alert.Level) lua.LGFunction {
+func (a *Alert) callFromLua(scriptChannels []string, escalate map[int][]string, alertLevel alert.Level) lua.LGFunction {
 	return func(luaState *lua.LState) int {
 		name, text, options, err := a.getAlertData(luaState)
 		if err != nil {
@@ -143,32 +143,41 @@ func (a *Alert) call(scriptChannels []string, escalate map[int][]string, alertLe
 			return 1
 		}
 
-		if len(options.Channels) == 0 {
-			options.Channels = scriptChannels
-		}
-
-		updatedAlert, levelWasUpdated, err := a.storage.Update(name, alertLevel)
-		if err != nil {
-			a.logger.Error("error update an alert", zap.Error(err))
-			luaState.Push(lua.LString("error update an alert: " + err.Error()))
+		_, _, errCall := a.call(name, text, scriptChannels, escalate, alertLevel, options)
+		if errCall != nil {
+			a.logger.Error("error update an alert", zap.Error(errCall))
+			luaState.Push(lua.LString("error update an alert: " + errCall.Error()))
 			return 1
-		}
-
-		// For current Error level check if we need to escalate
-		if updatedAlert.Level == alert.LevelError {
-			for num, channels := range escalate {
-				if updatedAlert.Count == num {
-					opts := options
-					opts.Channels = channels
-					a.chManager.Send(updatedAlert, text, opts)
-				}
-			}
-		}
-
-		if levelWasUpdated || (options.Repeat > 0 && updatedAlert.Count%options.Repeat == 0) {
-			a.chManager.Send(updatedAlert, text, options)
 		}
 
 		return 0
 	}
+}
+
+func (a *Alert) call(name, text string, scriptChannels []string, escalate map[int][]string, alertLevel alert.Level, options *alert.Options) (*alert.Alert, bool, error) {
+	if len(options.Channels) == 0 {
+		options.Channels = scriptChannels
+	}
+
+	updatedAlert, levelWasUpdated, err := a.storage.Update(name, alertLevel)
+	if err != nil {
+		return nil, false, err
+	}
+
+	// For current Error level check if we need to escalate
+	if updatedAlert.Level == alert.LevelError {
+		for num, channels := range escalate {
+			if updatedAlert.Count == num {
+				opts := options
+				opts.Channels = channels
+				a.chManager.Send(updatedAlert, text, opts)
+			}
+		}
+	}
+
+	if levelWasUpdated || (options.Repeat > 0 && updatedAlert.Count%options.Repeat == 0) {
+		a.chManager.Send(updatedAlert, text, options)
+	}
+
+	return updatedAlert, levelWasUpdated, nil
 }

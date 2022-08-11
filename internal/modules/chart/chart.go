@@ -22,16 +22,16 @@ func Methods() []string {
 
 // DataItem represents data item
 type DataItem struct {
-	Timestamp float64
-	Value     float64
+	Timestamp float64 `json:"timestamp"`
+	Value     float64 `json:"value"`
 }
 
 // DataSeries represents data series
 type DataSeries struct {
-	Color      string
-	LineColor  string
-	PointColor string
-	Data       []DataItem
+	Color      string     `json:"color"`
+	LineColor  string     `json:"line_color"`
+	PointColor string     `json:"point_color"`
+	Data       []DataItem `json:"data"`
 }
 
 // Data represents chart data

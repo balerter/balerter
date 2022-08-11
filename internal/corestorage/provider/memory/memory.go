@@ -3,6 +3,7 @@ package memory
 import (
 	"github.com/balerter/balerter/internal/alert"
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
+	"net/http"
 	"sync"
 )
 
@@ -34,6 +35,14 @@ func New() *Memory {
 	}
 
 	return m
+}
+
+func (m *storageKV) RunApiHandler(rw http.ResponseWriter, req *http.Request) {
+	http.Error(rw, "coreapi is not supported for this module", http.StatusNotImplemented)
+}
+
+func (m *storageAlert) RunApiHandler(rw http.ResponseWriter, req *http.Request) {
+	http.Error(rw, "coreapi is not supported for this module", http.StatusNotImplemented)
 }
 
 // Name returns the name of the storage
