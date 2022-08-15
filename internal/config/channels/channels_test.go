@@ -1,15 +1,17 @@
 package channels
 
 import (
+	"testing"
+
 	"github.com/balerter/balerter/internal/config/channels/discord"
 	"github.com/balerter/balerter/internal/config/channels/email"
+	"github.com/balerter/balerter/internal/config/channels/log"
 	"github.com/balerter/balerter/internal/config/channels/notify"
 	"github.com/balerter/balerter/internal/config/channels/slack"
 	"github.com/balerter/balerter/internal/config/channels/syslog"
 	"github.com/balerter/balerter/internal/config/channels/telegram"
 	"github.com/balerter/balerter/internal/config/channels/twiliovoice"
 	"github.com/balerter/balerter/internal/config/channels/webhook"
-	"testing"
 )
 
 func TestChannels_Validate(t *testing.T) {
@@ -22,6 +24,7 @@ func TestChannels_Validate(t *testing.T) {
 		Discord  []discord.Discord
 		Webhook  []webhook.Webhook
 		Twilio   []twiliovoice.Twilio
+		Log      []log.Log
 	}
 	tests := []struct {
 		name    string
@@ -122,6 +125,14 @@ func TestChannels_Validate(t *testing.T) {
 			errText: "found duplicated name for channels 'twilio': 1",
 		},
 		{
+			name: "duplicated log",
+			fields: fields{
+				Log: []log.Log{{Name: "1"}, {Name: "1"}},
+			},
+			wantErr: true,
+			errText: "found duplicated name for channels 'log': 1",
+		},
+		{
 			name: "ok",
 			fields: fields{
 				Email: []email.Email{{Name: "foo", From: "gopher@example.net", To: "foo@example.com",
@@ -159,6 +170,7 @@ func TestChannels_Validate(t *testing.T) {
 				Discord:     tt.fields.Discord,
 				Webhook:     tt.fields.Webhook,
 				TwilioVoice: tt.fields.Twilio,
+				Log:         tt.fields.Log,
 			}
 			err := cfg.Validate()
 			if (err != nil) != tt.wantErr {
