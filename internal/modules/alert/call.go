@@ -3,6 +3,7 @@ package alert
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/alert"
+	"github.com/balerter/balerter/internal/cloud"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"strings"
@@ -131,6 +132,15 @@ func (a *Alert) getAlertData(luaState *lua.LState) (alertName, alertText string,
 		options.Image = imageVal.String()
 	}
 
+	groupVal := alertOptions.RawGetString("group")
+	if groupVal != lua.LNil {
+		if groupVal.Type() != lua.LTString {
+			err = fmt.Errorf("group must be a string")
+			return
+		}
+		options.Group = groupVal.String()
+	}
+
 	return alertName, alertText, options, nil
 }
 
@@ -163,6 +173,8 @@ func (a *Alert) call(name, text string, scriptChannels []string, escalate map[in
 	if err != nil {
 		return nil, false, err
 	}
+
+	go cloud.SendAlert(updatedAlert.Name, options.Group, updatedAlert.Level, levelWasUpdated)
 
 	// For current Error level check if we need to escalate
 	if updatedAlert.Level == alert.LevelError {

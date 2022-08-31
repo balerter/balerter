@@ -11,6 +11,7 @@ import (
 
 	"github.com/balerter/balerter/internal/config/api"
 	"github.com/balerter/balerter/internal/config/channels"
+	"github.com/balerter/balerter/internal/config/cloud"
 	"github.com/balerter/balerter/internal/config/datasources"
 	"github.com/balerter/balerter/internal/config/scripts"
 	"github.com/balerter/balerter/internal/config/secrets/env"
@@ -127,6 +128,8 @@ type Config struct {
 	StorageKV string `json:"storageKV" yaml:"storageKV" hcl:"storageKV,optional"`
 
 	System *system.System `json:"system" yaml:"system" hcl:"system,block"`
+
+	Cloud *cloud.Cloud `json:"cloud" yaml:"cloud" hcl:"cloud,block"`
 }
 
 // Validate the config
@@ -164,6 +167,11 @@ func (cfg Config) Validate() error {
 	if cfg.System != nil {
 		if err := cfg.System.Validate(); err != nil {
 			return fmt.Errorf("error system validation, %w", err)
+		}
+	}
+	if cfg.Cloud != nil {
+		if err := cfg.Cloud.Validate(); err != nil {
+			return fmt.Errorf("error cloud validation, %w", err)
 		}
 	}
 

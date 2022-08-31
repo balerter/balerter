@@ -5,6 +5,7 @@ import (
 
 	"github.com/balerter/balerter/internal/config/channels/alertmanager"
 	"github.com/balerter/balerter/internal/config/channels/alertmanagerreceiver"
+	"github.com/balerter/balerter/internal/config/channels/cloud"
 	"github.com/balerter/balerter/internal/config/channels/discord"
 	"github.com/balerter/balerter/internal/config/channels/email"
 	"github.com/balerter/balerter/internal/config/channels/log"
@@ -41,6 +42,8 @@ type Channels struct {
 	TwilioVoice []twiliovoice.Twilio `json:"twilioVoice" yaml:"twilioVoice" hcl:"twilioVoice,block"`
 	// Log channel
 	Log []log.Log `json:"log" yaml:"log" hcl:"log,block"`
+	// Cloud channel
+	Cloud []cloud.Cloud `json:"cloud" yaml:"cloud" hcl:"cloud,block"`
 }
 
 // Validate config
@@ -165,6 +168,17 @@ func (cfg Channels) Validate() error {
 	}
 	if name := util.CheckUnique(names); name != "" {
 		return fmt.Errorf("found duplicated name for channels 'log': %s", name)
+	}
+
+	names = names[:0]
+	for _, c := range cfg.Cloud {
+		names = append(names, c.Name)
+		if err := c.Validate(); err != nil {
+			return fmt.Errorf("validate channel cloud: %w", err)
+		}
+	}
+	if name := util.CheckUnique(names); name != "" {
+		return fmt.Errorf("found duplicated name for channels 'cloud': %s", name)
 	}
 
 	return nil

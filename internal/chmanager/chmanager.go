@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/balerter/balerter/internal/channels/alertmanager"
 	alertmanagerreceiver "github.com/balerter/balerter/internal/channels/alertmanager_receiver"
+	"github.com/balerter/balerter/internal/channels/cloud"
 	"github.com/balerter/balerter/internal/channels/log"
 	"github.com/balerter/balerter/internal/channels/twiliovoice"
 	"github.com/balerter/balerter/internal/channels/webhook"
@@ -155,6 +156,15 @@ func (m *ChannelsManager) Init(cfg *channels.Channels, version string) error {
 		module, err := log.New(cfg.Log[idx], m.logger)
 		if err != nil {
 			return fmt.Errorf("error init log channel %s, %w", cfg.Log[idx].Name, err)
+		}
+
+		m.channels[module.Name()] = module
+	}
+
+	for idx := range cfg.Log {
+		module, err := cloud.New(cfg.Cloud[idx], m.logger)
+		if err != nil {
+			return fmt.Errorf("error init cloud channel %s, %w", cfg.Cloud[idx].Name, err)
 		}
 
 		m.channels[module.Name()] = module

@@ -4,13 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	apiManager "github.com/balerter/balerter/internal/api/manager"
-	"github.com/balerter/balerter/internal/coreapi"
-	"github.com/balerter/balerter/internal/corestorage"
-	alertModule "github.com/balerter/balerter/internal/modules/alert"
-	"github.com/balerter/balerter/internal/modules/file"
-	"github.com/balerter/balerter/internal/modules/meta"
-	"github.com/balerter/balerter/internal/service"
 	"log"
 	"net"
 	"os"
@@ -19,22 +12,31 @@ import (
 	"syscall"
 	"time"
 
+	apiManager "github.com/balerter/balerter/internal/api/manager"
 	channelsManager "github.com/balerter/balerter/internal/chmanager"
+	"github.com/balerter/balerter/internal/cloud"
 	"github.com/balerter/balerter/internal/config"
+	"github.com/balerter/balerter/internal/coreapi"
+	"github.com/balerter/balerter/internal/corestorage"
 	coreStorageManager "github.com/balerter/balerter/internal/corestorage/manager"
 	dsManager "github.com/balerter/balerter/internal/datasource/manager"
 	"github.com/balerter/balerter/internal/logger"
 	"github.com/balerter/balerter/internal/metrics"
 	"github.com/balerter/balerter/internal/modules"
+	alertModule "github.com/balerter/balerter/internal/modules/alert"
 	chartModule "github.com/balerter/balerter/internal/modules/chart"
+	"github.com/balerter/balerter/internal/modules/file"
 	httpModule "github.com/balerter/balerter/internal/modules/http"
 	"github.com/balerter/balerter/internal/modules/kv"
 	logModule "github.com/balerter/balerter/internal/modules/log"
+	"github.com/balerter/balerter/internal/modules/meta"
 	runtimeModule "github.com/balerter/balerter/internal/modules/runtime"
 	tlsModule "github.com/balerter/balerter/internal/modules/tls"
 	"github.com/balerter/balerter/internal/runner"
 	scriptsManager "github.com/balerter/balerter/internal/script/manager"
+	"github.com/balerter/balerter/internal/service"
 	uploadStorageManager "github.com/balerter/balerter/internal/upload_storage/manager"
+
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
@@ -94,6 +96,13 @@ func run(
 	}
 
 	lgr.Logger().Debug("lua modules path", zap.String("path", lua.LuaPathDefault))
+
+	if cfg.Cloud != nil {
+		cloud.Init(cfg.Cloud, version, lgr.Logger())
+
+		cloud.SendStart()
+		defer cloud.SendStop()
+	}
 
 	// Scripts sources
 	lgr.Logger().Info("init scripts manager")

@@ -3,6 +3,7 @@ package manager
 import (
 	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/message"
+
 	"go.uber.org/zap"
 )
 
@@ -37,7 +38,7 @@ func (m *ChannelsManager) Send(a *alert.Alert, text string, options *alert.Optio
 	}
 
 	for name, module := range chs {
-		if err := module.Send(message.New(a.Level.String(), a.Name, text, options.Image, options.Fields)); err != nil {
+		if err := module.Send(message.New(a.Level.String(), a.Name, text, options.Image, options.Fields, options.Group)); err != nil {
 			m.logger.Error("error send the message to the channel", zap.String("channel name", name), zap.Error(err))
 		}
 	}

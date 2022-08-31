@@ -13,6 +13,7 @@ type Options struct {
 	Repeat   int               `json:"repeat"`
 	Image    string            `json:"image"`
 	Fields   map[string]string `json:"fields"`
+	Group    string            `json:"group"`
 }
 
 func NewOptions() *Options {
