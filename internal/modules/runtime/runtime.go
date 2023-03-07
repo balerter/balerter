@@ -3,6 +3,8 @@ package runtime
 import (
 	"github.com/balerter/balerter/internal/config"
 	"github.com/balerter/balerter/internal/modules"
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
@@ -43,6 +45,12 @@ func New(flg *config.Flags, logger *zap.Logger) *Runtime {
 // Name returns the module name
 func (m *Runtime) Name() string {
 	return ModuleName()
+}
+
+func (m *Runtime) GetLoaderJS(_ modules.Job) require.ModuleLoader {
+	return func(runtime *goja.Runtime, object *goja.Object) {
+
+	}
 }
 
 // GetLoader returns the lua loader

@@ -2,6 +2,8 @@ package file
 
 import (
 	"fmt"
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
 	"net/http"
 	"os"
 
@@ -43,6 +45,12 @@ func (f *File) CoreApiHandler(method string, parts []string, params map[string]s
 // Name returns the module name
 func (f *File) Name() string {
 	return ModuleName()
+}
+
+func (f *File) GetLoaderJS(_ modules.Job) require.ModuleLoader {
+	return func(runtime *goja.Runtime, object *goja.Object) {
+
+	}
 }
 
 // GetLoader returns the lua loader

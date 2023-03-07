@@ -1,6 +1,8 @@
 package loki
 
 import (
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
 	"net/http"
 	"net/url"
 	"time"
@@ -87,6 +89,12 @@ func (m *Loki) Stop() error {
 // Name returns the datasource name
 func (m *Loki) Name() string {
 	return m.name
+}
+
+func (m *Loki) GetLoaderJS(_ modules.Job) require.ModuleLoader {
+	return func(runtime *goja.Runtime, object *goja.Object) {
+
+	}
 }
 
 // GetLoader returns the datasource lua loader

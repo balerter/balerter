@@ -3,6 +3,8 @@ package kv
 import (
 	coreStorage "github.com/balerter/balerter/internal/corestorage"
 	"github.com/balerter/balerter/internal/modules"
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -39,6 +41,12 @@ func New(engine coreStorage.KV) *KV {
 // Name returns the module name
 func (kv *KV) Name() string {
 	return ModuleName()
+}
+
+func (kv *KV) GetLoaderJS(_ modules.Job) require.ModuleLoader {
+	return func(runtime *goja.Runtime, object *goja.Object) {
+
+	}
 }
 
 // GetLoader returns the lua loader

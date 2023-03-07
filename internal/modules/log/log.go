@@ -1,9 +1,12 @@
 package log
 
 import (
-	"github.com/balerter/balerter/internal/modules"
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
+
+	"github.com/balerter/balerter/internal/modules"
 )
 
 // Log represents the Log core module
@@ -42,6 +45,33 @@ func Methods() []string {
 		"warn",
 		"info",
 		"debug",
+	}
+}
+
+func (l *Log) GetLoaderJS(j modules.Job) require.ModuleLoader {
+	return func(runtime *goja.Runtime, object *goja.Object) {
+		o := object.Get("exports").ToObject(runtime)
+		o.Set("error", l.jsLog(j.Script().Name, l.logger.Error))
+		o.Set("warn", l.jsLog(j.Script().Name, l.logger.Warn))
+		o.Set("info", l.jsLog(j.Script().Name, l.logger.Info))
+		o.Set("debug", l.jsLog(j.Script().Name, l.logger.Debug))
+	}
+}
+
+func (l *Log) jsLog(name string, fn func(msg string, fields ...zap.Field)) func(call goja.FunctionCall) goja.Value {
+	return func(call goja.FunctionCall) goja.Value {
+		if len(call.Arguments) == 0 {
+			return nil
+		}
+
+		var fields []string
+
+		for i := 1; i < len(call.Arguments); i++ {
+			fields = append(fields, call.Argument(i).String())
+		}
+
+		fn(call.Argument(0).String(), zap.String("scriptName", name), zap.Strings("fields", fields))
+		return nil
 	}
 }
 

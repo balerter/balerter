@@ -3,6 +3,8 @@ package http
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
 	"net/http"
 	"time"
 
@@ -82,6 +84,12 @@ func createHTTPClient(timeout time.Duration, insecureSkipVerify bool) httpClient
 // Name returns the module name
 func (h *HTTP) Name() string {
 	return ModuleName()
+}
+
+func (h *HTTP) GetLoaderJS(_ modules.Job) require.ModuleLoader {
+	return func(runtime *goja.Runtime, object *goja.Object) {
+
+	}
 }
 
 // GetLoader returns the lua loader

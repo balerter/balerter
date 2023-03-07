@@ -2,6 +2,8 @@ package tls
 
 import (
 	"crypto/tls"
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
 	"strings"
 
 	"github.com/balerter/balerter/internal/modules"
@@ -38,6 +40,12 @@ func New() *TLS {
 // Name returns the module name
 func (a *TLS) Name() string {
 	return ModuleName()
+}
+
+func (a *TLS) GetLoaderJS(_ modules.Job) require.ModuleLoader {
+	return func(runtime *goja.Runtime, object *goja.Object) {
+
+	}
 }
 
 // GetLoader returns the lua module

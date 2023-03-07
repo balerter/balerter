@@ -3,6 +3,8 @@ package chart
 import (
 	"bytes"
 	"github.com/balerter/balerter/internal/modules"
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
 	"github.com/yuin/gluamapper"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -62,6 +64,12 @@ func (ch *Chart) Name() string {
 // Stop the module
 func (ch *Chart) Stop() error {
 	return nil
+}
+
+func (ch *Chart) GetLoaderJS(_ modules.Job) require.ModuleLoader {
+	return func(runtime *goja.Runtime, object *goja.Object) {
+
+	}
 }
 
 // GetLoader returns the lua loader

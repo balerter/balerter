@@ -3,6 +3,8 @@ package meta
 import (
 	"fmt"
 	"github.com/balerter/balerter/internal/modules"
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"net/http"
@@ -41,6 +43,12 @@ func (m *Meta) CoreApiHandler(method string, parts []string, params map[string]s
 // Name returns the module name
 func (m *Meta) Name() string {
 	return ModuleName()
+}
+
+func (m *Meta) GetLoaderJS(_ modules.Job) require.ModuleLoader {
+	return func(runtime *goja.Runtime, object *goja.Object) {
+
+	}
 }
 
 // GetLoader returns the lua loader

@@ -3,10 +3,11 @@ package script
 import (
 	"crypto/sha1"
 	"fmt"
-	"github.com/robfig/cron/v3"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/robfig/cron/v3"
 )
 
 const (
@@ -72,7 +73,7 @@ func (s *Script) ParseMeta() error {
 		if l == "" {
 			continue
 		}
-		if !strings.HasPrefix(l, "--") {
+		if !strings.HasPrefix(l, "--") && !strings.HasPrefix(l, "//") {
 			return nil
 		}
 

@@ -3,6 +3,8 @@ package mysql
 import (
 	"github.com/balerter/balerter/internal/config/datasources/mysql"
 	"github.com/balerter/balerter/internal/modules"
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
 	_ "github.com/go-sql-driver/mysql" // import DB driver
 	"github.com/jmoiron/sqlx"
 	lua "github.com/yuin/gopher-lua"
@@ -72,6 +74,12 @@ func (m *MySQL) Stop() error {
 // Name returns the datasource name
 func (m *MySQL) Name() string {
 	return m.name
+}
+
+func (m *MySQL) GetLoaderJS(_ modules.Job) require.ModuleLoader {
+	return func(runtime *goja.Runtime, object *goja.Object) {
+
+	}
 }
 
 // GetLoader returns the datasource lua loader

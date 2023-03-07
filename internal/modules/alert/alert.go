@@ -3,8 +3,6 @@ package alert
 import (
 	"github.com/balerter/balerter/internal/alert"
 	"github.com/balerter/balerter/internal/corestorage"
-	"github.com/balerter/balerter/internal/modules"
-	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 )
 
@@ -54,31 +52,6 @@ func New(storage corestorage.Alert, chManager chManager, logger *zap.Logger) *Al
 // Name returns the module name
 func (a *Alert) Name() string {
 	return ModuleName()
-}
-
-// GetLoader returns the lua loader
-func (a *Alert) GetLoader(j modules.Job) lua.LGFunction {
-	return func() lua.LGFunction {
-		return func(luaState *lua.LState) int {
-			var exports = map[string]lua.LGFunction{
-				"warn":    a.callFromLua(j.Script().Channels, j.Script().Escalate, alert.LevelWarn),
-				"warning": a.callFromLua(j.Script().Channels, j.Script().Escalate, alert.LevelWarn),
-
-				"error": a.callFromLua(j.Script().Channels, j.Script().Escalate, alert.LevelError),
-				"fail":  a.callFromLua(j.Script().Channels, j.Script().Escalate, alert.LevelError),
-
-				"success": a.callFromLua(j.Script().Channels, j.Script().Escalate, alert.LevelSuccess),
-				"ok":      a.callFromLua(j.Script().Channels, j.Script().Escalate, alert.LevelSuccess),
-
-				"get": a.get(),
-			}
-
-			mod := luaState.SetFuncs(luaState.NewTable(), exports)
-
-			luaState.Push(mod)
-			return 1
-		}
-	}()
 }
 
 // Stop the module

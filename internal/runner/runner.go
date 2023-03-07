@@ -226,11 +226,13 @@ func (rnr *Runner) updateScripts(ctx context.Context, scripts []*script.Script, 
 
 		rnr.logger.Debug("schedule script job", zap.String("hash", s.Hash()), zap.String("script name", s.Name), zap.String("cron", s.CronValue))
 		j := rnr.newJobFunc(s, rnr.cron.Location(), rnr.logger)
-		err = rnr.createLuaState(j, nil)
-		if err != nil {
-			rnr.logger.Debug("error init job", zap.String("name", s.Name), zap.Error(err))
-			continue
-		}
+		rnr.initJS(j.(*Job))
+		//err = rnr.createLuaState(j, nil)
+		//if err != nil {
+		//	rnr.logger.Debug("error init job", zap.String("name", s.Name), zap.Error(err))
+		//	continue
+		//}
+		_ = err
 
 		if once {
 			j.Run()

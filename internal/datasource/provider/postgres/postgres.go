@@ -5,6 +5,8 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
 	"time"
 
 	"github.com/balerter/balerter/internal/config/datasources/postgres"
@@ -88,6 +90,12 @@ func (m *Postgres) Stop() error {
 // Name returns the datasource name
 func (m *Postgres) Name() string {
 	return m.name
+}
+
+func (m *Postgres) GetLoaderJS(_ modules.Job) require.ModuleLoader {
+	return func(runtime *goja.Runtime, object *goja.Object) {
+
+	}
 }
 
 // GetLoader returns the datasource lua loader

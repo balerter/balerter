@@ -9,6 +9,8 @@ import (
 	"github.com/ClickHouse/clickhouse-go"
 	clickhouseCfg "github.com/balerter/balerter/internal/config/datasources/clickhouse"
 	"github.com/balerter/balerter/internal/modules"
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
 	"github.com/jmoiron/sqlx"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
@@ -111,6 +113,12 @@ func (m *Clickhouse) Stop() error {
 // Name returns the datasource name
 func (m *Clickhouse) Name() string {
 	return m.name
+}
+
+func (m *Clickhouse) GetLoaderJS(_ modules.Job) require.ModuleLoader {
+	return func(runtime *goja.Runtime, object *goja.Object) {
+
+	}
 }
 
 // GetLoader returns the datasource lua loader

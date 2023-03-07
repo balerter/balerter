@@ -3,14 +3,18 @@ package runner
 import (
 	"context"
 	"fmt"
-	"github.com/balerter/balerter/internal/modules/api"
-	"github.com/balerter/balerter/internal/script/script"
-	"github.com/robfig/cron/v3"
-	lua "github.com/yuin/gopher-lua"
-	"go.uber.org/zap"
 	"net/http"
 	"sync/atomic"
 	"time"
+
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
+	"github.com/robfig/cron/v3"
+	lua "github.com/yuin/gopher-lua"
+	"go.uber.org/zap"
+
+	"github.com/balerter/balerter/internal/modules/api"
+	"github.com/balerter/balerter/internal/script/script"
 )
 
 // Job represents script Job
@@ -25,6 +29,9 @@ type Job struct {
 
 	cronLocation       *time.Location
 	priorExecutionTime time.Duration
+
+	// js
+	reg *require.Registry
 }
 
 func newJob(s *script.Script, cronLocation *time.Location, logger *zap.Logger) job {
@@ -44,7 +51,7 @@ func (j *Job) GetCronLocation() *time.Location {
 
 // Stop the job
 func (j *Job) Stop() {
-	j.luaState.Close()
+	//j.luaState.Close()
 }
 
 func (j *Job) Name() string {
@@ -84,13 +91,39 @@ func (j *Job) Run() {
 	ctx, cancel := context.WithTimeout(context.Background(), j.script.Timeout)
 	defer cancel()
 
-	j.luaState.SetContext(ctx)
+	j.runJS(ctx)
+
+	//j.luaState.SetContext(ctx)
+	//
+	//start := time.Now()
+	//
+	//err := j.luaState.DoString(string(j.script.Body))
+	//if err != nil {
+	//	j.logger.Error("error run job", zap.String("script name", j.script.Name), zap.Error(err))
+	//}
+	//
+	//j.priorExecutionTime = time.Since(start)
+}
+
+func (rnr *Runner) initJS(j *Job) {
+	j.reg = new(require.Registry) // this can be shared by multiple runtimes
+	for _, m := range rnr.coreModules {
+		j.reg.RegisterNativeModule(m.Name(), m.GetLoaderJS(j))
+	}
+}
+
+func (j *Job) runJS(ctx context.Context) {
+	runtime := goja.New()
+
+	j.reg.Enable(runtime)
+	runtime.Set("console", buildConsole(runtime, j.logger))
 
 	start := time.Now()
 
-	err := j.luaState.DoString(string(j.script.Body))
+	_, err := runtime.RunString(string(j.script.Body))
 	if err != nil {
 		j.logger.Error("error run job", zap.String("script name", j.script.Name), zap.Error(err))
+		return
 	}
 
 	j.priorExecutionTime = time.Since(start)
@@ -152,4 +185,29 @@ func (rnr *Runner) createLuaState(j job, apiRequest *http.Request) error {
 	j.SetLuaState(L)
 
 	return nil
+}
+
+func buildConsole(runtime *goja.Runtime, logger *zap.Logger) goja.Value {
+	co := runtime.NewObject()
+
+	fn := func(fn func(msg string, fields ...zap.Field)) func(call goja.FunctionCall) goja.Value {
+		return func(call goja.FunctionCall) goja.Value {
+			if len(call.Arguments) == 0 {
+				return nil
+			}
+			var fields []string
+			for i := 1; i < len(call.Arguments); i++ {
+				fields = append(fields, call.Argument(i).String())
+			}
+			fn(call.Argument(0).String(), zap.Strings("fields", fields))
+			return nil
+		}
+	}
+
+	co.Set("log", fn(logger.Debug))
+	co.Set("info", fn(logger.Info))
+	co.Set("warn", fn(logger.Warn))
+	co.Set("error", fn(logger.Error))
+
+	return co
 }

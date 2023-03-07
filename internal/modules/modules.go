@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"github.com/dop251/goja_nodejs/require"
 	"time"
 
 	"github.com/balerter/balerter/internal/script/script"
@@ -31,6 +32,7 @@ type Job interface {
 type Module interface {
 	Name() string
 	GetLoader(j Job) lua.LGFunction
+	GetLoaderJS(j Job) require.ModuleLoader
 	Stop() error
 	CoreApiHandler(method string, parts []string, params map[string]string, body []byte) (any, int, error)
 }

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/balerter/balerter/internal/config/storages/upload/s3"
 	"github.com/balerter/balerter/internal/modules"
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"net/http"
@@ -59,6 +61,12 @@ func (p *Provider) Name() string {
 // Stop the module
 func (p *Provider) Stop() error {
 	return nil
+}
+
+func (p *Provider) GetLoaderJS(_ modules.Job) require.ModuleLoader {
+	return func(runtime *goja.Runtime, object *goja.Object) {
+
+	}
 }
 
 // GetLoader returns the lua loader

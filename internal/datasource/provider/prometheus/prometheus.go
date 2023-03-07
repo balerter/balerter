@@ -3,6 +3,8 @@ package prometheus
 import (
 	"github.com/balerter/balerter/internal/config/datasources/prometheus"
 	"github.com/balerter/balerter/internal/modules"
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
 	lua "github.com/yuin/gopher-lua"
 	"go.uber.org/zap"
 	"net/http"
@@ -83,6 +85,12 @@ func (m *Prometheus) Stop() error {
 // Name returns the datasource name
 func (m *Prometheus) Name() string {
 	return m.name
+}
+
+func (m *Prometheus) GetLoaderJS(_ modules.Job) require.ModuleLoader {
+	return func(runtime *goja.Runtime, object *goja.Object) {
+
+	}
 }
 
 // GetLoader returns the datasource lua loader
