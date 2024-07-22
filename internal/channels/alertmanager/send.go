@@ -39,6 +39,9 @@ func (a *AlertManager) Send(mes *message.Message) error {
 
 	promAlert.Labels["name"] = mes.AlertName
 	promAlert.Annotations["description"] = mes.Text
+	for k, v := range mes.Fields {
+		promAlert.Labels[k] = v
+	}
 
 	data, err := json.Marshal([]*modelAlert{promAlert})
 	if err != nil {

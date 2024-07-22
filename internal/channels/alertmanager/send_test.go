@@ -101,6 +101,7 @@ func TestSend(t *testing.T) {
 		AlertName: "",
 		Text:      "",
 		Image:     "",
+		Fields:    map[string]string{"foo": "bar"},
 	}
 
 	err := a.Send(mes)
